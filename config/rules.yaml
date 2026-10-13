@@ -1,0 +1,433 @@
+# StudyRoute rules configuration (blueprint section 13).
+#
+# Every rule that can change lives here or in the config_rules table, never in code.
+# A node that has a `value` key is a rule. Each rule carries:
+#   value         the setting
+#   kind          sandbox_design | synthetic | regulatory
+#   verified      true only when the value was checked against an official source
+#   source_url    where it was (or must be) checked
+#   last_checked  date of the last check (YYYY-MM-DD)
+#   note          free text shown next to the rule
+# Rules with verified: false are shown with a yellow "Not verified" badge in the app and
+# always carry the sentence "Indicative. Confirm with your AD bank."
+# The file seeds the database once. After that the database is authoritative and admins
+# change rules through PUT /api/v1/config/rules (audited).
+
+schema_version: 1
+
+engine:
+  quote_ttl_seconds:
+    value: 300
+    kind: sandbox_design
+    verified: true
+    note: "How long a quote stays valid (blueprint 6.5)."
+  mfa_proof_ttl_seconds:
+    value: 300
+    kind: sandbox_design
+    verified: true
+    note: "A fresh MFA proof is valid for five minutes."
+  settlement_business_days:
+    value: 3
+    kind: sandbox_design
+    verified: true
+    note: "Typical SWIFT settlement is same day to about T+3 (blueprint 5.4)."
+  planner_buffer_days:
+    value: 2
+    kind: sandbox_design
+    verified: true
+    note: "Safety buffer added by the deadline planner."
+  bank_cutoff_local:
+    value: "15:00"
+    kind: sandbox_design
+    verified: false
+    source_url: "https://example.org/replace-with-your-ad-bank-cutoff"
+    last_checked: "2026-10-13"
+    note: "Assumed AD bank cut-off in Dhaka time. Confirm with your AD bank."
+  ben_deducts_fixed_fee:
+    value: true
+    kind: sandbox_design
+    verified: true
+    note: "Under BEN the provider fixed fee is deducted from the beneficiary (blueprint 6.2)."
+  idempotency_ttl_hours:
+    value: 24
+    kind: sandbox_design
+    verified: true
+    note: "How long a stored Idempotency-Key response is kept (blueprint 8.4)."
+
+limits:
+  per_transaction_usd_equivalent:
+    value: 50000
+    kind: sandbox_design
+    verified: true
+    note: "Sandbox cap, our own choice. Not a legal limit."
+  daily_usd_equivalent:
+    value: 100000
+    kind: sandbox_design
+    verified: true
+    note: "Sandbox cap, our own choice. Not a legal limit."
+
+compliance:
+  sanctions_test_token:
+    value: "SANCTION_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text is blocked (mock sanctions screening)."
+  fail_test_token:
+    value: "FAIL_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text makes the simulator send provider_failed."
+  slow_test_token:
+    value: "SLOW_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text delays simulated settlement."
+
+kyc:
+  required_documents:
+    value: [passport, parent_id, source_of_funds]
+    kind: sandbox_design
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-kyc-list"
+    last_checked: "2026-10-13"
+    note: "Mock KYC checklist. Real banks decide their own list."
+  mock_review_seconds:
+    value: 8
+    kind: sandbox_design
+    verified: true
+    note: "How long the simulated KYC review takes before status becomes VERIFIED."
+
+bangladesh_rules:
+  living_expense_usd_per_month:
+    value: 2000
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-circular"
+    last_checked: "2026-10-13"
+    note: "Secondary source only (LegalSeba, 2025). Confirm with your AD bank."
+  living_expense_high_cost_uplift_pct:
+    value: 50
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-circular"
+    last_checked: "2026-10-13"
+    note: "Up to 50% more for high-cost places with proof. Secondary source only."
+  single_ad_branch_rule:
+    value: "unknown"
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-circular"
+    last_checked: "2026-10-13"
+    note: "An older circular said one AD branch for the whole course. May be outdated."
+  education_remittance_circular_2026_09_30:
+    value: "not read"
+    kind: regulatory
+    verified: false
+    source_url: "https://www.bb.org.bd"
+    last_checked: "2026-10-13"
+    note: "Read the 30 Sep 2026 circular in full before presenting any limit as current."
+  international_card_for_education:
+    value: "unknown"
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-bangladesh-bank-notification"
+    last_checked: "2026-10-13"
+    note: "News report (Aug 2026) only. Confirm in the notification."
+  iso_purpose_code:
+    value: null
+    kind: regulatory
+    verified: false
+    source_url: "https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-lists"
+    last_checked: "2026-10-13"
+    note: "Do not show a purpose code (for example STDY or EDUC) before checking the ISO list."
+
+calendars:
+  weekend:
+    BD: {value: [Fri, Sat], kind: regulatory, verified: true, note: "Bangladesh weekend is Friday and Saturday."}
+    GB: {value: [Sat, Sun], kind: regulatory, verified: true}
+    US: {value: [Sat, Sun], kind: regulatory, verified: true}
+    DE: {value: [Sat, Sun], kind: regulatory, verified: true}
+    AU: {value: [Sat, Sun], kind: regulatory, verified: true}
+    CA: {value: [Sat, Sun], kind: regulatory, verified: true}
+    MY: {value: [Sat, Sun], kind: regulatory, verified: false, note: "Some Malaysian states use Friday and Saturday."}
+  holidays:
+    BD:
+      value:
+        "2026-02-21": "International Mother Language Day"
+        "2026-03-26": "Independence Day"
+        "2026-04-14": "Bengali New Year"
+        "2026-05-01": "May Day"
+        "2026-12-16": "Victory Day"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-bangladesh-gazette"
+      last_checked: "2026-10-13"
+      note: "Fixed-date holidays only. Eid, Puja and other moon-dependent holidays must be added from the official gazette."
+    GB:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-05-04": "Early May bank holiday"
+        "2026-05-25": "Spring bank holiday"
+        "2026-08-31": "Summer bank holiday"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://www.gov.uk/bank-holidays"
+      last_checked: "2026-10-13"
+      note: "England and Wales. Confirm against gov.uk before relying on it."
+    US:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-01-19": "Martin Luther King Jr. Day"
+        "2026-02-16": "Presidents Day"
+        "2026-05-25": "Memorial Day"
+        "2026-06-19": "Juneteenth"
+        "2026-07-03": "Independence Day (observed)"
+        "2026-09-07": "Labor Day"
+        "2026-10-12": "Columbus Day"
+        "2026-11-11": "Veterans Day"
+        "2026-11-26": "Thanksgiving"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+      last_checked: "2026-10-13"
+    DE:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-05-01": "Labour Day"
+        "2026-05-14": "Ascension Day"
+        "2026-05-25": "Whit Monday"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "National holidays only. State holidays differ."
+    AU:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-01-26": "Australia Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "National holidays only. State holidays differ."
+    CA:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-05-18": "Victoria Day"
+        "2026-07-01": "Canada Day"
+        "2026-09-07": "Labour Day"
+        "2026-10-12": "Thanksgiving"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+    MY:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-05-01": "Labour Day"
+        "2026-08-31": "National Day"
+        "2026-09-16": "Malaysia Day"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "Fixed-date holidays only. Moon-dependent holidays must be added."
+
+fx:
+  mid_rates:
+    GBP: {value: "160.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 GBP. Not a live feed."}
+    USD: {value: "122.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 USD. Not a live feed."}
+    EUR: {value: "140.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 EUR. Not a live feed."}
+    AUD: {value: "80.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 AUD. Not a live feed."}
+    CAD: {value: "89.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 CAD. Not a live feed."}
+    MYR: {value: "26.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 MYR. Not a live feed."}
+  history_days:
+    value: 30
+    kind: synthetic
+    verified: true
+    note: "Length of the synthetic rate history used by the best-day hint."
+
+providers:
+  prov_a:
+    value:
+      name: "Provider A (synthetic)"
+      margin_pct: "2.00"
+      fixed_fee_bdt_minor: 150000
+      swift_fee_bdt_minor: 100000
+      intermediary_fee_major: "0"
+      receiving_fee_major: "0"
+      supported_charge_codes: [OUR, SHA, BEN]
+      default_charge_code: OUR
+      eta_business_days: 1
+    kind: synthetic
+    verified: true
+    note: "Fees bundled: no intermediary or receiving fee. All numbers are invented."
+  prov_b:
+    value:
+      name: "Provider B (synthetic)"
+      margin_pct: "1.00"
+      fixed_fee_bdt_minor: 300000
+      swift_fee_bdt_minor: 150000
+      intermediary_fee_major: "30"
+      receiving_fee_major: "0"
+      supported_charge_codes: [OUR, SHA, BEN]
+      default_charge_code: OUR
+      eta_business_days: 2
+    kind: synthetic
+    verified: true
+    note: "All numbers are invented."
+  prov_c:
+    value:
+      name: "Provider C (synthetic)"
+      margin_pct: "1.25"
+      fixed_fee_bdt_minor: 50000
+      swift_fee_bdt_minor: 0
+      intermediary_fee_major: "25"
+      receiving_fee_major: "10"
+      supported_charge_codes: [SHA]
+      default_charge_code: SHA
+      eta_business_days: 3
+    kind: synthetic
+    verified: true
+    note: "Only offers SHA, so charges are deducted from the amount. All numbers are invented."
+
+corridors:
+  GB:
+    value: {name: "United Kingdom", currency: GBP, account_scheme: IBAN_OR_UK_DOMESTIC, host_rail: "UK Faster Payments or CHAPS"}
+    kind: sandbox_design
+    verified: true
+    note: "MVP corridor. The sandbox does not simulate the host rail; it only shows its name."
+  US:
+    value: {name: "United States", currency: USD, account_scheme: ABA_ACCOUNT, host_rail: "US ACH or wire"}
+    kind: sandbox_design
+    verified: true
+  DE:
+    value: {name: "Germany", currency: EUR, account_scheme: IBAN, host_rail: "SEPA"}
+    kind: sandbox_design
+    verified: true
+  AU:
+    value: {name: "Australia", currency: AUD, account_scheme: ACCOUNT, host_rail: "Australian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+  CA:
+    value: {name: "Canada", currency: CAD, account_scheme: ACCOUNT, host_rail: "Canadian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+  MY:
+    value: {name: "Malaysia", currency: MYR, account_scheme: ACCOUNT, host_rail: "Malaysian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+
+checklist_labels:
+  value:
+    offer_letter: {label: "Offer or admission letter", hint: "From the university, showing the course and start date."}
+    fee_demand_note: {label: "Fee demand note or annual estimate", hint: "Tuition, board, lodging and incidentals. Some banks ask for the original and a photocopy."}
+    passport: {label: "Student passport (bio page)", hint: "Use a mock file in this sandbox. Never upload a real passport."}
+    visa: {label: "Visa or entry permission", hint: "If the destination country requires one."}
+    parent_id: {label: "Parent national ID", hint: "The payer's identity document."}
+    source_of_funds: {label: "Source of funds evidence", hint: "For example salary or business income records."}
+    ad_bank_form: {label: "AD bank remittance application form", hint: "Your Authorised Dealer bank provides the form."}
+    receiving_account_details: {label: "Receiving account details", hint: "University payment instructions: account or IBAN, BIC and the reference format."}
+    enrolment_proof: {label: "Proof of enrolment", hint: "Shows the student is in a regular course."}
+    cas_number: {label: "CAS statement (UK)", hint: "Confirmation of Acceptance for Studies, if the university issues one."}
+    i20_form: {label: "Form I-20 (US)", hint: "Certificate of Eligibility issued by the US school."}
+    coe: {label: "Confirmation of Enrolment (Australia)", hint: "Issued by the Australian provider."}
+  kind: sandbox_design
+  verified: false
+  source_url: "https://example.org/replace-with-ad-bank-checklist"
+  last_checked: "2026-10-13"
+  note: "Indicative list of what the bank may ask for. Confirm with your AD bank."
+
+checklists:
+  GB_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details, cas_number]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Confirm with your AD bank."
+  GB_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Living-expense limits are not verified."
+  US_TUITION:
+    value: [offer_letter, fee_demand_note, i20_form, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Confirm with your AD bank."
+  US_LIVING:
+    value: [enrolment_proof, i20_form, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  DE_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  DE_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  AU_TUITION:
+    value: [offer_letter, fee_demand_note, coe, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  AU_LIVING:
+    value: [enrolment_proof, coe, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  CA_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  CA_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  MY_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  MY_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
