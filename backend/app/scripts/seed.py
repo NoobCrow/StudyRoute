@@ -1,8 +1,8 @@
 """Create synthetic demo accounts and recipients. Sandbox only: refuses to run in production.
 
-    python -m app.scripts.seed              add the demo data if it is missing
-    python -m app.scripts.seed --reset      delete the SQLite database first (server must be stopped)
-    python -m app.scripts.seed --if-empty   used by docker: seed only a brand-new database
+python -m app.scripts.seed              add the demo data if it is missing
+python -m app.scripts.seed --reset      delete the SQLite database first (server must be stopped)
+python -m app.scripts.seed --if-empty   used by docker: seed only a brand-new database
 """
 
 from __future__ import annotations
@@ -89,7 +89,9 @@ def _database_is_new(db_file: Path) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument("--reset", action="store_true", help="delete the SQLite database first")
     parser.add_argument("--if-empty", action="store_true", help="seed only a brand-new database")
     args = parser.parse_args(argv)

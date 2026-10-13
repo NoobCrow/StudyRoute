@@ -19,7 +19,7 @@ from app.main import create_app
 from app.scripts.seed import ADMIN_EMAIL, AI_ID, PARENT_EMAIL, STUDENT_EMAIL, seed_demo
 
 START = datetime(2026, 10, 14, 5, 0, tzinfo=UTC)  # Wednesday 11:00 in Dhaka
-PASSWORD = "Test-Password-1!"  # noqa: S105  (synthetic, used only by the test-suite)
+PASSWORD = "Test-Password-1!"
 MFA_CODE = "246810"
 EMAILS = {"parent": PARENT_EMAIL, "student": STUDENT_EMAIL, "admin": ADMIN_EMAIL}
 UNIVERSITY = "University of Example (synthetic)"

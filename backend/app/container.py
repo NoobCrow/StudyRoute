@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.ai.llm import build_llm_client
+from app.ai.orchestrator import Orchestrator
 from app.api.context import AppContext
 from app.api.rate_limit import RateLimiter
 from app.audit.service import AuditService
@@ -74,4 +76,5 @@ def build_context(
         config=ConfigService(clock, audit),
     )
     ctx.worker = BackgroundWorker(ctx)
+    ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
     return ctx

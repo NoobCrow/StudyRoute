@@ -193,7 +193,7 @@ def test_concurrent_writers_keep_one_linear_chain(db: Database, clock: FakeClock
                         action="quote.created",
                         quote_id=f"{name}-{index}",
                     )
-        except BaseException as exc:  # noqa: BLE001
+        except BaseException as exc:
             errors.append(exc)
 
     threads = [threading.Thread(target=worker, args=(f"usr_{n}",)) for n in range(4)]

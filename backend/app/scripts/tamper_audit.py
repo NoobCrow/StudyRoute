@@ -99,7 +99,8 @@ def main(argv: list[str] | None = None) -> int:
     seq = args.seq or max(1, _latest_seq(db_path) - 1)
     change = tamper_row(db_path, seq)
     print(
-        f"Edited audit event {seq}: {change['column']} {change['original']!r} -> {change['new']!r}.\n"
+        f"Edited audit event {seq}: {change['column']} "
+        f"{change['original']!r} -> {change['new']!r}.\n"
         "Now press Verify in the Audit screen (or GET /api/v1/audit/verify): it must FAIL at "
         f"sequence {seq}.\nUndo with: python -m app.scripts.tamper_audit --restore"
     )

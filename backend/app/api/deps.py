@@ -59,7 +59,9 @@ def limit_ip(group: str) -> Callable[..., None]:
 
 
 def limit_user(group: str) -> Callable[..., None]:
-    def dependency(actor: Actor = Depends(current_actor), ctx: AppContext = Depends(get_ctx)) -> None:
+    def dependency(
+        actor: Actor = Depends(current_actor), ctx: AppContext = Depends(get_ctx)
+    ) -> None:
         ctx.limiter.check(group, actor.user_id)
 
     return dependency

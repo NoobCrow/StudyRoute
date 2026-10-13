@@ -28,6 +28,8 @@ _DIGIT_RUN = re.compile(r"(?<![\w.])\d(?: ?\d){7,18}(?![\w])")
 _RULES: list[tuple[Pattern[str], str]] = [
     (_JWT, "[REDACTED_JWT]"),
     (_BEARER, "Bearer [REDACTED]"),
+]
+_LATER_RULES: list[tuple[Pattern[str], str]] = [
     (_EMAIL, "[REDACTED_EMAIL]"),
     (_IBAN, "[REDACTED_ACCOUNT]"),
     (_LONG_HEX, "[REDACTED_HEX]"),
@@ -37,8 +39,11 @@ _RULES: list[tuple[Pattern[str], str]] = [
 
 def redact(text: str) -> str:
     """Remove tokens, secrets, e-mail addresses, IBANs and long digit runs from text."""
-    result = _KEY_VALUE.sub(lambda m: f"{m.group(1)}{m.group(2)}[REDACTED]", text)
-    for pattern, replacement in _RULES:
+    result = text
+    for pattern, replacement in _RULES:  # tokens first, so "Authorization: Bearer x" is caught
+        result = pattern.sub(replacement, result)
+    result = _KEY_VALUE.sub(lambda m: f"{m.group(1)}{m.group(2)}[REDACTED]", result)
+    for pattern, replacement in _LATER_RULES:
         result = pattern.sub(replacement, result)
     return result
 

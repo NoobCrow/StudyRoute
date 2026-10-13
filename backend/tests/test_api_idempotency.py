@@ -22,7 +22,9 @@ def test_T04_same_key_same_request_approves_exactly_once(world: World) -> None:
     assert second.headers["idempotent-replay"] == "true"
     assert first.json() == second.json()
     assert len(world.audit_rows(action="approval.granted", payment_id=pid)) == 1
-    states = [r["detail"] for r in world.audit_rows(payment_id=pid) if "via approve" in str(r["detail"])]
+    states = [
+        r["detail"] for r in world.audit_rows(payment_id=pid) if "via approve" in str(r["detail"])
+    ]
     assert len(states) == 1
 
 

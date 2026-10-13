@@ -38,7 +38,13 @@ def _replay(row: IdempotencyKey) -> JSONResponse:
 
 
 def _attempt(
-    ctx: AppContext, actor: Actor, key: str, method: str, path: str, body: dict[str, Any], work: Work
+    ctx: AppContext,
+    actor: Actor,
+    key: str,
+    method: str,
+    path: str,
+    body: dict[str, Any],
+    work: Work,
 ) -> JSONResponse:
     now = ctx.clock.now()
     fingerprint = hash_object({"method": method, "path": path, "body": body})

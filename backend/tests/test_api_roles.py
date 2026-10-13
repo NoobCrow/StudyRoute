@@ -92,7 +92,11 @@ def test_T11_another_users_payment_is_404_not_403(world: World) -> None:
     approval = world.ready_payment()
     pid = approval["payment_id"]
     outsider = other_parent_headers(world)
-    for path in (f"/payments/{pid}", f"/payments/{pid}/tracker", f"/payments/{pid}/instruction-preview"):
+    for path in (
+        f"/payments/{pid}",
+        f"/payments/{pid}/tracker",
+        f"/payments/{pid}/instruction-preview",
+    ):
         assert world.client.get(f"/api/v1{path}", headers=outsider).status_code == 404
     approve = world.client.post(
         f"/api/v1/payments/{pid}/approve",

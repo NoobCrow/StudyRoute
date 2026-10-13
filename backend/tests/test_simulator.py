@@ -99,12 +99,12 @@ def test_a_failing_delivery_is_retried_and_the_state_survives_a_restart(world: W
         def post(self, body: bytes, headers: Any) -> int:
             return 503
 
-    world.ctx.simulator._dispatcher = Down()  # type: ignore[assignment]  # noqa: SLF001
+    world.ctx.simulator._dispatcher = Down()  # type: ignore[assignment]
     world.clock.advance(5)
     world.ctx.worker.tick()
     assert state(world, pid) == "SUBMITTED"
     world.dispatcher.client = real
-    world.ctx.simulator._dispatcher = world.dispatcher  # noqa: SLF001
+    world.ctx.simulator._dispatcher = world.dispatcher
     world.clock.advance(6)
     BackgroundWorker(world.ctx).tick()  # a "restarted" worker has no memory, only the database
     assert state(world, pid) == "SETTLED"

@@ -67,5 +67,5 @@ class BackgroundWorker:
         while not self._stop.wait(interval):
             try:
                 self.tick()
-            except Exception:  # noqa: BLE001 - the worker must survive any single failure
+            except Exception:
                 logger.exception("worker tick failed")

@@ -87,7 +87,9 @@ def test_unknown_fields_are_rejected(world) -> None:
 
 def test_malformed_json_is_a_400(world) -> None:
     response = world.client.post(
-        "/api/v1/quotes", content=b"{not json", headers={**world.login("parent"), "Content-Type": "application/json"}
+        "/api/v1/quotes",
+        content=b"{not json",
+        headers={**world.login("parent"), "Content-Type": "application/json"},
     )
     assert response.status_code == 400
     assert response.json()["code"] == "BAD_REQUEST"
@@ -142,4 +144,7 @@ def test_uk_domestic_details_and_us_aba_are_validated(world) -> None:
         "bic": "EXMPUS33", "routing_code": "123456780", "account_number": "000123456789",
     }  # fmt: skip
     assert world.call("POST", "/recipients", json=us).status_code == 201
-    assert world.call("POST", "/recipients", json={**us, "routing_code": "123456789"}).status_code == 422
+    assert (
+        world.call("POST", "/recipients", json={**us, "routing_code": "123456789"}).status_code
+        == 422
+    )

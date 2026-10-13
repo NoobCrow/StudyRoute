@@ -66,7 +66,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.DOCUMENT_WRITE,
             P.DATA_RESET,
         }
-    ),  # fmt: skip
+    ),
     ActorKind.STUDENT: frozenset(
         _COMMON
         | {
@@ -82,7 +82,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.DOCUMENT_READ,
             P.DOCUMENT_WRITE,
         }
-    ),  # fmt: skip
+    ),
     ActorKind.ADMIN: frozenset(
         _COMMON
         | {
@@ -96,7 +96,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.KYC_READ,
             P.KYC_REVIEW,
         }
-    ),  # fmt: skip
+    ),
     ActorKind.AI: frozenset(
         _COMMON
         | {
@@ -108,8 +108,9 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.RECIPIENT_READ,
             P.KYC_READ,
             P.PLANNER_READ,
+            P.DOCUMENT_READ,
         }
-    ),  # fmt: skip
+    ),
     ActorKind.SYSTEM: frozenset(),
     ActorKind.PROVIDER: frozenset(),
 }

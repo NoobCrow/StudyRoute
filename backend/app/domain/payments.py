@@ -6,7 +6,7 @@ change, the transition history and the audit event all commit together or not at
 
 from __future__ import annotations
 
-from datetime import datetime, time, timedelta
+from datetime import UTC, datetime, time, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -33,7 +33,7 @@ from app.engine.money import Money
 from app.engine.mt103 import build_instruction_preview
 from app.engine.planner import plan_deadline
 from app.engine.quote import ChargeCode
-from app.engine.validators import is_valid_swift_reference, mask_account, new_uetr
+from app.engine.validators import is_valid_swift_reference, new_uetr
 from app.models import Payment, PaymentTransition, Quote, Recipient, User
 from app.providers.base import SubmitInstruction
 from app.providers.registry import ProviderRegistry
@@ -46,7 +46,9 @@ COUNTS_TOWARD_DAILY_CAP = (
     PaymentState.SETTLED.value,
 )
 SUMMARY_DISCLAIMER = "Sandbox. No real money moves. Indicative guidance only."
+CURSOR_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 COMPLIANCE_CODES = {"SANCTIONS_HIT", "LIMIT_EXCEEDED"}
+LIMIT_BLOCKER = "A sandbox cap would be exceeded. Indicative. Confirm with your AD bank."
 
 
 def build_summary(
@@ -171,9 +173,9 @@ class PaymentService:
         checks = [
             (expired, "QUOTE_EXPIRED", "The quote expired. Get a new quote."),
             (not ctx.kyc_verified, "KYC_NOT_VERIFIED", "KYC is not verified (simulated)."),
-            (not ctx.recipient_allowlisted, "RECIPIENT_NOT_ALLOWLISTED", "Allowlist the recipient (MFA)."),
-            (not ctx.sanctions_clear, "SANCTIONS_HIT", "The recipient matched the mock sanctions screening."),
-            (ctx.limit_error is not None, "LIMIT_EXCEEDED", "A sandbox cap would be exceeded. Indicative. Confirm with your AD bank."),
+            (not ctx.recipient_allowlisted, "RECIPIENT_NOT_ALLOWLISTED", "Allowlist recipient."),
+            (not ctx.sanctions_clear, "SANCTIONS_HIT", "Recipient matched mock screening."),
+            (ctx.limit_error is not None, "LIMIT_EXCEEDED", LIMIT_BLOCKER),
         ]  # fmt: skip
         return [{"code": code, "message": msg} for failed, code, msg in checks if failed]
 
@@ -438,7 +440,8 @@ class PaymentService:
         ctx = self._guard_context(session, rules, payment, mfa_valid=True)
         self._run_guards(session, payment, actor, Event.REQUEST_APPROVAL, ctx)
         quote = session.get(Quote, payment.quote_id)
-        assert quote is not None  # FK guarantees it
+        if quote is None:
+            raise errors.InvalidState("The payment references missing data.")
         now = self._clock.now()
         payment.latest_send_date = self._latest_send_date(rules, quote, payment, now)
         summary = self._live_summary(session, payment)
@@ -503,7 +506,8 @@ class PaymentService:
             session, rules, payment, mfa_valid=proof is not None, summary_matches=matches
         )
         self._run_guards(session, payment, actor, Event.APPROVE, ctx)
-        assert proof is not None  # the FRESH_MFA guard passed
+        if proof is None:  # unreachable: the FRESH_MFA guard already passed
+            raise errors.MfaRequired("Verify MFA again.", persist=True)
         proof.used_at = now
         payment.approved_by = actor.user_id
         payment.approved_at = now
@@ -697,7 +701,7 @@ class PaymentService:
         if cursor:
             try:
                 stamp, _, last_id = cursor.partition("~")
-                last_at = datetime.fromisoformat(stamp)
+                last_at = datetime.strptime(stamp, CURSOR_FORMAT).replace(tzinfo=UTC)
             except ValueError as exc:
                 raise errors.BadRequest("The cursor is not valid.") from exc
             stmt = stmt.where(
@@ -708,7 +712,7 @@ class PaymentService:
         page = rows[:limit]
         next_cursor = None
         if len(rows) > limit and page:
-            next_cursor = f"{page[-1].created_at.isoformat()}~{page[-1].id}"
+            next_cursor = f"{page[-1].created_at.strftime(CURSOR_FORMAT)}~{page[-1].id}"
         return page, next_cursor
 
     def tracker(

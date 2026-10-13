@@ -40,7 +40,9 @@ def _reject(ctx: AppContext, raw: bytes, ip: str, code: str, message: str) -> er
     return errors.Unauthenticated(message)
 
 
-def _handle(ctx: AppContext, raw: bytes, signature: str | None, event_id: str | None, ip: str) -> JSONResponse:
+def _handle(
+    ctx: AppContext, raw: bytes, signature: str | None, event_id: str | None, ip: str
+) -> JSONResponse:
     with ctx.db.read() as session:
         provider_ids = load_rules(session).provider_ids()
     secrets_by_provider = {pid: ctx.secrets.webhook_secrets(pid) for pid in provider_ids}

@@ -42,7 +42,9 @@ def list_events(
                 AuditEvent.actor_id == actor.user_id,
                 AuditEvent.payment_id.in_(select(Payment.id).where(Payment.owner_id == owner)),
                 AuditEvent.quote_id.in_(select(Quote.id).where(Quote.owner_id == owner)),
-                AuditEvent.recipient_id.in_(select(Recipient.id).where(Recipient.owner_id == owner)),
+                AuditEvent.recipient_id.in_(
+                    select(Recipient.id).where(Recipient.owner_id == owner)
+                ),
             )
         )
     if payment_id:

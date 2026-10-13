@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from app.core import errors
 from app.engine import fx
-from app.engine.money import CURRENCY_EXPONENTS, Money
+from app.engine.money import CURRENCY_EXPONENTS
 from app.engine.planner import INDICATIVE, Calendar, PlannerParams, parse_weekdays
 from app.engine.quote import ChargeCode, EngineParams, ProviderTerms
 from app.models import ConfigRule
@@ -340,7 +340,7 @@ def _check_holidays(value: Any) -> None:
 def _check_rate(value: Any) -> None:
     try:
         fx.to_rate(Decimal(str(value)))
-    except (InvalidOperation, ValueError, TypeError, errors.ApiError, Exception) as exc:  # noqa: BLE001
+    except (InvalidOperation, ValueError, TypeError, errors.ApiError, Exception) as exc:
         raise _bad("Value must be a positive decimal rate.") from exc
 
 

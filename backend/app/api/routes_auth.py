@@ -35,7 +35,9 @@ def _user_view(user: User, payer: User | None) -> dict[str, Any]:
     }
 
 
-def _issue_tokens(ctx: AppContext, session: Any, user: User, family: str | None = None) -> dict[str, Any]:
+def _issue_tokens(
+    ctx: AppContext, session: Any, user: User, family: str | None = None
+) -> dict[str, Any]:
     now = ctx.clock.now()
     kind = ActorKind(user.role)
     scopes = frozenset(p.value for p in ROLE_PERMISSIONS[kind])
@@ -168,7 +170,9 @@ def mfa_verify(
         if subject is None or not actor.can_see_owner(subject.owner_id):
             raise errors.NotFound("The subject of the MFA step was not found.")
         try:
-            method = auth.check_mfa_code(user, body.code, now, ctx.cipher, settings.sandbox_mfa_code)
+            method = auth.check_mfa_code(
+                user, body.code, now, ctx.cipher, settings.sandbox_mfa_code
+            )
         except errors.MfaRequired:
             user.failed_mfa += 1
             if user.failed_mfa >= settings.max_failed_mfa:

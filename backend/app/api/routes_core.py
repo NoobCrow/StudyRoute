@@ -19,14 +19,12 @@ from app.api.schemas import (
     RecipientIn,
     RecipientPatchIn,
 )
-from app.core import errors
 from app.domain import privacy
 from app.domain.quotes import QuoteRequest
 from app.domain.rbac import Actor, Perm
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
 from app.engine.planner import plan_deadline
-from app.models import Quote
 
 router = APIRouter(tags=["core"])
 
@@ -166,13 +164,18 @@ def planner_deadline(
         payer = ctx.kyc.view(session, actor, rules) if actor.owner_id else None
         if payer and payer["status"] != "VERIFIED":
             extra.append(
-                {"code": "KYC_PENDING", "message": "KYC is not verified yet (simulated). "
-                 "Approval stays blocked until it is."}
+                {
+                    "code": "KYC_PENDING",
+                    "message": "KYC is not verified yet (simulated). "
+                    "Approval stays blocked until it is.",
+                }
             )
         if quote_id:
             quote = ctx.quotes.get_owned(session, actor, quote_id)
             if quote.expires_at <= now:
-                extra.append({"code": "QUOTE_EXPIRED", "message": "The quote expired. Get a new one."})
+                extra.append(
+                    {"code": "QUOTE_EXPIRED", "message": "The quote expired. Get a new one."}
+                )
         body["warnings"] = body["warnings"] + extra
         body["destination_country"] = country
         return body
@@ -223,7 +226,9 @@ def get_rules(
     return {
         "rules": rules,
         "unverified_count": sum(1 for r in rules if not r["verified"]),
-        "disclaimer": "Indicative. Confirm with your AD bank. Rules marked not verified are placeholders.",
+        "disclaimer": (
+            "Indicative. Confirm with your AD bank. Rules marked not verified are placeholders."
+        ),
     }
 
 

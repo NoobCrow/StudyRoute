@@ -76,7 +76,10 @@ def test_T12_changing_even_the_whitespace_of_the_body_breaks_the_signature(world
 def test_T12_missing_or_malformed_signature_headers(world: World) -> None:
     payment = submitted_payment(world)
     raw, headers = signed(world, payment)
-    assert send(world, raw, {k: v for k, v in headers.items() if k != "X-Signature"}).status_code == 401
+    assert (
+        send(world, raw, {k: v for k, v in headers.items() if k != "X-Signature"}).status_code
+        == 401
+    )
     assert send(world, raw, {**headers, "X-Signature": "v1=abc"}).status_code == 401
     assert state_of(world, payment) == "SUBMITTED"
 
