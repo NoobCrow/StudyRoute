@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Header, Query
 from fastapi.responses import JSONResponse
@@ -19,12 +20,17 @@ from app.api.schemas import (
     RecipientIn,
     RecipientPatchIn,
 )
+from app.core import errors
 from app.domain import privacy
+from app.domain.limits import usd_equivalent_minor
 from app.domain.quotes import QuoteRequest
 from app.domain.rbac import Actor, Perm
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
-from app.engine.planner import plan_deadline
+from app.engine.money import Money
+from app.engine.planner import INDICATIVE, plan_deadline
+from app.engine.rates import rate_hint, synthetic_history
+from app.engine.runway import compute_runway
 
 router = APIRouter(tags=["core"])
 
@@ -301,3 +307,55 @@ def reset_my_data(
     with ctx.db.write() as session:
         counts = privacy.reset_household_data(session, ctx.audit, actor)
     return JSONResponse({"reset": True, "deleted": counts})
+
+
+# --- stretch: living-cost runway (F9) and synthetic rate hint (F10) -------------------------
+@router.get("/planner/runway")
+def runway(
+    amount_minor: int = Query(gt=0, le=10**12),
+    monthly_cost_minor: int = Query(gt=0, le=10**12),
+    currency: str = Query(pattern=r"^[A-Z]{3}$"),
+    actor: Actor = Depends(require(Perm.PLANNER_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+    if currency not in rules.supported_currencies():
+        raise errors.ValidationFailed(f"Unsupported currency: {currency}.")
+    result = compute_runway(Money(amount_minor, currency), Money(monthly_cost_minor, currency))
+    body = result.to_api_dict()
+    monthly_usd = usd_equivalent_minor(rules, result.monthly_cost)
+    living = rules.record("bangladesh_rules.living_expense_usd_per_month")
+    body["monthly_cost_usd_equivalent"] = Money(monthly_usd, "USD").format()
+    body["reference"] = {
+        "label": "Indicative living-expense figure per month (secondary source)",
+        "value": Money.from_major(living.value, "USD").format(),
+        "verified": living.verified,
+        "badge": None if living.verified else "NOT_VERIFIED",
+        "note": f"Shown for comparison only. {INDICATIVE}",
+    }
+    return body
+
+
+@router.get("/rates/history")
+def rate_history(
+    currency: str = Query(default="GBP", pattern=r"^[A-Z]{3}$"),
+    days: int | None = Query(default=None, ge=7, le=90),
+    actor: Actor = Depends(require(Perm.PLANNER_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+    if currency not in rules.supported_currencies():
+        raise errors.ValidationFailed(f"Unsupported currency: {currency}.")
+    today = ctx.clock.now().astimezone(ZoneInfo("Asia/Dhaka")).date()
+    points = synthetic_history(
+        currency, rules.mid_rate(currency), today, days or int(rules.raw("fx.history_days"))
+    )
+    return {
+        "currency": currency,
+        "source": "synthetic",
+        "points": [{"date": p.day.isoformat(), "rate": str(p.rate)} for p in points],
+        "hint": rate_hint(points).to_api_dict(),
+        "disclaimer": "Synthetic data. Not a live feed and not a forecast.",
+    }
