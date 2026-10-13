@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     jwt_audience: str = "studyroute-api"
     access_token_ttl_seconds: int = 900
     refresh_token_ttl_seconds: int = 7 * 24 * 3600
+    argon2_time_cost: int = 2
+    argon2_memory_kib: int = 19456
+    argon2_parallelism: int = 1
     max_failed_logins: int = 5
     lockout_seconds: int = 900
     max_failed_mfa: int = 5

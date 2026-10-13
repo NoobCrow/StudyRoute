@@ -27,6 +27,7 @@ HASHED_FIELDS = (
     "recipient_id",
     "decision",
     "reason_code",
+    "detail",
     "input_hash",
     "output_hash",
     "model_version",

@@ -143,13 +143,13 @@ bangladesh_rules:
 
 calendars:
   weekend:
-    BD: {value: [Fri, Sat], kind: regulatory, verified: true, note: "Bangladesh weekend is Friday and Saturday."}
-    GB: {value: [Sat, Sun], kind: regulatory, verified: true}
-    US: {value: [Sat, Sun], kind: regulatory, verified: true}
-    DE: {value: [Sat, Sun], kind: regulatory, verified: true}
-    AU: {value: [Sat, Sun], kind: regulatory, verified: true}
-    CA: {value: [Sat, Sun], kind: regulatory, verified: true}
-    MY: {value: [Sat, Sun], kind: regulatory, verified: false, note: "Some Malaysian states use Friday and Saturday."}
+    BD: {value: [Fri, Sat], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13", note: "Bangladesh weekend is Friday and Saturday."}
+    GB: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    US: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    DE: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    AU: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    CA: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    MY: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13", note: "Some Malaysian states use Friday and Saturday."}
   holidays:
     BD:
       value:

@@ -133,9 +133,15 @@ class Payment(Base):
     submitted_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     settled_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     failure_reason: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    usd_equivalent_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    committed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime)
-    version: Mapped[int] = mapped_column(Integer, default=1)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Optimistic locking: SQLAlchemy adds "WHERE version = :old" to every UPDATE and raises
+    # StaleDataError when another transaction got there first.
+    __mapper_args__ = {"version_id_col": version}
 
 
 class PaymentTransition(Base):
@@ -168,6 +174,7 @@ class AuditEvent(Base):
     recipient_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     decision: Mapped[str | None] = mapped_column(String(12), nullable=True)
     reason_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    detail: Mapped[str | None] = mapped_column(String(240), nullable=True)
     input_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
     output_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
     model_version: Mapped[str | None] = mapped_column(String(80), nullable=True)

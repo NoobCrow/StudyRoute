@@ -81,13 +81,17 @@ def _latest_seq(db_path: Path) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument("--seq", type=int, help="sequence number to edit (default: second newest)")
     parser.add_argument("--restore", action="store_true", help="undo the previous tamper")
     parser.add_argument("--db", help="path to the SQLite file (default: from DATABASE_URL)")
     args = parser.parse_args(argv)
 
-    db_path = Path(args.db) if args.db else Path(Database(get_settings().database_url).sqlite_path())
+    db_path = (
+        Path(args.db) if args.db else Path(Database(get_settings().database_url).sqlite_path())
+    )
     if args.restore:
         change = restore_row(db_path)
         print(f"Restored event {change['seq']}: {change['column']} back to {change['original']!r}.")

@@ -67,3 +67,14 @@ class Purpose(StrEnum):
 def sql_in(values: type[StrEnum]) -> str:
     """Render enum values as a SQL IN list for CHECK constraints."""
     return ", ".join(f"'{member.value}'" for member in values)
+
+
+class ActorKind(StrEnum):
+    """Who is acting. Humans by role, plus the two non-human actors."""
+
+    PARENT = "parent"
+    STUDENT = "student"
+    ADMIN = "admin"
+    AI = "ai"
+    SYSTEM = "system"
+    PROVIDER = "provider"

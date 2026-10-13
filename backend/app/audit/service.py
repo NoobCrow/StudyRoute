@@ -81,6 +81,7 @@ class AuditService:
         recipient_id: str | None = None,
         decision: Any = None,
         reason_code: str | None = None,
+        detail: str | None = None,
         input_hash: str | None = None,
         output_hash: str | None = None,
         model_version: str | None = None,
@@ -105,6 +106,7 @@ class AuditService:
             "recipient_id": recipient_id,
             "decision": _plain(decision),
             "reason_code": reason_code,
+            "detail": detail[:240] if detail else None,
             "input_hash": input_hash,
             "output_hash": output_hash,
             "model_version": model_version,
@@ -149,7 +151,12 @@ class AuditService:
             )
         if chain.last_seq != head_seq or chain.last_hash != head_hash:
             return VerifyResult(
-                False, chain.events_checked, chain.last_seq + 1, "HEAD_MISMATCH", head_seq, head_hash
+                False,
+                chain.events_checked,
+                chain.last_seq + 1,
+                "HEAD_MISMATCH",
+                head_seq,
+                head_hash,
             )
         if expected_head and expected_head != chain.last_hash:
             return VerifyResult(

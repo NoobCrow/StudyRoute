@@ -10,6 +10,7 @@ import pytest
 
 from app.core.clock import FakeClock
 from app.core.db import Database
+from tests.helpers import World
 
 START = datetime(2026, 10, 14, 5, 0, tzinfo=UTC)  # a Wednesday, 11:00 in Dhaka
 
@@ -30,3 +31,10 @@ def db(db_path: Path) -> Iterator[Database]:
     database.create_schema()
     yield database
     database.dispose()
+
+
+@pytest.fixture
+def world(tmp_path: Path) -> Iterator[World]:
+    instance = World(tmp_path)
+    yield instance
+    instance.close()
