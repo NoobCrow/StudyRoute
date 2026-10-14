@@ -9,18 +9,21 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ai.context import ChatContext, gather_context
 from app.ai.guards import GuardFailure, parse_llm_json, validate_llm_output
-from app.ai.intents import classify
+from app.ai.intents import Intent, choose_intent
 from app.ai.llm import SYSTEM_PROMPT, LLMClient, LLMError
 from app.ai.masking import Masker
 from app.ai.number_guard import check_numbers
 from app.ai.policy import PolicyResult, check_text
 from app.ai.prompt import build_prompt
+from app.ai.request_parser import parse_request
+from app.ai.tasks import TaskResult, TaskRunner
 from app.ai.templates import INDICATIVE, Responder, refusal
 from app.api.context import AppContext
 from app.core import errors
@@ -61,6 +64,7 @@ class Orchestrator:
     def __init__(self, ctx: AppContext, llm: LLMClient | None) -> None:
         self._ctx = ctx
         self._llm = llm
+        self._tasks = TaskRunner(ctx)
 
     @property
     def mode(self) -> str:
@@ -84,11 +88,24 @@ class Orchestrator:
         ctx = self._ctx
         text = message.strip()
         policy = check_text(text)  # 2. policy check: flag, never obey
-        intent = classify(text)
         with ctx.db.read() as session:
             rules = load_rules(session)
             ai = self._ai_actor(session, actor)
+        today = ctx.clock.now().astimezone(ZoneInfo("Asia/Dhaka")).date()
+        parsed = parse_request(text, rules.supported_currencies(), today)
+        intent = choose_intent(text, parsed, has_context=bool(quote_id or payment_id))
+        task: TaskResult | None = None
+        if intent in (Intent.PLAN, Intent.CADENCE) and not policy.blocked:
+            task = self._tasks.run(
+                ai, intent, parsed
+            )  # a task: quote and plan, up to the human gate
+            if task.quote_id:
+                quote_id, payment_id = task.quote_id, None
+        with ctx.db.read() as session:
+            rules = load_rules(session)
             chat = gather_context(ctx, session, ai, rules, intent, quote_id, payment_id)  # 3. facts
+        for key, label, value in task.facts if task else ():
+            chat.facts.add(key, label, value)
         masker = Masker(chat.person_names)  # 4. mask personal data
         prompt = build_prompt(
             chat.facts,
@@ -101,6 +118,7 @@ class Orchestrator:
             chat.facts, chat.provider_ids, text,
             quote_id=chat.quote_id, payment_id=chat.payment_id, legal=policy.legal_question,
         )  # fmt: skip
+        responder.task = task
         outcome = self._decide(ai, intent, policy, chat, responder, prompt)
         reply = masker.unmask(outcome.reply)  # 8. un-mask
         if chat.ignored_documents:
@@ -122,6 +140,7 @@ class Orchestrator:
                 "retries": outcome.retries,
             },
             "proposed_actions": outcome.proposals,
+            "task": task.card if task else None,
             "mode": outcome.mode,
             "model_version": outcome.model,
             "disclaimer": DISCLAIMER,

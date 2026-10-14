@@ -82,7 +82,7 @@ def gather_context(
             params=rules.planner_params(),
         )
         fb.build_plan_facts(facts, plan.to_api_dict(), rules.corridor(country).name)
-    if intent is Intent.CHECKLIST:
+    if intent is Intent.CHECKLIST or (intent is Intent.PLAN and quote_id):
         authorize(ai, Perm.CHECKLIST_READ)
         fb.build_checklist_facts(facts, rules.checklist(country, purpose))
     fb.build_kyc_facts(facts, ctx.kyc.view(session, ai, rules))

@@ -14,6 +14,7 @@ from app.ai.number_guard import numbers_in
 
 INDICATIVE = "Indicative. Confirm with your AD bank."
 SANDBOX_NOTE = "This is a sandbox with synthetic numbers, so treat it as indicative."
+EXAMPLE_CADENCE_HINT = "How often should I send GBP 800 a month for 9 months?"
 NO_QUOTE = (
     "I do not have a quote to work from. Run a quote on the Compare screen and I will explain it."
 )
@@ -57,6 +58,7 @@ class Responder:
         self.payment_id = payment_id
         self.legal = legal
         self.used: list[str] = []
+        self.task: Any = None  # set by the orchestrator when a task ran
 
     # --- helpers ------------------------------------------------------------------------
     def v(self, key: str) -> str:
@@ -97,6 +99,7 @@ class Responder:
             Intent.DEADLINE: self.deadline, Intent.CHECKLIST: self.checklist,
             Intent.LIMITS: self.limits, Intent.KYC: self.kyc, Intent.STATUS: self.status,
             Intent.DRAFT: self.draft, Intent.REQUEST_APPROVAL: self.request_approval,
+            Intent.PLAN: self.plan, Intent.CADENCE: self.cadence,
         }.get(intent, self.help)  # fmt: skip
         return handler()
 
@@ -267,3 +270,112 @@ class Responder:
         answer = self._finish(text)
         answer.proposals.append(proposal)
         return answer
+
+    # --- tasks ----------------------------------------------------------------------------
+    def _task_gap(self, example_key: str, what_to_plan: str) -> Answer | None:
+        """The answer when a task could not run: say why and give an example."""
+        if self.facts.has("task.error"):
+            return self._finish(
+                f"I could not build that plan: {self.v('task.error')}. "
+                f"You can try again, for example: {self.v(example_key)}."
+            )
+        if self.facts.has("task.missing"):
+            return self._finish(
+                f"To plan {what_to_plan} I still need {self.v('task.missing')}. "
+                f"For example: {self.v(example_key)}."
+            )
+        return None
+
+    def plan(self) -> Answer:
+        if (gap := self._task_gap("example.plan", "your payment")) is not None:
+            return gap
+        if not self._have_quote():
+            return self._finish(NO_QUOTE)
+        ranked = self._ranked()
+        best = ranked[0]
+        parts = [
+            f"I made a quote for {self.v('quote.target')} to {self.v('request.country')} and "
+            "prepared your payment plan.",
+            f"The lowest true cost is {self.v(f'{best}.name')} at {self.v(f'{best}.cost_pct')} of "
+            f"the amount, {self.v(f'{best}.total_cost')} in total. You would pay "
+            f"{self.v(f'{best}.parent_pays')}.",
+            self._shortfall_note(ranked),
+        ]
+        if self.facts.has("plan.latest"):
+            parts.append(
+                f"To reach the university by {self.v('plan.due_date')}, send by "
+                f"{self.v('plan.latest')} at the latest; I suggest {self.v('plan.recommended')}. "
+                f"Deadline status: {self.v('plan.status')}."
+            )
+        else:
+            parts.append("Tell me the university's due date and I will plan the deadline too.")
+        parts.append(f"Your mock KYC status is {self.v('kyc.status')}.")
+        saved = int(self.v("recipient.matching") or 0)
+        allowlisted = int(self.v("recipient.allowlisted") or 0)
+        if saved == 0:
+            parts.append(
+                "You have no recipient saved for this country yet: add the university first."
+            )
+        elif allowlisted == 0:
+            parts.append("Your saved recipient still has to be allowlisted with a fresh MFA code.")
+        else:
+            parts.append("You already have an allowlisted recipient.")
+        parts.append(
+            f"Documents: {self.v('docs.provided')} of {self.v('docs.total')} on the checklist are ready."
+        )
+        parts.append(
+            "Review the plan below. I can only propose the draft: you confirm it and add the "
+            "payment reference, and only you can approve it, with a fresh MFA code. " + INDICATIVE
+        )
+        args = {"quote_id": self.quote_id, "provider_id": best}
+        missing = ["reference", "recipient_id"]
+        if self.task is not None:
+            missing = list(self.task.missing)
+            if self.task.recipient_id:
+                args["recipient_id"] = self.task.recipient_id
+        answer = self._finish(" ".join(" ".join(parts).split()))
+        answer.proposals.append(
+            {"tool": "create_draft", "args": args, "requires_human": True, "missing": missing}
+        )
+        return answer
+
+    def cadence(self) -> Answer:
+        if (gap := self._task_gap("example.cadence", "how often to send")) is not None:
+            return gap
+        order = [
+            k for k in ("monthly", "quarterly", "termly", "upfront")
+            if self.facts.has(f"cadence.{k}.name")
+        ]  # fmt: skip
+        if not order:
+            return self._finish(
+                "Tell me how much you send and for how many months, and I will compare the ways of "
+                f"sending it. For example: {EXAMPLE_CADENCE_HINT}"
+            )
+
+        def line(k: str) -> str:
+            count = self.facts.value(f"cadence.{k}.transfers")
+            unit = "transfer" if count == "1" else "transfers"
+            return (
+                f"{self.v(f'cadence.{k}.name')}: {self.v(f'cadence.{k}.transfers')} {unit} of "
+                f"{self.v(f'cadence.{k}.per_transfer')} with {self.v(f'cadence.{k}.provider')}, "
+                f"{self.v(f'cadence.{k}.total_cost')} in total"
+            )
+
+        cheapest_name = self.v("cadence.cheapest")
+        cheapest = next(k for k in order if self.facts.value(f"cadence.{k}.name") == cheapest_name)
+        text = (
+            f"To send {self.v('cadence.total')} over {self.v('cadence.months')} months, this is the "
+            f"true total cost of each way of sending it. {'; '.join(line(k) for k in order)}. "
+        )
+        if cheapest != "monthly":
+            text += (
+                f"The cheapest on paper is {cheapest_name}, which saves "
+                f"{self.v(f'cadence.{cheapest}.saving')} compared with sending every month. "
+            )
+        text += (
+            "Fixed and SWIFT fees are paid on every transfer, so fewer transfers cost less. But "
+            "sending less often moves money before it is needed, and StudyRoute does not predict "
+            "exchange rates, so the cheapest option is not automatically the best one. "
+            + INDICATIVE
+        )
+        return self._finish(" ".join(text.split()))
