@@ -1,19 +1,20 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { post } from "../api/client";
 import type { ChatAction, ChatResponse } from "../api/types";
 import { useCurrentChatScope } from "../chatContext";
+import { TaskView } from "./PlanCard";
 import { Badge, ErrorNotice } from "./Ui";
 
 interface Turn { id: number; role: "me" | "bot"; text: string; reply?: ChatResponse }
 
 const SUGGESTIONS = [
+  "I need to pay GBP 10,000 tuition by 28 October",
+  "How often should I send GBP 800 a month for 9 months?",
   "Why is Provider B cheaper than A?",
-  "Which provider is cheapest?",
   "What do OUR, SHA and BEN mean?",
-  "When should I send the payment?",
   "What documents do I need?",
   "What is the daily limit?",
 ];
@@ -56,7 +57,7 @@ function Details({ reply, paymentId }: { reply: ChatResponse; paymentId?: string
           </ul>
         </details>
       ) : null}
-      {reply.proposed_actions.map((action) => {
+      {(reply.task?.kind === "payment_plan" && reply.task.status === "ready" ? [] : reply.proposed_actions).map((action) => {
         const link = actionLink(action, paymentId);
         return (
           <p key={`${action.tool}-${link.to}`} className="small">
@@ -81,7 +82,11 @@ export function ChatPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [mode, setMode] = useState<ChatResponse | null>(null);
+  const [planQuote, setPlanQuote] = useState<string | null>(null);
   const counter = useRef(0);
+  const newest = useCallback((node: HTMLDivElement | null) => {
+    node?.scrollIntoView?.({ block: "start" });
+  }, []);
 
   async function ask(message: string) {
     const clean = message.trim();
@@ -91,9 +96,10 @@ export function ChatPanel() {
     setBusy(true);
     setTurns((t) => [...t, { id: ++counter.current, role: "me", text: clean }]);
     try {
-      const context = { quote_id: scope.quoteId ?? null, payment_id: scope.paymentId ?? null };
+      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null };
       const reply = await post<ChatResponse>("/assistant/chat", { message: clean, context });
       setMode(reply);
+      if (reply.task?.kind === "payment_plan" && reply.task.status === "ready") setPlanQuote(reply.task.quote.quote_id);
       setTurns((t) => [...t, { id: ++counter.current, role: "bot", text: reply.reply, reply }]);
     } catch (e) {
       setError(e as Error);
@@ -123,10 +129,15 @@ export function ChatPanel() {
           <div className="chat-log" aria-live="polite">
             <p className="small muted">
               I explain the engine's numbers. I cannot approve, submit, cancel or change anything.
-              {scope.quoteId || scope.paymentId ? " I can see the quote or payment you have open." : " Open a quote or payment so I can use its numbers."}
+              {scope.quoteId || scope.paymentId ? " I can see the quote or payment you have open." : " Tell me what you need to pay and I will plan it, or ask about a quote."}
             </p>
-            {turns.map((turn) => (
-              <div key={turn.id} className={`bubble ${turn.role}`}>
+            {turns.map((turn, index) => (
+              <div
+                key={turn.id}
+                className={`bubble ${turn.role}`}
+                ref={index === turns.length - 1 && turn.role === "bot" ? newest : undefined}
+              >
+                {turn.reply ? <TaskView task={turn.reply.task} /> : null}
                 {turn.text}
                 {turn.reply ? <Details reply={turn.reply} paymentId={scope.paymentId} /> : null}
               </div>

@@ -52,7 +52,7 @@ export function PaymentsScreen() {
         </div>
       ) : null}
       {items.length > 0 ? (
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0} role="region" aria-label="Payments table">
           <table>
             <thead>
               <tr>

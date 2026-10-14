@@ -89,7 +89,7 @@ export function SandboxScreen() {
           <Notice tone="info" title={data.banner}>{data.disclaimer}</Notice>
           <section className="card" aria-labelledby="sim-title">
             <h2 id="sim-title">What is simulated</h2>
-            <div className="table-wrap">
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="What is simulated table">
               <table>
                 <thead><tr><th scope="col">Part</th><th scope="col">What it does here</th></tr></thead>
                 <tbody>
@@ -102,7 +102,7 @@ export function SandboxScreen() {
           </section>
           <section className="card" aria-labelledby="scenario-title">
             <h2 id="scenario-title">Test scenarios</h2>
-            <div className="table-wrap">
+            <div className="table-wrap" tabIndex={0} role="region" aria-label="Test scenarios table">
               <table>
                 <thead><tr><th scope="col">Type this</th><th scope="col">Where</th><th scope="col">What happens</th></tr></thead>
                 <tbody>

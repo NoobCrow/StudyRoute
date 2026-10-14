@@ -59,7 +59,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
 body { min-height: 100vh; }
-h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5rem; }
+h1, h2, h3 { line-height: 1.25; margin: 0 0 0.5rem; overflow-wrap: anywhere; }
 h1 { font-size: 1.6rem; }
 h2 { font-size: 1.2rem; }
 h3 { font-size: 1.02rem; }
@@ -173,7 +173,7 @@ legend { font-weight: 600; padding: 0 0.3rem; }
 .notice ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
 
 /* Tables */
-.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+.table-wrap { position: relative; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
 table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
 th, td { padding: 0.5rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
 th { background: var(--surface-2); font-weight: 600; white-space: nowrap; }
@@ -210,7 +210,7 @@ tr.fail td { background: var(--danger-bg); }
 .chat-toggle { position: fixed; right: 1rem; bottom: 1rem; z-index: 60; box-shadow: var(--shadow); }
 .chat-panel {
   position: fixed; right: 1rem; bottom: 4rem; z-index: 60; width: min(calc(100vw - 2rem), 410px);
-  max-height: min(78vh, 640px); display: flex; flex-direction: column;
+  max-height: min(88vh, 780px); display: flex; flex-direction: column;
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgb(0 0 0 / 28%);
 }
 .chat-head { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
@@ -245,3 +245,22 @@ details pre { white-space: pre-wrap; word-break: break-word; font-size: 0.8rem; 
 .spark .tip-bg { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
 .spark .tip-value { fill: var(--text); font-size: 13px; font-weight: 700; }
 .spark .tip-sub { fill: var(--muted); font-size: 11px; }
+
+/* Assistant task cards */
+.plan-card { margin-top: 0.6rem; padding: 0.7rem 0.8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); white-space: normal; }
+.plan-card h3 { font-size: 0.98rem; margin-bottom: 0.4rem; }
+.steps { list-style: none; margin: 0.5rem 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.88rem; }
+.steps li { display: flex; gap: 0.5rem; align-items: baseline; }
+.steps .mark { width: 1.1rem; text-align: center; font-weight: 700; color: var(--muted); }
+.steps li.done .mark { color: var(--ok); }
+a.btn.small { padding: 0.25rem 0.6rem; font-size: 0.86rem; }
+
+/* Compliance report: readable on screen, clean on paper */
+.report .controls td:first-child { width: 28%; }
+.mono-wrap { word-break: break-all; }
+@media print {
+  .app-header, .chat-toggle, .chat-panel, .skip-link, .no-print { display: none !important; }
+  .page { padding: 0; max-width: none; }
+  .card { box-shadow: none; break-inside: avoid; }
+  body { background: #fff; }
+}

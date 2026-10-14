@@ -170,6 +170,7 @@ export function PaymentScreen() {
             <button type="button" className="btn" disabled={busy !== null} onClick={() => void cancel()}>Cancel payment</button>
           ) : null}
           <Link className="btn ghost" to={`/audit?payment_id=${data.payment_id}`}>See its audit trail</Link>
+          {can("audit:read") ? <Link className="btn ghost" to={`${base}/report`}>Compliance report</Link> : null}
         </div>
         {terminal ? <p className="small muted">This payment is finished and cannot change.</p> : null}
         {!terminal && !can("payments:approve") && user.role !== "admin" ? (

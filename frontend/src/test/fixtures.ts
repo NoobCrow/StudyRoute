@@ -99,3 +99,46 @@ export function problem(status: number, code: string, detail: string): Response 
   const body = { type: "x", title: code, status, code, detail, request_id: "req_t" };
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
+
+import type { ChatResponse, PaymentPlanCard, SendPlan } from "../api/types";
+
+export const PLAN_CARD: PaymentPlanCard = {
+  kind: "payment_plan", status: "ready",
+  request: { amount: { amount_minor: 1000000, currency: "GBP", formatted: "GBP 10,000.00" }, purpose: "TUITION", country: "GB", country_name: "United Kingdom", due_date: "2026-10-28", charge_code: "OUR" },
+  quote: { quote_id: "qte_plan1", expires_at: "2099-01-01T00:00:00Z" },
+  best: { provider_id: "prov_b", provider_name: "Provider B (synthetic)", cost_pct: "1.58%", parent_pays: "BDT 1,625,300.00", total_cost: "BDT 25,300.00", shortfall: "GBP 0.00", has_shortfall: false, charge_code: "OUR", eta_business_days: 2 },
+  alternatives: [
+    { provider_id: "prov_c", provider_name: "Provider C (synthetic)", cost_pct: "1.63%", parent_pays: "BDT 1,620,500.00", total_cost: "BDT 26,100.00", shortfall: "GBP 35.00", has_shortfall: true, charge_code: "SHA", eta_business_days: 3 },
+  ],
+  deadline: { due_date: "2026-10-28", latest_send_date: "2026-10-20", recommended_send_date: "2026-10-19", status: "ON_TRACK" },
+  recipients: [],
+  steps: [
+    { key: "quote", label: "Quote made from your request", state: "done", detail: "Valid for 5 minutes", link: null },
+    { key: "deadline", label: "Deadline planned", state: "done", detail: "Send by 2026-10-20", link: null },
+    { key: "kyc", label: "Identity check (simulated)", state: "todo", detail: "Documents are missing.", link: "/" },
+    { key: "recipient", label: "Recipient ready", state: "todo", detail: "Add the university as a recipient", link: "/recipients" },
+    { key: "documents", label: "Documents ready", state: "todo", detail: "0 of 9 documents ready", link: "/documents" },
+    { key: "draft", label: "Create the draft", state: "todo", detail: "You confirm the recipient and the payment reference", link: "/compare?quote=qte_plan1&provider=prov_b" },
+    { key: "approve", label: "Approve", state: "todo", detail: "Only you can, with a fresh MFA code", link: null },
+  ],
+  draft: { quote_id: "qte_plan1", provider_id: "prov_b", recipient_id: null, missing: ["reference", "recipient_id"] },
+};
+
+const OPTION = { charge_code: "OUR" as const, shortfall_foreign_minor: 0, exceeds_sandbox_cap: false };
+export const SEND_PLAN: SendPlan = {
+  total: { amount_minor: 1200000, currency: "GBP", formatted: "GBP 12,000.00" }, months: 12, cheapest_key: "upfront",
+  options: [
+    { ...OPTION, key: "monthly", label: "Every month", transfers: 12, provider_id: "prov_a", provider_name: "Provider A (synthetic)", display: { per_transfer: "GBP 1,000.00", total_cost: "BDT 68,400.00", parent_pays: "BDT 1", avg_cost_pct: "3.56%", saving_vs_monthly: "BDT 0.00" } },
+    { ...OPTION, key: "upfront", label: "All at once", transfers: 1, provider_id: "prov_b", provider_name: "Provider B (synthetic)", display: { per_transfer: "GBP 12,000.00", total_cost: "BDT 28,500.00", parent_pays: "BDT 2", avg_cost_pct: "1.48%", saving_vs_monthly: "BDT 39,900.00" } },
+  ],
+  synthetic: true, disclaimer: "Synthetic rates and fees. Indicative. Confirm with your AD bank.",
+  trade_off: "Sending less often costs less in fixed fees, but moves money before it is needed. StudyRoute does not predict exchange rates.",
+};
+
+export function chatReply(overrides: Partial<ChatResponse> = {}): ChatResponse {
+  return {
+    reply: "I made a quote.", facts_used: [], facts: [], guard: { status: "passed", flags: [], failure: null, retries: 0 },
+    proposed_actions: [], task: null, mode: "template", model_version: "template-v1", disclaimer: "Sandbox.",
+    debug: { masked_prompt: "FACTS", note: "masked" }, ...overrides,
+  };
+}

@@ -46,7 +46,7 @@ export function Mt103Card({ preview }: { preview: Mt103Preview }) {
         <h2 id="mt103-title">Payment instruction preview</h2>
         <Badge tone="neutral">{preview.format} - simulated</Badge>
       </div>
-      <div className="table-wrap">
+      <div className="table-wrap" tabIndex={0} role="region" aria-label="Instruction preview fields table">
         <table>
           <thead>
             <tr><th scope="col">Tag</th><th scope="col">Field</th><th scope="col">Value</th><th scope="col">Note</th></tr>

@@ -9,7 +9,7 @@ import { Badge, ErrorNotice, Field, NotVerifiedBadge } from "./Ui";
 /** F9 living-cost runway: how many months an amount covers. The engine does the arithmetic. */
 export function RunwayCard({ corridors }: { corridors: Corridor[] }) {
   const currencies = [...new Set(corridors.map((c) => c.currency))];
-  const [currency, setCurrency] = useState(currencies[0] ?? "GBP");
+  const [currency, setCurrency] = useState(currencies.includes("GBP") ? "GBP" : (currencies[0] ?? "GBP"));
   const [amount, setAmount] = useState("5000");
   const [monthly, setMonthly] = useState("1200");
   const [result, setResult] = useState<RunwayView | null>(null);

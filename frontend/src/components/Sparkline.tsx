@@ -104,7 +104,7 @@ export function Sparkline({ points, average, currency }: Props) {
       </span>
       <details>
         <summary>Show the {n} values as a table</summary>
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0} role="region" aria-label="Rate history data table">
           <table>
             <thead><tr><th>Date</th><th className="num">BDT per 1 {currency} (synthetic)</th></tr></thead>
             <tbody>

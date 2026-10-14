@@ -105,7 +105,7 @@ export function RulesScreen() {
       </label>
       {rules.loading && !rules.data ? <Loading /> : null}
       {shown.length > 0 ? (
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0} role="region" aria-label="Rules table">
           <table>
             <thead>
               <tr>

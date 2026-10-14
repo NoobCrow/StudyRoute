@@ -41,8 +41,8 @@ describe("Countdown", () => {
 describe("SandboxBanner", () => {
   it("always carries the sandbox sentence and the indicative disclaimer", () => {
     render(<SandboxBanner />);
-    expect(screen.getByRole("note")).toHaveTextContent("Sandbox - synthetic data - no real money moves");
-    expect(screen.getByRole("note")).toHaveTextContent("Confirm with your AD bank");
+    expect(screen.getByRole("region", { name: "Sandbox notice" })).toHaveTextContent("Sandbox - synthetic data - no real money moves");
+    expect(screen.getByRole("region", { name: "Sandbox notice" })).toHaveTextContent("Confirm with your AD bank");
   });
 });
 

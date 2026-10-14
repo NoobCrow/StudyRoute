@@ -151,7 +151,7 @@ export interface ChatAction {
 export interface ChatResponse {
   reply: string; facts_used: string[]; facts: { id: string; label: string; value: string }[];
   guard: { status: string; flags: string[]; failure: string | null; retries: number };
-  proposed_actions: ChatAction[]; mode: "template" | "llm"; model_version: string;
+  proposed_actions: ChatAction[]; task: TaskCard | null; mode: "template" | "llm"; model_version: string;
   disclaimer: string; debug: { masked_prompt: string; note: string };
 }
 export interface RunwayView {
@@ -181,4 +181,51 @@ export interface SandboxInfo {
   };
   limits: { per_transaction_usd_equivalent: number; daily_usd_equivalent: number; indicative: string };
   demo: { password: string; mfa_code: string } | null;
+}
+
+export interface PlanStep { key: string; label: string; state: "done" | "todo"; detail: string; link: string | null }
+export interface PlanProvider {
+  provider_id: string; provider_name: string; cost_pct: string; parent_pays: string; total_cost: string;
+  shortfall: string; has_shortfall: boolean; charge_code: ChargeCode; eta_business_days: number;
+}
+export interface PaymentPlanCard {
+  kind: "payment_plan"; status: "ready";
+  request: { amount: Money; purpose: string; country: string; country_name: string; due_date: string | null; charge_code: ChargeCode };
+  quote: { quote_id: string; expires_at: string };
+  best: PlanProvider; alternatives: PlanProvider[];
+  deadline: { due_date: string; latest_send_date: string; recommended_send_date: string; status: PlanView["status"] } | null;
+  recipients: { recipient_id: string; label: string; allowlisted: boolean }[];
+  steps: PlanStep[];
+  draft: { quote_id: string; provider_id: string; recipient_id: string | null; missing: string[] };
+}
+export interface CadenceOptionView {
+  key: string; label: string; transfers: number; provider_id: string; provider_name: string;
+  charge_code: ChargeCode; shortfall_foreign_minor: number; exceeds_sandbox_cap: boolean;
+  display: { per_transfer: string; total_cost: string; parent_pays: string; avg_cost_pct: string; saving_vs_monthly: string };
+}
+export interface SendPlan {
+  total: Money; months: number; cheapest_key: string; options: CadenceOptionView[];
+  synthetic: true; disclaimer: string; trade_off: string;
+}
+export interface SendPlanCardData { kind: "send_plan"; status: "ready"; plan: SendPlan }
+export interface TaskGap { kind: "payment_plan" | "send_plan"; status: "needs_input" | "error"; missing?: string[]; message?: string }
+export type TaskCard = PaymentPlanCard | SendPlanCardData | TaskGap;
+
+export type ControlResult = "PASS" | "PENDING" | "NOT_YET" | "BLOCKED" | "FAIL";
+export interface ComplianceReport {
+  report_type: string; generated_at: string; synthetic: true; disclaimer: string; report_hash: string;
+  payment: {
+    payment_id: string; state: PaymentState; reference: string; provider_name: string; uetr: string | null;
+    due_date: string | null; latest_send_date: string | null; created_at: string; approved_at: string | null;
+    submitted_at: string | null; settled_at: string | null; failure_reason: string | null;
+  };
+  amount: { beneficiary_receives: string; rate: string; charge_code: ChargeCode; total_cost: string; cost_pct: string; parent_pays: string; shortfall: string };
+  parties: {
+    originator: { name: string; address: string; country: string };
+    beneficiary: { name: string; account_masked: string; bic: string; country: string };
+  };
+  approval: { approved: boolean; approved_by: string | null; approved_at: string | null; summary_hash: string | null; mfa_proof_reference: string | null };
+  controls: { key: string; label: string; result: ControlResult; evidence: string }[];
+  timeline: Tracker["timeline"];
+  audit: { events: AuditEventView[]; chain: VerifyView };
 }

@@ -12,6 +12,7 @@ import { LoginScreen } from "./screens/Login";
 import { PaymentScreen } from "./screens/Payment";
 import { PaymentsScreen } from "./screens/Payments";
 import { RecipientsScreen } from "./screens/Recipients";
+import { ReportScreen } from "./screens/Report";
 import { RulesScreen } from "./screens/Rules";
 import { SandboxScreen } from "./screens/Sandbox";
 
@@ -38,6 +39,7 @@ export function App() {
           <Route path="compare" element={<CompareScreen />} />
           <Route path="payments" element={<PaymentsScreen />} />
           <Route path="payments/:paymentId" element={<PaymentScreen />} />
+          <Route path="payments/:paymentId/report" element={<ReportScreen />} />
           <Route path="recipients" element={<RecipientsScreen />} />
           <Route path="documents" element={<DocumentsScreen />} />
           <Route path="audit" element={<AuditScreen />} />

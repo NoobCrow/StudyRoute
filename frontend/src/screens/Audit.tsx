@@ -117,7 +117,7 @@ export function AuditScreen() {
       </div>
       {first.loading && !first.data ? <Loading /> : null}
       {events.length > 0 ? (
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0} role="region" aria-label="Audit events table">
           <table>
             <thead>
               <tr>

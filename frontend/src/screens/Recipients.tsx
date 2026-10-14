@@ -192,7 +192,7 @@ export function RecipientsScreen() {
       <ErrorNotice error={recipients.error ?? error} />
       {recipients.loading && !recipients.data ? <Loading /> : null}
       {items.length > 0 ? (
-        <div className="table-wrap">
+        <div className="table-wrap" tabIndex={0} role="region" aria-label="Recipients table">
           <table>
             <thead>
               <tr>

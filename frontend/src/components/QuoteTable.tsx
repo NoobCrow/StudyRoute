@@ -24,7 +24,7 @@ function rowClass(result: QuoteResult): string | undefined {
 /** F1 provider comparator: ranked by true total cost percentage, hidden margin included. */
 export function QuoteTable({ quote, selected, onSelect }: Props) {
   return (
-    <div className="table-wrap">
+    <div className="table-wrap" tabIndex={0} role="region" aria-label="Provider comparison table">
       <table>
         <caption className="sr-only">Providers ranked by true total cost percentage</caption>
         <thead>

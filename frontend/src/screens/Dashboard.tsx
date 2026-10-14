@@ -9,6 +9,7 @@ import { PlannerCard } from "../components/PlannerCard";
 import { RateCard } from "../components/RateCard";
 import { ResetCard } from "../components/ResetCard";
 import { RunwayCard } from "../components/RunwayCard";
+import { SendPlanCard } from "../components/SendPlanCard";
 import { ErrorNotice, Field, Loading, Notice, PageHead, StateBadge } from "../components/Ui";
 import { loadHealth } from "../health";
 import { useAsync } from "../hooks";
@@ -19,7 +20,7 @@ function RecentPayments({ items }: { items: PaymentBrief[] }) {
     return <p className="muted">No payments yet. Start by comparing providers.</p>;
   }
   return (
-    <div className="table-wrap">
+    <div className="table-wrap" tabIndex={0} role="region" aria-label="Recent payments table">
       <table>
         <thead>
           <tr>
@@ -127,6 +128,7 @@ export function DashboardScreen() {
           <RunwayCard corridors={items} />
         </div>
       ) : null}
+      {canPlan && items.length > 0 ? <SendPlanCard corridors={items} /> : null}
       {user.permissions.includes("data:reset") ? <ResetCard onDone={recent.reload} /> : null}
     </div>
   );
