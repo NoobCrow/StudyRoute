@@ -1,0 +1,12 @@
+{
+  "name": "studyroute-deck",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Builds the StudyRoute presentation deck (.pptx). Synthetic data only.",
+  "scripts": {
+    "build": "node build_deck.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "4.0.1"
+  }
+}
