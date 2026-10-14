@@ -240,6 +240,10 @@ export interface BankAccountView {
   household: boolean; simulated: true;
 }
 export type Beneficiary = Omit<BankAccountView, "balance">;
+export interface BankTotals {
+  by_currency: { currency: string; accounts: number; balance: Money; bdt_equivalent: Money }[];
+  bdt_total: Money; note: string;
+}
 
 export interface BankStep {
   stage: string; bank: string; bank_name: string; summary: string; delay_seconds: number;

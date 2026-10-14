@@ -340,3 +340,72 @@ def test_money_in_a_plan_is_integer_minor_units() -> None:
     for journal in plan.all_journals():
         for posting in journal.postings:
             assert isinstance(posting.amount_minor, int)
+
+
+# --- a seeded random sweep: rounding edge cases must never unbalance the books ----------------------
+
+
+def test_random_international_transfers_always_balance_or_are_refused_cleanly() -> None:
+    import random
+
+    rng = random.Random(20261014)
+    refused = built = 0
+    reasons: set[str] = set()
+    for _ in range(400):
+        provider = rng.choice(sorted(PROVIDERS))
+        code = rng.choice(list(ChargeCode))
+        target = rng.choice([rng.randint(1, 5_000), rng.randint(5_000, 4_000_000)])
+        result = compute_provider_result(
+            target=Money(target, CCY),
+            mid_rate=Decimal(rng.choice(["159.999999", "160", "160.123457", "0.5"])),
+            terms=PROVIDERS[provider],
+            requested_charge_code=code,
+            params=EngineParams(ben_deducts_fixed_fee=rng.random() < 0.8),
+        )
+        bank = {"prov_a": "EXMPBDA1", "prov_b": "EXMPBDB1", "prov_c": "EXMPBDC1"}[provider]
+        try:
+            plan = plan_international(
+                source=customer(bank, "S"), destination=customer("EXMPGB2L", "D", CCY),
+                correspondent=CORR, result=result, delays=(4, 4, 4),
+            )  # fmt: skip
+        except RailRejected as error:
+            reasons.add(error.code)
+            refused += 1
+            continue
+        built += 1
+        assert plan.debit.amount_minor == result.parent_pays_bdt_minor
+        assert plan.credit.amount_minor == result.beneficiary_receives_minor > 0
+        assert all(j.is_balanced() for j in plan.all_journals())
+        books = run(plan)
+        assert books.balance[plan.source] == -plan.debit.amount_minor
+        assert books.balance[plan.destination] == plan.credit.amount_minor
+        for ref, value in books.balance.items():
+            mirror = ref.mirror()
+            if mirror is not None and mirror in books.balance:
+                assert books.balance[mirror] == value
+    assert reasons <= {"CHARGES_EXCEED_AMOUNT"}
+    assert built > 150 and refused > 0  # both paths were really exercised
+
+
+def test_random_national_transfers_always_balance() -> None:
+    import random
+
+    rng = random.Random(14102026)
+    rails = [BDT_INSTANT, BDT_BATCH, BDT_HIGH]
+    for _ in range(300):
+        rail = rng.choice(rails)
+        amount = Money(rng.randint(1, 900_000_000), "BDT")
+        try:
+            plan = plan_national(
+                source=customer("EXMPBDA1", "a"), destination=customer("EXMPBDB1", "b"),
+                amount=amount, rail=rail, clearing_house="CLR-BD",
+            )  # fmt: skip
+        except RailRejected:
+            continue
+        books = run(plan)
+        assert books.balance[plan.source] == -(amount.amount_minor + plan.fee.amount_minor)
+        assert books.balance[plan.destination] == amount.amount_minor
+        assert books.balance[AccountRef("EXMPBDA1", AccountKind.IN_FLIGHT, "BDT")] == 0
+        for journal in reversed(plan.all_journals()):
+            books.apply(journal.reversed())
+        assert all(v == 0 for v in books.balance.values())

@@ -17,6 +17,10 @@ StudyRoute can show how money really moves from one bank to another, at home and
 | Send GBP inside the UK (student account to the university) | The same three hops through the UK clearing house |
 | Send BDT to a **university abroad** | Three hops over **SWIFT through a correspondent bank**: your bank sells the currency and pays out of its nostro account, the correspondent forwards through its own nostro, the university's bank credits the customer. An MT103 message (simulated) travels with the first two hops |
 
+The screen also adds up the household's money in every currency (the parent's Bangladesh accounts and
+the student's UK account), with an indicative BDT total at the synthetic mid-market rates. That is the
+multi-currency view; it is a guide, not a live rate.
+
 Every transfer has a plan first (fees, what the beneficiary receives, every hop), then you confirm
 it with MFA, then the banks move it one hop at a time while you watch.
 
@@ -108,7 +112,7 @@ All under `/api/v1/bank`, sandbox only. Money is `{amount_minor, currency}` plus
 | Method and path | Who | What |
 |-----------------|-----|------|
 | `GET /network` | any signed-in role | Banks, rails, trial balance, mirror accounts, `all_ok` |
-| `GET /accounts` | parent, student, reviewer | Customer accounts with balances (the household's own; all for the reviewer) |
+| `GET /accounts` | parent, student, reviewer | Customer accounts with balances (the household's own; all for the reviewer) and, for a household, `totals` by currency with a BDT equivalent |
 | `GET /beneficiaries` | same | Every customer account a transfer could go to, without balances |
 | `GET /accounts/{id}/statement` | same | Entries with running balances |
 | `POST /transfers` | parent | Plan a transfer. Needs `Idempotency-Key`. Moves nothing |

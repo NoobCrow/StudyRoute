@@ -109,7 +109,7 @@ export function AuditScreen() {
       <ErrorNotice error={first.error ?? error} />
       <div className="form-grid">
         <Field label="Payment id" htmlFor="a-payment">
-          <input id="a-payment" value={paymentId} onChange={(e) => setFilter("payment_id", e.target.value.trim())} placeholder="pay_..." />
+          <input id="a-payment" value={paymentId} onChange={(e) => setFilter("payment_id", e.target.value.trim())} placeholder="pay_... or btr_..." />
         </Field>
         <Field label="Action" htmlFor="a-action" hint="For example approval.granted or webhook.rejected.">
           <input id="a-action" value={action} onChange={(e) => setFilter("action", e.target.value.trim())} />

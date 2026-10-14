@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Link } from "react-router-dom";
 
 import { get, post } from "../api/client";
 import type {
-  BankAccountView, BankNetwork, BankTransfer, Beneficiary, ChargeCode, Health,
+  BankAccountView, BankNetwork, BankTotals, BankTransfer, Beneficiary, ChargeCode, Health,
 } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { BankStatusBadge, NetworkCard, TransferDetail, isOpen } from "../components/BankPanels";
+import { KycCard } from "../components/KycCard";
 import { ErrorNotice, Field, Loading, Notice, PageHead } from "../components/Ui";
 import { useAsync, usePolling } from "../hooks";
 import { useIdempotencyKey } from "../idempotency";
@@ -144,6 +144,40 @@ function PlanForm({ accounts, beneficiaries, network, onPlanned }: PlanFormProps
   );
 }
 
+function Totals({ totals }: { totals: BankTotals }) {
+  return (
+    <section className="card" aria-labelledby="totals-title">
+      <h2 id="totals-title">Your money in every currency</h2>
+      <div className="table-wrap" tabIndex={0} role="region" aria-label="Money by currency table">
+        <table>
+          <caption className="sr-only">Household balances by currency with an indicative BDT value</caption>
+          <thead>
+            <tr>
+              <th scope="col">Currency</th>
+              <th scope="col" className="num">Balance</th>
+              <th scope="col" className="num">About, in BDT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {totals.by_currency.map((line) => (
+              <tr key={line.currency}>
+                <td><strong>{line.currency}</strong><div className="small muted">{line.accounts} account{line.accounts === 1 ? "" : "s"}</div></td>
+                <td className="num">{line.balance.formatted}</td>
+                <td className="num">{line.bdt_equivalent.formatted}</td>
+              </tr>
+            ))}
+            <tr className="best">
+              <td colSpan={2}><strong>Total, about</strong></td>
+              <td className="num"><strong>{totals.bdt_total.formatted}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="small muted">{totals.note}</p>
+    </section>
+  );
+}
+
 function AccountsTable({ accounts }: { accounts: BankAccountView[] }) {
   return (
     <section className="card" aria-labelledby="accounts-title">
@@ -175,7 +209,10 @@ export function BankScreen() {
   const canTransfer = user?.permissions.includes("bank:transfer") ?? false;
   const canControl = user?.permissions.includes("sandbox:control") ?? false;
   const network = useAsync(() => get<BankNetwork>("/bank/network"), []);
-  const accounts = useAsync(() => get<{ items: BankAccountView[] }>("/bank/accounts"), []);
+  const accounts = useAsync(
+    () => get<{ items: BankAccountView[]; totals: BankTotals | null }>("/bank/accounts"),
+    [],
+  );
   const people = useAsync(() => get<{ items: Beneficiary[] }>("/bank/beneficiaries"), []);
   const transfers = useAsync(() => get<{ items: BankTransfer[] }>("/bank/transfers?limit=20"), []);
   const health = useAsync(() => get<Health>("/health", { auth: false }), []);
@@ -208,13 +245,15 @@ export function BankScreen() {
       <Notice tone="info" title="Everything here is simulated">
         The banks, accounts, fees and timings are made up for the sandbox. Try the names <code>FAIL_TEST</code>,
         <code> SLOW_TEST</code> and <code>SANCTION_TEST</code> as beneficiaries to see the edge cases.
-        International transfers need KYC to be verified: <Link to="/payments">verify it on a payment page</Link>.
+        International transfers need KYC to be verified; the identity check is below.
       </Notice>
       <ErrorNotice error={network.error ?? accounts.error ?? transfers.error} />
       {network.loading && !network.data ? <Loading what="Opening the bank network" /> : null}
       {network.data && !ready ? <NetworkCard network={network.data} /> : null}
       {ready ? (
         <>
+          {user?.role === "parent" && user.kyc_status !== "VERIFIED" ? <KycCard /> : null}
+          {accounts.data?.totals ? <Totals totals={accounts.data.totals} /> : null}
           <AccountsTable accounts={mine} />
           {canTransfer && network.data && people.data && accounts.data ? (
             <PlanForm

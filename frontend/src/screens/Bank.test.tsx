@@ -6,7 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Role } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import {
-  BANK_NETWORK, BANK_PERMISSIONS, bankAccount, bankTransfer, beneficiary, mockApi, problem, user,
+  BANK_NETWORK, BANK_PERMISSIONS, BANK_TOTALS, KYC, bankAccount, bankTransfer, beneficiary, mockApi,
+  problem, user,
 } from "../test/fixtures";
 import { BankScreen } from "./Bank";
 
@@ -18,7 +19,7 @@ function signIn(role: Role, permissions: string[]) {
   });
 }
 
-const ACCOUNTS = { items: [bankAccount()] };
+const ACCOUNTS = { items: [bankAccount()], totals: BANK_TOTALS };
 const PEOPLE = {
   items: [
     beneficiary(),
@@ -32,6 +33,7 @@ function routes(extra: Record<string, unknown> = {}) {
     "/bank/accounts": ACCOUNTS,
     "/bank/beneficiaries": PEOPLE,
     "/bank/transfers": { items: [] },
+    "/kyc/status": KYC,
     "/health": { mode: "sandbox", demo: { password: "x", mfa_code: "246810", accounts: [], parent_id: "p" } },
     ...extra,
   };
@@ -50,6 +52,32 @@ describe("bank network screen", () => {
     expect(await screen.findByText("BDT 5,000,000.00")).toBeInTheDocument();
     expect(screen.getByText("Everything here is simulated")).toBeInTheDocument();
     expect(screen.getByText("All books balance")).toBeInTheDocument();
+  });
+
+  it("shows the household's money in every currency with an indicative BDT total", async () => {
+    mockApi(routes());
+    render(<MemoryRouter><BankScreen /></MemoryRouter>);
+    expect(await screen.findByText("Your money in every currency")).toBeInTheDocument();
+    expect(screen.getByText("BDT 15,128,000.00")).toBeInTheDocument();
+    expect(screen.getByText("GBP 800.00")).toBeInTheDocument();
+    expect(screen.getByText(/Not a live FX feed/)).toBeInTheDocument();
+  });
+
+  it("puts the identity check on the page for a parent who is not verified yet", async () => {
+    mockApi(routes());
+    render(<MemoryRouter><BankScreen /></MemoryRouter>);
+    expect(await screen.findByText("Identity check (simulated)")).toBeInTheDocument();
+  });
+
+  it("leaves the identity check out once the parent is verified", async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { ...user("parent", [...BANK_PERMISSIONS, "payments:read"]), kyc_status: "VERIFIED" },
+      ready: true, login: vi.fn(), logout: vi.fn(), reloadUser: vi.fn(),
+    });
+    mockApi(routes());
+    render(<MemoryRouter><BankScreen /></MemoryRouter>);
+    await screen.findByText("Your money in every currency");
+    expect(screen.queryByText("Identity check (simulated)")).toBeNull();
   });
 
   it("offers only sensible destinations and plans an international transfer with an Idempotency-Key", async () => {
@@ -157,6 +185,7 @@ describe("bank network screen", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Open transfer to University/ }));
     expect(await screen.findByText("The beneficiary bank rejected the payment (simulated).")).toBeInTheDocument();
     expect(screen.getAllByText("Returned in full").length).toBeGreaterThan(0);
+    expect(screen.getByText("These were the planned figures. Nothing was charged.")).toBeInTheDocument();
   });
 
   it("shows a server refusal in plain words", async () => {
@@ -197,6 +226,14 @@ describe("roles", () => {
       return found as unknown[];
     });
     expect(body(step)).toEqual({ outcome: "fail" });
+  });
+
+  it("shows no household total to the reviewer", async () => {
+    signIn("admin", ["bank:read", "sandbox:control"]);
+    mockApi(routes({ "/bank/accounts": { items: [bankAccount()], totals: null } }));
+    render(<MemoryRouter><BankScreen /></MemoryRouter>);
+    await screen.findByText("BDT 5,000,000.00");
+    expect(screen.queryByText("Your money in every currency")).toBeNull();
   });
 
   it("tells the operator to run the seed when the network is missing", async () => {

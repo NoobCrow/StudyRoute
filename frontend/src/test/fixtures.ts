@@ -196,6 +196,15 @@ export function bankTransfer(overrides: Partial<BankTransfer> = {}): BankTransfe
   };
 }
 
+export const BANK_TOTALS = {
+  by_currency: [
+    { currency: "BDT", accounts: 3, balance: money(1_500_000_000, "BDT", "BDT 15,000,000.00"), bdt_equivalent: money(1_500_000_000, "BDT", "BDT 15,000,000.00") },
+    { currency: "GBP", accounts: 1, balance: money(80_000, "GBP", "GBP 800.00"), bdt_equivalent: money(12_800_000, "BDT", "BDT 128,000.00") },
+  ],
+  bdt_total: money(1_512_800_000, "BDT", "BDT 15,128,000.00"),
+  note: "Converted at synthetic mid-market rates. Not a live FX feed. Indicative. Confirm with your AD bank.",
+};
+
 export const BANK_NETWORK: BankNetwork = {
   ready: true, simulated: true, all_ok: true,
   directory: {

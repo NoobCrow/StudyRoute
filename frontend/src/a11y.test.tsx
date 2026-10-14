@@ -17,7 +17,7 @@ import { RecipientsScreen } from "./screens/Recipients";
 import { ReportScreen } from "./screens/Report";
 import { SandboxScreen } from "./screens/Sandbox";
 import {
-  BANK_NETWORK, BANK_PERMISSIONS, KYC, PARENT_PERMISSIONS, PLAN_CARD, QUOTE, RECIPIENT, bankAccount,
+  BANK_NETWORK, BANK_PERMISSIONS, BANK_TOTALS, KYC, PARENT_PERMISSIONS, PLAN_CARD, QUOTE, RECIPIENT, bankAccount,
   bankTransfer, beneficiary, chatReply, mockApi, payment, user,
 } from "./test/fixtures";
 
@@ -149,7 +149,8 @@ describe("accessibility (axe): bank network", () => {
       }],
     });
     mockApi({
-      "/bank/network": BANK_NETWORK, "/bank/accounts": { items: [bankAccount()] },
+      "/bank/network": BANK_NETWORK, "/bank/accounts": { items: [bankAccount()], totals: BANK_TOTALS },
+      "/kyc/status": KYC,
       "/bank/beneficiaries": { items: [beneficiary()] }, "/bank/transfers": { items: [transfer] },
       "/bank/transfers/btr_1": transfer, "/health": { mode: "sandbox" },
     });

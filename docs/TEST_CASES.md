@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **709 tests** in 58 files. Last run: `709 passed in 84.08s (0:01:24)`.
-- Frontend: **89 tests** in 12 files (Vitest).
+- Backend: **760 tests** in 59 files. Last run: `760 passed in 123.73s (0:02:03)`.
+- Frontend: **93 tests** in 12 files (Vitest).
 
 ```bash
 cd backend  && pytest -q
@@ -65,7 +65,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_api_ai_rbac.py` | 4 | The AI service account is read/draft only (T09). |
 | `tests/test_api_audit_config.py` | 7 | Audit endpoints (T16 through the API) and the admin rules configuration. |
 | `tests/test_api_auth.py` | 11 | Login, lockout, token rules and the auth rate limit (T22). |
-| `tests/test_api_bank.py` | 35 | The sandbox bank network through the API: national and international transfers end to end. |
+| `tests/test_api_bank.py` | 39 | The sandbox bank network through the API: national and international transfers end to end. |
 | `tests/test_api_compliance.py` | 10 | Mock sanctions screening (T17), sandbox caps (T18) and the KYC gate. |
 | `tests/test_api_compliance_report.py` | 10 | GET /payments/{id}/compliance-report: a regulator-style evidence pack for one payment. |
 | `tests/test_api_features.py` | 10 | Planner, checklist, documents, tracker, instruction preview, listings and data reset. |
@@ -87,7 +87,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_docker_config.py` | 17 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
 | `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
-| `tests/test_engine_interbank.py` | 21 | Interbank engine: balanced journals, rails, and numbers that agree with the fee engine. |
+| `tests/test_engine_interbank.py` | 23 | Interbank engine: balanced journals, rails, and numbers that agree with the fee engine. |
 | `tests/test_engine_money.py` | 11 | Money type: integer minor units, Decimal rounding, no floats. |
 | `tests/test_engine_mt103.py` | 5 |  |
 | `tests/test_engine_planner.py` | 12 | Deadline planner (blueprint 6.6). T21 covers weekends and holidays in both countries. |
@@ -97,6 +97,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
 | `tests/test_ledger.py` | 12 | The ledger: normal-side balances, overdraft refusal, reversals, integrity checks, append-only. |
 | `tests/test_make_submission.py` | 5 | scripts/make_submission.py: the archive a judge unzips must build in a Linux container. |
+| `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
@@ -117,7 +118,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `frontend/src/components/tasks.test.tsx` | 7 |
 | `frontend/src/lib/canonical.test.ts` | 4 |
 | `frontend/src/lib/lib.test.ts` | 21 |
-| `frontend/src/screens/Bank.test.tsx` | 13 |
+| `frontend/src/screens/Bank.test.tsx` | 17 |
 | `frontend/src/screens/Compare.test.tsx` | 5 |
 | `frontend/src/screens/Payment.test.tsx` | 5 |
 | `frontend/src/screens/Recipients.test.tsx` | 3 |

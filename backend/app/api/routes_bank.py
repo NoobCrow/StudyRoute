@@ -19,7 +19,7 @@ from app.api.idempotency import run_idempotent
 from app.api.schemas import BankStepIn, BankTransferIn
 from app.core import errors
 from app.domain.rbac import Actor, Perm
-from app.domain.rules import Rules
+from app.domain.rules import Rules, load_rules
 from app.engine.money import Money
 
 router = APIRouter(prefix="/bank", tags=["bank"])
@@ -64,7 +64,11 @@ def accounts(
     ctx: AppContext = Depends(get_ctx),
 ) -> dict[str, Any]:
     with ctx.db.read() as session:
-        return {"items": ctx.bank.list_accounts(session, actor), "simulated": True}
+        return {
+            "items": ctx.bank.list_accounts(session, actor),
+            "totals": ctx.bank.household_totals(session, actor, load_rules(session)),
+            "simulated": True,
+        }
 
 
 @router.get("/beneficiaries")

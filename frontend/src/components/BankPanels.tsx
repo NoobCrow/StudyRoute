@@ -184,6 +184,9 @@ export function TransferDetail({ transfer, canTransfer, canControl, sandboxCode,
         {transfer.uetr ? <> · UETR <code>{transfer.uetr}</code></> : null}
       </p>
       <ErrorNotice error={error} />
+      {transfer.status === "RETURNED" || transfer.status === "CANCELLED" ? (
+        <p className="small muted">These were the planned figures. Nothing was charged.</p>
+      ) : null}
       <Figures transfer={transfer} />
       {transfer.failure_reason ? <Notice tone="danger" title="Returned">{transfer.failure_reason}</Notice> : null}
       {pending && transfer.blockers.length > 0 ? (

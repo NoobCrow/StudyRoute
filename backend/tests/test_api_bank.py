@@ -11,6 +11,7 @@ from typing import Any
 import pytest
 from sqlalchemy import update
 
+from app.core import errors
 from app.core.secret_store import _generate_aes_key, _generate_ec_pem, _generate_hex_secret
 from app.models import BankAccount
 from tests.helpers import World
@@ -110,6 +111,32 @@ def test_each_role_sees_the_right_accounts(world: World) -> None:
     assert set(accounts(world, "student")) == set(parent)
     everything = accounts(world, "admin")
     assert UNIVERSITY in everything and len(everything) > len(parent)
+
+
+def test_the_household_sees_its_money_in_every_currency(world: World) -> None:
+    body = world.call("GET", "/bank/accounts", "parent").json()
+    lines = {line["currency"]: line for line in body["totals"]["by_currency"]}
+    assert list(lines) == ["BDT", "GBP"]
+    assert (
+        lines["BDT"]["balance"]["amount_minor"] == 1_500_000_000 and lines["BDT"]["accounts"] == 3
+    )
+    assert lines["GBP"]["balance"]["amount_minor"] == 80_000
+    # GBP 800.00 at the synthetic mid rate of 160 is BDT 128,000.00.
+    assert lines["GBP"]["bdt_equivalent"]["amount_minor"] == 12_800_000
+    assert body["totals"]["bdt_total"]["amount_minor"] == 1_512_800_000
+    assert "Not a live FX feed" in body["totals"]["note"]
+
+
+def test_the_reviewer_gets_no_single_household_total(world: World) -> None:
+    assert world.call("GET", "/bank/accounts", "admin").json()["totals"] is None
+
+
+def test_the_totals_follow_the_money_after_a_transfer(world: World) -> None:
+    world.verify_kyc()
+    send(world, PARENT_A, UNIVERSITY, 1_000_000, "GBP", charge_code="OUR")
+    after = world.call("GET", "/bank/accounts", "parent").json()["totals"]
+    paid = 1_634_500_00
+    assert after["by_currency"][0]["balance"]["amount_minor"] == 1_500_000_000 - paid
 
 
 def test_beneficiaries_list_every_customer_without_balances(world: World) -> None:
@@ -511,3 +538,18 @@ def test_bank_writes_have_their_own_rate_limit(tmp_path: Path) -> None:
         assert codes[:20] == [201] * 20 and codes[20:] == [429, 429]
     finally:
         limited.close()
+
+
+def test_the_worker_never_runs_a_hop_before_its_time(world: World) -> None:
+    created = plan(world, PARENT_A, RELATIVE_B, 100_000, "BDT", rail="BATCH")
+    assert confirm(world, created["id"]).status_code == 200
+    world.clock.advance(21)  # the first hop (the batch window) is due
+    with world.ctx.db.read() as session:
+        assert world.ctx.bank.due_ids(session, world.clock.now()) == [created["id"]]
+    path = f"/bank/transfers/{created['id']}/sandbox-step"
+    assert world.call("POST", path, "admin", json={"outcome": "advance"}).status_code == 200
+    with world.ctx.db.write() as session, pytest.raises(errors.ApiError) as caught:
+        world.ctx.bank.run_next_step(session, created["id"], only_if_due=True)
+    assert caught.value.code == "INVALID_STATE"
+    detail = world.call("GET", f"/bank/transfers/{created['id']}").json()
+    assert [s["done"] for s in detail["steps"]] == [True, False, False]

@@ -10,6 +10,12 @@
 // Numbers on the slides are read from the generated docs, so they cannot drift from the repo.
 // Everything shown is synthetic: StudyRoute is a sandbox and no real money moves.
 
+
+// Team name and repository link are set when the deck is built, never hard-coded:
+//   TEAM_NAME="..." REPO_LINK="https://github.com/..." node build_deck.js
+const TEAM = process.env.TEAM_NAME || "[Team name]";
+const REPO = process.env.REPO_LINK || "[repository link]";
+
 const fs = require("fs");
 const path = require("path");
 const pptxgen = require("pptxgenjs");
@@ -92,7 +98,7 @@ const slides = [];
 slides.push({
   layout: "title", section: "Opening", title: "StudyRoute",
   notes:
-    "Good morning. We are team [team name], and this is StudyRoute, our entry for Topic C, the cross-border and student finance assistant. " +
+    "Good morning. We are team " + TEAM + ", and this is StudyRoute, our entry for Topic C, the cross-border and student finance assistant. " +
     "StudyRoute is a sandbox AI agent that helps a parent in Bangladesh pay a student's tuition abroad. Everything you will see is synthetic and no real money moves. " +
     "Our design rule is on the slide, and the rest of the talk shows how we make each of those four sentences true and testable: the engine calculates, the AI explains, the human approves, and every step is logged.",
   elements: [
@@ -103,7 +109,7 @@ slides.push({
     text(0.6, 3.85, 5.7, 1.0,
       "The engine calculates. The AI explains. The human approves. Every step is logged.",
       { size: 16, italic: true, color: "accent2" }),
-    text(0.6, 5.0, 5.8, 0.3, "[Team name]  ·  Sandbox: synthetic data, no real money moves", { size: 12, color: "accent5" }),
+    text(0.6, 5.0, 5.8, 0.3, `${TEAM}  ·  Sandbox: synthetic data, no real money moves`, { size: 12, color: "accent5" }),
     ...shot("02-compare.png", 6.8, 0.6, 2.8, 2.19, "StudyRoute compare screen ranking three providers"),
     ...shot("12-audit-verify-pass.png", 6.8, 3.05, 2.8, 2.19, "Audit log with the hash chain verified"),
   ],
@@ -393,7 +399,7 @@ slides.push({
       ];
     }),
     text(0.5, 4.25, 9, 0.55, "Clear, cheap and safe.", { size: 24, bold: true, font: "+mj-lt", color: "accent2", valign: "middle" }),
-    text(0.5, 4.85, 9, 0.35, "[Team name]  ·  [repository link]  ·  Sandbox: no real money moves", { size: 12, color: "accent5" }),
+    text(0.5, 4.85, 9, 0.35, `${TEAM}  ·  ${REPO}  ·  Sandbox: no real money moves`, { size: 12, color: "accent5" }),
   ],
 });
 
@@ -405,7 +411,7 @@ async function writePptx() {
   pres.layout = "LAYOUT_16x9"; // 10 in x 5.625 in
   pres.title = "StudyRoute: sandbox AI agent for tuition payments from Bangladesh";
   pres.subject = "FinTechathon 2026, International Track, Topic C";
-  pres.author = "[Team name]";
+  pres.author = TEAM;
   pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
   const C = pres.SchemeColor;
   const color = (token) => C[token];

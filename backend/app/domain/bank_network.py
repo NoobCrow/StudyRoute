@@ -30,6 +30,7 @@ from app.domain.ledger import Ledger, LedgerError, ref_of
 from app.domain.limits import evaluate_limits, usd_equivalent_minor
 from app.domain.rbac import SYSTEM_ACTOR, Actor, Perm, authorize
 from app.domain.rules import Rules
+from app.engine import fx
 from app.engine.interbank import (
     ON_US,
     AccountKind,
@@ -44,7 +45,7 @@ from app.engine.interbank import (
     plan_national,
     scale_delays,
 )
-from app.engine.money import EngineError, Money
+from app.engine.money import EngineError, Money, round_half_up
 from app.engine.mt103 import build_instruction_preview
 from app.engine.quote import ChargeCode, compute_provider_result
 from app.engine.validators import mask_account
@@ -532,12 +533,17 @@ class BankNetworkService:
         *,
         actor: Actor = SYSTEM_ACTOR,
         force_fail: bool = False,
+        only_if_due: bool = False,
     ) -> BankTransfer:
         transfer = session.get(BankTransfer, transfer_id)
         if transfer is None:
             raise errors.NotFound("Transfer not found.")
         if transfer.status not in OPEN_STATES:
             raise errors.InvalidState("This transfer is not in flight.")
+        due_at = transfer.next_step_at
+        if only_if_due and (due_at is None or due_at > self._clock.now()):
+            # The worker saw this hop as due, but a reviewer ran it first: never run the next early.
+            raise errors.InvalidState("The next hop is not due yet.")
         plan = TransferPlan.from_dict(transfer.plan_json)
         index = transfer.next_step
         step = plan.steps[index]
@@ -649,7 +655,7 @@ class BankNetworkService:
         for transfer_id in ids:
             try:
                 with db.write() as session:
-                    self.run_next_step(session, transfer_id)
+                    self.run_next_step(session, transfer_id, only_if_due=True)
                 done += 1
             except errors.ApiError:
                 continue
@@ -746,6 +752,53 @@ class BankNetworkService:
             query = query.where(BankAccount.owner_id == actor.owner_id)
         rows = session.execute(query.order_by(BankAccount.bank_code, BankAccount.number)).scalars()
         return [self.account_view(a) for a in rows]
+
+    def household_totals(
+        self, session: Session, actor: Actor, rules: Rules
+    ) -> dict[str, Any] | None:
+        """The household's money in every currency, with an indicative BDT equivalent.
+
+        Converted at the synthetic mid-market rates, so it is a rough guide and not a live rate.
+        The reviewer sees every household, so a single total would mean nothing: None.
+        """
+        authorize(actor, Perm.BANK_READ)
+        if actor.owner_id is None:
+            return None
+        rows = session.execute(
+            select(BankAccount).where(
+                BankAccount.kind == AccountKind.CUSTOMER.value,
+                BankAccount.owner_id == actor.owner_id,
+            )
+        ).scalars()
+        sums: dict[str, list[int]] = {}
+        for account in rows:
+            entry = sums.setdefault(account.currency, [0, 0])
+            entry[0] += account.balance_minor
+            entry[1] += 1
+        lines = []
+        total_bdt = 0
+        for currency in sorted(sums, key=lambda c: (c != "BDT", c)):
+            balance, count = sums[currency]
+            if currency == "BDT":
+                bdt = balance
+            else:
+                rate = rules.mid_rate(currency)
+                bdt = round_half_up(fx.foreign_to_bdt_minor(balance, currency, rate))
+            total_bdt += bdt
+            lines.append(
+                {
+                    "currency": currency,
+                    "accounts": count,
+                    "balance": Money(balance, currency).to_dict(),
+                    "bdt_equivalent": Money(bdt, "BDT").to_dict(),
+                }
+            )
+        return {
+            "by_currency": lines,
+            "bdt_total": Money(total_bdt, "BDT").to_dict(),
+            "note": "Converted at synthetic mid-market rates. Not a live FX feed. "
+            "Indicative. Confirm with your AD bank.",
+        }
 
     def list_beneficiaries(self, session: Session, actor: Actor) -> list[dict[str, Any]]:
         """Every customer account a transfer could go to (synthetic directory)."""

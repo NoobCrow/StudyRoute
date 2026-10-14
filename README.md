@@ -254,6 +254,17 @@ ignores the sandbox MFA code.
 Step by step: [submission/CHECKLIST.md](submission/CHECKLIST.md). Regenerate the evidence with
 `python -m app.scripts.export_evidence --tamper` against a running API with fresh demo data.
 
+Two helpers for the last mile (neither touches git, the network or an e-mail):
+
+```bash
+python scripts/personalize.py --team "Your team" --repo "https://github.com/you/studyroute"
+python scripts/preflight.py            # OK, FAIL (repository broken) and OPEN (needs a person)
+```
+
+`personalize` puts your team name and repository link into the submission documents and rebuilds
+the deck. `preflight` checks the secret scan, the six deliverables, the evidence, the deck, the
+placeholders, git, Docker, the video and the archive, and counts down to the deadline.
+
 ## Known limits
 
 Listed honestly in [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md): unverified regulatory values,

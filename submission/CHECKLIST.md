@@ -85,6 +85,10 @@ judges access; put the link in the submission e-mail.
 
 ## 4. Build and send
 
+- [ ] `python scripts/personalize.py --team "..." --repo "https://github.com/..."` fills the team name
+      and repository link into the documents and the deck (add `--members "A (University), B (University)"`).
+- [ ] `python scripts/preflight.py` prints OK, FAIL and OPEN lines. Fix every FAIL; every OPEN line
+      is something only a person can do (team, registration, GitHub, Docker, video, the e-mail).
 - [ ] `python scripts/make_submission.py` writes `dist/studyroute-submission.zip` (refuses to build
       if the scan finds a problem). Unzip it elsewhere and run it once.
 - [ ] Send **one e-mail, in English**, to wangyr@pbcsf.tsinghua.edu.cn with the six items above:
