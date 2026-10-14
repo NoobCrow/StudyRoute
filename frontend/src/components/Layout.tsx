@@ -14,6 +14,7 @@ const NAV: NavItem[] = [
   { to: "/documents", label: "Documents", roles: ["parent", "student"] },
   { to: "/audit", label: "Audit log", roles: ["parent", "admin"] },
   { to: "/rules", label: "Rules", roles: ["parent", "student", "admin"] },
+  { to: "/sandbox", label: "Sandbox", roles: ["parent", "student", "admin"] },
 ];
 
 export function Layout() {

@@ -36,9 +36,10 @@ SECURITY_HEADERS = {
 
 
 class SecurityMiddleware:
-    def __init__(self, app: ASGIApp, *, max_body_bytes: int) -> None:
+    def __init__(self, app: ASGIApp, *, max_body_bytes: int, sandbox: bool = False) -> None:
         self.app = app
         self._max = max_body_bytes
+        self._sandbox = sandbox
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] != "http":
@@ -59,6 +60,8 @@ class SecurityMiddleware:
                 status_code = message["status"]
                 out = MutableHeaders(scope=message)
                 out["X-Request-Id"] = request_id
+                if self._sandbox:
+                    out["X-Sandbox"] = "true"
                 for name, value in SECURITY_HEADERS.items():
                     out[name] = value
                 out["Content-Security-Policy"] = DOCS_CSP if path in DOCS_PATHS else API_CSP
@@ -103,6 +106,6 @@ def cors_kwargs(origins: list[str]) -> dict[str, Any]:
             "X-MFA-Proof",
             "X-Request-Id",
         ],
-        "expose_headers": ["X-Request-Id", "Idempotent-Replay", "Retry-After"],
+        "expose_headers": ["X-Request-Id", "X-Sandbox", "Idempotent-Replay", "Retry-After"],
         "max_age": 600,
     }

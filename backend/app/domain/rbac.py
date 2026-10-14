@@ -35,6 +35,7 @@ class Perm(StrEnum):
     DOCUMENT_READ = "documents:read"
     DOCUMENT_WRITE = "documents:write"
     DATA_RESET = "data:reset"
+    SANDBOX_CONTROL = "sandbox:control"
 
 
 P = Perm
@@ -95,6 +96,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.AUDIT_VERIFY,
             P.KYC_READ,
             P.KYC_REVIEW,
+            P.SANDBOX_CONTROL,
         }
     ),
     ActorKind.AI: frozenset(

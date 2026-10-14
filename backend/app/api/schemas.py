@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 
@@ -111,3 +111,7 @@ class ChatContextIn(Strict):
 class ChatIn(Strict):
     message: StrictStr = Field(min_length=1, max_length=1000)
     context: ChatContextIn = Field(default_factory=ChatContextIn)
+
+
+class ProviderEventIn(Strict):
+    outcome: Literal["settle", "fail"]

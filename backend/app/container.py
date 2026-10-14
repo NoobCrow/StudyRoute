@@ -20,6 +20,7 @@ from app.domain.payments import PaymentService
 from app.domain.quotes import QuoteService
 from app.domain.recipients import RecipientService
 from app.domain.rules import load_rules, sync_rules_from_file
+from app.domain.sandbox import SandboxService
 from app.providers.registry import ProviderRegistry
 from app.providers.simulator import HttpWebhookDispatcher, ProviderSimulator, WebhookDispatcher
 from app.worker import BackgroundWorker
@@ -76,5 +77,6 @@ def build_context(
         config=ConfigService(clock, audit),
     )
     ctx.worker = BackgroundWorker(ctx)
+    ctx.sandbox = SandboxService(clock, audit, payments)
     ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
     return ctx

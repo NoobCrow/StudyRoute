@@ -23,6 +23,7 @@ MATRIX: dict[Perm, dict[ActorKind, bool]] = {
     Perm.CONFIG_WRITE: {P: False, S: False, A: True, AI: False},
     Perm.AUDIT_READ: {P: True, S: False, A: True, AI: False},
     Perm.AUDIT_VERIFY: {P: False, S: False, A: True, AI: False},
+    Perm.SANDBOX_CONTROL: {P: False, S: False, A: True, AI: False},
 }
 
 
@@ -60,6 +61,7 @@ def test_the_ai_actor_gets_a_dedicated_error_for_approve() -> None:
         Perm.AUDIT_VERIFY,
         Perm.KYC_REVIEW,
         Perm.MFA_ISSUE,
+        Perm.SANDBOX_CONTROL,
     ],
 )
 def test_the_ai_has_no_mutating_or_privileged_permission(perm: Perm) -> None:

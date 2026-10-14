@@ -169,3 +169,16 @@ export interface RateHistory {
 }
 
 export interface Page<T> { items: T[]; next_cursor: string | number | null }
+
+export interface SandboxInfo {
+  sandbox: true; banner: string; disclaimer: string; ai_mode: "template" | "llm";
+  simulated: { component: string; what: string }[];
+  scenarios: { token: string; where: string; effect: string }[];
+  providers: { provider_id: string; name: string }[];
+  timings: {
+    quote_ttl_seconds: number; mfa_proof_ttl_seconds: number; kyc_review_seconds: number;
+    submit_delay_seconds: number; settle_delay_seconds: number; slow_settle_delay_seconds: number;
+  };
+  limits: { per_transaction_usd_equivalent: number; daily_usd_equivalent: number; indicative: string };
+  demo: { password: string; mfa_code: string } | null;
+}

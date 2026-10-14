@@ -13,6 +13,7 @@ import { PaymentScreen } from "./screens/Payment";
 import { PaymentsScreen } from "./screens/Payments";
 import { RecipientsScreen } from "./screens/Recipients";
 import { RulesScreen } from "./screens/Rules";
+import { SandboxScreen } from "./screens/Sandbox";
 
 function Protected() {
   const { user, ready } = useAuth();
@@ -41,6 +42,7 @@ export function App() {
           <Route path="documents" element={<DocumentsScreen />} />
           <Route path="audit" element={<AuditScreen />} />
           <Route path="rules" element={<RulesScreen />} />
+          <Route path="sandbox" element={<SandboxScreen />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

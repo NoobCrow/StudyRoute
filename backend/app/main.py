@@ -15,13 +15,14 @@ from app.api import (
     routes_auth,
     routes_core,
     routes_payments,
+    routes_sandbox,
     routes_webhooks,
 )
 from app.api.middleware import SecurityMiddleware, cors_kwargs
 from app.container import build_context
 from app.core.clock import Clock, iso_utc
 from app.core.config import Settings, get_settings
-from app.core.demo import ADMIN_EMAIL, PARENT_EMAIL, PARENT_ID, STUDENT_EMAIL
+from app.core.demo import demo_hints
 from app.core.errors import install_error_handlers
 from app.core.logging import setup_logging
 from app.providers.simulator import WebhookDispatcher
@@ -63,7 +64,9 @@ def create_app(
     app.state.ctx = ctx
     install_error_handlers(app)
     app.add_middleware(CORSMiddleware, **cors_kwargs(settings.cors_origin_list))
-    app.add_middleware(SecurityMiddleware, max_body_bytes=settings.max_body_bytes)
+    app.add_middleware(
+        SecurityMiddleware, max_body_bytes=settings.max_body_bytes, sandbox=settings.is_sandbox
+    )
 
     api = APIRouter(prefix="/api/v1")
     for module in (
@@ -73,18 +76,12 @@ def create_app(
         routes_audit,
         routes_webhooks,
         routes_assistant,
+        routes_sandbox,
     ):
         api.include_router(module.router)
 
     def health() -> dict[str, object]:
-        demo: dict[str, object] | None = None
-        if settings.is_sandbox and settings.show_demo_hints:
-            demo = {
-                "accounts": [PARENT_EMAIL, STUDENT_EMAIL, ADMIN_EMAIL],
-                "password": settings.demo_password,
-                "mfa_code": settings.sandbox_mfa_code,
-                "parent_id": PARENT_ID,
-            }
+        demo = demo_hints(settings)
         body: dict[str, object] = {
             "status": "ok",
             "app": "StudyRoute",

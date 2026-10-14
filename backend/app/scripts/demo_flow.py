@@ -109,6 +109,14 @@ class DemoFlow:
         self._say("StudyRoute demo - sandbox, synthetic data, no real money moves.")
         health = self._client.get("/api/v1/health").json()
         self._say(f"Banner: {health['banner']} (AI mode: {health['ai_mode']})")
+        marked = self._client.get("/api/v1/health").headers.get("X-Sandbox")
+        self._check(marked == "true", "every API response carries X-Sandbox: true")
+        described = self._client.get("/api/v1/sandbox").json()
+        tokens = {s["token"] for s in described["scenarios"]}
+        self._check(
+            {"FAIL_TEST", "SLOW_TEST", "SANCTION_TEST"} <= tokens,
+            "GET /sandbox lists the simulated parts and the test scenarios",
+        )
         for who, email in (("parent", PARENT_EMAIL), ("student", STUDENT_EMAIL)):
             self._login(who, email)
         self._login("admin", ADMIN_EMAIL)
