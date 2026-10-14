@@ -29,6 +29,8 @@ ALLOWED_EMAIL_DOMAINS = (".test", "example.org", "example.com")
 ALLOWED: dict[str, set[str]] = {
     "CLAUDE.md": {"TODO marker"},  # the rule "no TODO left silently"
     "docs/BLUEPRINT.md": {"TODO marker", EMAIL_LABEL},  # organiser contact is public
+    "submission/CHECKLIST.md": {EMAIL_LABEL},  # the organiser's public registration address
+    "submission/EMAIL_TEMPLATES.md": {EMAIL_LABEL},  # the organiser's public registration address
     "backend/tests/test_ai_llm_mode.py": {"passport-like number"},  # masking test input
     "backend/tests/test_ai_masking.py": {"passport-like number"},  # masking test input
     "backend/tests/test_api_validation.py": {"TODO marker"},  # "XXX" is an invalid charge code
