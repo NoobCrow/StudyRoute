@@ -1,0 +1,45 @@
+# StudyRoute sandbox: one command for judges.   docker compose up --build
+# Open http://localhost:8080 . Synthetic data only. No real money moves.
+#
+# Every setting is optional. Copy .env.example to .env to override any of them.
+# Only the web container is published; the API is reachable only through it.
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      APP_ENV: ${APP_ENV:-sandbox}
+      DATABASE_URL: ${DATABASE_URL:-}
+      JWT_PRIVATE_KEY_PEM: ${JWT_PRIVATE_KEY_PEM:-}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
+      WEBHOOK_SECRET_PROV_A: ${WEBHOOK_SECRET_PROV_A:-}
+      WEBHOOK_SECRET_PROV_B: ${WEBHOOK_SECRET_PROV_B:-}
+      WEBHOOK_SECRET_PROV_C: ${WEBHOOK_SECRET_PROV_C:-}
+      WEBHOOK_SECRET_PROV_A_PREVIOUS: ${WEBHOOK_SECRET_PROV_A_PREVIOUS:-}
+      WEBHOOK_SECRET_PROV_B_PREVIOUS: ${WEBHOOK_SECRET_PROV_B_PREVIOUS:-}
+      WEBHOOK_SECRET_PROV_C_PREVIOUS: ${WEBHOOK_SECRET_PROV_C_PREVIOUS:-}
+      SANDBOX_MFA_CODE: ${SANDBOX_MFA_CODE:-}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+    volumes:
+      - studyroute-data:/srv/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  studyroute-data:
