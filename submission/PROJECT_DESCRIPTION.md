@@ -13,6 +13,11 @@ a hidden exchange-rate margin, fees taken on the way, tuition that arrives short
 and weeks of paperwork. Most people compare banks by the posted fee and miss the margin, which is
 usually the larger cost.
 
+Topic C asks for solutions to real financial pain points of international students and
+cross-border users, such as remittances, tuition payments, credit building and multi-currency
+management. StudyRoute covers remittances and tuition payments end to end; credit building and
+multi-currency management are next steps.
+
 ## The solution
 
 StudyRoute is an AI agent that completes this task safely, from first quote to settlement:

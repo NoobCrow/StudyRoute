@@ -1,7 +1,10 @@
 # Deck outline (blueprint 19.2) as slide text
 
-Ten slides for the judges. Screenshots come from the running app; capture them from
-`submission/screenshots/` or take fresh ones after `docker compose up --build`.
+Ten slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
+rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **7
+minutes** of speech, so keep any live demo to **3 minutes** (the scene list in `VIDEO_SCRIPT.md`
+is the 4.5-minute version for the recorded video). Screenshots come from the running app; they are
+in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
 Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
 
 ## 1. StudyRoute

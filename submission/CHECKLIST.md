@@ -1,27 +1,68 @@
 # Submission checklist
 
-Deadline: **20 Oct 2026, 23:59 Beijing time (21:59 Dhaka).** Internal target: the evening of
-**Monday 19 Oct, Dhaka time.** Do not plan to submit in the last hour. Keep a copy of the sent
-e-mail, its attachments and any reply.
+Source: the official rules, "PBCSF Appendix 2: Problem Description and Competition Rules for
+International Track" (read on 14 Oct 2026; a public copy is on the ITS Indonesia site), and the
+CMU Thailand announcement. Check the official site once more for changes:
+https://fintechathon.g-ican.com/#/en
 
-## Only you can do these
+**Deadline: 20 Oct 2026, 23:59 Beijing time = 21:59 in Dhaka (15:59 UTC).** Registration and
+submission share it. **Internal target: the evening of Monday 19 Oct, Dhaka time.** Submissions may
+be updated any time before the deadline and the latest version received counts; nothing is accepted
+after it. Keep a copy of every e-mail you send and any reply.
 
-- [ ] Download the official rules PDF and read it fully. Write the scoring rubric and exact
-      deliverables into blueprint section 18 and into `docs/OPEN_QUESTIONS.md` (section A).
-- [ ] Confirm every member meets the eligibility rules (at least 60% non-Chinese nationals,
-      full-time overseas enrolment, one team per person across tracks).
-- [ ] Complete the registration form and collect a passport bio page from every member.
-      **Never put these in the repository or the archive.**
-- [ ] Confirm the submission e-mail address and subject format on the official site before
-      sending anything (the blueprint copy comes from other universities' announcements).
-- [ ] Fill in the placeholders in `PROJECT_DESCRIPTION.md` and `DECK_OUTLINE.md` (team name,
-      members, contact).
-- [ ] Build the deck from `DECK_OUTLINE.md` (screenshots are in `submission/screenshots/`).
-- [ ] Record the demo video (3 to 5 minutes, English, script in blueprint 19.1). Whether it is
-      required is open (blueprint 1.6); record it anyway.
-- [ ] Dry run with someone outside the team.
+## 0. Can you enter? (rules, "Eligibility and Teaming")
 
-## Technical gate (all must pass before you build the archive)
+- [ ] **A team has 2 to 5 students.** A one-person entry is not allowed: find at least one
+      teammate before registering.
+- [ ] Every member is a full-time student (undergraduate, master's or PhD) at a university or
+      research institution **outside** Mainland China, Hong Kong SAR, Macao SAR and Chinese Taipei.
+- [ ] **At least 60% of the team are non-Chinese nationals.** In practice: 2 members need 2
+      non-Chinese, 3 need 2, 4 need 3, 5 need 3. The organiser assigns the track from
+      nationalities and institutions.
+- [ ] Nobody is in two teams (Domestic and International tracks count together; a duplicate
+      registration is invalid).
+- [ ] The work is the team's own. Third-party code and open-source parts are licensed (see
+      `docs/THIRD_PARTY.md`).
+- [ ] At least one member can **attend the final in person** if invited (Shenzhen, 20 to 23 Nov).
+      A finalist team that is absent without valid justification loses its awards.
+
+## 1. Register (do this first; the deadline is the same)
+
+- [ ] Download the registration form (link in the CMU announcement).
+- [ ] Fill it in. Attach **each member's passport bio page**. Never put these in the repository,
+      the archive or any chat.
+- [ ] E-mail the form and passport pages to **wangyr@pbcsf.tsinghua.edu.cn** (draft in
+      `EMAIL_TEMPLATES.md`). Use the subject format printed on the form.
+- [ ] Keep the confirmation. Registration is free: anyone asking for money is not the organiser.
+
+## 2. The six deliverables (official list)
+
+| # | Deliverable | Required | Where it is in this repository | Still yours |
+|---|-------------|----------|--------------------------------|-------------|
+| 01 | **Technical documentation**: system architecture, core algorithm description, security design | Yes | `docs/TECHNICAL_DOCUMENTATION.md` (links `docs/SECURITY.md`) | Export to PDF if you want one file |
+| 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (10 slides with speaker notes, about one minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Replace `[Team name]` and `[repository link]` on slides 1 and 10, then rehearse to 10 minutes |
+| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | Shot-by-shot script in `submission/VIDEO_SCRIPT.md` | Record it |
+| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `frontend/`, `docker-compose.yml` | **Create the GitHub repository and push** (see below); add its link to the e-mail |
+| 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Yes | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
+| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | The demo video (see 03) |
+
+Scoring (all topics): **task completion 40%, security and compliance 30%, innovation and
+interaction 30%**. Topic C is described as real financial pain points of international students and
+cross-border users, such as remittances, tuition payments, credit building and multi-currency
+management. StudyRoute covers remittance and tuition end to end; credit building and
+multi-currency management are listed as next steps, not built.
+
+### Putting the code on GitHub (deliverable 04)
+
+```bash
+git remote add origin https://github.com/<you>/<repo>.git     # create the empty repository first
+git push -u origin main
+```
+
+Run `python scripts/scan_repo.py` first (it must be clean). Make the repository public or give the
+judges access; put the link in the submission e-mail.
+
+## 3. Technical gate (all must pass before you send)
 
 - [ ] From a clean clone on a machine with Docker: `docker compose up --build`, open
       http://localhost:8080, sign in with a demo account. (Docker was not available where the
@@ -34,30 +75,31 @@ e-mail, its attachments and any reply.
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in
       `.env`, run `python -m app.scripts.check_ai` (must print OK), restart, and confirm the
       "Model: ..." badge in the chat. Otherwise say "template mode".
+- [ ] Regenerate the evidence if the code changed: `python -m app.scripts.export_evidence --tamper`
+      (needs a running API with fresh demo data).
+- [ ] Fill in the placeholders in `PROJECT_DESCRIPTION.md` and `DECK_OUTLINE.md` (team name,
+      members, contact).
 - [ ] Freeze the code. Commit. Tag the commit you submit.
 
-## Build and send
+## 4. Build and send
 
 - [ ] `python scripts/make_submission.py` writes `dist/studyroute-submission.zip` (refuses to build
       if the scan finds a problem). Unzip it elsewhere and run it once.
-- [ ] E-mail, in English, to the organisers: the archive (or a repository link), the one-page
-      description, the deck and the video link or file. Use the subject format from the official
-      page. Check the attachment size limit.
-- [ ] Keep the sent e-mail and a backup copy of everything sent.
+- [ ] Send **one e-mail, in English**, to wangyr@pbcsf.tsinghua.edu.cn with the six items above:
+      the documentation, the deck, the video link or file, the GitHub link plus the archive, the
+      self-assessment and the evidence (draft in `EMAIL_TEMPLATES.md`). Check the attachment size
+      limit; link large files instead.
+- [ ] Keep the sent e-mail and a backup copy of everything sent. An organiser reminder arrives 24
+      hours before the deadline: do not wait for it.
 
-## Verify before you submit (blueprint section 18)
+## 5. Questions the rules answered (blueprint section 18)
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | Deadline 20 Oct 23:59 Beijing (21:59 Dhaka) | Re-check on the official site |
-| 2 | Submission format and deliverables | Open: rules PDF |
-| 3 | Scoring rubric and weights | Open: rules PDF |
-| 4 | Any mandatory API, dataset or test environment | Open: rules PDF, organiser e-mail |
-| 5 | Topic C requirements | Open: rules PDF |
-| 6 | Eligibility and passport pages | Open: rules PDF, registration form |
-| 7 | Living-expense limit USD 2,000 a month plus 50% | Placeholder, `verified: false` |
-| 8 | Single AD branch rule | Placeholder, `verified: false` |
-| 9 | Circular of 30 Sep 2026 | Placeholder, read it in full |
-| 10 | International card rule for education | Placeholder, `verified: false` |
-| 11 | ISO purpose code for the instruction preview | Not shown on purpose, check the ISO list |
-| 12 | University payment instructions (reference format, charge code) | Ask each university |
+| 1 | Deadline | **Confirmed**: 20 Oct 2026, 23:59 Beijing (21:59 Dhaka) |
+| 2 | Submission format and deliverables | **Confirmed**: the six items in section 2 |
+| 3 | Scoring rubric | **Confirmed**: 40% task completion, 30% security and compliance, 30% innovation and interaction |
+| 4 | Mandatory API, dataset or test environment | **None stated.** The rules ask for sandbox operation logs, so our own sandbox API is what is submitted |
+| 5 | Topic C requirements | **Confirmed**: the description above, same scoring as every topic |
+| 6 | Eligibility | **Confirmed**: section 0. Who qualifies is for you to check |
+| 7 to 12 | Bangladesh Bank figures, circulars, ISO purpose code, university instructions | **Still open.** They stay `verified: false` in the app; see `docs/OPEN_QUESTIONS.md` |

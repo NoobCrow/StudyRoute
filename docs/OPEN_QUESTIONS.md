@@ -5,16 +5,23 @@ Rule of the project: when a rule or number is uncertain it goes into `config/rul
 `verified: false` and appears here. The app shows a yellow **Not verified** badge on each of them
 and says "Indicative. Confirm with your AD bank."
 
-## A. Competition facts the team must confirm (blueprint section 18)
+## A. Competition facts (checked against the official rules on 14 Oct 2026)
 
-| # | Question | Where to check | Status |
-|---|----------|----------------|--------|
-| 1 | Deadline 20 Oct 2026, 23:59 Beijing (21:59 Dhaka). Internal target: evening of 19 Oct. | Official site | Confirmed by several pages, re-check once |
-| 2 | Exact submission deliverables (code, report, slides, video, length) | Rules PDF, Appendix 2 for the International Track | **Open.** The submission pack in `submission/` covers all likely items |
-| 3 | Scoring rubric and weights (security reported as 30%) | Rules PDF | **Open** |
-| 4 | Is there a mandatory API, dataset or test environment? | Rules PDF, organiser email | **Open.** Our API (blueprint section 8) is our own design |
-| 5 | Eligibility: 60% non-Chinese, full-time overseas enrolment, passport pages at registration | Rules PDF, registration form | **Open, team lead** |
-| 6 | Is a demo video required or optional? | Rules PDF | **Open.** Record one anyway (script in blueprint 19) |
+Source: "PBCSF Appendix 2: Problem Description and Competition Rules for International Track" and
+the CMU Thailand announcement. Re-check https://fintechathon.g-ican.com/#/en once before sending.
+
+| # | Question | Answer from the rules | Status |
+|---|----------|-----------------------|--------|
+| 1 | Deadline | 20 Oct 2026, 23:59 Beijing (21:59 Dhaka). Registration and submission share it. Updates allowed until then, the latest version counts | **Confirmed** |
+| 2 | Deliverables | Six: technical documentation, deck (10 minutes), demo video (optional, 5 minutes), source code with README and test cases and a GitHub link, security self-assessment, execution evidence (sandbox logs and demo video for non-on-chain topics) | **Confirmed**; all prepared in `docs/` and `submission/` except the deck file, the video and the GitHub repository |
+| 3 | Scoring | Task completion 40%, security and compliance 30%, innovation and interaction 30%; bonus of 0 to 5 points only for the on-chain topic | **Confirmed** |
+| 4 | Mandatory API, dataset or test environment | None stated. The evidence requirement refers to the team's own simulated account or sandbox | **Confirmed: none** |
+| 5 | Team rules | 2 to 5 full-time students at institutions outside Mainland China, Hong Kong, Macao and Taiwan; at least 60% non-Chinese nationals; one team per person; the organiser assigns the track | **Confirmed. A one-person entry is not allowed** |
+| 6 | Demo video required? | Item 03 says optional, but item 06 asks for sandbox operation logs **and** a demo video | **Record it** |
+| 7 | Finals | At least one member of each finalist team must attend in person in Shenzhen, otherwise awards are forfeited | **Confirmed** |
+| 8 | Originality | Independent work, no plagiarism; third-party and open-source parts must be licensed; IP stays with the contestants, hosts may use entries for non-commercial promotion | **Confirmed**; see `docs/THIRD_PARTY.md` |
+| 9 | Exact subject line of the registration e-mail | Not stated in the rules or the announcement | **Open**: use the format printed on the registration form |
+| 10 | How the 60% rule is counted (headcount or otherwise) | Not stated | **Open**: assume headcount |
 
 ## B. Regulatory values kept as `verified: false`
 
@@ -68,8 +75,9 @@ change is written to the audit log with who, what and why.
 
 ## D. Things only a person can supply
 
+- A team of **at least two** eligible students (see section A, row 5).
 - The registration form and passport bio pages (never put these in the repository).
-- The demo video (3 to 5 minutes, English).
-- The final deck from the outline in `submission/DECK_OUTLINE.md`.
-- The submission email to the organisers (see blueprint 1.4). Check the address on the official
-  site first.
+- The GitHub repository and its link (deliverable 04).
+- The demo video (under 5 minutes, English; script in `submission/VIDEO_SCRIPT.md`).
+- The final deck, 10 minutes at most, from `submission/DECK_OUTLINE.md`.
+- The registration and submission e-mails (drafts in `submission/EMAIL_TEMPLATES.md`).

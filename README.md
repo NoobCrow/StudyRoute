@@ -209,6 +209,20 @@ in `config/rules.yaml` and, once seeded, in the database where an admin edits th
 screen (audited). Production mode (`APP_ENV=production`) refuses to start without real secrets and
 ignores the sandbox MFA code.
 
+## Competition deliverables (FinTechathon 2026, International Track, Topic C)
+
+| Official deliverable | Where |
+|----------------------|-------|
+| 01 Technical documentation (architecture, core algorithms, security design) | [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
+| 02 Presentation deck (10 minutes) | [submission/StudyRoute_Deck.pptx](submission/StudyRoute_Deck.pptx) (built by `submission/deck/build_deck.js`); outline in [submission/DECK_OUTLINE.md](submission/DECK_OUTLINE.md) |
+| 03 Demo video (under 5 minutes) | Script in [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md) |
+| 04 Source code, README, deployment instructions, test cases | This repository; [docs/TEST_CASES.md](docs/TEST_CASES.md); [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) |
+| 05 Security self-assessment (permission tiers, known risks) | [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
+| 06 Execution evidence (sandbox operation logs) | [submission/evidence/](submission/evidence/) |
+
+Step by step: [submission/CHECKLIST.md](submission/CHECKLIST.md). Regenerate the evidence with
+`python -m app.scripts.export_evidence --tamper` against a running API with fresh demo data.
+
 ## Known limits
 
 Listed honestly in [docs/OPEN_QUESTIONS.md](docs/OPEN_QUESTIONS.md): unverified regulatory values,
