@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **565 tests** in 51 files. Last run: `565 passed in 79.64s (0:01:19)`.
+- Backend: **601 tests** in 54 files. Last run: `601 passed in 73.03s (0:01:13)`.
 - Frontend: **75 tests** in 11 files (Vitest).
 
 ```bash
@@ -82,6 +82,8 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_blueprint_coverage.py` | 2 | Traceability: every blueprint test ID (T01..T24, section 16) must have at least one test. |
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
 | `tests/test_demo_flow.py` | 1 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
+| `tests/test_docker_config.py` | 17 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
+| `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
 | `tests/test_engine_money.py` | 11 | Money type: integer minor units, Decimal rounding, no floats. |
 | `tests/test_engine_mt103.py` | 5 |  |
@@ -90,6 +92,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_engine_runway_rates.py` | 8 | F9 living-cost runway and F10 synthetic rate history / best-day hint (pure engine). |
 | `tests/test_engine_validators.py` | 13 | IBAN mod-97, BIC, UK sort code and account, US ABA and UETR validators (blueprint 5.2). |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
+| `tests/test_make_submission.py` | 5 | scripts/make_submission.py: the archive a judge unzips must build in a Linux container. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
