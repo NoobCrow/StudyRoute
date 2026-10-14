@@ -115,3 +115,18 @@ class ChatIn(Strict):
 
 class ProviderEventIn(Strict):
     outcome: Literal["settle", "fail"]
+
+
+class BankTransferIn(Strict):
+    """A simulated transfer between two customer accounts of the sandbox bank network."""
+
+    source: StrictStr = Field(min_length=3, max_length=64)
+    destination: StrictStr = Field(min_length=3, max_length=64)
+    amount: MoneyIn
+    rail: StrictStr | None = Field(default=None, max_length=12)
+    charge_code: Literal["OUR", "SHA", "BEN"] | None = None
+    reference: StrictStr = Field(default="Sandbox transfer", min_length=1, max_length=140)
+
+
+class BankStepIn(Strict):
+    outcome: Literal["advance", "fail"]

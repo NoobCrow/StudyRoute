@@ -57,6 +57,8 @@ table and `ROLE_PERMISSIONS` ever differ.
 | `documents:write` | yes | yes | - | - |
 | `data:reset` | yes | - | - | - |
 | `sandbox:control` | - | - | yes | - |
+| `bank:read` | yes | yes | yes | - |
+| `bank:transfer` | yes | - | - | - |
 
 ### 1.3 Guards that apply on top of permissions
 

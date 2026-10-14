@@ -21,7 +21,14 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, UTCDateTime
-from app.domain.constants import KycStatus, PaymentState, RecipientType, Role, sql_in
+from app.domain.constants import (
+    BankTransferStatus,
+    KycStatus,
+    PaymentState,
+    RecipientType,
+    Role,
+    sql_in,
+)
 
 
 class User(Base):
@@ -285,3 +292,115 @@ class ProviderLedger(Base):
     due_at: Mapped[datetime] = mapped_column(UTCDateTime)
     delivered_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     attempts: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class BankAccount(Base):
+    """A ledger account in the sandbox bank network (customer or bank-internal). Synthetic."""
+
+    __tablename__ = "bank_accounts"
+    __table_args__ = (
+        UniqueConstraint(
+            "bank_code", "kind", "currency", "counterparty", "number", name="uq_bank_account"
+        ),
+        CheckConstraint("allow_negative = 1 OR balance_minor >= 0", name="ck_bank_account_balance"),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    bank_code: Mapped[str] = mapped_column(String(16), index=True)
+    kind: Mapped[str] = mapped_column(String(12))
+    currency: Mapped[str] = mapped_column(String(3))
+    counterparty: Mapped[str] = mapped_column(String(16), default="")
+    number: Mapped[str] = mapped_column(String(40), default="", index=True)
+    holder_name: Mapped[str] = mapped_column(String(120), default="")
+    label: Mapped[str] = mapped_column(String(80), default="")
+    owner_id: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    balance_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    allow_negative: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+class BankTransfer(Base):
+    """One simulated transfer between two customer accounts, national or international."""
+
+    __tablename__ = "bank_transfers"
+    __table_args__ = (
+        CheckConstraint(
+            f"status IN ({sql_in(BankTransferStatus)})", name="ck_bank_transfers_status"
+        ),
+        Index("ix_bank_transfers_owner_created", "owner_id", "created_at"),
+        Index("ix_bank_transfers_due", "status", "next_step_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    kind: Mapped[str] = mapped_column(String(14))
+    rail: Mapped[str] = mapped_column(String(12))
+    status: Mapped[str] = mapped_column(String(24))
+    source_account_id: Mapped[str] = mapped_column(ForeignKey("bank_accounts.id"))
+    destination_account_id: Mapped[str] = mapped_column(ForeignKey("bank_accounts.id"))
+    debit_minor: Mapped[int] = mapped_column(BigInteger)
+    debit_currency: Mapped[str] = mapped_column(String(3))
+    credit_minor: Mapped[int] = mapped_column(BigInteger)
+    credit_currency: Mapped[str] = mapped_column(String(3))
+    fee_minor: Mapped[int] = mapped_column(BigInteger, default=0)
+    reference: Mapped[str] = mapped_column(String(140))
+    uetr: Mapped[str | None] = mapped_column(String(36), nullable=True, unique=True)
+    scenario: Mapped[str] = mapped_column(String(12), default="NORMAL")
+    plan_json: Mapped[dict[str, Any]] = mapped_column(JSON)
+    plan_hash: Mapped[str] = mapped_column(String(80))
+    next_step: Mapped[int] = mapped_column(Integer, default=0)
+    next_step_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    failure_reason: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    confirmed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    settled_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    __mapper_args__ = {"version_id_col": version}
+
+
+class LedgerJournal(Base):
+    """One balanced posting. Append-only: a mistake is corrected by a reversing journal."""
+
+    __tablename__ = "ledger_journals"
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    transfer_id: Mapped[str | None] = mapped_column(
+        ForeignKey("bank_transfers.id"), nullable=True, index=True
+    )
+    seq: Mapped[int] = mapped_column(Integer, default=0)
+    kind: Mapped[str] = mapped_column(String(10))
+    stage: Mapped[str] = mapped_column(String(24), default="")
+    memo: Mapped[str] = mapped_column(String(160))
+    posted_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+class LedgerEntry(Base):
+    """One line of a journal. Append-only."""
+
+    __tablename__ = "ledger_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    journal_id: Mapped[str] = mapped_column(ForeignKey("ledger_journals.id"), index=True)
+    account_id: Mapped[str] = mapped_column(ForeignKey("bank_accounts.id"), index=True)
+    side: Mapped[str] = mapped_column(String(6))
+    amount_minor: Mapped[int] = mapped_column(BigInteger)
+    currency: Mapped[str] = mapped_column(String(3))
+    balance_after_minor: Mapped[int] = mapped_column(BigInteger)
+
+
+class BankTransferEvent(Base):
+    """The hop-by-hop history of a transfer, including the simulated message that travelled."""
+
+    __tablename__ = "bank_transfer_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    transfer_id: Mapped[str] = mapped_column(ForeignKey("bank_transfers.id"), index=True)
+    at: Mapped[datetime] = mapped_column(UTCDateTime)
+    stage: Mapped[str] = mapped_column(String(24))
+    bank_code: Mapped[str] = mapped_column(String(16))
+    event: Mapped[str] = mapped_column(String(32))
+    note: Mapped[str] = mapped_column(String(240), default="")
+    message_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)

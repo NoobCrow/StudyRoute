@@ -17,7 +17,7 @@ from app.domain import auth
 from app.domain.constants import ActorKind, ActorType, Decision
 from app.domain.rbac import ROLE_PERMISSIONS, Actor, Perm
 from app.domain.rules import load_rules
-from app.models import Payment, Recipient, RefreshToken, User
+from app.models import BankTransfer, Payment, Recipient, RefreshToken, User
 
 router = APIRouter(tags=["auth"])
 
@@ -162,11 +162,12 @@ def mfa_verify(
         if user is None:
             raise errors.Unauthenticated("Unknown user.")
         auth.ensure_not_locked(user.mfa_locked_until, now)
-        subject = (
-            session.get(Payment, body.subject_id)
-            if body.scope == "approve_payment"
-            else session.get(Recipient, body.subject_id)
-        )
+        subject_table = {
+            "approve_payment": Payment,
+            "allowlist_recipient": Recipient,
+            "confirm_bank_transfer": BankTransfer,
+        }[body.scope]
+        subject = session.get(subject_table, body.subject_id)
         if subject is None or not actor.can_see_owner(subject.owner_id):
             raise errors.NotFound("The subject of the MFA step was not found.")
         try:

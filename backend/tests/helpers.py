@@ -61,7 +61,7 @@ class WorldBase:
     ctx: AppContext
     ids: dict[str, str]
 
-    def __init__(self, tmp_path: Path, **settings: Any) -> None:
+    def __init__(self, tmp_path: Path, *, bank_network: bool = False, **settings: Any) -> None:
         self.clock = FakeClock(START)
         self.dispatcher = InProcessDispatcher()
         self.settings = make_settings(tmp_path, **settings)
@@ -69,7 +69,7 @@ class WorldBase:
         self.ctx = self.app.state.ctx
         self.client = TestClient(self.app)
         self.dispatcher.client = self.client
-        self.ids = seed_demo(self.ctx)
+        self.ids = seed_demo(self.ctx, bank_network=bank_network)
         self._tokens: dict[str, tuple[str, datetime]] = {}
 
     def close(self) -> None:

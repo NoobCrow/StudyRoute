@@ -13,10 +13,13 @@ from app.core.crypto import FieldCipher
 from app.core.db import Database
 from app.core.secret_store import SecretStore
 from app.domain.auth import PasswordService, TokenService
+from app.domain.bank_directory import load_directory
+from app.domain.bank_network import BankNetworkService
 from app.domain.compliance_report import ReportService
 from app.domain.config_service import ConfigService
 from app.domain.documents import DocumentService
 from app.domain.kyc import KycService
+from app.domain.ledger import Ledger
 from app.domain.payments import PaymentService
 from app.domain.quotes import QuoteService
 from app.domain.recipients import RecipientService
@@ -80,5 +83,8 @@ def build_context(
     ctx.worker = BackgroundWorker(ctx)
     ctx.sandbox = SandboxService(clock, audit, payments)
     ctx.reports = ReportService(clock, audit, payments, recipients)
+    ctx.bank = BankNetworkService(
+        clock, audit, Ledger(clock), load_directory(settings.resolve_bank_network_file())
+    )
     ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
     return ctx

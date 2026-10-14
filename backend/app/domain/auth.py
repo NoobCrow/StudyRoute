@@ -25,7 +25,7 @@ from app.domain.constants import ActorKind
 from app.domain.rbac import ROLE_PERMISSIONS, Actor, make_actor
 from app.models import MfaProof, RefreshToken, User
 
-MFA_SCOPES = ("approve_payment", "allowlist_recipient")
+MFA_SCOPES = ("approve_payment", "allowlist_recipient", "confirm_bank_transfer")
 TOTP_STEP_SECONDS = 30
 
 

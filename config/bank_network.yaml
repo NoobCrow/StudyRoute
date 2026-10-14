@@ -59,9 +59,10 @@ liquidity:
 # Names carrying FAIL_TEST, SLOW_TEST or SANCTION_TEST trigger the sandbox scenarios.
 demo_accounts:
   - {key: parent_a, bank: EXMPBDA1, number: "SBX-A-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent salary account"}
-  - {key: parent_b, bank: EXMPBDB1, number: "SBX-B-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 100000000, owner: parent, label: "Parent savings account"}
-  - {key: parent_c, bank: EXMPBDC1, number: "SBX-C-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 30000000, owner: parent, label: "Parent business account"}
+  - {key: parent_b, bank: EXMPBDB1, number: "SBX-B-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent savings account"}
+  - {key: parent_c, bank: EXMPBDC1, number: "SBX-C-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent business account"}
   - {key: student_gbp, bank: EXMPGB2X, number: "SBX-X-0001", holder: "Demo Student (synthetic)", currency: GBP, opening_minor: 80000, owner: student, label: "Student UK current account"}
+  - {key: relative_a, bank: EXMPBDA1, number: "SBX-A-0002", holder: "Demo Cousin (synthetic)", currency: BDT, opening_minor: 1500000, owner: null, label: "Cousin, same bank as the parent"}
   - {key: relative_b, bank: EXMPBDB1, number: "SBX-B-0002", holder: "Demo Relative (synthetic)", currency: BDT, opening_minor: 2500000, owner: null, label: "Relative in Dhaka"}
   - {key: relative_c, bank: EXMPBDC1, number: "SBX-C-0002", holder: "Demo Aunt (synthetic)", currency: BDT, opening_minor: 1000000, owner: null, label: "Aunt in Chattogram"}
   - {key: landlord, bank: EXMPGB2X, number: "SBX-X-0002", holder: "Example Landlord (synthetic)", currency: GBP, opening_minor: 200000, owner: null, label: "Student landlord"}

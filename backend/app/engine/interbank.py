@@ -536,6 +536,9 @@ def plan_international(
     fee_total = Money(bank_fees_bdt, BDT)
     figures: dict[str, Any] = {
         "target": result.target.to_dict(),
+        "instructed": Money(
+            target - (fixed_foreign if result.charge_code is ChargeCode.BEN else 0), ccy
+        ).to_dict(),
         "you_pay": Money(parent_pays, BDT).to_dict(),
         "beneficiary_receives": Money(credit, ccy).to_dict(),
         "charge_code": result.charge_code.value,

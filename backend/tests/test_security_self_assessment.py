@@ -35,6 +35,7 @@ def test_the_documented_ai_tier_never_includes_a_decision() -> None:
         "config:write",
         "audit:verify",
         "sandbox:control",
+        "bank:transfer",
     ):
         assert ai_column[decision] == "-", decision
 

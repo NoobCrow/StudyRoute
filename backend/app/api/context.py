@@ -46,3 +46,4 @@ class AppContext:
     worker: Any = None
     sandbox: Any = None  # the sandbox service, set by the container
     reports: Any = None  # the compliance report service, set by the container
+    bank: Any = None  # the sandbox bank network, set by the container

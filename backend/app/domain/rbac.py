@@ -36,6 +36,8 @@ class Perm(StrEnum):
     DOCUMENT_WRITE = "documents:write"
     DATA_RESET = "data:reset"
     SANDBOX_CONTROL = "sandbox:control"
+    BANK_READ = "bank:read"
+    BANK_TRANSFER = "bank:transfer"
 
 
 P = Perm
@@ -66,6 +68,8 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.DOCUMENT_READ,
             P.DOCUMENT_WRITE,
             P.DATA_RESET,
+            P.BANK_READ,
+            P.BANK_TRANSFER,
         }
     ),
     ActorKind.STUDENT: frozenset(
@@ -82,6 +86,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.CHAT_USE,
             P.DOCUMENT_READ,
             P.DOCUMENT_WRITE,
+            P.BANK_READ,
         }
     ),
     ActorKind.ADMIN: frozenset(
@@ -97,6 +102,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.KYC_READ,
             P.KYC_REVIEW,
             P.SANDBOX_CONTROL,
+            P.BANK_READ,
         }
     ),
     ActorKind.AI: frozenset(

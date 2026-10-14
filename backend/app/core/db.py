@@ -52,6 +52,14 @@ AUDIT_TRIGGERS = (
        BEGIN SELECT RAISE(ABORT, 'audit_events is append-only: UPDATE blocked'); END""",
     """CREATE TRIGGER IF NOT EXISTS audit_events_no_delete BEFORE DELETE ON audit_events
        BEGIN SELECT RAISE(ABORT, 'audit_events is append-only: DELETE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS ledger_entries_no_update BEFORE UPDATE ON ledger_entries
+       BEGIN SELECT RAISE(ABORT, 'ledger_entries is append-only: UPDATE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS ledger_entries_no_delete BEFORE DELETE ON ledger_entries
+       BEGIN SELECT RAISE(ABORT, 'ledger_entries is append-only: DELETE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS ledger_journals_no_update BEFORE UPDATE ON ledger_journals
+       BEGIN SELECT RAISE(ABORT, 'ledger_journals is append-only: UPDATE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS ledger_journals_no_delete BEFORE DELETE ON ledger_journals
+       BEGIN SELECT RAISE(ABORT, 'ledger_journals is append-only: DELETE blocked'); END""",
 )
 
 

@@ -2,7 +2,8 @@
 
 One tick (every second by default) does four things, each in its own short transaction:
 finish simulated KYC reviews, return stale quotes to DRAFT, submit approved payments after the
-cancellation window, and deliver due provider webhooks. Tests call tick() directly.
+cancellation window, deliver due provider webhooks, and move simulated bank transfers one hop
+forward. Tests call tick() directly.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ class BackgroundWorker:
             "quotes_expired": expired,
             "payments_submitted": self._submit_due(),
             "webhooks_delivered": ctx.simulator.deliver_due(),
+            "bank_steps": ctx.bank.advance_due(ctx.db),
         }
 
     def _submit_due(self) -> int:

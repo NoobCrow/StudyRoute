@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     database_url: str = ""
     data_dir: Path = Path("data")
     rules_file: Path | None = None
+    bank_network_file: Path | None = None
     cors_origins: str = "http://localhost:5173,http://localhost:8080,http://127.0.0.1:8080"
 
     sandbox_mfa_code: str | None = DEFAULT_SANDBOX_MFA_CODE
@@ -96,6 +97,20 @@ class Settings(BaseSettings):
             if candidate is not None and candidate.is_file():
                 return candidate
         raise FileNotFoundError("config/rules.yaml not found. Set RULES_FILE.")
+
+    def resolve_bank_network_file(self) -> Path:
+        """Find config/bank_network.yaml: the setting, then BANK_NETWORK_FILE, then usual places."""
+        env_path = os.environ.get("BANK_NETWORK_FILE")
+        candidates = [
+            self.bank_network_file,
+            Path(env_path) if env_path else None,
+            Path(__file__).resolve().parents[2] / "config" / "bank_network.yaml",
+            _REPO_ROOT / "config" / "bank_network.yaml",
+        ]
+        for candidate in candidates:
+            if candidate is not None and candidate.is_file():
+                return candidate
+        raise FileNotFoundError("config/bank_network.yaml not found. Set BANK_NETWORK_FILE.")
 
 
 @lru_cache(maxsize=1)

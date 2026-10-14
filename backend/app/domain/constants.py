@@ -40,6 +40,17 @@ TERMINAL_STATES = frozenset(
 )
 
 
+class BankTransferStatus(StrEnum):
+    """Lifecycle of a simulated interbank transfer (sandbox bank network)."""
+
+    PENDING_CONFIRMATION = "PENDING_CONFIRMATION"
+    ACCEPTED = "ACCEPTED"
+    IN_TRANSIT = "IN_TRANSIT"
+    SETTLED = "SETTLED"
+    RETURNED = "RETURNED"
+    CANCELLED = "CANCELLED"
+
+
 class RecipientType(StrEnum):
     UNIVERSITY = "UNIVERSITY"
     STUDENT = "STUDENT"

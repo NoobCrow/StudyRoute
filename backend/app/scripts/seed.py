@@ -11,6 +11,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from sqlalchemy.orm import Session
+
 from app.api.context import AppContext
 from app.container import build_context
 from app.core.config import get_settings
@@ -45,13 +47,16 @@ FAIL_UNIVERSITY = RecipientCreate(
 )
 
 
-def seed_demo(ctx: AppContext) -> dict[str, str]:
-    """Idempotent: does nothing when the demo parent already exists."""
+def seed_demo(ctx: AppContext, *, bank_network: bool = True) -> dict[str, str]:
+    """Idempotent: does nothing when the demo parent already exists (apart from adding the
+    sandbox bank network to a database that predates it). `bank_network=False` is for tests."""
     now = ctx.clock.now()
     password = ctx.settings.demo_password
     common = {"passwords": ctx.passwords, "cipher": ctx.cipher, "now": now}
     with ctx.db.write() as session:
         if find_user_by_email(session, PARENT_EMAIL) is not None:
+            if bank_network:
+                _ensure_bank_network(ctx, session)
             return {"parent": PARENT_ID, "student": STUDENT_ID, "admin": ADMIN_ID, "ai": AI_ID}
         parent = create_user(
             session, **common, user_id=PARENT_ID, email=PARENT_EMAIL, display_name="Demo Parent",
@@ -75,14 +80,35 @@ def seed_demo(ctx: AppContext) -> dict[str, str]:
         actor = human_actor(parent)
         for recipient in (UNIVERSITY, FAIL_UNIVERSITY):
             ctx.recipients.create(session, actor, rules, recipient)
+        if bank_network:
+            ctx.bank.ensure_network(session)
         ctx.audit.append(
             session,
             actor_type=ActorType.SYSTEM,
             actor_id="system",
             action="system.seeded",
-            detail="Synthetic demo accounts and recipients created",
+            detail="Synthetic demo accounts, recipients and sandbox bank accounts created",
         )
     return {"parent": PARENT_ID, "student": STUDENT_ID, "admin": ADMIN_ID, "ai": AI_ID}
+
+
+def _ensure_bank_network(ctx: AppContext, session: Session) -> int:
+    """Add the sandbox banks and bank accounts to a database that predates them. Idempotent."""
+    created = ctx.bank.ensure_network(session)
+    if created:
+        ctx.audit.append(
+            session,
+            actor_type=ActorType.SYSTEM,
+            actor_id="system",
+            action="system.bank_network_ready",
+            detail=f"{created} synthetic sandbox bank accounts created",
+        )
+    return created
+
+
+def ensure_bank_network(ctx: AppContext) -> int:
+    with ctx.db.write() as session:
+        return _ensure_bank_network(ctx, session)
 
 
 def _database_is_new(db_file: Path) -> bool:
@@ -106,7 +132,13 @@ def main(argv: list[str] | None = None) -> int:
         for suffix in ("", "-wal", "-shm"):
             Path(str(path) + suffix).unlink(missing_ok=True)
     elif args.if_empty and not _database_is_new(path):
-        print("Database already has data; skipping seed.")
+        ctx = build_context(settings)
+        try:
+            added = ensure_bank_network(ctx)
+        finally:
+            ctx.db.dispose()
+        note = f" Added {added} sandbox bank accounts." if added else ""
+        print(f"Database already has data; skipping seed.{note}")
         return 0
     ctx = build_context(settings)
     try:

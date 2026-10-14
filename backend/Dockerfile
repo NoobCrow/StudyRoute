@@ -8,7 +8,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     DATA_DIR=/srv/data \
-    RULES_FILE=/srv/config/rules.yaml
+    RULES_FILE=/srv/config/rules.yaml \
+    BANK_NETWORK_FILE=/srv/config/bank_network.yaml
 
 WORKDIR /srv
 RUN useradd --system --uid 10001 --home-dir /srv --shell /usr/sbin/nologin studyroute \
