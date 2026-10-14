@@ -1,0 +1,26 @@
+{
+  "edited_event": {
+    "seq": 23,
+    "column": "amount_minor"
+  },
+  "verify_after_edit": {
+    "status": "FAIL",
+    "events_checked": 22,
+    "failed_seq": 23,
+    "reason": "HASH_MISMATCH",
+    "head": {
+      "seq": 24,
+      "hash": "bc68ed9943d5c52df6edb3e516045c93739b1e07302a4bed0bf3f1bd9f1f033e"
+    }
+  },
+  "verify_after_restore": {
+    "status": "PASS",
+    "events_checked": 24,
+    "failed_seq": null,
+    "reason": null,
+    "head": {
+      "seq": 24,
+      "hash": "bc68ed9943d5c52df6edb3e516045c93739b1e07302a4bed0bf3f1bd9f1f033e"
+    }
+  }
+}

@@ -69,6 +69,12 @@ class DemoFlow:
         merged.update(headers or {})
         return self._client.request(method, f"/api/v1{path}", json=json, headers=merged)
 
+    def fetch(self, path: str, who: str) -> Any:
+        """GET `path` as a signed-in demo user (after run()) and return the JSON body."""
+        reply = self._call("GET", path, who)
+        reply.raise_for_status()
+        return reply.json()
+
     def _check(self, ok: bool, message: str) -> bool:
         self._say(f"      {'OK  ' if ok else 'FAIL'} {message}")
         if not ok:

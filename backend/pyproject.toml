@@ -23,6 +23,7 @@ ignore = [
 "app/ai/tools.py" = ["E501"]
 "app/engine/mt103.py" = ["E501"]
 "app/scripts/**" = ["S101"]
+"app/scripts/export_evidence.py" = ["S101", "E501"]  # the README text is prose in a string
 
 [tool.ruff.format]
 quote-style = "double"
