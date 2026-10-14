@@ -194,3 +194,12 @@ def test_production_mode_has_no_sandbox_surface_and_no_marker(production_world: 
     reply = trigger(world, "pay_x", "settle")
     assert reply.status_code == 404
     assert "x-sandbox" not in reply.headers
+
+
+def test_the_demo_hints_can_be_switched_off(tmp_path: Path) -> None:
+    quiet = World(tmp_path, show_demo_hints=False)
+    try:
+        assert "demo" not in quiet.client.get("/api/v1/health").json()
+        assert quiet.client.get("/api/v1/sandbox").json()["demo"] is None
+    finally:
+        quiet.close()
