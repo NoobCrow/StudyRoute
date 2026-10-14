@@ -60,6 +60,10 @@ configuring: sandbox secrets are generated and kept in a Docker volume.
 
 To start again with clean demo data: `docker compose down -v && docker compose up --build`.
 
+With the stack running, `python scripts/docker_smoke.py` checks the web server, the security
+headers and the API through the proxy. Prerequisites, the volume, logs, troubleshooting and an
+optional hardened overlay are in [docs/DOCKER.md](docs/DOCKER.md).
+
 ## Run without Docker
 
 Needs Python 3.12 and Node 22.

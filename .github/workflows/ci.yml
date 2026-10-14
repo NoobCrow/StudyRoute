@@ -67,3 +67,23 @@ jobs:
           node-version: "22"
       - run: npm audit --omit=dev
         working-directory: frontend
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # The judges' command: build both images, start the stack and wait for the health checks.
+      - run: docker compose up -d --build --wait --wait-timeout 240
+      # Web server, security headers once each, API through the proxy, sandbox marker.
+      - run: python scripts/docker_smoke.py http://localhost:8080
+      # The twelve-step demo against the API inside its container.
+      - run: docker compose exec -T backend python -m app.scripts.demo_flow
+      - name: Show the container logs
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop and delete the data volume
+        if: always()
+        run: docker compose down -v

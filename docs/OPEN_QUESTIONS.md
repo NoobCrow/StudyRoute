@@ -71,10 +71,15 @@ change is written to the audit log with who, what and why.
   exercised against a live model endpoint in this sandbox. Pin `LLM_MODEL`, then run
   `python -m app.scripts.check_ai` (from `backend/`) with your own key before the demo if you
   intend to show model mode. It prints OK or FAIL with the reason.
-- **Docker.** `docker compose up --build` is written and its parts were validated one by one (the
-  API entrypoint, the built UI served with the repository's exact security headers, the compose
-  file syntax) but the team should run it once from a clean clone on a machine with Docker before
-  submission, because Docker was not available where this was built.
+- **Docker.** `docker compose up --build` has **not been run** on the development machine, which has
+  no Docker. Its parts were checked one by one: the API entrypoint from a copy laid out like the
+  image, the UI built from a clean copy that honours `frontend/.dockerignore`, and the repository's
+  own `nginx.conf` in a real nginx 1.28 in front of the API (`scripts/docker_smoke.py` passes and a
+  headless Chrome walks the parent journey under the strict CSP). That run found and fixed one
+  defect: the proxy added its own security headers to API responses, so each was sent twice.
+  `docker-compose.hardened.yml` (read-only filesystem, dropped capabilities) is untested. The CI
+  `docker` job builds and starts the real stack once the repository is pushed. Run
+  `docker compose up --build` from a clean clone before submitting; see `docs/DOCKER.md`.
 
 ## D. Things only a person can supply
 

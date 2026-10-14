@@ -1,0 +1,28 @@
+# Optional extra hardening for the sandbox stack. Layer it over the normal file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.hardened.yml up --build
+#
+# What it adds to both containers: a read-only root filesystem (only the data volume and
+# /tmp are writable), no Linux capabilities, and no way to gain privileges later.
+#
+# Status: written from the Docker documentation and NOT yet run here (no Docker on the
+# development machine). The CI "docker" job starts the normal file only. If a container
+# refuses to start under this overlay, use the normal file and note it in docs/OPEN_QUESTIONS.md.
+services:
+  backend:
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

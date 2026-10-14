@@ -66,11 +66,12 @@ judges access; put the link in the submission e-mail.
 
 - [ ] From a clean clone on a machine with Docker: `docker compose up --build`, open
       http://localhost:8080, sign in with a demo account. (Docker was not available where the
-      project was built, so this one check is yours.)
+      project was built, so this one check is yours; setup help is in `docs/DOCKER.md`.)
+- [ ] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack.
 - [ ] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
 - [ ] `cd backend && pytest -q && ruff check . && ruff format --check .`
 - [ ] `cd frontend && npm run typecheck && npm test && npm run build`
-- [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit).
+- [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit, docker).
 - [ ] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs).
 - [ ] Every screen shows the sandbox banner (sign-in page included).
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in

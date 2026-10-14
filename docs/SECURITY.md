@@ -50,7 +50,10 @@ test or demo step that proves it. Test names refer to `backend/tests/`. Demo ste
   sent and CSRF does not apply.
 - **nginx.** Serves the UI and proxies `/api` on the same origin, so no CORS is needed. It sets
   `X-Forwarded-For` from the real client address (overwriting any client value). Only nginx is
-  published by `docker-compose.yml`.
+  published by `docker-compose.yml`. nginx adds the page's security headers to the UI and its
+  assets only; the API sets its own, stricter ones (`default-src 'none'`), and nginx does not add
+  a second copy. `scripts/docker_smoke.py` and `tests/test_docker_config.py` both check this.
+  `docker-compose.hardened.yml` optionally adds a read-only filesystem and dropped capabilities.
 - **API.** Security middleware (headers, body limit, request id), RFC 7807 errors that never expose
   internals, CORS limited to an exact origin list without credentials.
 - **Domain.** Authorisation, the state machine and every guard (KYC, allowlist, limits, sanctions,
