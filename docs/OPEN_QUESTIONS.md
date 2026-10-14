@@ -58,8 +58,9 @@ change is written to the audit log with who, what and why.
 - **Calendars** list fixed-date holidays only.
 - **Real LLM.** The assistant runs in template mode without a key. The Anthropic and
   OpenAI-compatible clients are implemented and unit-tested against fakes, but have not been
-  exercised against a live model endpoint in this sandbox. Pin `LLM_MODEL` and test once with your
-  own key before the demo if you intend to show model mode.
+  exercised against a live model endpoint in this sandbox. Pin `LLM_MODEL`, then run
+  `python -m app.scripts.check_ai` (from `backend/`) with your own key before the demo if you
+  intend to show model mode. It prints OK or FAIL with the reason.
 - **Docker.** `docker compose up --build` is written and its parts were validated one by one (the
   API entrypoint, the built UI served with the repository's exact security headers, the compose
   file syntax) but the team should run it once from a clean clone on a machine with Docker before

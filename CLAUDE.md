@@ -56,6 +56,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Start all: docker compose up --build
 - Reset demo data: python -m app.scripts.seed
 - Run the demo script against a running API: python -m app.scripts.demo_flow
+- Check the AI layer (template mode or a configured model): python -m app.scripts.check_ai
 - Scan for secrets, real e-mails and TODOs: python scripts/scan_repo.py
 - Build the submission archive: python scripts/make_submission.py
 

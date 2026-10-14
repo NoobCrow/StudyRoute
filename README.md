@@ -107,6 +107,21 @@ for `tamper_audit` below).
 Sandbox scenarios: a recipient named `FAIL_TEST` makes the simulated provider fail the payment,
 `SLOW_TEST` delays settlement 30 seconds, and `SANCTION_TEST` is blocked by the mock sanctions check.
 
+## The sandbox
+
+The whole app runs in `APP_ENV=sandbox` by default. In that mode:
+
+- **Every API response carries `X-Sandbox: true`**, errors included, and the web app shows the
+  banner on every screen. Production mode (`APP_ENV=production`) sends neither.
+- **`GET /api/v1/sandbox`** (public) lists what is simulated, the test scenarios, the timings and
+  caps, the synthetic providers and the demo hints. The **Sandbox** screen shows the same.
+- **The reviewer can drive the simulated provider.** `POST /api/v1/sandbox/payments/{id}/provider-event`
+  with `{"outcome": "settle"}` or `{"outcome": "fail"}` brings the simulator's signed webhook forward
+  for a payment that is in flight (for example a `SLOW_TEST` one). It does not touch the payment
+  directly: the webhook goes through the normal HMAC check and state machine, the action is
+  audited, and only an admin may call it. The AI, parents and students cannot, and in production
+  both sandbox endpoints answer 404.
+
 ## How it fits together
 
 ```
@@ -159,12 +174,29 @@ and a visible "Template mode" badge. To use a real model, copy `.env.example` to
 `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL`. The model id is recorded in every AI audit
 event. The same checks apply in both modes: policy check, masking, number guard, tool allow-list.
 
+### Adding the AI
+
+1. Copy `.env.example` to `.env` (it is gitignored) and set three values:
+   `LLM_PROVIDER=anthropic`, `LLM_API_KEY=<your key>` and `LLM_MODEL=<the exact model id you tested>`.
+   For `openai_compatible` also set `LLM_BASE_URL`.
+2. Run `python -m app.scripts.check_ai` from `backend/`. It uses a throw-away database, asks one
+   real question about a synthetic quote, sends one prompt-injection attempt, and confirms the model
+   answered, the number guard passed, personal data was masked in the prompt and the injection was
+   refused before reaching the model. It exits 0 when healthy and prints what to fix otherwise. The
+   key is never printed. With no key it confirms template mode.
+3. Restart the API (`docker compose up --build` picks `.env` up). The chat badge changes from
+   "Template mode" to "Model: <id>", and the model id appears in every AI audit event.
+
+If the model is down or answers with a number the engine did not produce, the answer falls back to
+the template automatically, and the guard badge says why.
+
 ## Tests and quality
 
 ```bash
 cd backend  && pytest -q && ruff check . && ruff format --check .
 cd frontend && npm run typecheck && npm test && npm run build
 python scripts/scan_repo.py      # secrets, real e-mails, passport-like numbers, TODOs
+python -m app.scripts.check_ai   # (from backend/) template mode, or your model once a key is set
 ```
 
 `backend/tests/test_blueprint_coverage.py` fails if any blueprint test ID (T01 to T24) has no test.

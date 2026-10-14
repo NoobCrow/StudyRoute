@@ -32,7 +32,8 @@ e-mail, its attachments and any reply.
 - [ ] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs).
 - [ ] Every screen shows the sandbox banner (sign-in page included).
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in
-      `.env`, ask one question, and confirm the "Model: ..." badge. Otherwise say "template mode".
+      `.env`, run `python -m app.scripts.check_ai` (must print OK), restart, and confirm the
+      "Model: ..." badge in the chat. Otherwise say "template mode".
 - [ ] Freeze the code. Commit. Tag the commit you submit.
 
 ## Build and send
