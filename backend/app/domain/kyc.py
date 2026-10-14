@@ -36,10 +36,15 @@ class KycService:
         self._clock = clock
         self._audit = audit
 
-    def _payer(self, session: Session, actor: Actor) -> User:
-        if actor.owner_id is None:
-            raise errors.Forbidden("KYC belongs to the paying parent.")
-        payer = session.get(User, actor.owner_id)
+    def _payer(self, session: Session, actor: Actor, user_id: str | None = None) -> User:
+        target = actor.owner_id
+        if actor.owner_id is None:  # an admin names the payer to look at
+            if user_id is None:
+                raise errors.Forbidden("KYC belongs to the paying parent.")
+            target = user_id
+        elif user_id is not None and user_id != actor.owner_id:
+            raise errors.NotFound("Payer not found.")
+        payer = session.get(User, target) if target else None
         if payer is None:
             raise errors.NotFound("Payer not found.")
         return payer
@@ -67,9 +72,11 @@ class KycService:
             detail=f"{old}>{new.value} for {user.id}",
         )
 
-    def view(self, session: Session, actor: Actor, rules: Rules) -> dict[str, Any]:
+    def view(
+        self, session: Session, actor: Actor, rules: Rules, user_id: str | None = None
+    ) -> dict[str, Any]:
         authorize(actor, Perm.KYC_READ)
-        payer = self._payer(session, actor)
+        payer = self._payer(session, actor, user_id)
         return self._view(session, payer, rules)
 
     def _view(self, session: Session, payer: User, rules: Rules) -> dict[str, Any]:

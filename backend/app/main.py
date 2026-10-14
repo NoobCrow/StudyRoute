@@ -21,6 +21,7 @@ from app.api.middleware import SecurityMiddleware, cors_kwargs
 from app.container import build_context
 from app.core.clock import Clock, iso_utc
 from app.core.config import Settings, get_settings
+from app.core.demo import ADMIN_EMAIL, PARENT_EMAIL, PARENT_ID, STUDENT_EMAIL
 from app.core.errors import install_error_handlers
 from app.core.logging import setup_logging
 from app.providers.simulator import WebhookDispatcher
@@ -76,7 +77,15 @@ def create_app(
         api.include_router(module.router)
 
     def health() -> dict[str, object]:
-        return {
+        demo: dict[str, object] | None = None
+        if settings.is_sandbox and settings.show_demo_hints:
+            demo = {
+                "accounts": [PARENT_EMAIL, STUDENT_EMAIL, ADMIN_EMAIL],
+                "password": settings.demo_password,
+                "mfa_code": settings.sandbox_mfa_code,
+                "parent_id": PARENT_ID,
+            }
+        body: dict[str, object] = {
             "status": "ok",
             "app": "StudyRoute",
             "version": VERSION,
@@ -85,6 +94,9 @@ def create_app(
             "ai_mode": _ai_mode(ctx),
             "time": iso_utc(ctx.clock.now()),
         }
+        if demo is not None:
+            body["demo"] = demo
+        return body
 
     api.add_api_route("/health", health, methods=["GET"], tags=["meta"])
     app.add_api_route("/health", health, methods=["GET"], tags=["meta"])

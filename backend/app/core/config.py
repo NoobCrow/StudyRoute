@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     max_body_bytes: int = 65_536
     rate_limit_enabled: bool = True
     enable_api_docs: bool = True
+    show_demo_hints: bool = True
 
     simulator_enabled: bool = True
     submit_delay_seconds: int = 3

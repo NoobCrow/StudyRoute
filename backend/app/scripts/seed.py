@@ -14,19 +14,20 @@ from pathlib import Path
 from app.api.context import AppContext
 from app.container import build_context
 from app.core.config import get_settings
+from app.core.demo import (
+    ADMIN_EMAIL,
+    ADMIN_ID,
+    AI_EMAIL,
+    AI_ID,
+    PARENT_EMAIL,
+    PARENT_ID,
+    STUDENT_EMAIL,
+    STUDENT_ID,
+)
 from app.domain.auth import create_user, find_user_by_email, human_actor
 from app.domain.constants import ActorKind, ActorType
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
-
-PARENT_EMAIL = "parent@demo.studyroute.test"
-STUDENT_EMAIL = "student@demo.studyroute.test"
-ADMIN_EMAIL = "admin@demo.studyroute.test"
-AI_EMAIL = "ai-agent@demo.studyroute.test"
-PARENT_ID = "usr_demo_parent"
-STUDENT_ID = "usr_demo_student"
-ADMIN_ID = "usr_demo_admin"
-AI_ID = "usr_ai_service"
 
 UNIVERSITY = RecipientCreate(
     type="UNIVERSITY",

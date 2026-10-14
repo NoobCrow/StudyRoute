@@ -121,10 +121,12 @@ def patch_recipient(
 # --- KYC ----------------------------------------------------------------------------------
 @router.get("/kyc/status")
 def kyc_status(
-    actor: Actor = Depends(require(Perm.KYC_READ)), ctx: AppContext = Depends(get_ctx)
+    user_id: str | None = Query(default=None, max_length=64),
+    actor: Actor = Depends(require(Perm.KYC_READ)),
+    ctx: AppContext = Depends(get_ctx),
 ) -> dict[str, Any]:
     with ctx.db.read() as session:
-        return ctx.kyc.view(session, actor, load_rules(session))
+        return ctx.kyc.view(session, actor, load_rules(session), user_id)
 
 
 @router.post("/kyc/mock-submit")

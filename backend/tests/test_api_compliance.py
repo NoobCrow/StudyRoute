@@ -134,3 +134,15 @@ def test_the_student_sees_the_parents_kyc_but_only_an_admin_can_review(world: Wo
     assert world.call("PUT", "/kyc/mock-review", "parent", json=review).status_code == 403
     assert world.call("PUT", "/kyc/mock-review", "admin", json=review).status_code == 200
     assert world.call("GET", "/kyc/status", "student").json()["status"] == "VERIFIED"
+
+
+def test_an_admin_can_look_up_a_payers_kyc_and_users_only_see_their_own_household(
+    world: World,
+) -> None:
+    parent_id = world.ids["parent"]
+    seen = world.call("GET", f"/kyc/status?user_id={parent_id}", "admin")
+    assert seen.status_code == 200 and seen.json()["user_id"] == parent_id
+    assert world.call("GET", "/kyc/status", "admin").status_code == 403
+    assert world.call("GET", f"/kyc/status?user_id={parent_id}", "parent").status_code == 200
+    assert world.call("GET", "/kyc/status?user_id=usr_someone_else", "parent").status_code == 404
+    assert world.call("GET", f"/kyc/status?user_id={parent_id}", "student").status_code == 200
