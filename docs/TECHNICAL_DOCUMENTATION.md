@@ -35,6 +35,7 @@ logged. Each part below exists to make one of those four statements true and tes
    +--> Audit     append-only hash chain, verify
    +--> Providers mock adapters A, B, C  -->  simulator  -->  HMAC-signed webhooks back to the API
    +--> Bank network  invented banks, clearing houses and a correspondent  -->  double-entry ledger
+   +--> Sandbox chain Solidity contracts on an in-memory EVM: escrow, tokenised deposit, audit anchor
    |
    v
  SQLite (Postgres optional), foreign keys on, CHECK constraints, audit triggers
@@ -46,6 +47,7 @@ logged. Each part below exists to make one of those four statements true and tes
 | Domain | `backend/app/domain/` | State machine, guards, RBAC, KYC, limits, config, the ledger and the bank network | Database via a passed-in session |
 | API | `backend/app/api/` | Routes, authentication, idempotency, rate limits, errors | HTTP |
 | Audit | `backend/app/audit/` | Hash chain and verification | Database |
+| Chain | `backend/app/chain/`, `contracts/` | Compiled contracts, ABI codec and the in-memory EVM (`py-evm`) | None (memory) |
 | Providers | `backend/app/providers/` | Mock providers, simulator, webhook signing | HTTP (webhooks) |
 | AI | `backend/app/ai/` | Orchestrator, masking, number guard, tools, templates | Optional network call to a model |
 | Web | `frontend/src/` | Dashboard, compare, recipients, documents, payment, audit, rules, sandbox, chat | HTTP |
@@ -342,6 +344,25 @@ See [BANK_NETWORK.md](BANK_NETWORK.md).
 
 ---
 
+### 2.14 Smart escrow and the audit anchor (sandbox chain)
+
+Three Solidity contracts (`contracts/src/`) are compiled once by `contracts/build.mjs` (the `solc`
+WebAssembly package, `evmVersion: paris`) and the artifacts are committed, so the backend needs no
+compiler. `chain/evm.py` runs them on `py-evm`, a Python implementation of the EVM: one transaction is one
+block, a revert changes nothing, messages run without signatures or gas, and wallets are addresses
+derived from labels (there is no key anywhere).
+
+The EVM is memory, so `domain/chain_service.py` keeps the history in `chain_log`: append-only and
+hash-chained, replayed to rebuild the chain exactly. A transaction counts only when its row commits
+with the request, so a request that fails halfway leaves no trace; a changed row stops the chain
+(`LOG_CORRUPT`). `domain/escrow.py` is the business flow: a parent plans an escrow, a human with a
+fresh MFA proof for that escrow locks it (mint, approve, create: three transactions, **one** audit
+event in the same database transaction), the worker pays each tranche on its date, and paying early or
+cancelling needs MFA again. The reviewer role can only freeze and unfreeze. `engine/escrow_schedule.py`
+splits the total in integer minor units. The AI has no escrow or chain permission. The
+`AuditAnchor` contract stores audit head hashes; `GET /chain/verify` reports `MISMATCH` when the
+database no longer agrees, even if every hash was recomputed. See [SMART_ESCROW.md](SMART_ESCROW.md).
+
 ## 3. Security design
 
 The full threat and control matrix, with the test that proves each row, is in
@@ -365,7 +386,7 @@ The full threat and control matrix, with the test that proves each row, is in
 
 - `backend/tests/` has one or more tests for each blueprint scenario T01 to T24 and fails if one
   is missing; see [TEST_CASES.md](TEST_CASES.md).
-- `python -m app.scripts.demo_flow` replays the thirteen-step demo against a running API and prints
+- `python -m app.scripts.demo_flow` replays the fourteen-step demo against a running API and prints
   OK or FAIL for each check.
 - Operation logs from a real run are in `submission/evidence/`.
 - `python scripts/scan_repo.py` and the CI workflow scan for secrets, real e-mails and TODOs.

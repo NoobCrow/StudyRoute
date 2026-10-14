@@ -3,24 +3,35 @@ import type { FormEvent } from "react";
 
 import { get } from "../api/client";
 import type { Corridor, RunwayView } from "../api/types";
+import { corridorForCurrency, exponentFor, formDefaults } from "../lib/corridors";
 import { parseMajorToMinor } from "../lib/money";
+import { CurrencyOptions } from "./CountryOptions";
 import { Badge, ErrorNotice, Field, NotVerifiedBadge } from "./Ui";
 
 /** F9 living-cost runway: how many months an amount covers. The engine does the arithmetic. */
 export function RunwayCard({ corridors }: { corridors: Corridor[] }) {
-  const currencies = [...new Set(corridors.map((c) => c.currency))];
-  const [currency, setCurrency] = useState(currencies.includes("GBP") ? "GBP" : (currencies[0] ?? "GBP"));
-  const [amount, setAmount] = useState("5000");
-  const [monthly, setMonthly] = useState("1200");
+  const start = corridors.some((c) => c.currency === "GBP") ? "GBP" : (corridors[0]?.currency ?? "GBP");
+  const [currency, setCurrency] = useState(start);
+  const [amount, setAmount] = useState(() => formDefaults(corridorForCurrency(corridors, start)).runwayAmount);
+  const [monthly, setMonthly] = useState(() => formDefaults(corridorForCurrency(corridors, start)).runwayMonthly);
   const [result, setResult] = useState<RunwayView | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
+  /** Another currency is a different size of money, so the amounts start again in proportion. */
+  function chooseCurrency(next: string) {
+    setCurrency(next);
+    const defaults = formDefaults(corridorForCurrency(corridors, next));
+    setAmount(defaults.runwayAmount);
+    setMonthly(defaults.runwayMonthly);
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    const total = parseMajorToMinor(amount);
-    const cost = parseMajorToMinor(monthly);
+    const exponent = exponentFor(corridors, currency);
+    const total = parseMajorToMinor(amount, exponent);
+    const cost = parseMajorToMinor(monthly, exponent);
     if (!total.ok) return setProblem(`Amount: ${total.error}`);
     if (!cost.ok) return setProblem(`Monthly cost: ${cost.error}`);
     setProblem(null);
@@ -44,8 +55,8 @@ export function RunwayCard({ corridors }: { corridors: Corridor[] }) {
       <form onSubmit={submit}>
         <div className="form-grid">
           <Field label="Currency" htmlFor="rw-currency">
-            <select id="rw-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-              {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+            <select id="rw-currency" value={currency} onChange={(e) => chooseCurrency(e.target.value)}>
+              <CurrencyOptions corridors={corridors} />
             </select>
           </Field>
           <Field label="Amount sent" htmlFor="rw-amount">

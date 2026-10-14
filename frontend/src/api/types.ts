@@ -143,6 +143,14 @@ export interface CorridorList { items: Corridor[]; providers: string[] }
 export interface Corridor {
   country: string; name: string; currency: string; account_scheme: string;
   host_rail: string; mid_rate: string;
+  /** Decimal places of the currency (JPY 0, GBP 2, KWD 3). */
+  exponent: number;
+  /** One of the six hand-written corridors, shown first. */
+  featured: boolean;
+  /** Listed, but the sandbox will not quote it. */
+  restricted: boolean;
+  /** A round starting amount worth about BDT 1.6 million, for form defaults only. */
+  sample_amount: string;
 }
 export interface ChatAction {
   tool: "create_draft" | "request_approval"; args: Record<string, string>;
@@ -282,3 +290,46 @@ export interface BankNetwork {
   accounts_not_matching_entries?: number;
 }
 
+
+// --- smart escrow on the sandbox chain -------------------------------------------------------
+export type TrancheState = "PLANNED" | "LOCKED" | "RELEASED" | "REFUNDED";
+export type ChainEscrowStatus = "ACTIVE" | "FROZEN" | "COMPLETED" | "CANCELLED";
+export interface EscrowTranche {
+  index: number; amount: Money; release_on: string; state: TrancheState; due: boolean;
+}
+export interface EscrowTx {
+  seq: number; tx_hash: string; kind: string; contract: string; function: string | null;
+  sender: string; time: string;
+}
+export interface EscrowChainInfo {
+  escrow_id: number; contract: string; token: string; payer_wallet: string;
+  beneficiary_wallet: string; locked: Money; chain_time: string;
+}
+export interface EscrowView {
+  escrow_id: string; status: "PENDING_CONFIRMATION" | "ON_CHAIN" | "ABANDONED";
+  chain_status: ChainEscrowStatus | null; purpose: "TUITION" | "LIVING"; cadence: string;
+  currency: string; total: Money; reference: string;
+  recipient: { recipient_id: string; label: string };
+  tranches: EscrowTranche[]; plan_hash: string; created_at: string; confirmed_at: string | null;
+  chain: EscrowChainInfo | null; transactions?: EscrowTx[]; blockers?: Blocker[]; simulated: true;
+}
+export interface ChainContract {
+  label: string; contract: string; address: string; source_file: string; source_sha256: string;
+  solc: string;
+}
+export interface ChainStatus {
+  simulated: true; engine: string; ready: boolean; block: number; chain_time: string;
+  time_offset_seconds: number; contracts: ChainContract[];
+  log: { transactions: number; head: string }; integrity: { ok: boolean; problem: string | null };
+}
+export interface ChainAnchor { index: number; seq: number; head: string; time: string }
+export interface AnchorCheck extends ChainAnchor {
+  database_hash: string | null; state: "MATCH" | "MISMATCH" | "MISSING_EVENT";
+}
+export interface AnchorVerdict {
+  status: "PASS" | "FAIL" | "NO_ANCHOR"; simulated: true; failed: number[]; anchors: AnchorCheck[];
+  audit_chain: {
+    status: "PASS" | "FAIL"; events_checked: number; failed_seq: number | null; reason: string | null;
+    head: { seq: number; hash: string };
+  };
+}

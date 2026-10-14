@@ -59,6 +59,11 @@ table and `ROLE_PERMISSIONS` ever differ.
 | `sandbox:control` | - | - | yes | - |
 | `bank:read` | yes | yes | yes | - |
 | `bank:transfer` | yes | - | - | - |
+| `escrow:read` | yes | yes | yes | - |
+| `escrow:write` | yes | - | - | - |
+| `escrow:freeze` | - | - | yes | - |
+| `chain:read` | yes | yes | yes | - |
+| `chain:anchor` | - | - | yes | - |
 
 ### 1.3 Guards that apply on top of permissions
 
@@ -101,12 +106,22 @@ production**. "Accepted" means we chose not to fix it in this submission and say
 | R19 | **The bank network is a simulation with invented rails, fees and limits**, so its numbers could be mistaken for a real scheme's rules | Medium if presented as real | Labelled simulated on the screen and in every response, banks all start with `EXMP`, nothing is marked verified, and the parameters live in `config/bank_network.yaml` and `docs/OPEN_QUESTIONS.md` | Mitigated. Replace with verified scheme rules before any real use |
 | R20 | **A failed bank transfer is unwound exactly**, with no return fee and no partial return, which is kinder than a real bank | Low | The behaviour is documented in `docs/BANK_NETWORK.md`; the unwind is a reversing journal, so the books still balance and the audit log records the return | Accepted for the demo |
 | R21 | **The parent can pay from any account of the demo household**, including the student's UK account, and bank transfers have no daily total | Low (sandbox) | Only a parent with a fresh MFA proof for that transfer can confirm; the per-transaction cap, rail limits and a 20-a-minute rate limit apply; every step is audited | Accepted; a real bank would model mandates and daily limits |
+| R22 | **A rewritten audit log** can still pass the SHA-256 hash chain if an attacker recomputes every hash after the edit | High without an outside check | The reviewer anchors the audit head hash on the sandbox chain (`AuditAnchor` contract). `GET /chain/verify` compares the database with every anchor and reports `MISMATCH` or `MISSING_EVENT`. A test performs exactly this attack and shows the chain check passing while the anchor check fails | Mitigated once an anchor exists; anchor after every demo and before submitting |
+| R23 | **The escrow's chain history could be edited** to hide a payment (the in-memory chain is rebuilt from the database) | Medium | `chain_log` is append-only (database triggers) and hash-chained: each row covers the one before it. On every start the log is replayed and each row's hash is recomputed; a changed or missing row stops the chain (`LOG_CORRUPT`) and writes are refused | Mitigated; SQLite triggers can be dropped by someone with file access, which the hash chain then detects |
+| R24 | **A stolen parent session could lock or move escrow funds** | Medium | Locking funds, paying a tranche early and cancelling each need a fresh MFA proof bound to that exact escrow and used once, plus an Idempotency-Key; the per-transaction cap and KYC gate apply; every step is audited. The AI has no escrow permission | Mitigated |
+| R25 | **A reviewer could abuse the freeze** | Low | The `TuitionEscrow` contract gives the compliance role only `freeze` and `unfreeze`: no function lets it release, refund or cancel, which a contract test checks. Every freeze needs a written reason and is audited | Mitigated by design |
+| R26 | **The simulated chain could be mistaken for a real blockchain** | Medium if presented as real | Every response says `simulated`, the screen says "no network, no real tokens, not money", and the whole surface answers 404 outside the sandbox. It is an in-memory EVM (py-evm), not a public or consortium chain | Accepted; deploying to a real EVM chain is a documented next step |
+| R27 | **An EVM library (py-evm, with its dependencies) and a build tool (solc) enter the supply chain** | Low | All are pinned and permissively licensed (MIT, BSD or Apache-2.0); every dependency ships prebuilt wheels for Linux and Windows, so no compiler is needed on the server; the backend runs committed artifacts, so `solc` is never installed there; a test checks every artifact against its source file by SHA-256; `pip-audit` and `npm audit` on `contracts/` are clean | Accepted |
+| R28 | **E-mail addresses could be discovered by trying to lock them.** A real account answered 429 after repeated failures while an unknown address kept answering 401 (found by the security probe, 15 Oct 2026) | Medium | Fixed: `FailedLoginTracker` counts failed sign-ins per e-mail whether or not the account exists, so both lock after the same number of failures with the identical 429 answer and `Retry-After`. The count is bounded in memory. Regression tests cover real versus made-up addresses | Fixed |
+| R29 | **The sandbox shows its demo password and MFA code** on the sign-in page and in `GET /health` so judges need no set-up | Medium if a sandbox is ever exposed to the internet | Only while `APP_ENV=sandbox`; production returns no hints (tested). All data is synthetic. To expose a sandbox anyway, set `SHOW_DEMO_HINTS=false`, `SEED_DEMO_PASSWORD` and `SANDBOX_MFA_CODE` | Accepted for the demo; never publish a sandbox |
+| R30 | **The container trusts `X-Forwarded-For`** (`--forwarded-allow-ips=*`) because only nginx can reach the API. If someone published the API port, a client could forge its address and dodge the per-IP rate limit | Low | Compose does not publish the API port (a test enforces it); nginx overwrites the header; account lockout still stops password guessing from any address. The application itself ignores the header unless the connecting peer is a trusted proxy | Accepted; documented |
+| R31 | **The Vite dev server (`npm run dev`) is not hardened** | Low | For development only and bound to loopback. The security headers and CSP come from nginx (`docker compose up`); the browser audit tests the production build under that CSP | Accepted |
 
 ## 3. What we tested and how to repeat it
 
 ```bash
 cd backend && pytest -q               # blueprint T01-T24 plus AI, sandbox and demo tests
-python -m app.scripts.demo_flow       # thirteen-step demo against a running API
+python -m app.scripts.demo_flow       # fourteen-step demo against a running API
 python -m app.scripts.tamper_audit    # edit one audit row, then Verify must FAIL at that sequence
 python scripts/scan_repo.py           # no secrets, real e-mails, passport-like numbers or TODOs
 ```

@@ -4,6 +4,8 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 import type { Health } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { BrandMark } from "../components/BrandMark";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { ErrorNotice, Field, Notice } from "../components/Ui";
 import { loadHealth } from "../health";
 
@@ -39,8 +41,13 @@ export function LoginScreen() {
   const demo = health?.demo;
   return (
     <main className="page">
+      <div className="row between login-top">
+        <span className="brand"><BrandMark />StudyRoute</span>
+        <ThemeToggle />
+      </div>
       <div className="grid two">
         <form className="card" onSubmit={submit} aria-labelledby="signin-title">
+          <p className="eyebrow">Made for families in Bangladesh</p>
           <h1 id="signin-title">Sign in to StudyRoute</h1>
           <p className="muted">
             An assistant for paying tuition and living costs abroad from Bangladesh. The engine
@@ -66,7 +73,7 @@ export function LoginScreen() {
               <p className="small">
                 Demo accounts. Password <code>{demo.password}</code>, MFA code <code>{demo.mfa_code}</code>.
               </p>
-              <ul>
+              <ul className="chip-list">
                 {demo.accounts.map((account) => (
                   <li key={account}>
                     <button type="button" className="btn small ghost" onClick={() => { setEmail(account); setPassword(demo.password); }}>

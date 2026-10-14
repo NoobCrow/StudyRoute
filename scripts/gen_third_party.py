@@ -47,9 +47,11 @@ def python_rows(requirements: Path) -> list[tuple[str, str, str]]:
     return sorted(rows, key=lambda r: r[0].lower())
 
 
-def javascript_rows() -> tuple[list[tuple[str, str, str]], list[tuple[str, str, str]]]:
-    package = json.loads((ROOT / "frontend" / "package.json").read_text(encoding="utf-8"))
-    lock = json.loads((ROOT / "frontend" / "package-lock.json").read_text(encoding="utf-8"))
+def javascript_rows(
+    folder: str = "frontend",
+) -> tuple[list[tuple[str, str, str]], list[tuple[str, str, str]]]:
+    package = json.loads((ROOT / folder / "package.json").read_text(encoding="utf-8"))
+    lock = json.loads((ROOT / folder / "package-lock.json").read_text(encoding="utf-8"))
 
     def rows(names: dict[str, str]) -> list[tuple[str, str, str]]:
         out = []
@@ -73,6 +75,7 @@ def main() -> int:
     runtime_names = {r[0].lower() for r in runtime}
     dev = [r for r in dev if r[0].lower() not in runtime_names]
     js_runtime, js_dev = javascript_rows()
+    _, contracts_dev = javascript_rows("contracts")
     lines = [
         "# Third-party components and licences",
         "",
@@ -83,7 +86,8 @@ def main() -> int:
         "providers, fees, people and accounts in the sandbox are invented by the team. The",
         "competition rules require third-party components to be properly licensed; this is the",
         "inventory. Only direct dependencies are listed; the exact versions of everything",
-        "installed are pinned in `backend/requirements.txt` and `frontend/package-lock.json`.",
+        "installed are pinned in `backend/requirements.txt`, `frontend/package-lock.json` and",
+        "`contracts/package-lock.json`.",
         "",
         "## Backend runtime (Python 3.12)",
         "",
@@ -101,9 +105,19 @@ def main() -> int:
         "",
         *table(js_dev),
         "",
+        "## Smart-contract build tools (`contracts/`, development only)",
+        "",
+        "The backend runs the committed, compiled contracts and never installs these.",
+        "",
+        *table(contracts_dev),
+        "",
         "## Notes",
         "",
-        "- Fonts: none are bundled; the UI uses the system font stack.",
+        "- Fonts: Inter, Source Serif 4 and JetBrains Mono ship with the `@fontsource-variable`",
+        "  packages above (SIL Open Font License 1.1). They are self-hosted: nothing is loaded",
+        "  from the internet.",
+        "- `py-evm` (an in-memory EVM) and `eth-abi` run the sandbox chain; both are pinned.",
+        "- The Solidity contracts in `contracts/src/` are the team's own (MIT licence headers).",
         "- Images: only the team's own favicon and screenshots of the application.",
         "- A project licence for StudyRoute itself is the team's decision and is not set here.",
     ]

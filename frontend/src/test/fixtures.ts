@@ -224,3 +224,67 @@ export const BANK_NETWORK: BankNetwork = {
   accounts_not_matching_entries: 0,
 };
 
+import type { Corridor } from "../api/types";
+
+/** A destination as the API lists it. Defaults describe the United Kingdom. */
+export function corridor(overrides: Partial<Corridor> = {}): Corridor {
+  return {
+    country: "GB", name: "United Kingdom", currency: "GBP", account_scheme: "IBAN_OR_UK_DOMESTIC",
+    host_rail: "x", mid_rate: "160", exponent: 2, featured: true, restricted: false, sample_amount: "10000",
+    ...overrides,
+  };
+}
+
+import type { AnchorVerdict, ChainStatus, EscrowTranche, EscrowView } from "../api/types";
+
+const GBP = (minor: number) => ({
+  amount_minor: minor, currency: "GBP",
+  formatted: `GBP ${(minor / 100).toLocaleString("en-GB", { minimumFractionDigits: 2 })}`,
+});
+
+/** One tranche as the API lists it. */
+export function tranche(index: number, overrides: Partial<EscrowTranche> = {}): EscrowTranche {
+  return {
+    index, amount: GBP(30_000), release_on: `2026-1${index}-28`, state: "LOCKED", due: false, ...overrides,
+  };
+}
+
+/** A live escrow of three monthly tranches, as `GET /escrows` returns it. */
+export function escrowView(overrides: Partial<EscrowView> = {}): EscrowView {
+  return {
+    escrow_id: "esc_1", status: "ON_CHAIN", chain_status: "ACTIVE", purpose: "LIVING", cadence: "MONTHLY",
+    currency: "GBP", total: GBP(90_000), reference: "Fall living costs",
+    recipient: { recipient_id: "rcp_1", label: "University of Example (synthetic) GB** **** 4821" },
+    tranches: [tranche(0, { release_on: "2026-10-28" }), tranche(1, { release_on: "2026-11-28" }), tranche(2, { release_on: "2026-12-28" })],
+    plan_hash: "a".repeat(64), created_at: "2026-10-14T05:00:00Z", confirmed_at: "2026-10-14T05:01:00Z",
+    chain: {
+      escrow_id: 1, contract: "0x" + "1".repeat(40), token: "0x" + "2".repeat(40),
+      payer_wallet: "0x" + "3".repeat(40), beneficiary_wallet: "0x" + "4".repeat(40),
+      locked: GBP(90_000), chain_time: "2026-10-14T05:01:00Z",
+    },
+    transactions: [
+      { seq: 4, tx_hash: "b".repeat(64), kind: "CALL", contract: "token:GBP", function: "mint", sender: "bank", time: "2026-10-14T05:01:00Z" },
+      { seq: 6, tx_hash: "c".repeat(64), kind: "CALL", contract: "escrow", function: "create", sender: "user:usr_demo_parent", time: "2026-10-14T05:01:00Z" },
+    ],
+    blockers: [], simulated: true, ...overrides,
+  };
+}
+
+export const CHAIN_STATUS: ChainStatus = {
+  simulated: true, engine: "py-evm, an in-memory EVM. No network, no peers, no real tokens.", ready: true,
+  block: 6, chain_time: "2026-10-14T05:01:00Z", time_offset_seconds: 0,
+  contracts: [
+    { label: "escrow", contract: "TuitionEscrow", address: "0x" + "5".repeat(40), source_file: "contracts/src/TuitionEscrow.sol", source_sha256: "d".repeat(64), solc: "0.8.37" },
+    { label: "anchor", contract: "AuditAnchor", address: "0x" + "6".repeat(40), source_file: "contracts/src/AuditAnchor.sol", source_sha256: "e".repeat(64), solc: "0.8.37" },
+  ],
+  log: { transactions: 6, head: "f".repeat(64) }, integrity: { ok: true, problem: null },
+};
+
+export function verdict(overrides: Partial<AnchorVerdict> = {}): AnchorVerdict {
+  return {
+    status: "PASS", simulated: true, failed: [],
+    anchors: [{ index: 0, seq: 12, head: "9".repeat(64), time: "2026-10-14T05:02:00Z", database_hash: "9".repeat(64), state: "MATCH" }],
+    audit_chain: { status: "PASS", events_checked: 14, failed_seq: null, reason: null, head: { seq: 14, hash: "8".repeat(64) } },
+    ...overrides,
+  };
+}

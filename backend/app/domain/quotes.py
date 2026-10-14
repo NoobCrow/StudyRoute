@@ -50,7 +50,7 @@ class QuoteService:
         authorize(actor, Perm.QUOTE_CREATE)
         if actor.owner_id is None:
             raise errors.Forbidden("Quotes belong to a paying parent.")
-        corridor = rules.corridor(req.destination_country)
+        corridor = rules.open_corridor(req.destination_country)
         if req.target_currency not in rules.supported_currencies():
             raise errors.ValidationFailed(f"Unsupported currency: {req.target_currency}.")
         if req.target_currency != corridor.currency:

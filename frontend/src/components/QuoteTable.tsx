@@ -59,7 +59,7 @@ export function QuoteTable({ quote, selected, onSelect }: Props) {
                 {r.rank}
                 {r.rank === 1 ? <> <Badge tone="ok">Lowest cost</Badge></> : null}
               </td>
-              <td>
+              <td className="provider-cell">
                 <strong>{r.provider_name}</strong>
                 <div className="small muted">
                   Charge code {r.charge_code}

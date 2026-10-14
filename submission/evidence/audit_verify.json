@@ -1,10 +1,10 @@
 {
   "status": "PASS",
-  "events_checked": 47,
+  "events_checked": 60,
   "failed_seq": null,
   "reason": null,
   "head": {
-    "seq": 47,
-    "hash": "45e7ba2a1f39687db9c98d7c56ff2356eab70653bf65416930677c0298767a14"
+    "seq": 60,
+    "hash": "fc2e1b6a1b545956f170b707de2307af4db269e00bb5f80df1efd9e710a505f1"
   }
 }

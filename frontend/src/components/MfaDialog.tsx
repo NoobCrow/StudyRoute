@@ -6,7 +6,13 @@ import { ErrorNotice } from "./Ui";
 
 interface Props {
   title: string;
-  scope: "approve_payment" | "allowlist_recipient" | "confirm_bank_transfer";
+  scope:
+    | "approve_payment"
+    | "allowlist_recipient"
+    | "confirm_bank_transfer"
+    | "confirm_escrow"
+    | "release_escrow"
+    | "cancel_escrow";
   subjectId: string;
   sandboxCode?: string;
   onProof: (proof: string) => void;
@@ -43,22 +49,24 @@ export function MfaDialog({ title, scope, subjectId, sandboxCode, onProof, onCan
 
   return (
     <div className="overlay">
-      <form className="dialog" role="dialog" aria-modal="true" aria-labelledby="mfa-title" onSubmit={submit}>
-        <h2 id="mfa-title">{title}</h2>
-        <p className="muted">
-          Enter the 6-digit code from your authenticator app. The proof lasts 5 minutes and works once, for this action only.
-        </p>
-        {sandboxCode ? <p className="small">Sandbox hint: the demo code is <code>{sandboxCode}</code>.</p> : null}
-        <ErrorNotice error={error} />
-        <div className="field">
-          <label htmlFor="mfa-code">MFA code</label>
-          <input id="mfa-code" ref={input} value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" maxLength={12} />
-        </div>
-        <div className="row">
-          <button type="submit" className="btn primary" disabled={busy || code.trim().length < 4}>Verify</button>
-          <button type="button" className="btn" onClick={onCancel}>Cancel</button>
-        </div>
-      </form>
+      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="mfa-title">
+        <form onSubmit={submit}>
+          <h2 id="mfa-title">{title}</h2>
+          <p className="muted">
+            Enter the 6-digit code from your authenticator app. The proof lasts 5 minutes and works once, for this action only.
+          </p>
+          {sandboxCode ? <p className="small">Sandbox hint: the demo code is <code>{sandboxCode}</code>.</p> : null}
+          <ErrorNotice error={error} />
+          <div className="field">
+            <label htmlFor="mfa-code">MFA code</label>
+            <input id="mfa-code" ref={input} value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" maxLength={12} />
+          </div>
+          <div className="row">
+            <button type="submit" className="btn primary" disabled={busy || code.trim().length < 4}>Verify</button>
+            <button type="button" className="btn" onClick={onCancel}>Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

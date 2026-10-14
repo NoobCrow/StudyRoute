@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from app.engine.currencies import CURRENCY_EXPONENTS
+
 
 class EngineError(Exception):
     """Base class for errors raised by the pure engine."""
@@ -17,20 +19,6 @@ class UnsupportedCurrency(EngineError):
 
 class InvalidAmount(EngineError):
     pass
-
-
-# ISO 4217 minor-unit exponents for the currencies this sandbox knows about.
-# Which of them a corridor may use is decided by config/rules.yaml, not here.
-CURRENCY_EXPONENTS: dict[str, int] = {
-    "BDT": 2,
-    "GBP": 2,
-    "USD": 2,
-    "EUR": 2,
-    "AUD": 2,
-    "CAD": 2,
-    "MYR": 2,
-    "JPY": 0,
-}
 
 
 def exponent(currency: str) -> int:

@@ -42,6 +42,26 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+      - run: npm ci --no-fund
+      # The build tool is dev-only, but it must not carry known vulnerabilities either.
+      - run: npm audit
+      # Rebuild the Solidity contracts. The committed artifacts must be exactly what the sources
+      # produce, so a changed contract cannot ship without its rebuilt bytecode.
+      - run: npm run build
+      - run: git diff --exit-code -- ../backend/app/chain/artifacts
+
   secret-scan:
     runs-on: ubuntu-latest
     steps:
@@ -79,7 +99,7 @@ jobs:
       - run: docker compose up -d --build --wait --wait-timeout 240
       # Web server, security headers once each, API through the proxy, sandbox marker.
       - run: python scripts/docker_smoke.py http://localhost:8080
-      # The thirteen-step demo against the API inside its container.
+      # The fourteen-step demo against the API inside its container.
       - run: docker compose exec -T backend python -m app.scripts.demo_flow
       - name: Show the container logs
         if: failure()

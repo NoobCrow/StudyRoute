@@ -27,6 +27,10 @@ _WORDS = {
     "canadian dollars": "CAD",
 }  # fmt: skip
 
+# Real currency codes that are also everyday English words. Only the uppercase form counts as a
+# currency ("top 5 universities" is not an amount, "TOP 5" can be).
+_WORD_LIKE_CODES = frozenset({"ALL", "TRY", "PEN", "MAD", "TOP", "SOS", "MOP", "CUP", "RUB", "GEL"})
+
 _CODE_AFTER = re.compile(rf"{_AMOUNT}\s*(k)?\s*([A-Za-z]{{3}})\b", re.I)
 _CODE_FIRST_PLAIN = re.compile(rf"\b([A-Za-z]{{3}})\s*{_AMOUNT}\s*(k)?\b", re.I)
 _SYMBOL = re.compile(rf"([£€])\s*{_AMOUNT}\s*(k)?", re.I)
@@ -83,6 +87,10 @@ def _to_minor(raw: str, thousands: bool, currency: str) -> int | None:
     return minor if 0 < minor <= MAX_MINOR else None
 
 
+def _is_written_as_code(token: str) -> bool:
+    return token.upper() not in _WORD_LIKE_CODES or token.isupper()
+
+
 def _find_amount(text: str, currencies: Collection[str]) -> tuple[int, str] | None:
     candidates: list[tuple[int, str, str, bool]] = []  # position, amount, currency, k
     for match in _SYMBOL.finditer(text):
@@ -95,11 +103,11 @@ def _find_amount(text: str, currencies: Collection[str]) -> tuple[int, str] | No
         )
     for match in _CODE_AFTER.finditer(text):
         code = match.group(3).upper()
-        if code in currencies:
+        if code in currencies and _is_written_as_code(match.group(3)):
             candidates.append((match.start(), match.group(1), code, bool(match.group(2))))
     for match in _CODE_FIRST_PLAIN.finditer(text):
         code = match.group(1).upper()
-        if code in currencies:
+        if code in currencies and _is_written_as_code(match.group(1)):
             candidates.append((match.start(), match.group(2), code, bool(match.group(3))))
     for _, raw, currency, thousands in sorted(candidates):
         if currency not in currencies or currency not in CURRENCY_EXPONENTS:

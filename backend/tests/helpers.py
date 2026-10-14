@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sqlite3
 import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -11,6 +12,7 @@ from fastapi.testclient import TestClient
 from httpx import Response
 
 from app.api.context import AppContext
+from app.audit.chain import GENESIS, HASHED_FIELDS, compute_hash
 from app.core.clock import FakeClock
 from app.core.config import Settings
 from app.domain.constants import ActorKind
@@ -198,3 +200,27 @@ class World(WorldBase):
     def audit_rows(self, **filters: Any) -> list[dict[str, Any]]:
         items = self.call("GET", "/audit/events?limit=100", "admin").json()["items"]
         return [r for r in items if all(r.get(k) == v for k, v in filters.items())]
+
+
+def rewrite_audit_consistently(db_path: Path, seq: int, detail: str) -> None:
+    """The attack a SHA-256 chain alone cannot catch: edit an event, then recompute every hash
+    after it (and the head). The chain still verifies; only an outside anchor notices."""
+    con = sqlite3.connect(db_path)
+    con.row_factory = sqlite3.Row
+    con.execute("DROP TRIGGER IF EXISTS audit_events_no_update")
+    rows = [dict(r) for r in con.execute("SELECT * FROM audit_events ORDER BY seq")]
+    prev = GENESIS
+    for row in rows:
+        if row["seq"] == seq:
+            row["detail"] = detail
+        row["prev_event_hash"] = prev
+        row["this_event_hash"] = compute_hash(prev, {k: row[k] for k in HASHED_FIELDS})
+        prev = row["this_event_hash"]
+        con.execute(
+            "UPDATE audit_events SET detail = ?, prev_event_hash = ?, this_event_hash = ?"
+            " WHERE seq = ?",
+            (row["detail"], row["prev_event_hash"], row["this_event_hash"], row["seq"]),
+        )
+    con.execute("UPDATE audit_head SET hash = ? WHERE id = 1", (prev,))
+    con.commit()
+    con.close()

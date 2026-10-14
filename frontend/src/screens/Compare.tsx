@@ -8,10 +8,12 @@ import { useAuth } from "../auth/AuthContext";
 import { useChatScope } from "../chatContext";
 import { Countdown } from "../components/Countdown";
 import { QuoteTable } from "../components/QuoteTable";
+import { CountryOptions } from "../components/CountryOptions";
 import { ErrorNotice, Field, Loading, Notice, PageHead } from "../components/Ui";
 import { useAsync } from "../hooks";
 import { useIdempotencyKey } from "../idempotency";
 import { addDaysIso } from "../lib/format";
+import { formDefaults } from "../lib/corridors";
 import { parseMajorToMinor } from "../lib/money";
 
 const CHARGE_HELP: Record<ChargeCode, string> = {
@@ -157,12 +159,20 @@ export function CompareScreen() {
       .catch((e: unknown) => setError(e as Error));
   }, [sharedQuote, sharedProvider]);
 
+  /** A new destination means a new currency, so the amount starts again from a sensible size for it. */
+  function chooseCountry(next: string) {
+    setCountry(next);
+    setRecipientId("");
+    const target = corridors.data?.items.find((c) => c.country === next);
+    if (target) setAmount(formDefaults(target).amount);
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    const parsed = parseMajorToMinor(amount);
-    if (!parsed.ok) return setFormError(parsed.error);
     if (!corridor) return setFormError("Choose a destination country.");
+    const parsed = parseMajorToMinor(amount, corridor.exponent);
+    if (!parsed.ok) return setFormError(parsed.error);
     setFormError(null);
     setBusy(true);
     try {
@@ -194,10 +204,8 @@ export function CompareScreen() {
         <h2 id="quote-title">What should arrive?</h2>
         <div className="form-grid">
           <Field label="Destination" htmlFor="q-country">
-            <select id="q-country" value={country} onChange={(e) => { setCountry(e.target.value); setRecipientId(""); }}>
-              {(corridors.data?.items ?? []).map((c) => (
-                <option key={c.country} value={c.country}>{c.name} ({c.currency})</option>
-              ))}
+            <select id="q-country" value={country} onChange={(e) => chooseCountry(e.target.value)}>
+              <CountryOptions corridors={corridors.data?.items ?? []} withCurrency />
             </select>
           </Field>
           <Field label={`Amount the beneficiary must receive${corridor ? ` (${corridor.currency})` : ""}`} htmlFor="q-amount" error={formError}>

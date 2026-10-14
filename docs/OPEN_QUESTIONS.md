@@ -37,8 +37,11 @@ None of these may be presented as a legal limit. They are placeholders for the A
 | `bangladesh_rules.iso_purpose_code` | Purpose code in the instruction preview | Not stated until checked against the ISO 20022 external code list. The MT103 preview says so |
 | `engine.bank_cutoff_local` | 15:00 Dhaka cut-off | Assumed. Each AD bank sets its own |
 | `kyc.required_documents` | Mock KYC checklist | Real banks decide their own list |
-| `calendars.weekend.*`, `calendars.holidays.*` | Weekends and fixed-date holidays for BD and six host countries | Moon-dependent holidays (Eid, Puja) are not included. Add them from the official gazette |
+| `calendars.weekend.*`, `calendars.holidays.*` | Weekends and fixed-date holidays for BD and six host countries (every other country has a weekend only, from `countries.directory`) | Moon-dependent holidays (Eid, Puja) are not included. Add them from the official gazette |
 | `checklists.*_TUITION`, `checklists.*_LIVING` and `checklist_labels` | Indicative document lists per corridor | Each university and bank has its own list |
+| `checklists.GENERIC_TUITION`, `checklists.GENERIC_LIVING` | The general list shown for every country without its own | Country-specific documents (like a CAS or an I-20) are only loaded for the six hand-written corridors |
+| `countries.directory` | Name, currency and weekend for all 198 destination countries | Taken from Unicode CLDR (through Babel), not checked against each country's banks. No public holidays are loaded for these countries |
+| `countries.restricted` | Destinations the sandbox lists but will not quote (CU, IR, KP, SY) | A placeholder from public sanctions news, not legal advice. Which destinations a Bangladeshi AD bank refuses must come from Bangladesh Bank and the bank itself |
 
 Every one of these can be changed by an admin in the **Rules** screen without a code change; the
 change is written to the audit log with who, what and why.
@@ -80,12 +83,21 @@ change is written to the audit log with who, what and why.
   return fee. The network is a separate simulation that reuses the fee engine's pricing; a
   StudyRoute payment is still settled by the simulated provider, and linking the two is a next step.
   See `docs/BANK_NETWORK.md`.
-- **Docker.** `docker compose up --build` has **not been run** on the development machine, which has
-  no Docker. Its parts were checked one by one: the API entrypoint from a copy laid out like the
-  image, the UI built from a clean copy that honours `frontend/.dockerignore`, and the repository's
-  own `nginx.conf` in a real nginx 1.28 in front of the API (`scripts/docker_smoke.py` passes and a
-  headless Chrome walks the parent journey under the strict CSP). That run found and fixed one
-  defect: the proxy added its own security headers to API responses, so each was sent twice.
+- **Smart escrow and the chain.** The chain is an in-memory EVM, not a network: no peers, no
+  consensus, no gas, no keys. The "tokenised deposit" is a sandbox token the bank mints against a
+  simulated debit; it is not linked to the Bank network screen. The contracts target Solidity 0.8.x
+  and the `paris` EVM so they should run on other EVM-compatible chains, **but this has not been
+  tried**. Which party would really issue the token, hold the compliance key and run the nodes in a
+  Bangladeshi AD-bank setting, and what Bangladesh Bank allows for tokenised deposits, are open and
+  not answered here. See `docs/SMART_ESCROW.md`.
+- **Docker.** `docker build` and `docker compose up --build` have **not been run** on the
+  development machine, which has no Docker (not installed, no administrator rights, virtualisation
+  off). Their parts were reproduced instead: all 59 pinned Python packages have wheels for Linux
+  (`x86_64` and `aarch64`), the API ran from a clean environment built from the lock file with the
+  real `docker-entrypoint.sh` in an image-like layout, and the repository's own `nginx.conf` ran in
+  a real nginx 1.27 in front of it (`scripts/docker_smoke.py`, the 14-step demo and the 40-check
+  real-Chrome audit under the strict CSP all pass). That found and fixed two defects: duplicate
+  security headers on proxied API responses, and the demo exceeding the real sign-in rate limit.
   `docker-compose.hardened.yml` (read-only filesystem, dropped capabilities) is untested. The CI
   `docker` job builds and starts the real stack once the repository is pushed. Run
   `docker compose up --build` from a clean clone before submitting; see `docs/DOCKER.md`.

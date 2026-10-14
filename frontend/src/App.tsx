@@ -9,6 +9,7 @@ import { BankScreen } from "./screens/Bank";
 import { CompareScreen } from "./screens/Compare";
 import { DashboardScreen } from "./screens/Dashboard";
 import { DocumentsScreen } from "./screens/Documents";
+import { EscrowScreen } from "./screens/Escrow";
 import { LoginScreen } from "./screens/Login";
 import { PaymentScreen } from "./screens/Payment";
 import { PaymentsScreen } from "./screens/Payments";
@@ -46,6 +47,7 @@ export function App() {
           <Route path="audit" element={<AuditScreen />} />
           <Route path="rules" element={<RulesScreen />} />
           <Route path="bank" element={<BankScreen />} />
+          <Route path="escrow" element={<EscrowScreen />} />
           <Route path="sandbox" element={<SandboxScreen />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

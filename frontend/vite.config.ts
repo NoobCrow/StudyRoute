@@ -9,7 +9,8 @@ export default defineConfig({
     port: 5173,
     proxy: { "/api": backend, "/health": backend },
   },
-  build: { target: "es2022", sourcemap: false },
+  // assetsInlineLimit 0: the CSP has no data: in font-src, so fonts must stay separate files.
+  build: { target: "es2022", sourcemap: false, assetsInlineLimit: 0 },
   test: {
     environment: "jsdom",
     globals: true,

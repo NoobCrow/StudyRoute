@@ -5,6 +5,7 @@ import { get, patch, post } from "../api/client";
 import type { Corridor, CorridorList, Recipient } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { MfaDialog } from "../components/MfaDialog";
+import { CountryOptions } from "../components/CountryOptions";
 import { Badge, ErrorNotice, Field, Loading, Notice, PageHead } from "../components/Ui";
 import { loadHealth } from "../health";
 import { useAsync } from "../hooks";
@@ -101,7 +102,7 @@ function RecipientForm({ corridors, onCreated }: { corridors: Corridor[]; onCrea
         </Field>
         <Field label="Country" htmlFor="r-country">
           <select id="r-country" value={form.country} onChange={(e) => set("country", e.target.value)}>
-            {corridors.map((c) => <option key={c.country} value={c.country}>{c.name}</option>)}
+            <CountryOptions corridors={corridors} />
           </select>
         </Field>
         <Field label="Bank BIC (SWIFT code)" htmlFor="r-bic" hint="8 or 11 characters. The country letters must match.">

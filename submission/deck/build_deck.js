@@ -279,7 +279,36 @@ slides.push({
 });
 
 // 7 ---------------------------------------------------------------------------------------------
-const pipeline = ["1  Policy check", "2  Engine facts", "3  Mask personal data", "4  Model (optional)", "5  Number guard", "6  Tool guard", "7  Audit"];
+const escrowSteps = [
+  ["Plan", "The schedule is shown first. Nothing is locked."],
+  ["Lock", "A fresh MFA proof from the parent. The funds wait in the contract."],
+  ["Release", "On the dates chosen. A reviewer can freeze it with a reason, never move the funds."],
+  ["Privacy", "Only amounts, dates and hashes go on the chain. The AI has no access."],
+];
+slides.push({
+  layout: "content", section: "The solution", title: "Smart escrow for living costs",
+  notes:
+    "Living costs are different from tuition: they are a payment every month. Smart escrow lets the parent lock the money in a smart contract that pays on the dates they choose. " +
+    "Planning locks nothing, the schedule is shown first. Locking needs a fresh MFA proof from the parent, and then each payment is released on its date. " +
+    "A bank reviewer can freeze an escrow with a written reason but can never move the funds. Only amounts, dates and hashes go on the chain, never a name or an account number, and the AI has no permission here at all. " +
+    "The chain is simulated: an in-memory EVM running real Solidity contracts, and the tokens are not money. " +
+    "We also anchor the head of the audit log on it, so rewriting history leaves a trace that someone editing the database cannot reach.",
+  elements: [
+    ...shot("29-escrow-schedule.png", 0.58, 1.43, 5.0, 3.36, "An escrow with three monthly payments and its on-chain proof"),
+    text(0.5, 4.95, 5.2, 0.3, "Simulated chain: the tokens are not money. Synthetic data.", { size: 11, color: "text2" }),
+    ...escrowSteps.flatMap(([head, body], i) => {
+      const y = 1.4 + i * 0.9;
+      return [
+        card(6.0, y, 3.5, 0.8),
+        text(6.15, y + 0.04, 3.2, 0.28, head, { size: 14, bold: true, color: "accent1" }),
+        text(6.15, y + 0.32, 3.25, 0.46, body, { size: 11, color: "text1" }),
+      ];
+    }),
+  ],
+});
+
+// 8 ---------------------------------------------------------------------------------------------
+const pipeline =["1  Policy check", "2  Engine facts", "3  Mask personal data", "4  Model (optional)", "5  Number guard", "6  Tool guard", "7  Audit"];
 const guarantees = [
   ["Every number comes from the engine", "A number guard rejects any figure the engine did not produce, then a template answer takes over."],
   ["It can only propose", "It may make a quote. It cannot create a payment, approve, submit or cancel. A human approves with MFA."],
@@ -313,7 +342,7 @@ slides.push({
   ],
 });
 
-// 8 ---------------------------------------------------------------------------------------------
+// 9 ---------------------------------------------------------------------------------------------
 const tiers = [
   ["Public:", " sign in, health", "background2", "text1"],
   ["Read:", " own household only", "background2", "text1"],
@@ -357,7 +386,7 @@ slides.push({
   ],
 });
 
-// 9 ---------------------------------------------------------------------------------------------
+// 10 --------------------------------------------------------------------------------------------
 slides.push({
   layout: "content", section: "Trust", title: "Honest by design",
   notes:
@@ -374,19 +403,20 @@ slides.push({
   ],
 });
 
-// 10 --------------------------------------------------------------------------------------------
+// 11 --------------------------------------------------------------------------------------------
 const next = [
   ["Verified rules", "Replace each placeholder rule with an official Bangladesh Bank source."],
   ["A real AD bank partner", "Real quotes, real KYC, and regulator-ready reports from the audit log."],
   ["Credit building", "Topic C scope we have not built: help a student build a credit history abroad."],
-  ["Multi-currency management", "One view of balances and costs across the six corridors."],
+  ["A real chain", "Run the escrow contracts on a permissioned chain with a bank-issued deposit token."],
 ];
 slides.push({
   layout: "closing", section: "Close", title: "What comes next",
   notes:
     "Next steps. First, replace every placeholder rule with an official Bangladesh Bank source and add the moon-dependent holidays. " +
     "We would also add the moon-dependent holidays to the planner. Second, a partnership with an authorised dealer bank for real quotes and real KYC, and regulator-ready reports from the audit log. " +
-    "Topic C also mentions credit building and multi-currency management. We have not built those, and we would rather say so than pretend. " +
+    "Third, the escrow contracts would move from our simulated chain to a permissioned one with a deposit token issued by a bank. " +
+    "Topic C also mentions credit building. We have not built it, and we would rather say so than pretend. We do show a household's money in every currency, but those are simulated accounts, not real ones. " +
     "To close: StudyRoute is clear, cheap and safe, because the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
   elements: [
     ...next.flatMap(([head, body], i) => {

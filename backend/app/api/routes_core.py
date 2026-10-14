@@ -28,7 +28,8 @@ from app.domain.rbac import Actor, Perm
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
 from app.domain.send_plan import build_send_plan
-from app.engine.money import Money
+from app.engine import fx
+from app.engine.money import CURRENCY_EXPONENTS, Money
 from app.engine.planner import INDICATIVE, plan_deadline
 from app.engine.rates import rate_hint, synthetic_history
 from app.engine.runway import compute_runway
@@ -219,6 +220,10 @@ def corridors(
             "account_scheme": c.account_scheme,
             "host_rail": c.host_rail,
             "mid_rate": f"{rules.mid_rate(c.currency)}",
+            "exponent": CURRENCY_EXPONENTS[c.currency],
+            "featured": c.featured,
+            "restricted": c.restricted,
+            "sample_amount": str(fx.sample_amount_major(rules.mid_rate(c.currency))),
         }
         for c in rules.corridors().values()
     ]

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { get } from "../api/client";
 import type { CorridorList, Page, PaymentBrief } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { CurrencyOptions } from "../components/CountryOptions";
 import { KycCard } from "../components/KycCard";
 import { PlannerCard } from "../components/PlannerCard";
 import { RateCard } from "../components/RateCard";
@@ -82,7 +83,6 @@ export function DashboardScreen() {
   if (!user) return null;
 
   const items = corridors.data?.items ?? [];
-  const currencies = [...new Set(items.map((c) => c.currency))];
   const isAdmin = user.role === "admin";
   const canCompare = user.permissions.includes("quotes:create");
   const canPlan = user.permissions.includes("planner:read");
@@ -119,10 +119,12 @@ export function DashboardScreen() {
       {canPlan && items.length > 0 ? (
         <div className="grid two">
           <div className="stack">
-            <label className="small" htmlFor="rate-currency">Rate card currency</label>
-            <select id="rate-currency" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-              {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <div className="row">
+              <label className="small" htmlFor="rate-currency">Rate card currency</label>
+              <select id="rate-currency" className="auto-width" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                <CurrencyOptions corridors={items} />
+              </select>
+            </div>
             <RateCard currency={currency} />
           </div>
           <RunwayCard corridors={items} />

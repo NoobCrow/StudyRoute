@@ -112,7 +112,8 @@ def test_corridors_and_checklists(seeded: Database) -> None:
     with seeded.read() as session:
         rules = load_rules(session)
     assert rules.corridor("GB").currency == "GBP"
-    assert set(rules.corridors()) == {"GB", "US", "DE", "AU", "CA", "MY"}
+    featured = {code for code, c in rules.corridors().items() if c.featured}
+    assert featured == {"GB", "US", "DE", "AU", "CA", "MY"}
     checklist = rules.checklist("GB", "TUITION")
     keys = [item["key"] for item in checklist["items"]]
     assert keys[:3] == ["offer_letter", "fee_demand_note", "passport"]

@@ -5,6 +5,7 @@ import type { Corridor, PlanView } from "../api/types";
 import { formatDate } from "../lib/format";
 import { addDaysIso } from "../lib/format";
 import { useAsync } from "../hooks";
+import { CountryOptions } from "./CountryOptions";
 import { Badge, ErrorNotice, Field, Loading, Notice } from "./Ui";
 
 const STATUS = {
@@ -34,7 +35,7 @@ export function PlannerCard({ corridors }: { corridors: Corridor[] }) {
         </Field>
         <Field label="Destination" htmlFor="plan-country">
           <select id="plan-country" value={country} onChange={(e) => setCountry(e.target.value)}>
-            {corridors.map((c) => <option key={c.country} value={c.country}>{c.name}</option>)}
+            <CountryOptions corridors={corridors} />
           </select>
         </Field>
       </div>

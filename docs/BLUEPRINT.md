@@ -183,7 +183,8 @@ A parent in Bangladesh paying a student's tuition and living costs abroad faces 
 | F8     | AI explainer chat            | Answers questions using engine numbers only. Refuses unsafe actions.                                                   | MVP          |
 | F9     | Living-cost runway           | Shows how many months the sent amount covers given monthly costs.                                                      | Stretch      |
 | F10    | Rate alert and best-day hint | Shows quote history and suggests waiting or sending now. Must be labelled as indicative.                               | Stretch      |
-| F11    | Multi-corridor               | UK, US, Australia, Canada, Germany, Malaysia, with different checklists and rails.                                     | Stretch      |
+| F11    | Multi-corridor               | UK, US, Australia, Canada, Germany, Malaysia, with different checklists and rails. Every other country is also a destination, on generated defaults (13.1). | Stretch      |
+| F16    | Smart escrow and audit anchor | Tuition and living costs locked in Solidity contracts on a simulated chain and paid on their dates; MFA to lock, pay early or cancel; reviewer freeze only; audit head hashes anchored outside the database. See docs/SMART_ESCROW.md. | Stretch      |
 
 2.4 Non-goals
 
@@ -965,6 +966,20 @@ Keep every rule that can change in one file or table, never in code. Example (YA
 >
 > source_of_funds, ad_bank_form, receiving_account_details\]
 
+13.1 Destination countries (added 15 October 2026)
+
+Every country is a destination, not only the six with hand-written rules. The six (UK, US,
+Germany, Australia, Canada, Malaysia) keep their own corridor, calendar, holidays, rate and
+checklist rules and are listed first. All other countries (198 in total, Bangladesh excluded) come
+from a generated `countries` section at the end of `config/rules.yaml`: `countries.directory`
+(name, currency, weekend), `countries.rates` (an invented BDT rate per currency) and
+`countries.restricted` (CU, IR, KP and SY are listed but never quoted). A hand-written rule always
+wins over a generated one. Countries on defaults get a general document checklist that says so, an
+IBAN account format where the ISO 13616 registry has one and a plain account number elsewhere, the
+weekend from Unicode CLDR, and no public holidays. The data is written by `scripts/gen_countries.py`
+(Babel, a development tool only). The rates are invented, the weekends and the restricted list are
+`verified: false`, and every figure still says "Indicative. Confirm with your AD bank."
+
 14\. AI layer specification \[DESIGN\]
 
 14.1 Principle
@@ -1694,4 +1709,5 @@ This section records where the built sandbox goes beyond, or deliberately simpli
 | Delivery | docker-compose.yml starts the API and an nginx web server on http://localhost:8080. The security headers are in frontend/security_headers.conf. docs/SECURITY.md maps each row of 12.1 to its proof; docs/OPEN_QUESTIONS.md lists what is unverified or not built. |
 | Bank network (new, outside sections 1 to 23) | A simulated interbank network at /api/v1/bank (sandbox only): invented banks, clearing houses, a correspondent and 17 synthetic accounts in config/bank_network.yaml, a double-entry ledger (append-only), national transfers (same bank, instant, next batch, high value) and international transfers (BDT to a host bank through the correspondent, MT103 preview on the hops). A transfer is planned, then confirmed by a parent with an MFA proof bound to that transfer and an Idempotency-Key, then moved one hop at a time by the worker with one audit event per hop. Failures unwind exactly. International pricing reuses the fee engine. Permissions bank:read (parent, student, admin) and bank:transfer (parent). The AI has none. See docs/BANK_NETWORK.md. |
 | Final-readiness tools | scripts/preflight.py reports OK, FAIL and OPEN for the repository and the items only a person can do; scripts/personalize.py fills the team name and repository link into the submission documents and the deck. Neither touches git, the network or an e-mail. |
-| Demo script | Thirteen steps. Step 12 is the bank network; the audit verification is step 13 so it covers the bank events. |
+| Smart escrow (new, outside sections 1 to 23) | Solidity contracts (TokenisedDeposit, TuitionEscrow, AuditAnchor) run on an in-memory EVM (py-evm) at /api/v1/escrows and /api/v1/chain (sandbox only). The chain's history is an append-only, hash-chained table that rebuilds the EVM exactly. Locking funds, paying early and cancelling need an MFA proof bound to that escrow and an Idempotency-Key; the reviewer can freeze and unfreeze only; the audit log's head hash can be anchored on the chain and verified. Permissions escrow:read, escrow:write (parent), escrow:freeze, chain:read, chain:anchor (reviewer). The AI has none. See docs/SMART_ESCROW.md. |
+| Demo script | Fourteen steps. Step 12 is the bank network and step 13 the smart escrow; the audit verification is step 14 so it covers both. |

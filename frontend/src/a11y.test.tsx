@@ -11,6 +11,7 @@ import { useAuth } from "./auth/AuthContext";
 import { ChatPanel } from "./components/ChatPanel";
 import { SandboxBanner } from "./components/SandboxBanner";
 import { BankScreen } from "./screens/Bank";
+import { EscrowScreen } from "./screens/Escrow";
 import { CompareScreen } from "./screens/Compare";
 import { PaymentScreen } from "./screens/Payment";
 import { RecipientsScreen } from "./screens/Recipients";
@@ -18,7 +19,7 @@ import { ReportScreen } from "./screens/Report";
 import { SandboxScreen } from "./screens/Sandbox";
 import {
   BANK_NETWORK, BANK_PERMISSIONS, BANK_TOTALS, KYC, PARENT_PERMISSIONS, PLAN_CARD, QUOTE, RECIPIENT, bankAccount,
-  bankTransfer, beneficiary, chatReply, mockApi, payment, user,
+  CHAIN_STATUS, bankTransfer, beneficiary, chatReply, corridor, escrowView, mockApi, payment, tranche, user, verdict,
 } from "./test/fixtures";
 
 vi.mock("./auth/AuthContext", () => ({ useAuth: vi.fn() }));
@@ -37,7 +38,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const CORRIDORS = {
-  items: [{ country: "GB", name: "United Kingdom", currency: "GBP", account_scheme: "IBAN_OR_UK_DOMESTIC", host_rail: "x", mid_rate: "160" }],
+  items: [corridor()],
   providers: [],
 };
 
@@ -161,3 +162,43 @@ describe("accessibility (axe): bank network", () => {
   });
 });
 
+describe("accessibility (axe): smart escrow", () => {
+  it("the escrow screen with a plan form, a live escrow, a frozen one, anchors and the chain", async () => {
+    mockApi({
+      "/escrows": { items: [
+        escrowView({ tranches: [tranche(0, { state: "RELEASED" }), tranche(1, { due: true }), tranche(2)] }),
+        escrowView({ escrow_id: "esc_2", chain_status: "FROZEN", reference: "Held for review" }),
+        escrowView({ escrow_id: "esc_3", status: "PENDING_CONFIRMATION", chain_status: null, chain: null, reference: "Next term" }),
+      ] },
+      "/chain/status": CHAIN_STATUS,
+      "/chain/anchors": { items: [{ index: 0, seq: 12, head: "9".repeat(64), time: "2026-10-14T05:02:00Z" }] },
+      "/chain/verify": verdict(),
+      "/recipients": { items: [RECIPIENT] }, "/corridors": CORRIDORS, "/kyc/status": KYC,
+      "/health": { mode: "sandbox" },
+    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: user("parent", [...PARENT_PERMISSIONS, "escrow:read", "escrow:write", "chain:read"]), ready: true,
+      login: vi.fn(), logout: vi.fn(), reloadUser: vi.fn(),
+    });
+    const { container } = render(<MemoryRouter><EscrowScreen /></MemoryRouter>);
+    await screen.findAllByRole("article");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the reviewer's view with the freeze form, the clock and the verdict", async () => {
+    mockApi({
+      "/escrows": { items: [escrowView()] }, "/chain/status": CHAIN_STATUS,
+      "/chain/anchors": { items: [] }, "/chain/verify": verdict({ status: "NO_ANCHOR", anchors: [] }),
+      "/recipients": { items: [] }, "/corridors": CORRIDORS, "/health": { mode: "sandbox" },
+    });
+    vi.mocked(useAuth).mockReturnValue({
+      user: user("admin", ["escrow:read", "escrow:freeze", "chain:read", "chain:anchor", "audit:verify", "sandbox:control"]),
+      ready: true, login: vi.fn(), logout: vi.fn(), reloadUser: vi.fn(),
+    });
+    const { container } = render(<MemoryRouter><EscrowScreen /></MemoryRouter>);
+    await screen.findByRole("form", { name: /Reviewer control/ });
+    await userEvent.click(screen.getByRole("button", { name: "Verify against the chain" }));
+    await screen.findByText("Nothing anchored yet");
+    expect(await violations(container)).toEqual([]);
+  });
+});

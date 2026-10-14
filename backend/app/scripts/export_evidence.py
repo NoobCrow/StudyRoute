@@ -3,7 +3,7 @@
     python -m app.scripts.export_evidence                  # needs a running API with fresh demo data
     python -m app.scripts.export_evidence --tamper         # also records Verify FAIL then PASS
 
-Replays the thirteen-step demo against the API, then saves what happened into submission/evidence/:
+Replays the 14-step demo against the API, then saves what happened into submission/evidence/:
 
     sandbox_operation_log.txt   the demo transcript, one line per check (OK or FAIL)
     audit_log.json              every audit event, oldest first, with its hashes
@@ -11,6 +11,8 @@ Replays the thirteen-step demo against the API, then saves what happened into su
     payments.json               the payments with their tracker timelines and UETR
     bank_network.json           the simulated bank transfers with every hop, message and journal,
                                 and the trial balance that proves the books balance
+    smart_escrow.json           the escrows with their on-chain proof, the audit anchors and the
+                                check that the database still matches the chain
     tamper_demo.json            (with --tamper) Verify after an edit, and after restoring it
     README.md                   what each file is
 
@@ -44,11 +46,12 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 
 | File | What it shows |
 |------|---------------|
-| `sandbox_operation_log.txt` | The thirteen-step demo run against the API, one line per check, OK or FAIL |
+| `sandbox_operation_log.txt` | The 14-step demo run against the API, one line per check, OK or FAIL |
 | `audit_log.json` | Every audit event in order, each with `prev_event_hash` and `this_event_hash` |
 | `audit_verify.json` | The hash-chain verification: status, events checked, head hash |
 | `payments.json` | The payments created, with their state timeline and UETR |
 | `bank_network.json` | The simulated interbank transfers (national and international) with every hop, the simulated messages and the double-entry journals, plus the trial balance and mirror-account check |
+| `smart_escrow.json` | The smart escrows (schedule, state, the contract call log with its hashes), the simulated chain's status, the audit anchors written to it and the check that the database still matches the chain |
 | `tamper_demo.json` | Verify after one audit row was edited behind the application's back (FAIL at that sequence), and after it was restored (PASS). Only present when run with `--tamper` |
 
 To reproduce: start the API with fresh demo data, then run the command above.
@@ -85,6 +88,16 @@ def _bank_network(flow: DemoFlow) -> dict[str, Any]:
     return {"network": {key: network[key] for key in keys}, "transfers": transfers}
 
 
+def _smart_escrow(flow: DemoFlow) -> dict[str, Any]:
+    """The escrows with their on-chain proof, the audit anchors and the anchor check."""
+    return {
+        "escrows": flow.fetch("/escrows", "parent")["items"],
+        "chain": flow.fetch("/chain/status", "admin"),
+        "anchors": flow.fetch("/chain/anchors", "admin")["items"],
+        "anchor_check": flow.fetch("/chain/verify", "admin"),
+    }
+
+
 def _write(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -116,6 +129,7 @@ def collect_evidence(
     _write(out_dir / "audit_verify.json", verify)
     _write(out_dir / "payments.json", _payments_with_trackers(flow))
     _write(out_dir / "bank_network.json", _bank_network(flow))
+    _write(out_dir / "smart_escrow.json", _smart_escrow(flow))
     if tamper_db is not None:
         change = tamper_row(tamper_db, max(1, len(events) - 1))
         broken = flow.fetch("/audit/verify", "admin")

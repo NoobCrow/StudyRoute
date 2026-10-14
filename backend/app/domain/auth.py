@@ -7,6 +7,7 @@ Time always comes from the injected Clock, so expiry is testable.
 from __future__ import annotations
 
 import secrets
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any
@@ -25,7 +26,14 @@ from app.domain.constants import ActorKind
 from app.domain.rbac import ROLE_PERMISSIONS, Actor, make_actor
 from app.models import MfaProof, RefreshToken, User
 
-MFA_SCOPES = ("approve_payment", "allowlist_recipient", "confirm_bank_transfer")
+MFA_SCOPES = (
+    "approve_payment",
+    "allowlist_recipient",
+    "confirm_bank_transfer",
+    "confirm_escrow",
+    "release_escrow",
+    "cancel_escrow",
+)
 TOTP_STEP_SECONDS = 30
 
 
@@ -220,6 +228,58 @@ def ensure_not_locked(until: datetime | None, now: datetime) -> None:
         raise errors.RateLimited(
             "Too many failed attempts. Try again later.", headers={"Retry-After": str(wait)}
         )
+
+
+class FailedLoginTracker:
+    """Counts failed sign-ins per e-mail address, whether or not an account exists.
+
+    Without this, repeated failures lock a REAL account (answer 429) but never an unknown one
+    (answer 401), and the difference tells an attacker which e-mail addresses have accounts. Here
+    both lock the same way after the same number of failures and give the same answer. The count
+    lives in memory (the database lock for real accounts still survives a restart) and the table is
+    capped, so it cannot be grown without limit by trying endless made-up addresses."""
+
+    MAX_ENTRIES = 10_000
+
+    def __init__(self, clock: Any, max_failures: int, lock_seconds: int) -> None:
+        self._clock = clock
+        self._max = max_failures
+        self._lock_seconds = lock_seconds
+        self._lock = threading.Lock()
+        self._entries: dict[str, tuple[int, datetime | None]] = {}
+
+    def ensure_open(self, key: str) -> None:
+        now = self._clock.now()
+        with self._lock:
+            _, locked_until = self._entries.get(key, (0, None))
+        ensure_not_locked(locked_until, now)
+
+    def fail(self, key: str) -> None:
+        now = self._clock.now()
+        with self._lock:
+            count, locked_until = self._entries.get(key, (0, None))
+            if locked_until is not None and now >= locked_until:
+                count, locked_until = 0, None
+            count += 1
+            if count >= self._max:
+                count, locked_until = 0, now + timedelta(seconds=self._lock_seconds)
+            self._entries[key] = (count, locked_until)
+            if len(self._entries) > self.MAX_ENTRIES:
+                self._purge(now)
+
+    def clear(self, key: str) -> None:
+        with self._lock:
+            self._entries.pop(key, None)
+
+    def _purge(self, now: datetime) -> None:
+        expired = [
+            k for k, (_, until) in self._entries.items() if until is not None and now >= until
+        ]
+        for key in expired:
+            del self._entries[key]
+        while len(self._entries) > self.MAX_ENTRIES:  # still too many: drop the oldest tenth
+            for key in list(self._entries)[: self.MAX_ENTRIES // 10]:
+                del self._entries[key]
 
 
 # --- MFA ----------------------------------------------------------------------------------

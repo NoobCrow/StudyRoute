@@ -51,6 +51,14 @@ class BankTransferStatus(StrEnum):
     CANCELLED = "CANCELLED"
 
 
+class EscrowStatus(StrEnum):
+    """Where an escrow plan stands in the app. What is on the chain is read from the chain."""
+
+    PENDING_CONFIRMATION = "PENDING_CONFIRMATION"
+    ON_CHAIN = "ON_CHAIN"
+    ABANDONED = "ABANDONED"
+
+
 class RecipientType(StrEnum):
     UNIVERSITY = "UNIVERSITY"
     STUDENT = "STUDENT"

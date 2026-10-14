@@ -60,6 +60,10 @@ AUDIT_TRIGGERS = (
        BEGIN SELECT RAISE(ABORT, 'ledger_journals is append-only: UPDATE blocked'); END""",
     """CREATE TRIGGER IF NOT EXISTS ledger_journals_no_delete BEFORE DELETE ON ledger_journals
        BEGIN SELECT RAISE(ABORT, 'ledger_journals is append-only: DELETE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS chain_log_no_update BEFORE UPDATE ON chain_log
+       BEGIN SELECT RAISE(ABORT, 'chain_log is append-only: UPDATE blocked'); END""",
+    """CREATE TRIGGER IF NOT EXISTS chain_log_no_delete BEFORE DELETE ON chain_log
+       BEGIN SELECT RAISE(ABORT, 'chain_log is append-only: DELETE blocked'); END""",
 )
 
 

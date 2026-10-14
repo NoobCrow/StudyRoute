@@ -44,7 +44,7 @@ docker compose down -v               # stop and DELETE the data: the next start 
 Run the repository's own scripts inside the API container:
 
 ```bash
-docker compose exec backend python -m app.scripts.demo_flow      # 13-step demo check
+docker compose exec backend python -m app.scripts.demo_flow      # 14-step demo check
 docker compose exec backend python -m app.scripts.tamper_audit   # edit the log, then Verify FAIL
 docker compose exec backend python -m app.scripts.check_ai       # after you add an LLM key
 ```
@@ -106,18 +106,27 @@ fails to start with it, fall back to the normal command.
 
 ## What was and was not tested
 
-The development machine had no Docker, so `docker compose up` itself has not been run there.
-What was checked instead, and what covers the rest:
+The development machine had no Docker (not installed, no administrator rights, virtualisation
+off), so `docker build` and `docker compose up` themselves have **not** been run there. Everything
+a container does was reproduced piece by piece instead, and the rest is covered by tests and CI:
 
-- The API entrypoint run natively from a copy laid out exactly like the image (runtime
-  requirements only, seeded on first start, serving in about two seconds).
-- The frontend built from a clean copy that honours `frontend/.dockerignore` (`npm ci` then
-  `npm run build`).
-- The repository's own `nginx.conf` and `security_headers.conf` run in a real nginx 1.28 in front
-  of that API: `nginx -t` passes, `scripts/docker_smoke.py` passes every check, and a headless
-  Chrome walks the whole parent journey with the strict content security policy enforced and no
-  console error. That run found and fixed a real defect (the proxy added the web page's security
-  headers on top of the API's own, so each API response carried them twice).
+- **The pinned dependencies fit the image.** `backend/requirements.txt` was resolved for the
+  container's platform (Linux, Python 3.12, `x86_64` and `aarch64`): all 59 pins have a published
+  wheel, so the build never has to compile C code. The frontend lock file carries the Linux
+  (including musl) native builds that `npm ci` needs inside the Alpine image.
+- **The API as the image runs it.** A clean virtual environment built from that lock file only
+  (runtime requirements, nothing else) and the repository's real `docker-entrypoint.sh`, in a
+  `/srv`-style layout with `DATA_DIR`, `RULES_FILE` and `BANK_NETWORK_FILE` set the way the
+  Dockerfile sets them: seeds on first start, serves with the container's uvicorn flags
+  (`--proxy-headers`, `--no-access-log`, `--no-server-header`).
+- **The web container.** The repository's own `nginx.conf` and `security_headers.conf` run in a
+  real nginx 1.27 in front of that API on port 8080: `scripts/docker_smoke.py` passes every check,
+  the 14-step `demo_flow` passes through it from a fresh database, and the real-Chrome audit
+  (`scripts/security/browser_audit.mjs`) passes 40 of 40 checks under the production content
+  security policy. These runs found and fixed two real defects: the proxy added the web page's
+  security headers on top of the API's own (each API response carried them twice), and the demo
+  tripped the 10-a-minute sign-in limit the first time it ran against the real rate limits (it now
+  waits as the server asks; a test keeps it so).
 - Static tests in `backend/tests/test_docker_config.py` and `test_docker_smoke.py`.
 - The GitHub Actions `docker` job builds both images, starts the stack with `docker compose up`,
   runs `scripts/docker_smoke.py` and the demo flow, and tears it down. It runs when the repository

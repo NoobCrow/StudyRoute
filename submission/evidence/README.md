@@ -5,11 +5,12 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 
 | File | What it shows |
 |------|---------------|
-| `sandbox_operation_log.txt` | The thirteen-step demo run against the API, one line per check, OK or FAIL |
+| `sandbox_operation_log.txt` | The 14-step demo run against the API, one line per check, OK or FAIL |
 | `audit_log.json` | Every audit event in order, each with `prev_event_hash` and `this_event_hash` |
 | `audit_verify.json` | The hash-chain verification: status, events checked, head hash |
 | `payments.json` | The payments created, with their state timeline and UETR |
 | `bank_network.json` | The simulated interbank transfers (national and international) with every hop, the simulated messages and the double-entry journals, plus the trial balance and mirror-account check |
+| `smart_escrow.json` | The smart escrows (schedule, state, the contract call log with its hashes), the simulated chain's status, the audit anchors written to it and the check that the database still matches the chain |
 | `tamper_demo.json` | Verify after one audit row was edited behind the application's back (FAIL at that sequence), and after it was restored (PASS). Only present when run with `--tamper` |
 
 To reproduce: start the API with fresh demo data, then run the command above.

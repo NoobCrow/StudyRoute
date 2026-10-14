@@ -15,6 +15,7 @@ from app.api import (
     routes_auth,
     routes_bank,
     routes_core,
+    routes_escrow,
     routes_payments,
     routes_sandbox,
     routes_webhooks,
@@ -79,6 +80,7 @@ def create_app(
         routes_assistant,
         routes_sandbox,
         routes_bank,
+        routes_escrow,
     ):
         api.include_router(module.router)
 

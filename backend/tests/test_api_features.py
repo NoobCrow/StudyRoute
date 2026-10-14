@@ -121,7 +121,16 @@ def test_reset_my_data_removes_business_data_but_keeps_the_audit_chain(world: Wo
     assert len(world.audit_rows(action="user.data_reset")) == 1
 
 
-def test_corridors_listing_shows_all_six_destinations(world: World) -> None:
+def test_corridors_listing_covers_every_country_with_the_six_featured_first(world: World) -> None:
     items = world.call("GET", "/corridors").json()["items"]
-    assert {c["country"] for c in items} == {"GB", "US", "DE", "AU", "CA", "MY"}
+    codes = [c["country"] for c in items]
+    assert len(items) >= 190 and len(set(codes)) == len(codes)
+    assert "BD" not in codes
+    assert [c["country"] for c in items if c["featured"]] == ["AU", "CA", "DE", "GB", "MY", "US"]
+    assert codes[:6] == ["AU", "CA", "DE", "GB", "MY", "US"]
     assert next(c for c in items if c["country"] == "GB")["currency"] == "GBP"
+    assert next(c for c in items if c["country"] == "JP")["currency"] == "JPY"
+    assert all(c["sample_amount"].isdigit() and int(c["sample_amount"]) >= 1 for c in items)
+    exponents = {c["currency"]: c["exponent"] for c in items}
+    assert (exponents["GBP"], exponents["JPY"], exponents["KWD"]) == (2, 0, 3)
+    assert {c["country"] for c in items if c["restricted"]} == {"CU", "IR", "KP", "SY"}

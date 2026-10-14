@@ -7,7 +7,8 @@ below, each under its own licence, and no third-party data set. The exchange rat
 providers, fees, people and accounts in the sandbox are invented by the team. The
 competition rules require third-party components to be properly licensed; this is the
 inventory. Only direct dependencies are listed; the exact versions of everything
-installed are pinned in `backend/requirements.txt` and `frontend/package-lock.json`.
+installed are pinned in `backend/requirements.txt`, `frontend/package-lock.json` and
+`contracts/package-lock.json`.
 
 ## Backend runtime (Python 3.12)
 
@@ -16,8 +17,10 @@ installed are pinned in `backend/requirements.txt` and `frontend/package-lock.js
 | anthropic | 1.13.0 | MIT License |
 | argon2-cffi | 25.1.0 | MIT |
 | cryptography | 50.0.2 | Apache-2.0 OR BSD-3-Clause |
+| eth_abi | 6.0.0 | MIT |
 | fastapi | 0.143.0 | MIT |
 | httpx | 0.28.1 | BSD License |
+| py-evm | 0.12.1b1 | MIT License |
 | pydantic | 2.14.1 | MIT |
 | pydantic-settings | 2.15.0 | MIT |
 | PyJWT | 2.15.1 | MIT |
@@ -38,6 +41,9 @@ installed are pinned in `backend/requirements.txt` and `frontend/package-lock.js
 
 | Package | Version | Licence |
 |---------|---------|---------|
+| @fontsource-variable/inter | 5.3.0 | OFL-1.1 |
+| @fontsource-variable/jetbrains-mono | 5.3.0 | OFL-1.1 |
+| @fontsource-variable/source-serif-4 | 5.3.1 | OFL-1.1 |
 | react | 19.3.0 | MIT |
 | react-dom | 19.3.0 | MIT |
 | react-router-dom | 7.18.4 | MIT |
@@ -59,8 +65,21 @@ installed are pinned in `backend/requirements.txt` and `frontend/package-lock.js
 | vite | 8.3.4 | MIT |
 | vitest | 5.0.4 | MIT |
 
+## Smart-contract build tools (`contracts/`, development only)
+
+The backend runs the committed, compiled contracts and never installs these.
+
+| Package | Version | Licence |
+|---------|---------|---------|
+| js-sha3 | 0.9.3 | MIT |
+| solc | 0.8.37 | MIT |
+
 ## Notes
 
-- Fonts: none are bundled; the UI uses the system font stack.
+- Fonts: Inter, Source Serif 4 and JetBrains Mono ship with the `@fontsource-variable`
+  packages above (SIL Open Font License 1.1). They are self-hosted: nothing is loaded
+  from the internet.
+- `py-evm` (an in-memory EVM) and `eth-abi` run the sandbox chain; both are pinned.
+- The Solidity contracts in `contracts/src/` are the team's own (MIT licence headers).
 - Images: only the team's own favicon and screenshots of the application.
 - A project licence for StudyRoute itself is the team's decision and is not set here.

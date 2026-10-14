@@ -41,6 +41,7 @@ def test_the_evidence_files_are_written_and_the_demo_passed(world: World, tmp_pa
         "audit_verify.json",
         "payments.json",
         "bank_network.json",
+        "smart_escrow.json",
         "README.md",
     ):
         assert (out / name).is_file(), name
@@ -62,6 +63,10 @@ def test_the_evidence_files_are_written_and_the_demo_passed(world: World, tmp_pa
     assert statuses == ["RETURNED", "SETTLED", "SETTLED"]
     assert {t["kind"] for t in bank["transfers"]} == {"NATIONAL", "INTERNATIONAL"}
     assert all(t["journals"] and t["events"] for t in bank["transfers"])
+    escrow = json.loads((out / "smart_escrow.json").read_text("utf-8"))
+    assert escrow["escrows"] and escrow["anchors"]
+    assert escrow["chain"]["integrity"]["ok"] is True
+    assert escrow["anchor_check"]["status"] == "PASS"
 
 
 def test_the_tamper_demo_records_fail_then_pass(world: World, tmp_path: Path) -> None:

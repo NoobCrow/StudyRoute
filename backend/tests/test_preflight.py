@@ -81,9 +81,9 @@ def test_the_deck_text_includes_slides_and_speaker_notes(tmp_path: Path) -> None
 
 
 @pytest.mark.parametrize(
-    ("slides", "notes", "status"), [(10, 10, "OK"), (9, 10, "FAIL"), (10, 0, "FAIL")]
+    ("slides", "notes", "status"), [(11, 11, "OK"), (10, 11, "FAIL"), (11, 0, "FAIL")]
 )
-def test_the_deck_must_have_ten_slides_with_notes(
+def test_the_deck_must_have_eleven_slides_with_notes(
     tmp_path: Path, slides: int, notes: int, status: str
 ) -> None:
     (tmp_path / "submission").mkdir()

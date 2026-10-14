@@ -1,9 +1,10 @@
 # Deck outline (blueprint 19.2) as slide text
 
-Ten slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
-rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **7.5
-minutes** of speech, so keep any live demo to **2 minutes** (the scene list in `VIDEO_SCRIPT.md`
-is the 4.5-minute version for the recorded video). Screenshots come from the running app; they are
+Eleven slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
+rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.5
+minutes** of speech at a brisk 160 words a minute (a calmer 140 is closer to 9.6), so keep any
+live demo to **1 minute** or none and point to the recorded video (`VIDEO_SCRIPT.md` is its scene
+list, 4:50). Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
 in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
 Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
 
@@ -41,25 +42,32 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Integer minor units and `Decimal` rates; no floats.
 - Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once, because fixed fees are paid on every transfer.
 
-## 7. AI that cannot cheat
+## 7. Smart escrow for living costs
+- The parent locks money in a smart contract that pays on dates they choose; tuition is one payment, living costs one a month.
+- Plan first (nothing locked), then lock with a fresh MFA proof. A reviewer can freeze with a reason but never move funds. The AI has no permission here.
+- Only amounts, dates and hashes go on the chain. The chain is simulated (in-memory EVM, real Solidity); the tokens are not money. The head of the audit log is anchored on it.
+- Screenshot: an escrow with its on-chain proof (`29-escrow-schedule.png`); the whole page is `27-smart-escrow.png`.
+
+## 8. AI that cannot cheat
 - Pipeline: policy check, facts from the engine, masking, model (optional), number guard, tool guard, audit.
 - The number guard blocks any figure the engine did not produce. Template mode works with no key.
 - The AI proposes; it may make a quote, but it has no approve, submit, cancel, limit or config tool and cannot create a payment.
 
-## 8. Security and compliance
+## 9. Security and compliance
 - Threat and control matrix with a proof for every row (`docs/SECURITY.md`).
 - KYC gate, MFA-bound approval tied to a summary hash, idempotency, HMAC webhooks, rate limits, CSP.
-- Audit chain: Verify PASS, then Verify FAIL after an edit. Each payment has a compliance report whose hash the browser verifies.
+- Audit chain: Verify PASS, then Verify FAIL after an edit; the head of the chain is anchored on the simulated chain. Each payment has a compliance report whose hash the browser verifies.
 
-## 9. Sandbox honesty
+## 10. Sandbox honesty
 - Synthetic data everywhere, labelled on every screen.
 - Rules in config with source, last checked and a verified flag; yellow "Not verified" badges.
 - "Indicative. Confirm with your AD bank." Never "this is legal".
 
-## 10. Impact and next steps
+## 11. Impact and next steps
 - More corridors and a verified rule set; moon-dependent holidays.
 - A real AD bank partnership for quotes and KYC.
-- Regulator reporting built on the compliance report. Credit building and multi-currency management (named in Topic C, not built).
+- The escrow contracts on a permissioned chain with a bank-issued deposit token.
+- Regulator reporting built on the compliance report. Credit building (named in Topic C, not built).
 
 ## Demo order (3 to 5 minutes)
 Follow blueprint 19.1 or run `python -m app.scripts.demo_flow` first to rehearse. Keep the security

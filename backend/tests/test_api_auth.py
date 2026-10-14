@@ -140,3 +140,46 @@ def test_forged_tampered_and_unsigned_tokens_are_rejected(world: World) -> None:
 def test_missing_or_wrong_scheme_is_401(world: World) -> None:
     assert world.client.get("/api/v1/me").status_code == 401
     assert world.client.get("/api/v1/me", headers={"Authorization": "Basic abc"}).status_code == 401
+
+
+def test_real_and_made_up_addresses_lock_the_same_way_so_accounts_cannot_be_discovered(
+    world: World,
+) -> None:
+    """After repeated failures a real account answered 429 while an unknown address kept answering
+    401, which told an attacker which e-mail addresses have accounts. Both must now look alike."""
+
+    def burst(email: str) -> list[int]:
+        return [login(world, email, "wrong-password").status_code for _ in range(7)]
+
+    real, unknown = burst(EMAILS["student"]), burst("nobody@nowhere.test")
+    assert real == unknown == [401] * 5 + [429] * 2
+    a, b = login(world, EMAILS["student"], "x"), login(world, "nobody@nowhere.test", "x")
+    assert a.status_code == b.status_code == 429
+    assert a.json()["detail"] == b.json()["detail"] and a.json()["code"] == b.json()["code"]
+    assert a.headers["retry-after"] == b.headers["retry-after"]
+    assert login(world, EMAILS["student"], PASSWORD).status_code == 429, (
+        "even the right password waits"
+    )
+    world.clock.advance(901)
+    assert login(world, EMAILS["student"], PASSWORD).status_code == 200
+    assert login(world, "nobody@nowhere.test", "x").status_code == 401, "the lock expired for both"
+
+
+def test_a_good_sign_in_resets_the_failure_count(world: World) -> None:
+    for _ in range(4):
+        assert login(world, EMAILS["parent"], "wrong-password").status_code == 401
+    assert login(world, EMAILS["parent"], PASSWORD).status_code == 200
+    for _ in range(4):
+        assert login(world, EMAILS["parent"], "wrong-password").status_code == 401, "a fresh count"
+
+
+def test_the_failed_login_table_cannot_be_grown_without_limit() -> None:
+    from datetime import UTC, datetime
+
+    from app.core.clock import FakeClock
+    from app.domain.auth import FailedLoginTracker
+
+    tracker = FailedLoginTracker(FakeClock(datetime(2026, 10, 14, tzinfo=UTC)), 5, 900)
+    for n in range(FailedLoginTracker.MAX_ENTRIES + 3_000):
+        tracker.fail(f"made-up-{n}")
+    assert len(tracker._entries) <= FailedLoginTracker.MAX_ENTRIES

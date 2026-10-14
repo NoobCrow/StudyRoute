@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **760 tests** in 59 files. Last run: `760 passed in 123.73s (0:02:03)`.
-- Frontend: **93 tests** in 12 files (Vitest).
+- Backend: **897 tests** in 65 files. Last run: `897 passed in 127.20s (0:02:07)`.
+- Frontend: **126 tests** in 16 files (Vitest).
 
 ```bash
 cd backend  && pytest -q
@@ -64,10 +64,11 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_ai_tools.py` | 6 |  |
 | `tests/test_api_ai_rbac.py` | 4 | The AI service account is read/draft only (T09). |
 | `tests/test_api_audit_config.py` | 7 | Audit endpoints (T16 through the API) and the admin rules configuration. |
-| `tests/test_api_auth.py` | 11 | Login, lockout, token rules and the auth rate limit (T22). |
+| `tests/test_api_auth.py` | 14 | Login, lockout, token rules and the auth rate limit (T22). |
 | `tests/test_api_bank.py` | 39 | The sandbox bank network through the API: national and international transfers end to end. |
 | `tests/test_api_compliance.py` | 10 | Mock sanctions screening (T17), sandbox caps (T18) and the KYC gate. |
 | `tests/test_api_compliance_report.py` | 10 | GET /payments/{id}/compliance-report: a regulator-style evidence pack for one payment. |
+| `tests/test_api_escrow.py` | 24 | Programmable escrow on the sandbox chain, through the API. Planning is free. Locking funds, paying early and cancelling need MFA for that exact escrow. The schedule pays itself, the bank's reviewer can freeze (and nothing more), and the AI has no escrow permission at all. |
 | `tests/test_api_features.py` | 10 | Planner, checklist, documents, tracker, instruction preview, listings and data reset. |
 | `tests/test_api_idempotency.py` | 8 | Idempotency keys (T04, T05) and optimistic locking against double approval. |
 | `tests/test_api_payment_guards.py` | 11 | MFA proofs (T08), summary-hash binding, illegal transitions (T15), cancel and reject. |
@@ -82,11 +83,15 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_audit.py` | 12 | Audit log: append-only, hash-chained, tamper-evident (blueprint 15, test T16). |
 | `tests/test_bank_setup.py` | 6 | The bank network configuration and how the seed script adds it to an existing database. |
 | `tests/test_blueprint_coverage.py` | 2 | Traceability: every blueprint test ID (T01..T24, section 16) must have at least one test. |
+| `tests/test_chain_contracts.py` | 26 | The three Solidity contracts, run for real on the in-memory EVM. These are the contract tests: access control, who may move funds and when, the compliance freeze, and the rule that the escrow always holds exactly what is still locked. |
+| `tests/test_chain_service.py` | 16 | The chain service: a hash-chained log that rebuilds the in-memory EVM exactly. |
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
-| `tests/test_demo_flow.py` | 1 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
+| `tests/test_countries.py` | 17 | Every country is a destination: generated defaults sit under the six hand-written corridors. The hand-written rules (GB, US, DE, AU, CA, MY) must win. Everything else comes from the `countries` section of config/rules.yaml, which scripts/gen_countries.py writes. |
+| `tests/test_demo_flow.py` | 2 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
 | `tests/test_docker_config.py` | 17 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
 | `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
+| `tests/test_engine_escrow_schedule.py` | 10 | Escrow release schedules: integer money, no rounding drift, month-end dates. |
 | `tests/test_engine_interbank.py` | 23 | Interbank engine: balanced journals, rails, and numbers that agree with the fee engine. |
 | `tests/test_engine_money.py` | 11 | Money type: integer minor units, Decimal rounding, no floats. |
 | `tests/test_engine_mt103.py` | 5 |  |
@@ -102,6 +107,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
 | `tests/test_security.py` | 12 | Headers, CORS, body limits, XSS handling (T23) and log privacy (T24). |
+| `tests/test_security_households.py` | 6 | Two unrelated households: nothing crosses between them. The household is the security boundary of the product. A second family signs in and tries to read, change or borrow the first family's records, MFA proofs and idempotency keys. Everything must answer 403 or 404 and reveal nothing. |
 | `tests/test_security_self_assessment.py` | 3 | The permission matrix in docs/SECURITY_SELF_ASSESSMENT.md must equal the code. |
 | `tests/test_simulator.py` | 5 | The provider simulator: approval -> submit -> signed webhook -> settled / failed. |
 | `tests/test_state_machine.py` | 16 | Payment state machine (blueprint 10). T15 and the guard behaviour. |
@@ -112,15 +118,19 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 
 | File | Tests |
 |------|-------|
-| `frontend/src/a11y.test.tsx` | 9 |
+| `frontend/src/a11y.test.tsx` | 11 |
 | `frontend/src/api/client.test.ts` | 6 |
+| `frontend/src/components/CountryOptions.test.tsx` | 4 |
 | `frontend/src/components/components.test.tsx` | 8 |
 | `frontend/src/components/tasks.test.tsx` | 7 |
 | `frontend/src/lib/canonical.test.ts` | 4 |
+| `frontend/src/lib/corridors.test.ts` | 8 |
 | `frontend/src/lib/lib.test.ts` | 21 |
 | `frontend/src/screens/Bank.test.tsx` | 17 |
-| `frontend/src/screens/Compare.test.tsx` | 5 |
+| `frontend/src/screens/Compare.test.tsx` | 7 |
+| `frontend/src/screens/Escrow.test.tsx` | 13 |
 | `frontend/src/screens/Payment.test.tsx` | 5 |
 | `frontend/src/screens/Recipients.test.tsx` | 3 |
 | `frontend/src/screens/Report.test.tsx` | 4 |
 | `frontend/src/screens/Sandbox.test.tsx` | 4 |
+| `frontend/src/theme.test.tsx` | 4 |

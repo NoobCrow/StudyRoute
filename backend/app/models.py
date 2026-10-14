@@ -23,6 +23,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base, UTCDateTime
 from app.domain.constants import (
     BankTransferStatus,
+    EscrowStatus,
     KycStatus,
     PaymentState,
     RecipientType,
@@ -404,3 +405,53 @@ class BankTransferEvent(Base):
     event: Mapped[str] = mapped_column(String(32))
     note: Mapped[str] = mapped_column(String(240), default="")
     message_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+
+
+class Escrow(Base):
+    """A planned or live sandbox escrow. The tranche states themselves live on the chain."""
+
+    __tablename__ = "escrows"
+    __table_args__ = (
+        CheckConstraint(f"status IN ({sql_in(EscrowStatus)})", name="ck_escrows_status"),
+        Index("ix_escrows_owner_created", "owner_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    created_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
+    recipient_id: Mapped[str] = mapped_column(ForeignKey("recipients.id"))
+    purpose: Mapped[str] = mapped_column(String(10))
+    currency: Mapped[str] = mapped_column(String(3))
+    total_minor: Mapped[int] = mapped_column(BigInteger)
+    cadence: Mapped[str] = mapped_column(String(8))
+    reference: Mapped[str] = mapped_column(String(140))
+    plan_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    plan_hash: Mapped[str] = mapped_column(String(80))
+    status: Mapped[str] = mapped_column(String(24))
+    chain_escrow_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    confirmed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    __mapper_args__ = {"version_id_col": version}
+
+
+class ChainLog(Base):
+    """Everything that happened on the sandbox chain, in order. Append-only and hash-chained:
+    each row's hash covers the one before it, and replaying the rows rebuilds the chain exactly."""
+
+    __tablename__ = "chain_log"
+
+    seq: Mapped[int] = mapped_column(Integer, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(8))  # DEPLOY, CALL or TIME
+    contract: Mapped[str] = mapped_column(String(40))  # a label such as "escrow" or "token:GBP"
+    function: Mapped[str | None] = mapped_column(String(40), nullable=True)  # DEPLOY: the artifact
+    caller: Mapped[str] = mapped_column(String(80))  # the wallet label that sent it
+    args_json: Mapped[list[Any]] = mapped_column(JSON)
+    at: Mapped[int] = mapped_column(BigInteger)  # chain time, in epoch seconds
+    ref: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    actor_id: Mapped[str] = mapped_column(String(40))
+    prev_hash: Mapped[str] = mapped_column(String(64))
+    tx_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)

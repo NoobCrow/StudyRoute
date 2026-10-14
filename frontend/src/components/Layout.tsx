@@ -1,7 +1,9 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext";
+import { BrandMark } from "./BrandMark";
 import { ChatPanel } from "./ChatPanel";
+import { ThemeToggle } from "./ThemeToggle";
 import { Badge } from "./Ui";
 
 interface NavItem { to: string; label: string; roles: string[] }
@@ -15,6 +17,7 @@ const NAV: NavItem[] = [
   { to: "/audit", label: "Audit log", roles: ["parent", "admin"] },
   { to: "/rules", label: "Rules", roles: ["parent", "student", "admin"] },
   { to: "/bank", label: "Bank network", roles: ["parent", "student", "admin"] },
+  { to: "/escrow", label: "Smart escrow", roles: ["parent", "student", "admin"] },
   { to: "/sandbox", label: "Sandbox", roles: ["parent", "student", "admin"] },
 ];
 
@@ -35,7 +38,7 @@ export function Layout() {
       <header className="app-header">
         <div className="inner">
           <NavLink to="/" className="brand" aria-label="StudyRoute home">
-            <span className="brand-mark" aria-hidden="true" />
+            <BrandMark />
             StudyRoute
           </NavLink>
           <nav className="nav" aria-label="Main">
@@ -48,6 +51,7 @@ export function Layout() {
           <div className="user-box">
             <span>{user.display_name}</span>
             <Badge tone="info">{user.role}</Badge>
+            <ThemeToggle />
             <button type="button" className="btn small" onClick={signOut}>Sign out</button>
           </div>
         </div>

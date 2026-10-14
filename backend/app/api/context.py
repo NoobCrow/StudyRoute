@@ -47,3 +47,6 @@ class AppContext:
     sandbox: Any = None  # the sandbox service, set by the container
     reports: Any = None  # the compliance report service, set by the container
     bank: Any = None  # the sandbox bank network, set by the container
+    chain: Any = None  # the sandbox chain (EVM log and replay), set by the container
+    escrow: Any = None  # programmable escrow on the sandbox chain, set by the container
+    login_attempts: Any = None  # failed-sign-in counter per e-mail, set by the container

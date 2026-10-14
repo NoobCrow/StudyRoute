@@ -169,7 +169,7 @@ class RecipientService:
             raise errors.Forbidden("Recipients belong to a paying parent.")
         if payload.type not in {t.value for t in RecipientType}:
             raise errors.ValidationFailed("Recipient type must be UNIVERSITY or STUDENT.")
-        corridor = rules.corridor(payload.country)
+        corridor = rules.open_corridor(payload.country)
         name = clean_name(payload.display_name)
         self.block_if_sanctioned(session, actor, rules, name, None)
         account = normalize_account(corridor, payload)

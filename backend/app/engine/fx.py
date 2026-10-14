@@ -11,6 +11,7 @@ _RATE_QUANTUM = Decimal(1).scaleb(-RATE_PLACES)
 _PCT_QUANTUM = Decimal("0.01")
 _PRECISION = 60
 BDT = "BDT"
+SAMPLE_BDT = Decimal(1_600_000)
 
 
 def to_rate(value: Decimal | str | int) -> Decimal:
@@ -55,3 +56,17 @@ def bdt_to_foreign_minor(bdt_minor: int, foreign_currency: str, rate: Decimal) -
 def pct_display(value: Decimal) -> str:
     """Two decimal places, half-up, as a plain string such as 1.58."""
     return str(value.quantize(_PCT_QUANTUM, rounding=ROUND_HALF_UP))
+
+
+def sample_amount_major(mid_rate: Decimal) -> int:
+    """A round amount, in whole units, worth about BDT 1,600,000. It is only a form default.
+
+    One significant figure, never below 1, so a country whose money is worth very little
+    (or a lot) per unit still starts with a sensible number instead of a fixed 10,000.
+    """
+    with localcontext() as ctx:
+        ctx.prec = _PRECISION
+        raw = SAMPLE_BDT / to_rate(mid_rate)
+        magnitude = Decimal(10) ** (raw.adjusted())
+        rounded = (raw / magnitude).quantize(Decimal(1), rounding=ROUND_HALF_UP) * magnitude
+        return max(1, int(rounded))

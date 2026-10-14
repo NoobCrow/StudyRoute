@@ -15,8 +15,8 @@ usually the larger cost.
 
 Topic C asks for solutions to real financial pain points of international students and
 cross-border users, such as remittances, tuition payments, credit building and multi-currency
-management. StudyRoute covers remittances and tuition payments end to end; credit building and
-multi-currency management are next steps.
+management. StudyRoute covers remittances and tuition payments end to end and shows a household's
+money in every currency (simulated accounts); credit building is a next step.
 
 ## The solution
 
@@ -27,8 +27,9 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
   short. In the worked example (GBP 10,000, synthetic rates) it ranks Provider B first at 1.58%,
   C second at 1.63% with a GBP 35 shortfall warning, and A third at 2.16%.
 - **Plans the deadline** backwards from the university due date over both countries' working
-  days and the bank cut-off, and keeps a document checklist per corridor (UK, US, Germany,
-  Australia, Canada, Malaysia).
+  days and the bank cut-off, and keeps a document checklist per corridor. Every country is a
+  destination; six (UK, US, Germany, Australia, Canada, Malaysia) have their own rules and the
+  rest run on clearly labelled generated defaults.
 - **Guides a safe approval.** A mock KYC gate, recipient allowlisting, sandbox limits and a
   sanctions check must pass. The parent reads one approval summary with an MT103 preview
   (originator and beneficiary data, charge code, reference), then approves with a fresh MFA code.
@@ -64,6 +65,13 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
    the simulated MT103 and the journals visible. A rejected payment is returned in full, and a
    books-balance check (debits equal credits, every nostro equals its mirror) stays green. The AI has no
    permission to touch it.
+7. **Smart escrow on a simulated chain.** For living costs a parent can lock money in a smart contract
+   that pays on the dates they choose. The contracts are real Solidity, run in an in-memory EVM
+   inside the sandbox; planning locks nothing, locking needs a fresh MFA proof bound to that escrow,
+   and a bank reviewer can freeze an escrow with a reason but can never move the funds. Only
+   amounts, dates and hashes go on the chain, never a name or an account number. The head of the
+   audit hash chain is also anchored on the chain, so rewriting history leaves a trace a database
+   editor cannot reach. The AI has no permission here. The tokens are not money.
 
 ## Security and compliance in the demo
 
@@ -78,8 +86,8 @@ with your AD bank." The app never claims a live bank or a live FX feed.
 
 A FastAPI and SQLite backend (engine, domain, audit, mock providers, AI layer), a React and
 TypeScript web app (dashboard, compare, recipients, documents, payment with approval and tracker,
-audit log, rules, bank network, chat), over 600 backend tests that trace to all 24 blueprint scenarios (T01 to
-T24), over 85 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
+audit log, rules, bank network, smart escrow, chat), almost 900 backend tests that trace to all 24 blueprint scenarios (T01 to
+T24), over 120 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
 secret scanning, and a one-command start: `docker compose up --build`, then open
 `http://localhost:8080`.
 

@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { del, get, post } from "../api/client";
 import type { Checklist, CorridorList, DocumentView } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { CountryOptions } from "../components/CountryOptions";
 import { Badge, ErrorNotice, Field, Loading, Notice, NotVerifiedBadge, PageHead } from "../components/Ui";
 import { useAsync } from "../hooks";
 import { formatDateTime } from "../lib/format";
@@ -29,9 +30,8 @@ function ChecklistCard({
       </div>
       <ul className="stack" aria-label="Document checklist">
         {checklist.items.map((item) => (
-          <li key={item.key} className="row between">
+          <li key={item.key} className={item.provided ? "row between tick done" : "row between tick"}>
             <div>
-              <span aria-hidden="true">{item.provided ? "☑" : "☐"} </span>
               <strong>{item.label}</strong>
               <span className="sr-only">{item.provided ? " (ready)" : " (missing)"}</span>
               <div className="small muted">{item.hint}</div>
@@ -109,7 +109,7 @@ export function DocumentsScreen() {
       <div className="form-grid">
         <Field label="Destination" htmlFor="d-country">
           <select id="d-country" value={country} onChange={(e) => setCountry(e.target.value)}>
-            {(corridors.data?.items ?? []).map((c) => <option key={c.country} value={c.country}>{c.name}</option>)}
+            <CountryOptions corridors={corridors.data?.items ?? []} />
           </select>
         </Field>
         <Field label="Purpose" htmlFor="d-purpose">

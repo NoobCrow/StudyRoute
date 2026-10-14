@@ -3,14 +3,14 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { PLAN_CARD, SEND_PLAN, chatReply, mockApi } from "../test/fixtures";
+import { PLAN_CARD, SEND_PLAN, chatReply, corridor, mockApi } from "../test/fixtures";
 import { ChatPanel } from "./ChatPanel";
 import { PlanCard } from "./PlanCard";
 import { SendPlanCard } from "./SendPlanCard";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const CORRIDORS = [{ country: "GB", name: "United Kingdom", currency: "GBP", account_scheme: "IBAN", host_rail: "x", mid_rate: "160" }];
+const CORRIDORS = [corridor({ account_scheme: "IBAN" })];
 
 describe("PlanCard", () => {
   it("shows what was prepared and what is left, with the draft link for the person", () => {

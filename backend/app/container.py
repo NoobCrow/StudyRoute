@@ -12,12 +12,14 @@ from app.core.config import Settings
 from app.core.crypto import FieldCipher
 from app.core.db import Database
 from app.core.secret_store import SecretStore
-from app.domain.auth import PasswordService, TokenService
+from app.domain.auth import FailedLoginTracker, PasswordService, TokenService
 from app.domain.bank_directory import load_directory
 from app.domain.bank_network import BankNetworkService
+from app.domain.chain_service import ChainService
 from app.domain.compliance_report import ReportService
 from app.domain.config_service import ConfigService
 from app.domain.documents import DocumentService
+from app.domain.escrow import EscrowService
 from app.domain.kyc import KycService
 from app.domain.ledger import Ledger
 from app.domain.payments import PaymentService
@@ -86,5 +88,10 @@ def build_context(
     ctx.bank = BankNetworkService(
         clock, audit, Ledger(clock), load_directory(settings.resolve_bank_network_file())
     )
+    ctx.chain = ChainService(clock, audit)
+    ctx.login_attempts = FailedLoginTracker(
+        clock, settings.max_failed_logins, settings.lockout_seconds
+    )
+    ctx.escrow = EscrowService(clock, audit, recipients, ctx.chain)
     ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
     return ctx

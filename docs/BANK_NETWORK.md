@@ -150,5 +150,5 @@ All under `/api/v1/bank`, sandbox only. Money is `{amount_minor, currency}` plus
   (`tests/test_api_bank.py`, `tests/test_bank_setup.py`).
 - A live run in headless Chrome behind the production content security policy: national, international,
   rejected, screened, phone width and the reviewer's view, with no console error.
-- The 13-step demo script and the evidence export include the bank network
+- The 14-step demo script and the evidence export include the bank network
   (`submission/evidence/bank_network.json`).

@@ -130,3 +130,23 @@ class BankTransferIn(Strict):
 
 class BankStepIn(Strict):
     outcome: Literal["advance", "fail"]
+
+
+class EscrowPlanIn(Strict):
+    """Plan an escrow on the sandbox chain. Nothing is locked until a human confirms with MFA."""
+
+    recipient_id: StrictStr = Field(min_length=3, max_length=64)
+    purpose: Literal["TUITION", "LIVING"] = "TUITION"
+    total: MoneyIn
+    tranches: StrictInt = Field(default=1, ge=1, le=24)
+    first_release: date
+    cadence: Literal["ONCE", "MONTHLY"] = "MONTHLY"
+    reference: StrictStr = Field(min_length=1, max_length=70)
+
+
+class ReasonIn(Strict):
+    reason: StrictStr = Field(min_length=3, max_length=120)
+
+
+class ChainAdvanceIn(Strict):
+    days: StrictInt = Field(ge=1, le=366)

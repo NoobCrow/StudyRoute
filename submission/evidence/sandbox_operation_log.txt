@@ -55,13 +55,13 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [10] Tracker: the simulated provider submits and settles
       OK   payment reaches SETTLED (simulated)
-      OK   UETR assigned: 66f7f0c3-27bb-4d1f-9e1b-6bb9f8d9c4a7
+      OK   UETR assigned: 88ac7e19-1e7f-4ee6-971f-5b9cbfc84c98
       Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
 
 [11] Compliance report: evidence for the payment, sealed with a hash
       OK   all 10 controls pass with evidence
       OK   the report hash matches the report
-      Report hash sha256:fe3b255a77b15d81d1bbc2cc12bef9ebbfd0a8e2c463bffb11181bab1e66cd5f
+      Report hash sha256:3b26ed8e88bf173cbd03be51b3440a4daeeb9528e227a864afd2c87ae45aeb96
 
 [12] Bank network: money moves between invented banks, at home and abroad
       OK   the books balance and every nostro agrees with its mirror account
@@ -73,10 +73,23 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   mock sanctions screening blocks a transfer before any money moves
       OK   after all of it the books still balance and every mirror agrees
 
-[13] Audit log: verify the hash chain
+[13] Smart escrow: living costs locked in a contract on a simulated chain
+      OK   the plan splits GBP 900.00 into three monthly tranches and locks nothing yet
+      OK   locking the funds without MFA is refused
+      OK   with a fresh MFA proof the funds are locked in the escrow contract (3 transactions)
+      OK   the first tranche is due today, so the schedule pays it by itself
+      OK   the bank's reviewer freezes it; even the parent cannot move funds while frozen
+      OK   the reviewer unfreezes it
+      (rate limit: waiting 11 s as the server asks)
+      OK   the parent pays the second tranche early (a human decision, so MFA)
+      OK   cancelling takes back only the tranche that was not yet due
+      OK   the audit log's head hash is anchored on the chain and the database matches it
+      After tamper_audit, /chain/verify fails even if every hash is rebuilt.
+
+[14] Audit log: verify the hash chain
       OK   the blocked AI attempt is in the audit log
-      OK   chain verifies: PASS (47 events)
-      Head hash 45e7ba2a1f39687db9c98d7c56ff2356eab70653bf65416930677c0298767a14
+      OK   chain verifies: PASS (60 events)
+      Head hash fc2e1b6a1b545956f170b707de2307af4db269e00bb5f80df1efd9e710a505f1
 
 To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
 Undo it with:        python -m app.scripts.tamper_audit --restore

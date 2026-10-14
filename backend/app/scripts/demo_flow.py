@@ -98,20 +98,37 @@ class DemoFlow:
             self._wait(WAIT_STEP_SECONDS)
         return probe()
 
+    def _polite(self, send: Callable[[], httpx.Response]) -> httpx.Response:
+        """Sign-in and MFA endpoints allow 10 requests a minute per address. When the server says
+        wait, wait as long as it asks (up to three times) instead of failing the whole demo."""
+        reply = send()
+        for _ in range(3):
+            if reply.status_code != 429:
+                break
+            pause = min(65.0, float(reply.headers.get("retry-after", "5")) + 1)
+            self._say(f"      (rate limit: waiting {pause:.0f} s as the server asks)")
+            self._wait(pause)
+            reply = send()
+        return reply
+
     def _login(self, who: str, email: str) -> None:
-        reply = self._client.post(
-            "/api/v1/auth/login", json={"email": email, "password": self._password}
+        reply = self._polite(
+            lambda: self._client.post(
+                "/api/v1/auth/login", json={"email": email, "password": self._password}
+            )
         )
         if reply.status_code != 200:
             raise RuntimeError(f"Could not sign in as {who} ({reply.status_code}). Seed first?")
         self._tokens[who] = reply.json()["access_token"]
 
     def _mfa(self, who: str, scope: str, subject_id: str, code: str | None = None) -> str:
-        reply = self._call(
-            "POST",
-            "/auth/mfa/verify",
-            who,
-            json={"code": code or self._mfa_code, "scope": scope, "subject_id": subject_id},
+        reply = self._polite(
+            lambda: self._call(
+                "POST",
+                "/auth/mfa/verify",
+                who,
+                json={"code": code or self._mfa_code, "scope": scope, "subject_id": subject_id},
+            )
         )
         if reply.status_code != 200:
             raise RuntimeError(f"MFA step failed ({reply.status_code}): {reply.text[:120]}")
@@ -148,6 +165,7 @@ class DemoFlow:
         self._tracker(payment_id)
         self._compliance_report(payment_id)
         self._bank_network()
+        self._smart_escrow(today.isoformat())
         self._audit()
         return self.failures
 
@@ -474,8 +492,100 @@ class DemoFlow:
             after["all_ok"], "after all of it the books still balance and every mirror agrees"
         )
 
+    def _escrow(self, escrow_id: str, who: str = "parent") -> dict[str, Any]:
+        return dict(self._call("GET", f"/escrows/{escrow_id}", who).json())
+
+    def _smart_escrow(self, today: str) -> None:
+        self._step(13, "Smart escrow: living costs locked in a contract on a simulated chain")
+        recipients = self._call("GET", "/recipients", "parent").json()["items"]
+        university = next(r["recipient_id"] for r in recipients if r["display_name"] == UNIVERSITY)
+        body = {
+            "recipient_id": university,
+            "purpose": "LIVING",
+            "total": {"amount_minor": 90_000, "currency": "GBP"},
+            "tranches": 3,
+            "first_release": today,
+            "cadence": "MONTHLY",
+            "reference": "Demo living costs",
+        }
+        planned = self._call("POST", "/escrows", "parent", json=body, key=_key())
+        plan = planned.json()
+        self._check(
+            planned.status_code == 201
+            and plan["status"] == "PENDING_CONFIRMATION"
+            and plan["chain"] is None
+            and [t["amount"]["amount_minor"] for t in plan["tranches"]] == [30_000] * 3,
+            "the plan splits GBP 900.00 into three monthly tranches and locks nothing yet",
+        )
+        eid = plan["escrow_id"]
+        refused = self._call("POST", f"/escrows/{eid}/confirm", "parent", key=_key())
+        self._check(refused.status_code == 403, "locking the funds without MFA is refused")
+        proof = self._mfa("parent", "confirm_escrow", eid)
+        funded = self._call("POST", f"/escrows/{eid}/confirm", "parent", key=_key(), mfa=proof)
+        view = funded.json()
+        self._check(
+            funded.status_code == 200
+            and view["chain_status"] == "ACTIVE"
+            and view["chain"]["locked"]["amount_minor"] == 90_000,
+            "with a fresh MFA proof the funds are locked in the escrow contract (3 transactions)",
+        )
+        paid = self._until(lambda: self._escrow(eid)["tranches"][0]["state"] == "RELEASED", 20)
+        view = self._escrow(eid)
+        self._check(
+            paid and [t["state"] for t in view["tranches"]] == ["RELEASED", "LOCKED", "LOCKED"],
+            "the first tranche is due today, so the schedule pays it by itself",
+        )
+        reason = {"reason": "Demo: sanctions screening hit, under review"}
+        frozen = self._call("POST", f"/escrows/{eid}/freeze", "admin", json=reason)
+        held = self._call(
+            "POST",
+            f"/escrows/{eid}/tranches/1/release",
+            "parent",
+            key=_key(),
+            mfa=self._mfa("parent", "release_escrow", eid),
+        )
+        self._check(
+            frozen.json()["chain_status"] == "FROZEN" and held.status_code == 409,
+            "the bank's reviewer freezes it; even the parent cannot move funds while frozen",
+        )
+        thawed = self._call(
+            "POST", f"/escrows/{eid}/unfreeze", "admin", json={"reason": "Cleared after review"}
+        )
+        self._check(thawed.json()["chain_status"] == "ACTIVE", "the reviewer unfreezes it")
+        early = self._call(
+            "POST",
+            f"/escrows/{eid}/tranches/1/release",
+            "parent",
+            key=_key(),
+            mfa=self._mfa("parent", "release_escrow", eid),
+        )
+        self._check(
+            early.status_code == 200 and early.json()["tranches"][1]["state"] == "RELEASED",
+            "the parent pays the second tranche early (a human decision, so MFA)",
+        )
+        cancelled = self._call(
+            "POST",
+            f"/escrows/{eid}/cancel",
+            "parent",
+            key=_key(),
+            mfa=self._mfa("parent", "cancel_escrow", eid),
+        )
+        states = [t["state"] for t in cancelled.json()["tranches"]]
+        self._check(
+            states == ["RELEASED", "RELEASED", "REFUNDED"]
+            and cancelled.json()["chain_status"] == "CANCELLED",
+            "cancelling takes back only the tranche that was not yet due",
+        )
+        anchored = self._call("POST", "/chain/anchor", "admin")
+        verdict = self._call("GET", "/chain/verify", "admin").json()
+        self._check(
+            anchored.status_code == 201 and verdict["status"] == "PASS",
+            "the audit log's head hash is anchored on the chain and the database matches it",
+        )
+        self._say("      After tamper_audit, /chain/verify fails even if every hash is rebuilt.")
+
     def _audit(self) -> None:
-        self._step(13, "Audit log: verify the hash chain")
+        self._step(14, "Audit log: verify the hash chain")
         blocked = self._call("GET", "/audit/events?action=ai.blocked&limit=5", "admin").json()
         self._check(len(blocked["items"]) >= 1, "the blocked AI attempt is in the audit log")
         verify = self._call("GET", "/audit/verify", "admin").json()

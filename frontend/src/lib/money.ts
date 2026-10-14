@@ -8,10 +8,15 @@ const MAX_MINOR = 10 ** 12;
 export function parseMajorToMinor(input: string, exponent = 2): ParsedMoney {
   const cleaned = input.trim().replace(/[\s,]/g, "");
   if (cleaned === "") return { ok: false, error: "Enter an amount." };
-  const pattern = new RegExp(`^([0-9]{1,12})(?:[.]([0-9]{1,${exponent}}))?$`);
-  const match = pattern.exec(cleaned);
+  const decimals = exponent > 0 ? `(?:[.]([0-9]{1,${exponent}}))?` : "()";
+  const match = new RegExp(`^([0-9]{1,12})${decimals}$`).exec(cleaned);
   if (!match) {
-    return { ok: false, error: `Use digits only, with at most ${exponent} decimal places.` };
+    return {
+      ok: false,
+      error: exponent > 0
+        ? `Use digits only, with at most ${exponent} decimal places.`
+        : "Use whole numbers only: this currency has no decimals.",
+    };
   }
   const whole = match[1] ?? "0";
   const fraction = (match[2] ?? "").padEnd(exponent, "0");

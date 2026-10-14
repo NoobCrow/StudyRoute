@@ -7,7 +7,7 @@ hard-coded in Python. Rules with verified=false are shown with a yellow badge.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, time
 from decimal import Decimal, InvalidOperation
 from fnmatch import fnmatchcase
@@ -23,9 +23,11 @@ from app.engine import fx
 from app.engine.money import CURRENCY_EXPONENTS
 from app.engine.planner import INDICATIVE, Calendar, PlannerParams, parse_weekdays
 from app.engine.quote import ChargeCode, EngineParams, ProviderTerms
+from app.engine.validators import IBAN_LENGTHS
 from app.models import ConfigRule
 
 HOME_COUNTRY = "BD"
+GENERIC_CHECKLIST = "GENERIC"
 ACCOUNT_SCHEMES = {"IBAN", "IBAN_OR_UK_DOMESTIC", "ABA_ACCOUNT", "ACCOUNT"}
 
 
@@ -67,6 +69,8 @@ class Corridor:
     currency: str
     account_scheme: str
     host_rail: str
+    featured: bool = True  # has its own hand-written rules; False means generated defaults
+    restricted: bool = False  # the sandbox will not quote or save recipients for it
 
 
 def flatten_rules(path: Path) -> dict[str, dict[str, Any]]:
@@ -209,12 +213,17 @@ class Rules:
         return [t.provider_id for t in self.provider_terms()]
 
     def mid_rate(self, currency: str) -> Decimal:
-        key = f"fx.mid_rates.{currency}"
-        if key not in self._records:
-            raise errors.ValidationFailed(f"No synthetic mid-market rate for {currency}.")
-        return fx.to_rate(self._records[key].value)
+        """A hand-written fx.mid_rates rule wins; otherwise the generated synthetic table."""
+        record = self._records.get(f"fx.mid_rates.{currency}")
+        if record is not None:
+            return fx.to_rate(record.value)
+        generated = self._records.get("countries.rates")
+        if generated is not None and currency in generated.value:
+            return fx.to_rate(generated.value[currency])
+        raise errors.ValidationFailed(f"No synthetic mid-market rate for {currency}.")
 
     def corridors(self) -> dict[str, Corridor]:
+        """Hand-written corridors first, then every other country by name (generated defaults)."""
         found: dict[str, Corridor] = {}
         for key in sorted(k for k in self._records if k.startswith("corridors.")):
             country = key.split(".", 1)[1]
@@ -222,7 +231,29 @@ class Rules:
             found[country] = Corridor(
                 country, v["name"], v["currency"], v["account_scheme"], v["host_rail"]
             )
-        return found
+        for country, row in sorted(self._directory().items(), key=lambda item: item[1]["name"]):
+            if country not in found:
+                found[country] = _generated_corridor(country, row)
+        blocked = self.restricted_countries()
+        return {c: replace(v, restricted=c in blocked) for c, v in found.items()}
+
+    def restricted_countries(self) -> set[str]:
+        record = self._records.get("countries.restricted")
+        return {str(code) for code in record.value} if record else set()
+
+    def open_corridor(self, country: str) -> Corridor:
+        """The corridor, or an error if the sandbox does not quote payments to it."""
+        corridor = self.corridor(country)
+        if corridor.restricted:
+            raise errors.ValidationFailed(
+                f"The sandbox does not quote payments to {corridor.name}, because banks often "
+                "refuse that destination. Confirm with your AD bank."
+            )
+        return corridor
+
+    def _directory(self) -> Mapping[str, Mapping[str, Any]]:
+        record = self._records.get("countries.directory")
+        return record.value if record else {}
 
     def corridor(self, country: str) -> Corridor:
         try:
@@ -235,8 +266,16 @@ class Rules:
 
     # --- calendars and checklists ------------------------------------------------------
     def calendar(self, country: str) -> Calendar:
-        weekend = parse_weekdays(self.raw(f"calendars.weekend.{country}"))
-        raw_holidays = self.raw(f"calendars.holidays.{country}")
+        weekend_rule = self._records.get(f"calendars.weekend.{country}")
+        if weekend_rule is not None:
+            weekend = parse_weekdays(weekend_rule.value)
+        else:
+            row = self._directory().get(country)
+            if row is None:
+                raise errors.ValidationFailed(f"Unsupported destination country: {country}")
+            weekend = parse_weekdays(row["weekend"])
+        holiday_rule = self._records.get(f"calendars.holidays.{country}")
+        raw_holidays = holiday_rule.value if holiday_rule is not None else {}
         holidays = {date.fromisoformat(day): str(name) for day, name in raw_holidays.items()}
         return Calendar(country, weekend, holidays)
 
@@ -245,15 +284,24 @@ class Rules:
         return [self.calendar(HOME_COUNTRY), self.calendar(host_country)]
 
     def checklist(self, country: str, purpose: str) -> dict[str, Any]:
+        corridor = self.corridor(country)
+        generic = f"checklists.{GENERIC_CHECKLIST}_{purpose}"
         key = f"checklists.{country}_{purpose}"
-        if key not in self._records:
+        own = key in self._records
+        if not own and generic not in self._records:
             raise errors.ValidationFailed(f"No checklist for {country} / {purpose}.")
-        rule = self._records[key]
+        rule = self._records[key if own else generic]
         labels = self.raw("checklist_labels")
         items = [
             {"key": item, "label": labels[item]["label"], "hint": labels[item]["hint"]}
             for item in rule.value
         ]
+        note = rule.note
+        if not own:
+            note = (
+                f"A general list: documents specific to {corridor.name} are not loaded. "
+                f"{rule.note or INDICATIVE}"
+            )
         return {
             "country": country,
             "purpose": purpose,
@@ -261,9 +309,15 @@ class Rules:
             "verified": rule.verified,
             "source_url": rule.source_url,
             "last_checked": rule.last_checked,
-            "note": rule.note,
+            "note": note,
             "indicative": INDICATIVE,
         }
+
+
+def _generated_corridor(country: str, row: Mapping[str, Any]) -> Corridor:
+    scheme = "IBAN" if country in IBAN_LENGTHS else "ACCOUNT"
+    rail = f"Local banking system of {row['name']} (named only: the sandbox does not simulate it)"
+    return Corridor(country, row["name"], row["currency"], scheme, rail, featured=False)
 
 
 def _parse_provider(provider_id: str, value: Mapping[str, Any]) -> ProviderTerms:
@@ -362,6 +416,34 @@ def _check_corridor(value: Any) -> None:
         raise _bad("Corridor needs name, currency, account_scheme and host_rail.")
 
 
+def _check_directory(value: Any) -> None:
+    ok = isinstance(value, dict) and all(
+        isinstance(code, str)
+        and len(code) == 2
+        and isinstance(row, dict)
+        and {"name", "currency", "weekend"} <= row.keys()
+        and row["currency"] in CURRENCY_EXPONENTS
+        for code, row in value.items()
+    )
+    if not ok:
+        raise _bad("Each country needs a 2-letter code, a name, a known currency and a weekend.")
+
+
+def _check_rate_table(value: Any) -> None:
+    if not isinstance(value, dict) or not all(c in CURRENCY_EXPONENTS for c in value):
+        raise _bad("Rates must be a table of known currency codes.")
+    for rate in value.values():
+        _check_rate(rate)
+
+
+def _check_country_codes(value: Any) -> None:
+    ok = isinstance(value, list) and all(
+        isinstance(code, str) and len(code) == 2 and code.isupper() for code in value
+    )
+    if not ok:
+        raise _bad("Give a list of 2-letter country codes, such as KP.")
+
+
 def _check_labels(value: Any) -> None:
     ok = isinstance(value, dict) and all(
         isinstance(v, dict) and {"label", "hint"} <= v.keys() for v in value.values()
@@ -388,6 +470,9 @@ _VALIDATORS: list[tuple[str, Any]] = [
     ("fx.history_days", _int_between(7, 365)),
     ("providers.*", _check_provider),
     ("corridors.*", _check_corridor),
+    ("countries.directory", _check_directory),
+    ("countries.rates", _check_rate_table),
+    ("countries.restricted", _check_country_codes),
     ("checklist_labels", _check_labels),
     ("checklists.*", _check_str_list),
 ]

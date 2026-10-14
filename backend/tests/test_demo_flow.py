@@ -31,3 +31,30 @@ def test_the_demo_script_passes_every_check(world: World) -> None:
     transcript = "\n".join(lines)
     assert "SETTLED" in transcript
     assert "chain verifies: PASS" in transcript
+    assert "[13] Smart escrow" in transcript and "[14] Audit log" in transcript
+    assert "locked in the escrow contract" in transcript
+    assert "anchored on the chain and the database matches it" in transcript
+
+
+def test_the_demo_passes_with_the_real_rate_limits_switched_on(tmp_path: Path) -> None:
+    """A real server allows 10 sign-in and MFA requests a minute per address. The demo makes more
+    than that, so it must wait as the server asks. (Tests usually switch the limits off, which hid
+    this until the demo ran against the real stack.)"""
+    instance = World(tmp_path, bank_network=True, rate_limit_enabled=True)
+    try:
+
+        def wait(seconds: float) -> None:
+            instance.clock.advance(seconds)
+            instance.ctx.worker.tick()
+
+        lines: list[str] = []
+        flow = DemoFlow(
+            instance.client, password=PASSWORD, mfa_code=MFA_CODE, wait=wait, say=lines.append
+        )
+        failures = flow.run()
+        transcript = "\n".join(lines)
+        assert failures == [], transcript
+        assert "rate limit: waiting" in transcript, "the limit really was hit and waited out"
+        assert "[14] Audit log" in transcript and "chain verifies: PASS" in transcript
+    finally:
+        instance.close()

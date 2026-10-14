@@ -97,6 +97,7 @@ def test_the_entrypoint_seeds_unless_production_then_serves() -> None:
     assert "python -m app.scripts.seed --if-empty" in script
     assert re.search(r"^exec uvicorn app\.main:create_app --factory", script, re.MULTILINE)
     assert script.index("seed --if-empty") < script.index("exec uvicorn")
+    assert "--no-server-header" in script, "the server software is not announced to clients"
 
 
 def test_the_api_image_runs_as_a_non_root_user_with_a_health_check() -> None:

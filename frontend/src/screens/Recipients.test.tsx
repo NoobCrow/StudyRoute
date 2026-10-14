@@ -3,13 +3,13 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAuth } from "../auth/AuthContext";
-import { PARENT_PERMISSIONS, RECIPIENT, mockApi, user } from "../test/fixtures";
+import { PARENT_PERMISSIONS, RECIPIENT, corridor, mockApi, user } from "../test/fixtures";
 import { RecipientsScreen } from "./Recipients";
 
 vi.mock("../auth/AuthContext", () => ({ useAuth: vi.fn() }));
 
 const CORRIDORS = {
-  items: [{ country: "GB", name: "United Kingdom", currency: "GBP", account_scheme: "IBAN_OR_UK_DOMESTIC", host_rail: "x", mid_rate: "160" }],
+  items: [corridor()],
   providers: [],
 };
 const SCRIPT = '<script>window.__pwned = true</script><img src=x onerror="window.__pwned=true">';

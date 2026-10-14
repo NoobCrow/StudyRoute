@@ -57,7 +57,9 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Reset demo data: python -m app.scripts.seed
 - Run the demo script against a running API: python -m app.scripts.demo_flow
 - Check the AI layer (template mode or a configured model): python -m app.scripts.check_ai
+- Regenerate the destination countries (needs `pip install babel`, a dev tool only): python scripts/gen_countries.py
 - Scan for secrets, real e-mails and TODOs: python scripts/scan_repo.py
+- Attack the running app (lab only; see scripts/security/README.md): scripts/security/attack_probe.py, brute_probe.py, browser_audit.mjs
 - Build the submission archive: python scripts/make_submission.py
 
 ## How to work

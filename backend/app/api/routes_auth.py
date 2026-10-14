@@ -17,7 +17,7 @@ from app.domain import auth
 from app.domain.constants import ActorKind, ActorType, Decision
 from app.domain.rbac import ROLE_PERMISSIONS, Actor, Perm
 from app.domain.rules import load_rules
-from app.models import BankTransfer, Payment, Recipient, RefreshToken, User
+from app.models import BankTransfer, Escrow, Payment, Recipient, RefreshToken, User
 
 router = APIRouter(tags=["auth"])
 
@@ -66,12 +66,15 @@ def login(
 ) -> dict[str, Any]:
     now = ctx.clock.now()
     settings = ctx.settings
+    email_key = sha256_ref(body.email.strip().lower())
+    ctx.login_attempts.ensure_open(email_key)  # the same answer for real and made-up addresses
     with ctx.db.write() as session:
         user = auth.find_user_by_email(session, body.email)
         if user is not None:
             auth.ensure_not_locked(user.locked_until, now)
         good = ctx.passwords.verify(user.password_hash if user else None, body.password)
         if user is None or not good or user.role == ActorKind.AI.value:
+            ctx.login_attempts.fail(email_key)
             if user is not None:
                 user.failed_logins += 1
                 if user.failed_logins >= settings.max_failed_logins:
@@ -89,6 +92,7 @@ def login(
             raise errors.Unauthenticated("Invalid email or password.", persist=True)
         user.failed_logins = 0
         user.locked_until = None
+        ctx.login_attempts.clear(email_key)
         tokens = _issue_tokens(ctx, session, user)
         ctx.audit.append(
             session,
@@ -166,6 +170,9 @@ def mfa_verify(
             "approve_payment": Payment,
             "allowlist_recipient": Recipient,
             "confirm_bank_transfer": BankTransfer,
+            "confirm_escrow": Escrow,
+            "release_escrow": Escrow,
+            "cancel_escrow": Escrow,
         }[body.scope]
         subject = session.get(subject_table, body.subject_id)
         if subject is None or not actor.can_see_owner(subject.owner_id):
