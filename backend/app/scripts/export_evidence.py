@@ -53,6 +53,7 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 | `bank_network.json` | The simulated interbank transfers (national and international) with every hop, the simulated messages and the double-entry journals, plus the trial balance and mirror-account check |
 | `smart_escrow.json` | The smart escrows (schedule, state, the contract call log with its hashes), the simulated chain's status, the audit anchors written to it and the check that the database still matches the chain |
 | `tamper_demo.json` | Verify after one audit row was edited behind the application's back (FAIL at that sequence), and after it was restored (PASS). Only present when run with `--tamper` |
+| `docker_run.txt` | A real `docker compose` run (Docker 29.1.3, Compose 2.40.3, Ubuntu 24.04 VM): container health, the read-only and capability-dropped settings, the smoke script, the 14-step demo and the browser audit. Recorded by hand from that run; **this command does not regenerate it** |
 
 To reproduce: start the API with fresh demo data, then run the command above.
 """

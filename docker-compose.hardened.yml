@@ -5,9 +5,10 @@
 # What it adds to both containers: a read-only root filesystem (only the data volume and
 # /tmp are writable), no Linux capabilities, and no way to gain privileges later.
 #
-# Status: written from the Docker documentation and NOT yet run here (no Docker on the
-# development machine). The CI "docker" job starts the normal file only. If a container
-# refuses to start under this overlay, use the normal file and note it in docs/OPEN_QUESTIONS.md.
+# Status: run with Docker 29.1.3 and Compose 2.40.3 (Ubuntu 24.04, amd64): both containers start
+# healthy, the root filesystem is read-only, and docker_smoke.py and the 14-step demo pass (see
+# docs/DOCKER.md). The CI "docker" job starts the normal file only. If a container refuses to
+# start under this overlay, use the normal file and note it in docs/OPEN_QUESTIONS.md.
 services:
   backend:
     read_only: true

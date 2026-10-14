@@ -87,8 +87,9 @@ docker compose -f docker-compose.yml -f docker-compose.hardened.yml up --build
 ```
 
 Adds a read-only root filesystem, dropped Linux capabilities and `no-new-privileges` to both
-containers. It was written from the documentation and has **not** been run yet; if a container
-fails to start with it, fall back to the normal command.
+containers. It was run for real (see "What was and was not tested"): both containers start
+healthy, the root filesystem is read-only, and the smoke script and the demo pass. If it ever fails
+to start on your machine, fall back to the normal command.
 
 ## Troubleshooting
 
@@ -106,31 +107,63 @@ fails to start with it, fall back to the normal command.
 
 ## What was and was not tested
 
-The development machine had no Docker (not installed, no administrator rights, virtualisation
-off), so `docker build` and `docker compose up` themselves have **not** been run there. Everything
-a container does was reproduced piece by piece instead, and the rest is covered by tests and CI:
+### Run for real, on 15 October 2026
+
+The stack was built and run with **real Docker** from a clean copy: the submission archive
+(`dist/studyroute-submission.zip`, commit `3eb6a57`) unzipped in a fresh directory.
+
+- **Where:** Docker Engine 29.1.3 and Docker Compose 2.40.3 (Ubuntu 24.04 packages, `amd64`) inside
+  an Ubuntu 24.04 virtual machine run by portable QEMU 11.1 on the Windows 11 development machine,
+  because Docker Desktop could not be installed there (no administrator rights). The VM listened
+  only on `127.0.0.1`; the scripts below ran from the Windows host through the forwarded port 8080.
+- **`docker compose up --build`:** both images built (the backend's `pip install` from the lock
+  file and the frontend's `npm ci` and `vite build` included). The backend became healthy, then
+  `web` started. Images: backend 366 MB (Python 3.12 slim), web 75 MB (nginx 1.27.5 unprivileged).
+- **`python scripts/docker_smoke.py`:** all checks passed.
+- **`docker compose exec backend python -m app.scripts.demo_flow`:** all 14 steps passed (53 OK
+  lines), including the smart escrow and the audit anchor.
+- **`scripts/security/browser_audit.mjs`** (real Chrome, production content security policy):
+  40 of 40 checks passed through the container's own nginx.
+- **Containers:** the backend runs as user 10001 and the web server as the unprivileged `nginx`
+  user. Only port 8080 is published; the API's port 8000 is reachable only from `web`. Nothing in
+  the backend log held a token, a private key or an IBAN; the only matches were the seed banner
+  that prints the documented demo accounts, password and MFA code.
+- **Data survives:** after `docker compose down` and `up`, the audit chain still verified
+  (81 events, then 82 after the next sign-in), and the escrow chain replayed from the database with
+  its 12 transactions and its audit anchor intact.
+- **The hardened overlay** (`docker-compose.hardened.yml`) started from an empty volume with both
+  containers healthy. Docker confirmed `ReadonlyRootfs=true`, all capabilities dropped and
+  `no-new-privileges`; a write outside the data volume was refused ("Read-only file system"). The
+  smoke script and the full 14-step demo passed on it. The only message is nginx's harmless
+  "can not modify default.conf (read-only file system?)" from its IPv6 start-up script.
+
+**Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
+images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
+`nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs
+when the repository is pushed.
+
+### Checked piece by piece before that
 
 - **The pinned dependencies fit the image.** `backend/requirements.txt` was resolved for the
   container's platform (Linux, Python 3.12, `x86_64` and `aarch64`): all 59 pins have a published
-  wheel, so the build never has to compile C code. The frontend lock file carries the Linux
-  (including musl) native builds that `npm ci` needs inside the Alpine image.
-- **The API as the image runs it.** A clean virtual environment built from that lock file only
-  (runtime requirements, nothing else) and the repository's real `docker-entrypoint.sh`, in a
-  `/srv`-style layout with `DATA_DIR`, `RULES_FILE` and `BANK_NETWORK_FILE` set the way the
-  Dockerfile sets them: seeds on first start, serves with the container's uvicorn flags
-  (`--proxy-headers`, `--no-access-log`, `--no-server-header`).
-- **The web container.** The repository's own `nginx.conf` and `security_headers.conf` run in a
-  real nginx 1.27 in front of that API on port 8080: `scripts/docker_smoke.py` passes every check,
-  the 14-step `demo_flow` passes through it from a fresh database, and the real-Chrome audit
-  (`scripts/security/browser_audit.mjs`) passes 40 of 40 checks under the production content
-  security policy. These runs found and fixed two real defects: the proxy added the web page's
-  security headers on top of the API's own (each API response carried them twice), and the demo
-  tripped the 10-a-minute sign-in limit the first time it ran against the real rate limits (it now
-  waits as the server asks; a test keeps it so).
+  wheel. The frontend lock file carries the Linux (including musl) native builds.
+- **The API as the image runs it** (clean environment from the lock file, the real
+  `docker-entrypoint.sh`) and **the repository's `nginx.conf` in a real nginx 1.27**, natively on
+  Windows. Those runs found and fixed two real defects: the proxy added the web page's security
+  headers on top of the API's own (each API response carried them twice), and the demo tripped the
+  10-a-minute sign-in limit the first time it ran against the real rate limits (it now waits as the
+  server asks; a test keeps it so).
 - Static tests in `backend/tests/test_docker_config.py` and `test_docker_smoke.py`.
 - The GitHub Actions `docker` job builds both images, starts the stack with `docker compose up`,
-  runs `scripts/docker_smoke.py` and the demo flow, and tears it down. It runs when the repository
-  is pushed.
+  runs `scripts/docker_smoke.py` and the demo flow, and tears it down.
 
-Before you submit, run `docker compose up --build` once from a clean clone on a machine with
-Docker and tick the matching box in `submission/CHECKLIST.md`.
+### Reproduce it
+
+On any machine with Docker, from a clean clone or the unzipped archive:
+
+```bash
+docker compose up --build
+python scripts/docker_smoke.py
+docker compose exec backend python -m app.scripts.demo_flow
+docker compose down -v
+```

@@ -90,17 +90,14 @@ change is written to the audit log with who, what and why.
   tried**. Which party would really issue the token, hold the compliance key and run the nodes in a
   Bangladeshi AD-bank setting, and what Bangladesh Bank allows for tokenised deposits, are open and
   not answered here. See `docs/SMART_ESCROW.md`.
-- **Docker.** `docker build` and `docker compose up --build` have **not been run** on the
-  development machine, which has no Docker (not installed, no administrator rights, virtualisation
-  off). Their parts were reproduced instead: all 59 pinned Python packages have wheels for Linux
-  (`x86_64` and `aarch64`), the API ran from a clean environment built from the lock file with the
-  real `docker-entrypoint.sh` in an image-like layout, and the repository's own `nginx.conf` ran in
-  a real nginx 1.27 in front of it (`scripts/docker_smoke.py`, the 14-step demo and the 40-check
-  real-Chrome audit under the strict CSP all pass). That found and fixed two defects: duplicate
-  security headers on proxied API responses, and the demo exceeding the real sign-in rate limit.
-  `docker-compose.hardened.yml` (read-only filesystem, dropped capabilities) is untested. The CI
-  `docker` job builds and starts the real stack once the repository is pushed. Run
-  `docker compose up --build` from a clean clone before submitting; see `docs/DOCKER.md`.
+- **Docker.** `docker compose up --build` was run for real on 15 October 2026 from the unzipped
+  submission archive, with Docker Engine 29.1.3 and Compose 2.40.3 inside an Ubuntu 24.04 `amd64`
+  virtual machine (Docker Desktop could not be installed on the development machine). Both images
+  built and started healthy; `scripts/docker_smoke.py`, the 14-step demo and the 40-check
+  real-Chrome audit under the strict CSP passed, data survived `down` and `up`, and
+  `docker-compose.hardened.yml` (read-only filesystem, dropped capabilities) started and passed too.
+  **Still open:** Docker Desktop on Windows or macOS, `arm64`, and the GitHub Actions `docker` job
+  (it runs when the repository is pushed). See `docs/DOCKER.md`.
 
 ## D. Things only a person can supply
 

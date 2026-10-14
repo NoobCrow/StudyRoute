@@ -251,8 +251,9 @@ def docker_check() -> Check:
     return Check(
         OPEN,
         "Docker",
-        "not installed here. Install Docker Desktop (Windows needs WSL 2), then run "
-        "`docker compose up --build` once and `python scripts/docker_smoke.py`",
+        "not installed on this machine. The stack was run for real in a Linux VM (docs/DOCKER.md); "
+        "to repeat it here install Docker Desktop (Windows needs WSL 2), then run "
+        "`docker compose up --build` and `python scripts/docker_smoke.py`",
     )
 
 

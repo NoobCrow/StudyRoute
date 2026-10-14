@@ -64,11 +64,13 @@ judges access; put the link in the submission e-mail.
 
 ## 3. Technical gate (all must pass before you send)
 
-- [ ] From a clean clone on a machine with Docker: `docker compose up --build`, open
-      http://localhost:8080, sign in with a demo account. (Docker was not available where the
-      project was built, so this one check is yours; setup help is in `docs/DOCKER.md`.)
-- [ ] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack.
-- [ ] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
+- [x] From a clean clone on a machine with Docker: `docker compose up --build`, open
+      http://localhost:8080, sign in with a demo account. Done on 15 Oct 2026 from the unzipped
+      archive in a Linux VM (Docker 29.1.3, Compose 2.40.3); details in `docs/DOCKER.md`. Repeat it
+      on your own machine if you can (Docker Desktop on Windows was not tried).
+- [x] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
+      (also with `docker-compose.hardened.yml`).
+- [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
 - [ ] `cd backend && pytest -q && ruff check . && ruff format --check .`
 - [ ] `cd frontend && npm run typecheck && npm test && npm run build`
 - [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit, docker).

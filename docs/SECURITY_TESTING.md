@@ -62,9 +62,9 @@ entrypoint check.
 * **If an AI key is configured**, masked facts go to that provider. In the default template mode
   nothing leaves the machine.
 * **Not done:** an external penetration test, a dynamic scanner such as OWASP ZAP, fuzzing of the
-  AI path with a real model, and `docker compose up` itself (Docker is not installed on the
-  development machine; the container's pieces were run natively behind a real nginx, where the
-  browser audit passed 40 of 40 and the demo passed, see [DOCKER.md](DOCKER.md)).
+  AI path with a real model, and the attack probe against the Docker stack (the real-Chrome audit
+  passed 40 of 40 against the real containers, and the smoke script and demo passed on them, also
+  with the hardened overlay; see [DOCKER.md](DOCKER.md)).
 
 ## Repeat it
 
