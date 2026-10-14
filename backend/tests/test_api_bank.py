@@ -143,8 +143,8 @@ def test_production_mode_has_no_bank_surface(
         monkeypatch.setenv(f"WEBHOOK_SECRET_{provider}", _generate_hex_secret())
     prod = World(tmp_path, app_env="production")
     try:
-        assert prod.client.get("/api/v1/bank/network").status_code in (401, 404)
-        assert prod.client.get("/api/v1/bank/accounts").status_code in (401, 404)
+        assert prod.client.get("/api/v1/bank/network").status_code == 404
+        assert prod.client.get("/api/v1/bank/accounts").status_code == 404
     finally:
         prod.close()
 

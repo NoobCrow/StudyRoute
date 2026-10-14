@@ -44,7 +44,7 @@ docker compose down -v               # stop and DELETE the data: the next start 
 Run the repository's own scripts inside the API container:
 
 ```bash
-docker compose exec backend python -m app.scripts.demo_flow      # 12-step demo check
+docker compose exec backend python -m app.scripts.demo_flow      # 13-step demo check
 docker compose exec backend python -m app.scripts.tamper_audit   # edit the log, then Verify FAIL
 docker compose exec backend python -m app.scripts.check_ai       # after you add an LLM key
 ```
@@ -99,6 +99,7 @@ fails to start with it, fall back to the normal command.
 | `web` stays in "Created" or "waiting" | The API is not healthy yet or crashed. `docker compose logs backend` shows why |
 | The page loads but sign-in fails with a network error | You opened a URL other than the one `web` serves (for example port 8000). Use http://localhost:8080 |
 | Sign-in says too many attempts | The limit is 10 a minute per address. Wait a minute |
+| The Bank network screen says it is not set up | The database predates the bank simulation. `docker compose restart backend` adds it on start (the entrypoint checks every time), or run `docker compose exec backend python -m app.scripts.seed` |
 | Old data or a changed password does not appear | The volume still holds the first run. `docker compose down -v`, then `up --build` |
 | `sh: ... not found` or `\r` errors in the entrypoint | A file was saved with Windows line endings. The repository's `.gitattributes` forces LF on checkout, and `scripts/make_submission.py` writes LF into the zip. Re-clone or convert the file to LF |
 | Build fails while installing Python or npm packages | No internet or a proxy. Retry; both lock files are pinned, so the same versions are fetched each time |

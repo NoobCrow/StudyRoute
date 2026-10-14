@@ -55,18 +55,28 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [10] Tracker: the simulated provider submits and settles
       OK   payment reaches SETTLED (simulated)
-      OK   UETR assigned: 984ae911-2804-437f-bbda-d9234bb75de8
+      OK   UETR assigned: 66f7f0c3-27bb-4d1f-9e1b-6bb9f8d9c4a7
       Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
 
 [11] Compliance report: evidence for the payment, sealed with a hash
       OK   all 10 controls pass with evidence
       OK   the report hash matches the report
-      Report hash sha256:9696f0ee49f72a8db592ead28b6d89ddddb216839803c7d47de32f4e2336458b
+      Report hash sha256:fe3b255a77b15d81d1bbc2cc12bef9ebbfd0a8e2c463bffb11181bab1e66cd5f
 
-[12] Audit log: verify the hash chain
+[12] Bank network: money moves between invented banks, at home and abroad
+      OK   the books balance and every nostro agrees with its mirror account
+      OK   national: BDT 1,000.00 over the instant rail settles through the clearing house
+      OK   the payer lost the amount plus the BDT 5.00 fee and the receiver gained the amount
+      OK   international: BDT to GBP through the correspondent in 3 hops
+      OK   OUR: the university receives the full GBP 1,000.00 and the parent paid BDT 165,700.00
+      OK   a rejecting beneficiary bank returns the money in full, fees included
+      OK   mock sanctions screening blocks a transfer before any money moves
+      OK   after all of it the books still balance and every mirror agrees
+
+[13] Audit log: verify the hash chain
       OK   the blocked AI attempt is in the audit log
-      OK   chain verifies: PASS (28 events)
-      Head hash d1e2fd0bbe76056ed49df3bf87f62341453984f98d0fc52569e81c32d9206961
+      OK   chain verifies: PASS (47 events)
+      Head hash 45e7ba2a1f39687db9c98d7c56ff2356eab70653bf65416930677c0298767a14
 
 To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
 Undo it with:        python -m app.scripts.tamper_audit --restore

@@ -31,6 +31,7 @@ logged. Each part below exists to make one of those four statements true and tes
    +--> AI layer  policy check, facts, masking, model client (optional), number guard, tool guard
    +--> Audit     append-only hash chain, verify
    +--> Providers mock adapters A, B, C  -->  simulator  -->  HMAC-signed webhooks back to the API
+   +--> Bank network  invented banks, clearing houses and a correspondent  -->  double-entry ledger
    |
    v
  SQLite (Postgres optional), foreign keys on, CHECK constraints, audit triggers
@@ -38,8 +39,8 @@ logged. Each part below exists to make one of those four statements true and tes
 
 | Layer | Folder | Responsibility | I/O |
 |-------|--------|----------------|-----|
-| Engine | `backend/app/engine/` | Every number: costs, ranking, deadline, runway | None (pure) |
-| Domain | `backend/app/domain/` | State machine, guards, RBAC, KYC, limits, config | Database via a passed-in session |
+| Engine | `backend/app/engine/` | Every number: costs, ranking, deadline, runway, and the journals of a bank transfer (`interbank.py`) | None (pure) |
+| Domain | `backend/app/domain/` | State machine, guards, RBAC, KYC, limits, config, the ledger and the bank network | Database via a passed-in session |
 | API | `backend/app/api/` | Routes, authentication, idempotency, rate limits, errors | HTTP |
 | Audit | `backend/app/audit/` | Hash chain and verification | Database |
 | Providers | `backend/app/providers/` | Mock providers, simulator, webhook signing | HTTP (webhooks) |
@@ -56,8 +57,10 @@ can be trusted as the single source of numbers.
 version for optimistic locking), `payment_transitions`, `audit_events`, `audit_head`,
 `idempotency_keys` (unique per user and key), `webhook_events` (unique event id), `config_rules`
 (value, source URL, last checked, verified), `kyc_records`, `documents`, `mfa_proofs`,
-`refresh_tokens`, `provider_ledger`. The payment state is limited by a CHECK constraint, and two
-triggers block `UPDATE` and `DELETE` on `audit_events`.
+`refresh_tokens`, `provider_ledger`, and for the bank network `bank_accounts`, `bank_transfers`,
+`bank_transfer_events`, `ledger_journals` and `ledger_entries`. The payment state is limited by a
+CHECK constraint, and triggers block `UPDATE` and `DELETE` on `audit_events`, `ledger_journals` and
+`ledger_entries`.
 
 ### 1.3 Payment lifecycle
 
@@ -284,6 +287,41 @@ canonical JSON. The web screen recomputes that hash in the browser, using the sa
 JSON as the backend (a test checks the two agree byte for byte, Bengali text included), and the page
 prints cleanly or downloads as JSON. Reading a report writes nothing.
 
+### 2.13 The bank network (interbank simulation)
+
+`engine/interbank.py` turns a transfer request into a **plan**: a hold journal and an ordered list of
+steps, each with the institution that acts, the seconds before it runs, the simulated message that
+travels with it and the balanced journal it posts. Nothing is posted by the engine. A journal is a
+list of debits and credits; for every currency the debits must equal the credits, or building it
+raises.
+
+*National* transfers run inside one country and one currency over a rail: same bank (one step), or
+instant, next-batch and high-value (sending bank, clearing house, receiving bank). The fee is a fixed
+amount plus basis points, each rail has a minimum and a maximum, and the cheapest eligible rail is
+chosen when none is named. *International* transfers start from a Bangladesh bank in BDT. The plan is
+built from the fee engine's `ProviderResult`, so the customer's debit equals `parent_pays` and the
+beneficiary's credit equals `beneficiary_receives` (the code raises if they ever disagree). The
+originating bank sells the currency, pays out of its nostro at the correspondent and keeps its fees;
+the correspondent forwards through its nostro at the beneficiary's bank and keeps a lifting fee; the
+beneficiary's bank credits the customer and keeps a receiving fee. With OUR the originating bank
+prefunds those two fees, with SHA they come out of the amount, with BEN the originating bank also
+takes its own fee from the amount.
+
+`domain/ledger.py` applies a journal: each posting moves a balance on the account's normal side,
+a journal that would overdraw an account is refused before anything is written, and the journal and
+entry rows are append-only. A failed transfer is unwound by posting the exact opposite of every
+journal so far, newest first. Three checks prove integrity at any moment: the trial balance (debits
+equal credits per currency), the mirror accounts (each nostro equals the matching vostro, each
+reserve equals the clearing house's liability) and the entry sum (no stored balance differs from the
+sum of its entries).
+
+`domain/bank_network.py` is the lifecycle: PENDING_CONFIRMATION, then a parent confirms with an MFA
+proof bound to that transfer (this reserves the funds), then ACCEPTED and IN_TRANSIT while the worker
+runs one step per delay, then SETTLED or RETURNED. Each state change writes one audit event in the
+same transaction. All figures are integer minor units. The AI has no bank permission. The
+configuration (`config/bank_network.yaml`) is invented and validated when the application starts.
+See [BANK_NETWORK.md](BANK_NETWORK.md).
+
 ---
 
 ## 3. Security design
@@ -296,7 +334,7 @@ The full threat and control matrix, with the test that proves each row, is in
 |---------|--------|
 | Authentication | Argon2id passwords; ES256 access tokens (15 minutes); rotating refresh tokens with reuse detection; lockout after repeated failures; MFA step-up for approval and allowlisting |
 | Authorisation | Role and token-scope checks in the domain layer; ownership checks return 404; the AI service account has its own scope list with no approve, cancel, reject, limit or config permission |
-| Integrity of money | Integer minor units; summary hash bound to approval; idempotency; optimistic locking; one audit event per transition in the same transaction |
+| Integrity of money | Integer minor units; summary hash bound to approval; idempotency; optimistic locking; one audit event per transition in the same transaction; double-entry journals that must balance, an append-only ledger, and a books-balance check |
 | Provider trust | HMAC-signed webhooks with timestamp window, secret rotation and event de-duplication |
 | AI safety | Policy check, masking, number guard, tool allow-list, human approval, template fallback |
 | Data protection | AES-256-GCM for account numbers; masked display; log redaction filter; personal data masked before any model call; "Reset my data" |
@@ -309,7 +347,7 @@ The full threat and control matrix, with the test that proves each row, is in
 
 - `backend/tests/` has one or more tests for each blueprint scenario T01 to T24 and fails if one
   is missing; see [TEST_CASES.md](TEST_CASES.md).
-- `python -m app.scripts.demo_flow` replays the twelve-step demo against a running API and prints
+- `python -m app.scripts.demo_flow` replays the thirteen-step demo against a running API and prints
   OK or FAIL for each check.
 - Operation logs from a real run are in `submission/evidence/`.
 - `python scripts/scan_repo.py` and the CI workflow scan for secrets, real e-mails and TODOs.

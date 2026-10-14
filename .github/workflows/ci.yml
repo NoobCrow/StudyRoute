@@ -79,7 +79,7 @@ jobs:
       - run: docker compose up -d --build --wait --wait-timeout 240
       # Web server, security headers once each, API through the proxy, sandbox marker.
       - run: python scripts/docker_smoke.py http://localhost:8080
-      # The twelve-step demo against the API inside its container.
+      # The thirteen-step demo against the API inside its container.
       - run: docker compose exec -T backend python -m app.scripts.demo_flow
       - name: Show the container logs
         if: failure()

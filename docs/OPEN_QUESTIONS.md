@@ -71,6 +71,15 @@ change is written to the audit log with who, what and why.
   exercised against a live model endpoint in this sandbox. Pin `LLM_MODEL`, then run
   `python -m app.scripts.check_ai` (from `backend/`) with your own key before the demo if you
   intend to show model mode. It prints OK or FAIL with the reason.
+- **Bank network.** The banks, BIC-style codes (`EXMP...`), account numbers, rails (instant, next
+  batch, high value), fees, limits, delays and the correspondent route in `config/bank_network.yaml`
+  are **invented**. They copy the shape of real payment systems and nothing more; no real scheme's
+  rules, cut-off times or limits were checked, so none is marked verified. International transfers
+  run one way (Bangladesh bank, BDT, through one correspondent to a foreign account in its own
+  currency); inbound and foreign-to-foreign are refused. A failed transfer is unwound exactly, with no
+  return fee. The network is a separate simulation that reuses the fee engine's pricing; a
+  StudyRoute payment is still settled by the simulated provider, and linking the two is a next step.
+  See `docs/BANK_NETWORK.md`.
 - **Docker.** `docker compose up --build` has **not been run** on the development machine, which has
   no Docker. Its parts were checked one by one: the API entrypoint from a copy laid out like the
   image, the UI built from a clean copy that honours `frontend/.dockerignore`, and the repository's

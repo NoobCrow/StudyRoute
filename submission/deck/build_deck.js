@@ -184,7 +184,7 @@ slides.push({
   notes:
     "This is the real chain. The parent pays in taka to an authorised dealer bank, which sells foreign currency and sends a SWIFT instruction carrying a UETR and a charge code. " +
     "A correspondent bank may take a lifting fee, the receiving bank may take another, and the university matches the payment by reference. Each step has a typical failure, shown in red. " +
-    "SWIFT only carries the instruction; banks settle between their own accounts. StudyRoute simulates this chain end to end, and it never moves real money.",
+    "SWIFT only carries the instruction; banks settle between their own accounts. StudyRoute simulates this chain end to end with invented banks, a correspondent and a double-entry ledger where debits equal credits, and a failed payment is returned in full. It never moves real money.",
   elements: [
     ...chain.flatMap(([head, sub, fill, risk], i) => {
       const x = 0.5 + i * 1.84;
@@ -200,7 +200,7 @@ slides.push({
     text(0.5, 3.2, 4, 0.28, "Where it goes wrong", { size: 12, bold: true, color: "text2" }),
     text(0.5, 4.35, 9, 0.4, "SWIFT carries the instruction. Banks settle between their own accounts.",
       { size: 16, bold: true, color: "text1", valign: "middle" }),
-    text(0.5, 4.8, 9, 0.4, "StudyRoute simulates this chain. It never moves real money.",
+    text(0.5, 4.8, 9, 0.4, "StudyRoute simulates this chain with invented banks. It moves no real money.",
       { size: 14, italic: true, color: "accent1", valign: "middle" }),
   ],
 });

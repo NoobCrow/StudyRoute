@@ -98,12 +98,15 @@ production**. "Accepted" means we chose not to fix it in this submission and say
 | R16 | **No CAPTCHA** on sign-in | Low | Rate limit by IP and account lockout | Accepted (optional in the design) |
 | R17 | **Simulated systems could be mistaken for real ones** | Medium | Banner on every screen, `X-Sandbox: true` on every API response, "simulated" on every provider-related view, no claim of a live bank or FX feed | Mitigated |
 | R18 | **The assistant can now create a quote** (a state change) when it plans a payment from a sentence | Low | The RBAC matrix already allows the AI to create quotes; it still cannot create a payment, approve, submit, cancel or allowlist. A message flagged by the policy check creates nothing; each quote is owner-scoped, audited as `quote.created` by the AI actor, and limited by the 20-chats-a-minute rate limit. Tests: `test_ai_tasks.py` | Accepted: a stray quote is harmless and expires after five minutes |
+| R19 | **The bank network is a simulation with invented rails, fees and limits**, so its numbers could be mistaken for a real scheme's rules | Medium if presented as real | Labelled simulated on the screen and in every response, banks all start with `EXMP`, nothing is marked verified, and the parameters live in `config/bank_network.yaml` and `docs/OPEN_QUESTIONS.md` | Mitigated. Replace with verified scheme rules before any real use |
+| R20 | **A failed bank transfer is unwound exactly**, with no return fee and no partial return, which is kinder than a real bank | Low | The behaviour is documented in `docs/BANK_NETWORK.md`; the unwind is a reversing journal, so the books still balance and the audit log records the return | Accepted for the demo |
+| R21 | **The parent can pay from any account of the demo household**, including the student's UK account, and bank transfers have no daily total | Low (sandbox) | Only a parent with a fresh MFA proof for that transfer can confirm; the per-transaction cap, rail limits and a 20-a-minute rate limit apply; every step is audited | Accepted; a real bank would model mandates and daily limits |
 
 ## 3. What we tested and how to repeat it
 
 ```bash
 cd backend && pytest -q               # blueprint T01-T24 plus AI, sandbox and demo tests
-python -m app.scripts.demo_flow       # twelve-step demo against a running API
+python -m app.scripts.demo_flow       # thirteen-step demo against a running API
 python -m app.scripts.tamper_audit    # edit one audit row, then Verify must FAIL at that sequence
 python scripts/scan_repo.py           # no secrets, real e-mails, passport-like numbers or TODOs
 ```

@@ -58,6 +58,12 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
    back and Verify fails at that sequence number. Each payment also has a compliance report (parties,
    ten controls with evidence, approval proof, audit excerpt) whose hash the browser recomputes, so an
    edited copy is detected.
+6. **A bank network you can watch.** Invented banks, a clearing house and a correspondent move
+   simulated money at home and abroad over a double-entry ledger. A transfer is planned, confirmed by
+   a human with an MFA proof bound to that transfer, then passes from bank to bank hop by hop with
+   the simulated MT103 and the journals visible. A rejected payment is returned in full, and a
+   books-balance check (debits equal credits, every nostro equals its mirror) stays green. The AI has no
+   permission to touch it.
 
 ## Security and compliance in the demo
 
@@ -72,8 +78,8 @@ with your AD bank." The app never claims a live bank or a live FX feed.
 
 A FastAPI and SQLite backend (engine, domain, audit, mock providers, AI layer), a React and
 TypeScript web app (dashboard, compare, recipients, documents, payment with approval and tracker,
-audit log, rules, chat), over 550 backend tests that trace to all 24 blueprint scenarios (T01 to
-T24), over 70 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
+audit log, rules, bank network, chat), over 600 backend tests that trace to all 24 blueprint scenarios (T01 to
+T24), over 85 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
 secret scanning, and a one-command start: `docker compose up --build`, then open
 `http://localhost:8080`.
 

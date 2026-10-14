@@ -28,6 +28,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Parent (BDT) to AD bank, which sells foreign currency and sends a SWIFT message with a UETR and a charge code.
 - Correspondent bank may deduct a lifting fee; the receiving bank may deduct a fee; the university matches by reference.
 - Diagram: blueprint section 3. SWIFT carries the instruction; banks settle between their accounts.
+- StudyRoute simulates the chain with invented banks, a correspondent and a double-entry ledger (screen: Bank network; guide: `docs/BANK_NETWORK.md`).
 
 ## 5. Solution overview
 - **Agent task:** one sentence in the chat becomes a quote, a ranking, a deadline plan and a draft proposal; the human still creates the draft and approves.
