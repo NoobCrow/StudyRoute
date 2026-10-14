@@ -118,7 +118,7 @@ def create_transfer(
     actor: Actor = Depends(require(Perm.BANK_TRANSFER)),
     key: str = Depends(idempotency_key),
     ctx: AppContext = Depends(get_ctx),
-    __: None = Depends(limit_user("payment_writes")),
+    __: None = Depends(limit_user("bank_writes")),
 ) -> JSONResponse:
     """Plan a transfer. Nothing moves until a human confirms it with MFA."""
 
@@ -148,7 +148,7 @@ def confirm_transfer(
     actor: Actor = Depends(require(Perm.BANK_TRANSFER)),
     key: str = Depends(idempotency_key),
     ctx: AppContext = Depends(get_ctx),
-    __: None = Depends(limit_user("payment_writes")),
+    __: None = Depends(limit_user("bank_writes")),
 ) -> JSONResponse:
     """Human only: reserve the funds and start it. Needs an MFA proof for this exact transfer."""
 

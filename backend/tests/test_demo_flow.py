@@ -2,8 +2,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from pathlib import Path
+
+import pytest
+
 from app.scripts.demo_flow import DemoFlow
 from tests.helpers import MFA_CODE, PASSWORD, World
+
+
+@pytest.fixture
+def world(tmp_path: Path) -> Iterator[World]:
+    """The demo now includes the sandbox bank network, so seed it."""
+    instance = World(tmp_path, bank_network=True)
+    yield instance
+    instance.close()
 
 
 def test_the_demo_script_passes_every_check(world: World) -> None:

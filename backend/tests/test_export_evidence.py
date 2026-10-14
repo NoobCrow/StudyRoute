@@ -3,10 +3,21 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
+
+import pytest
 
 from app.scripts.export_evidence import collect_evidence
 from tests.helpers import MFA_CODE, PASSWORD, World
+
+
+@pytest.fixture
+def world(tmp_path: Path) -> Iterator[World]:
+    """The demo now includes the sandbox bank network, so seed it."""
+    instance = World(tmp_path, bank_network=True)
+    yield instance
+    instance.close()
 
 
 def export(world: World, out: Path, *, tamper: bool) -> list[str]:
@@ -29,6 +40,7 @@ def test_the_evidence_files_are_written_and_the_demo_passed(world: World, tmp_pa
         "audit_log.json",
         "audit_verify.json",
         "payments.json",
+        "bank_network.json",
         "README.md",
     ):
         assert (out / name).is_file(), name
@@ -44,6 +56,12 @@ def test_the_evidence_files_are_written_and_the_demo_passed(world: World, tmp_pa
     payments = json.loads((out / "payments.json").read_text("utf-8"))
     assert payments[0]["tracker"]["state"] == "SETTLED"
     assert payments[0]["tracker"]["uetr"]
+    bank = json.loads((out / "bank_network.json").read_text("utf-8"))
+    assert bank["network"]["all_ok"] is True
+    statuses = sorted(t["status"] for t in bank["transfers"])
+    assert statuses == ["RETURNED", "SETTLED", "SETTLED"]
+    assert {t["kind"] for t in bank["transfers"]} == {"NATIONAL", "INTERNATIONAL"}
+    assert all(t["journals"] and t["events"] for t in bank["transfers"])
 
 
 def test_the_tamper_demo_records_fail_then_pass(world: World, tmp_path: Path) -> None:

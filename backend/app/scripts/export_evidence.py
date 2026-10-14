@@ -3,12 +3,14 @@
     python -m app.scripts.export_evidence                  # needs a running API with fresh demo data
     python -m app.scripts.export_evidence --tamper         # also records Verify FAIL then PASS
 
-Replays the twelve-step demo against the API, then saves what happened into submission/evidence/:
+Replays the thirteen-step demo against the API, then saves what happened into submission/evidence/:
 
     sandbox_operation_log.txt   the demo transcript, one line per check (OK or FAIL)
     audit_log.json              every audit event, oldest first, with its hashes
     audit_verify.json           the hash-chain verification result
     payments.json               the payments with their tracker timelines and UETR
+    bank_network.json           the simulated bank transfers with every hop, message and journal,
+                                and the trial balance that proves the books balance
     tamper_demo.json            (with --tamper) Verify after an edit, and after restoring it
     README.md                   what each file is
 
@@ -42,10 +44,11 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 
 | File | What it shows |
 |------|---------------|
-| `sandbox_operation_log.txt` | The twelve-step demo run against the API, one line per check, OK or FAIL |
+| `sandbox_operation_log.txt` | The thirteen-step demo run against the API, one line per check, OK or FAIL |
 | `audit_log.json` | Every audit event in order, each with `prev_event_hash` and `this_event_hash` |
 | `audit_verify.json` | The hash-chain verification: status, events checked, head hash |
 | `payments.json` | The payments created, with their state timeline and UETR |
+| `bank_network.json` | The simulated interbank transfers (national and international) with every hop, the simulated messages and the double-entry journals, plus the trial balance and mirror-account check |
 | `tamper_demo.json` | Verify after one audit row was edited behind the application's back (FAIL at that sequence), and after it was restored (PASS). Only present when run with `--tamper` |
 
 To reproduce: start the API with fresh demo data, then run the command above.
@@ -71,6 +74,15 @@ def _payments_with_trackers(flow: DemoFlow) -> list[dict[str, Any]]:
         tracker = flow.fetch(f"/payments/{brief['payment_id']}/tracker", "parent")
         out.append({"payment": brief, "tracker": tracker})
     return out
+
+
+def _bank_network(flow: DemoFlow) -> dict[str, Any]:
+    """The simulated interbank transfers in full, and proof that the books balance."""
+    network = flow.fetch("/bank/network", "admin")
+    listing = flow.fetch("/bank/transfers?limit=50", "admin")["items"]
+    transfers = [flow.fetch(f"/bank/transfers/{t['id']}", "admin") for t in reversed(listing)]
+    keys = ("all_ok", "trial_balance", "mirror_accounts", "accounts_not_matching_entries")
+    return {"network": {key: network[key] for key in keys}, "transfers": transfers}
 
 
 def _write(path: Path, data: Any) -> None:
@@ -103,6 +115,7 @@ def collect_evidence(
     verify = flow.fetch("/audit/verify", "admin")
     _write(out_dir / "audit_verify.json", verify)
     _write(out_dir / "payments.json", _payments_with_trackers(flow))
+    _write(out_dir / "bank_network.json", _bank_network(flow))
     if tamper_db is not None:
         change = tamper_row(tamper_db, max(1, len(events) - 1))
         broken = flow.fetch("/audit/verify", "admin")

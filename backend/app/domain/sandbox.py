@@ -38,7 +38,15 @@ SIMULATED: list[dict[str, str]] = [
         "what": "The MT103 and pacs.008 are previews. Nothing is sent.",
     },
     {"component": "Settlement", "what": "A simulator sends HMAC-signed status webhooks."},
-    {"component": "Host-country rails", "what": "Named in the tracker only. Not simulated."},
+    {
+        "component": "Host-country rails",
+        "what": "The tracker only names them. The Bank network screen simulates invented ones.",
+    },
+    {
+        "component": "Bank network",
+        "what": "Invented banks, accounts, a clearing house and a correspondent move simulated "
+        "money at home and abroad. No real bank is contacted.",
+    },
     {"component": "Documents", "what": "Mock text files. Never upload a real passport or ID."},
 ]
 

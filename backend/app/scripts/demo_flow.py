@@ -26,6 +26,12 @@ from app.core.crypto import hash_object
 from app.core.demo import ADMIN_EMAIL, PARENT_EMAIL, STUDENT_EMAIL
 
 UNIVERSITY = "University of Example (synthetic)"
+# Synthetic accounts of the sandbox bank network (config/bank_network.yaml).
+BANK_PARENT = "SBX-A-0001"
+BANK_RELATIVE = "SBX-B-0002"
+BANK_UNIVERSITY = "GB08EXMP12345612344821"
+BANK_FAIL_UNIVERSITY = "GB13EXMP12345600005555"
+BANK_SANCTIONED = "SBX-L-0099"
 WAIT_STEP_SECONDS = 1.0
 EXPECTED_ORDER = [("prov_b", "1.58"), ("prov_c", "1.63"), ("prov_a", "2.16")]
 
@@ -141,6 +147,7 @@ class DemoFlow:
         self._security_moments(payment_id)
         self._tracker(payment_id)
         self._compliance_report(payment_id)
+        self._bank_network()
         self._audit()
         return self.failures
 
@@ -381,8 +388,94 @@ class DemoFlow:
         self._check(claimed == hash_object(body), "the report hash matches the report")
         self._say(f"      Report hash {claimed}")
 
+    # --- the sandbox bank network ---------------------------------------------------------------
+    def _bank_balance(self, number: str) -> int:
+        items = self._call("GET", "/bank/accounts", "admin").json()["items"]
+        return int(next(a for a in items if a["number"] == number)["balance"]["amount_minor"])
+
+    def _bank_send(
+        self, destination: str, amount_minor: int, currency: str, **extra: Any
+    ) -> dict[str, Any]:
+        """Plan, confirm with MFA, and wait for the simulated banks to finish."""
+        body = {
+            "source": BANK_PARENT,
+            "destination": destination,
+            "amount": {"amount_minor": amount_minor, "currency": currency},
+            **extra,
+        }
+        planned = self._call("POST", "/bank/transfers", "parent", json=body, key=_key())
+        planned.raise_for_status()
+        transfer_id = planned.json()["id"]
+        proof = self._mfa("parent", "confirm_bank_transfer", transfer_id)
+        confirmed = self._call(
+            "POST", f"/bank/transfers/{transfer_id}/confirm", "parent", key=_key(), mfa=proof
+        )
+        confirmed.raise_for_status()
+        path = f"/bank/transfers/{transfer_id}"
+        done = ("SETTLED", "RETURNED")
+        self._until(lambda: self._call("GET", path, "parent").json()["status"] in done, 90)
+        return dict(self._call("GET", path, "parent").json())
+
+    def _bank_network(self) -> None:
+        self._step(12, "Bank network: money moves between invented banks, at home and abroad")
+        network = self._call("GET", "/bank/network", "parent").json()
+        self._check(
+            network["ready"] and network["all_ok"],
+            "the books balance and every nostro agrees with its mirror account",
+        )
+        start = self._bank_balance(BANK_PARENT)
+        relative = self._bank_balance(BANK_RELATIVE)
+        national = self._bank_send(BANK_RELATIVE, 100_000, "BDT", rail="INSTANT")
+        self._check(
+            national["status"] == "SETTLED" and national["fee"]["amount_minor"] == 500,
+            "national: BDT 1,000.00 over the instant rail settles through the clearing house",
+        )
+        self._check(
+            self._bank_balance(BANK_PARENT) == start - 100_500
+            and self._bank_balance(BANK_RELATIVE) == relative + 100_000,
+            "the payer lost the amount plus the BDT 5.00 fee and the receiver gained the amount",
+        )
+        before = self._bank_balance(BANK_PARENT)
+        abroad = self._bank_send(BANK_UNIVERSITY, 100_000, "GBP", charge_code="OUR")
+        hops = [s["bank"] for s in abroad["steps"] if s["done"]]
+        self._check(
+            abroad["status"] == "SETTLED" and len(hops) == 3,
+            f"international: BDT to GBP through the correspondent in {len(hops)} hops",
+        )
+        self._check(
+            abroad["credit"]["amount_minor"] == 100_000
+            and before - self._bank_balance(BANK_PARENT) == abroad["debit"]["amount_minor"],
+            "OUR: the university receives the full GBP 1,000.00 and the parent paid "
+            f"{abroad['debit']['formatted']}",
+        )
+        after_abroad = self._bank_balance(BANK_PARENT)
+        rejected = self._bank_send(BANK_FAIL_UNIVERSITY, 100_000, "GBP", charge_code="OUR")
+        self._check(
+            rejected["status"] == "RETURNED" and self._bank_balance(BANK_PARENT) == after_abroad,
+            "a rejecting beneficiary bank returns the money in full, fees included",
+        )
+        blocked = self._call(
+            "POST",
+            "/bank/transfers",
+            "parent",
+            json={
+                "source": BANK_PARENT,
+                "destination": BANK_SANCTIONED,
+                "amount": {"amount_minor": 100_000, "currency": "GBP"},
+            },
+            key=_key(),
+        )
+        self._check(
+            blocked.status_code == 422 and blocked.json()["code"] == "SANCTIONS_HIT",
+            "mock sanctions screening blocks a transfer before any money moves",
+        )
+        after = self._call("GET", "/bank/network", "parent").json()
+        self._check(
+            after["all_ok"], "after all of it the books still balance and every mirror agrees"
+        )
+
     def _audit(self) -> None:
-        self._step(12, "Audit log: verify the hash chain")
+        self._step(13, "Audit log: verify the hash chain")
         blocked = self._call("GET", "/audit/events?action=ai.blocked&limit=5", "admin").json()
         self._check(len(blocked["items"]) >= 1, "the blocked AI attempt is in the audit log")
         verify = self._call("GET", "/audit/verify", "admin").json()

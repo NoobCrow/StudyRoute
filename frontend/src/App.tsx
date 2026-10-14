@@ -5,6 +5,7 @@ import { Layout } from "./components/Layout";
 import { SandboxBanner } from "./components/SandboxBanner";
 import { Loading } from "./components/Ui";
 import { AuditScreen } from "./screens/Audit";
+import { BankScreen } from "./screens/Bank";
 import { CompareScreen } from "./screens/Compare";
 import { DashboardScreen } from "./screens/Dashboard";
 import { DocumentsScreen } from "./screens/Documents";
@@ -44,6 +45,7 @@ export function App() {
           <Route path="documents" element={<DocumentsScreen />} />
           <Route path="audit" element={<AuditScreen />} />
           <Route path="rules" element={<RulesScreen />} />
+          <Route path="bank" element={<BankScreen />} />
           <Route path="sandbox" element={<SandboxScreen />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -229,3 +229,52 @@ export interface ComplianceReport {
   timeline: Tracker["timeline"];
   audit: { events: AuditEventView[]; chain: VerifyView };
 }
+
+// --- sandbox bank network (all simulated) -----------------------------------------------------
+export type BankStatus =
+  | "PENDING_CONFIRMATION" | "ACCEPTED" | "IN_TRANSIT" | "SETTLED" | "RETURNED" | "CANCELLED";
+
+export interface BankAccountView {
+  id: string; bank_code: string; bank_name: string; country: string | null; kind: string;
+  number: string; holder: string; label: string; currency: string; balance: Money;
+  household: boolean; simulated: true;
+}
+export type Beneficiary = Omit<BankAccountView, "balance">;
+
+export interface BankStep {
+  stage: string; bank: string; bank_name: string; summary: string; delay_seconds: number;
+  done: boolean; message: string;
+}
+export interface BankEvent {
+  at: string; stage: string; bank_code: string; bank_name: string; event: string; note: string;
+  message: { type?: string; fields?: { tag: string; name: string; value: string }[] } | null;
+}
+export interface BankJournalLine { side: "DEBIT" | "CREDIT"; bank: string; account: string; amount: Money }
+export interface BankJournal {
+  id: string; kind: string; stage: string; memo: string; posted_at: string; lines: BankJournalLine[];
+}
+export interface BankTransfer {
+  id: string; status: BankStatus; kind: "NATIONAL" | "INTERNATIONAL"; rail: string; reference: string;
+  uetr: string | null; source: BankAccountView; destination: Beneficiary;
+  debit: Money; credit: Money; fee: Money; figures: Record<string, unknown>; plan_hash: string;
+  steps: BankStep[]; next_step_at: string | null; failure_reason: string | null;
+  created_at: string; confirmed_at: string | null; settled_at: string | null;
+  blockers: Warning[]; simulated: true; note: string;
+  events?: BankEvent[]; journals?: BankJournal[];
+}
+export interface BankRail {
+  code: string; label: string; fee_fixed_minor: number; fee_bps: number;
+  min_minor: number; max_minor: number | null; seconds: number;
+}
+export interface BankMirror {
+  kind: string; holder_bank_name: string; other_name: string; currency: string;
+  balance: Money; reconciled: boolean;
+}
+export interface BankNetwork {
+  ready: boolean; simulated: true; all_ok?: boolean;
+  directory?: { rails: Record<string, BankRail[]>; banks: { code: string; name: string; role: string }[]; note: string };
+  trial_balance?: Record<string, { debits: number; credits: number; balanced: boolean }>;
+  mirror_accounts?: BankMirror[];
+  accounts_not_matching_entries?: number;
+}
+

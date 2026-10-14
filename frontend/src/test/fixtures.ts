@@ -2,7 +2,10 @@
 import { vi } from "vitest";
 import type { Mock } from "vitest";
 
-import type { KycView, Payment, Quote, QuoteResult, Recipient, Role, UserView } from "../api/types";
+import type {
+  BankAccountView, BankNetwork, BankTransfer, Beneficiary, KycView, Payment, Quote, QuoteResult,
+  Recipient, Role, UserView,
+} from "../api/types";
 
 export function user(role: Role, permissions: string[]): UserView {
   return {
@@ -142,3 +145,73 @@ export function chatReply(overrides: Partial<ChatResponse> = {}): ChatResponse {
     debug: { masked_prompt: "FACTS", note: "masked" }, ...overrides,
   };
 }
+
+// --- sandbox bank network ---------------------------------------------------------------------
+export const BANK_PERMISSIONS = ["bank:read", "bank:transfer"];
+
+const money = (amount_minor: number, currency: string, formatted: string) => ({ amount_minor, currency, formatted });
+
+export function bankAccount(overrides: Partial<BankAccountView> = {}): BankAccountView {
+  return {
+    id: "bacc_parent_a", bank_code: "EXMPBDA1", bank_name: "Example Bank A (sandbox)", country: "BD",
+    kind: "CUSTOMER", number: "SBX-A-0001", holder: "Demo Parent (synthetic)", label: "Parent salary account",
+    currency: "BDT", balance: money(500_000_000, "BDT", "BDT 5,000,000.00"), household: true, simulated: true,
+    ...overrides,
+  };
+}
+
+export function beneficiary(overrides: Partial<Beneficiary> = {}): Beneficiary {
+  const { balance: _balance, ...rest } = bankAccount({
+    id: "bacc_uni", bank_code: "EXMPGB2L", bank_name: "University Bank of Example (sandbox)", country: "GB",
+    number: "GB08EXMP12345612344821", holder: "University of Example (synthetic)", label: "University tuition account",
+    currency: "GBP", household: false,
+  });
+  return { ...rest, ...overrides };
+}
+
+export function bankTransfer(overrides: Partial<BankTransfer> = {}): BankTransfer {
+  return {
+    id: "btr_1", status: "PENDING_CONFIRMATION", kind: "INTERNATIONAL", rail: "SWIFT",
+    reference: "Sandbox transfer", uetr: "11111111-2222-4333-8444-555555555555",
+    source: bankAccount(), destination: beneficiary(),
+    debit: money(163_000_000, "BDT", "BDT 1,630,000.00"), credit: money(1_000_000, "GBP", "GBP 10,000.00"),
+    fee: money(250_000, "BDT", "BDT 2,500.00"),
+    figures: {
+      you_pay: money(163_000_000, "BDT", "BDT 1,630,000.00"),
+      beneficiary_receives: money(1_000_000, "GBP", "GBP 10,000.00"),
+      charge_code: "OUR", provider_rate: "163.200000", bank_fees: money(250_000, "BDT", "BDT 2,500.00"),
+      intermediary_fee: money(0, "GBP", "GBP 0.00"), receiving_fee: money(0, "GBP", "GBP 0.00"),
+      total_cost: money(3_450_000, "BDT", "BDT 34,500.00"), cost_pct: "2.16",
+    },
+    plan_hash: "hash", next_step_at: null, failure_reason: null,
+    created_at: "2026-10-14T09:30:00Z", confirmed_at: null, settled_at: null, blockers: [],
+    simulated: true, note: "Simulated. No real bank is contacted and no real money moves.",
+    steps: [
+      { stage: "ORIGINATING_BANK", bank: "EXMPBDA1", bank_name: "Example Bank A (sandbox)", summary: "Originating bank sells currency and sends MT103", delay_seconds: 4, done: false, message: "MT103" },
+      { stage: "CORRESPONDENT", bank: "EXMPUS6C", bank_name: "Example Correspondent Bank (sandbox)", summary: "Correspondent forwards through its nostro", delay_seconds: 4, done: false, message: "MT103" },
+      { stage: "BENEFICIARY_BANK", bank: "EXMPGB2L", bank_name: "University Bank of Example (sandbox)", summary: "Beneficiary bank credits the customer", delay_seconds: 4, done: false, message: "CREDIT_ADVICE" },
+    ],
+    events: [], journals: [],
+    ...overrides,
+  };
+}
+
+export const BANK_NETWORK: BankNetwork = {
+  ready: true, simulated: true, all_ok: true,
+  directory: {
+    banks: [{ code: "EXMPBDA1", name: "Example Bank A (sandbox)", role: "AD_BANK" }],
+    rails: {
+      BDT: [
+        { code: "INSTANT", label: "Instant payment (simulated)", fee_fixed_minor: 500, fee_bps: 0, min_minor: 100, max_minor: 50_000_000, seconds: 3 },
+        { code: "BATCH", label: "Next-batch transfer (simulated)", fee_fixed_minor: 200, fee_bps: 0, min_minor: 100, max_minor: 500_000_000, seconds: 26 },
+      ],
+    },
+    note: "Invented banks.",
+  },
+  trial_balance: { BDT: { debits: 1000, credits: 1000, balanced: true } },
+  mirror_accounts: [
+    { kind: "NOSTRO", holder_bank_name: "Example Bank A (sandbox)", other_name: "Example Correspondent Bank (sandbox)", currency: "GBP", balance: money(1_000_000_000, "GBP", "GBP 10,000,000.00"), reconciled: true },
+  ],
+  accounts_not_matching_entries: 0,
+};
+

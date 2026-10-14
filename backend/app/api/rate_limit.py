@@ -14,6 +14,7 @@ LIMITS: dict[str, tuple[int, str]] = {
     "auth": (10, "ip"),
     "quotes": (30, "user"),
     "payment_writes": (10, "user"),
+    "bank_writes": (20, "user"),
     "chat": (20, "user"),
     "webhooks": (120, "provider"),
     "webhook_failures": (30, "ip"),

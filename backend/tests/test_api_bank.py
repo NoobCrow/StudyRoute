@@ -494,3 +494,20 @@ def test_money_in_every_view_is_an_integer(world: World) -> None:
     for journal in detail["journals"]:
         for line in journal["lines"]:
             assert isinstance(line["amount"]["amount_minor"], int)
+
+
+def test_bank_writes_have_their_own_rate_limit(tmp_path: Path) -> None:
+    limited = World(tmp_path, bank_network=True, rate_limit_enabled=True)
+    try:
+        body = {
+            "source": PARENT_A,
+            "destination": COUSIN_A,
+            "amount": {"amount_minor": 1_000, "currency": "BDT"},
+        }
+        codes = [
+            limited.call("POST", "/bank/transfers", json=body, idem=True).status_code
+            for _ in range(22)
+        ]
+        assert codes[:20] == [201] * 20 and codes[20:] == [429, 429]
+    finally:
+        limited.close()

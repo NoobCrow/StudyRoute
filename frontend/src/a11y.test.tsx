@@ -10,13 +10,15 @@ import type { ComplianceReport } from "./api/types";
 import { useAuth } from "./auth/AuthContext";
 import { ChatPanel } from "./components/ChatPanel";
 import { SandboxBanner } from "./components/SandboxBanner";
+import { BankScreen } from "./screens/Bank";
 import { CompareScreen } from "./screens/Compare";
 import { PaymentScreen } from "./screens/Payment";
 import { RecipientsScreen } from "./screens/Recipients";
 import { ReportScreen } from "./screens/Report";
 import { SandboxScreen } from "./screens/Sandbox";
 import {
-  KYC, PARENT_PERMISSIONS, PLAN_CARD, QUOTE, RECIPIENT, chatReply, mockApi, payment, user,
+  BANK_NETWORK, BANK_PERMISSIONS, KYC, PARENT_PERMISSIONS, PLAN_CARD, QUOTE, RECIPIENT, bankAccount,
+  bankTransfer, beneficiary, chatReply, mockApi, payment, user,
 } from "./test/fixtures";
 
 vi.mock("./auth/AuthContext", () => ({ useAuth: vi.fn() }));
@@ -126,3 +128,35 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 });
+
+describe("accessibility (axe): bank network", () => {
+  it("the bank network screen with accounts, a form, an open transfer and the books", async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: user("parent", [...BANK_PERMISSIONS, "payments:read"]), ready: true,
+      login: vi.fn(), logout: vi.fn(), reloadUser: vi.fn(),
+    });
+    const transfer = bankTransfer({
+      status: "SETTLED",
+      steps: bankTransfer().steps.map((s) => ({ ...s, done: true })),
+      events: [{
+        at: "2026-10-14T09:31:00Z", stage: "ORIGINATING_BANK", bank_code: "EXMPBDA1", bank_name: "Example Bank A (sandbox)",
+        event: "step_done", note: "Sent",
+        message: { type: "MT103", fields: [{ tag: ":71A:", name: "Details of charges", value: "OUR" }] },
+      }],
+      journals: [{
+        id: "jrn_1", kind: "STEP", stage: "ORIGINATING_BANK", memo: "Sell foreign currency", posted_at: "2026-10-14T09:31:00Z",
+        lines: [{ side: "DEBIT", bank: "Example Bank A (sandbox)", account: "IN_FLIGHT", amount: { amount_minor: 1, currency: "BDT", formatted: "BDT 0.01" } }],
+      }],
+    });
+    mockApi({
+      "/bank/network": BANK_NETWORK, "/bank/accounts": { items: [bankAccount()] },
+      "/bank/beneficiaries": { items: [beneficiary()] }, "/bank/transfers": { items: [transfer] },
+      "/bank/transfers/btr_1": transfer, "/health": { mode: "sandbox" },
+    });
+    const { container } = render(<MemoryRouter><BankScreen /></MemoryRouter>);
+    await userEvent.click(await screen.findByRole("button", { name: /Open transfer to University/ }));
+    await screen.findByRole("article");
+    expect(await violations(container)).toEqual([]);
+  });
+});
+

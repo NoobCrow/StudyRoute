@@ -6,7 +6,7 @@ import { ErrorNotice } from "./Ui";
 
 interface Props {
   title: string;
-  scope: "approve_payment" | "allowlist_recipient";
+  scope: "approve_payment" | "allowlist_recipient" | "confirm_bank_transfer";
   subjectId: string;
   sandboxCode?: string;
   onProof: (proof: string) => void;
