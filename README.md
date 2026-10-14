@@ -14,6 +14,18 @@ or Malaysia. StudyRoute shows the true total cost of each provider (including th
 rate margin), warns when a university may be short-paid, works backwards from the due date, tracks
 documents and KYC, and walks the parent through a safe approval.
 
+## At a glance
+
+<table>
+<tr>
+<td valign="top" width="33%"><a href="submission/screenshots/02-compare.png"><img src="submission/screenshots/02-compare.png" alt="The Compare screen: three providers ranked by true total cost" width="100%"></a><br><b>Compare</b><br><sub>Three providers ranked by true total cost, including the hidden margin.</sub></td>
+<td valign="top" width="33%"><a href="submission/screenshots/17-agent-plan.png"><img src="submission/screenshots/17-agent-plan.png" alt="The assistant's payment plan card built from one sentence" width="100%"></a><br><b>One sentence becomes a plan</b><br><sub>The assistant makes the quote, ranks, plans the deadline and proposes the draft. It creates no payment.</sub></td>
+<td valign="top" width="33%"><a href="submission/screenshots/23-bank-international-plan.png"><img src="submission/screenshots/23-bank-international-plan.png" alt="The Bank network screen showing a planned international transfer" width="100%"></a><br><b>Money between banks</b><br><sub>Plan a simulated international transfer, then watch it hop from bank to bank. Fees match the Compare screen.</sub></td>
+</tr>
+</table>
+
+All of it is a sandbox: invented banks, synthetic data, no real money. More screenshots and diagrams are further down.
+
 ## Features
 
 | # | Feature | Where |
@@ -138,18 +150,25 @@ The whole app runs in `APP_ENV=sandbox` by default. In that mode:
   internationally, over a double-entry ledger. Confirming a transfer needs an MFA proof for that
   transfer; the AI cannot touch it. Details in [docs/BANK_NETWORK.md](docs/BANK_NETWORK.md).
 
+## The bank network
+
+The **Bank network** screen shows how money really moves between banks, with invented banks and
+synthetic accounts. A transfer is planned, confirmed by a human with an MFA proof for that transfer,
+and then moved one hop at a time. Every hop is one balanced journal and one audit event, and a failed
+transfer is unwound exactly.
+
+<p align="center"><img src="docs/diagrams/money-flow.png" alt="International transfer: Bank A, correspondent bank, university's bank, with a journal at each hop" width="85%"></p>
+
+<p align="center"><img src="docs/diagrams/national-flow.png" alt="National transfer through a clearing house, with three rails and a same-bank shortcut" width="100%"></p>
+
+Full guide, API and limits: [docs/BANK_NETWORK.md](docs/BANK_NETWORK.md).
+
 ## How it fits together
 
-```
- Browser (React) --> nginx --> FastAPI  (auth, rate limit, validation, idempotency, RFC 7807)
-   same origin,        |          |
-   strict CSP          |          +--> Engine   FX, fees, ranking, planner, runway (pure, no I/O)
-                       |          +--> Domain   state machine, KYC, limits, recipients, RBAC
-                       |          +--> AI       policy check, masking, number guard, tool allow-list
-                       |          +--> Audit    append-only, SHA-256 hash chain, verify
-                       |          +--> Providers (mock) --> HMAC-signed webhooks back to the API
-                       +--------- SQLite (Postgres optional)
-```
+<p align="center"><img src="docs/diagrams/architecture.png" alt="Architecture: browser, nginx, FastAPI, engine, domain, AI layer, audit, simulated providers, SQLite" width="100%"></p>
+
+The engine is pure code with no database, clock or network, so every number can be unit-tested. The
+diagram sources are Mermaid files in [docs/diagrams/](docs/diagrams/).
 
 ```
 backend/app/engine/     money, fx, quote, ranking, planner, mt103, validators, interbank (pure)
@@ -184,7 +203,24 @@ Full threat matrix with the test that proves each row: [docs/SECURITY.md](docs/S
 - **Honesty.** Every rule is in config with `source_url` and a `verified` flag; unverified ones carry
   a yellow badge and the sentence "Indicative. Confirm with your AD bank." Simulated things are labelled.
 
+### The life of a payment
+
+<p align="center"><img src="docs/diagrams/payment-lifecycle.png" alt="Payment state machine: DRAFT, QUOTED, PENDING_APPROVAL, APPROVED, SUBMITTED, SETTLED, with REJECTED, CANCELLED and FAILED" width="100%"></p>
+
+Each arrow is a row in one transition table, checked by guards (quote valid, KYC verified, recipient
+allowlisted, sanctions clear, caps, fresh MFA, matching summary hash) and writes exactly one audit event.
+
+### A safe approval, step by step
+
+<p align="center"><img src="docs/diagrams/safe-approval.png" alt="Sequence from request approval through MFA, approve, signed webhook and settlement" width="100%"></p>
+
+### Why the audit log can be trusted
+
+<p align="center"><img src="docs/diagrams/audit-chain.png" alt="Hash chain of audit events and Verify returning PASS or FAIL at the edited event" width="100%"></p>
+
 ## The AI assistant
+
+<p align="center"><img src="docs/diagrams/ai-pipeline.png" alt="AI pipeline: policy check, engine facts, masking, model or template, number guard, reply guard, human click" width="100%"></p>
 
 It starts in **template mode**: deterministic answers built from engine facts, no network, no key,
 and a visible "Template mode" badge. To use a real model, copy `.env.example` to `.env` and set
@@ -239,6 +275,94 @@ Everything is optional in the sandbox; see `.env.example` (empty values only). R
 in `config/rules.yaml` and, once seeded, in the database where an admin edits them in the **Rules**
 screen (audited). Production mode (`APP_ENV=production`) refuses to start without real secrets and
 ignores the sandbox MFA code.
+
+## Screenshots
+
+All taken from the running app on synthetic data. Click an image for the full size.
+
+### Compare, decide, approve
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/01-dashboard.png"><img src="submission/screenshots/01-dashboard.png" alt="The parent's dashboard" width="100%"></a><br><b>Dashboard</b><br><sub>Identity check, deadline planner over both countries' working days, send plan, rate card and living-cost runway.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/02-compare.png"><img src="submission/screenshots/02-compare.png" alt="Provider comparison" width="100%"></a><br><b>Compare providers</b><br><sub>Ranked by true total cost, with the hidden margin and a shortfall warning.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/03-draft-blocked.png"><img src="submission/screenshots/03-draft-blocked.png" alt="Payment draft blocked by the KYC gate" width="100%"></a><br><b>A draft that cannot be approved yet</b><br><sub>KYC is not verified, so the button is disabled and the screen says why.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/04-recipients.png"><img src="submission/screenshots/04-recipients.png" alt="Recipients list with masked accounts" width="100%"></a><br><b>Recipients</b><br><sub>BIC and IBAN checks, masked account numbers and an allowlist.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/05-pending-approval.png"><img src="submission/screenshots/05-pending-approval.png" alt="Pending approval with the summary and MT103 preview" width="100%"></a><br><b>Approval</b><br><sub>The frozen summary with its hash, the MT103 preview and the MFA step.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/06-settled.png"><img src="submission/screenshots/06-settled.png" alt="Settled payment with the tracker and the security demo" width="100%"></a><br><b>Tracker and security demo</b><br><sub>SETTLED with a UETR. The security demo replays an approval and sends a forged webhook.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/10-payments.png"><img src="submission/screenshots/10-payments.png" alt="Payments list" width="100%"></a><br><b>Payments</b><br><sub>Every payment with its state.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/08-documents.png"><img src="submission/screenshots/08-documents.png" alt="Document checklist" width="100%"></a><br><b>Documents</b><br><sub>The checklist for the chosen corridor, with tick-off.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/09-rules.png"><img src="submission/screenshots/09-rules.png" alt="Rules screen with Not verified badges" width="100%"></a><br><b>Rules</b><br><sub>Each rule with its source, last-checked date and a yellow Not verified badge.</sub></td>
+<td width="50%"></td>
+</tr>
+</table>
+
+### The assistant
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/07-chat.png"><img src="submission/screenshots/07-chat.png" alt="Chat answer and a blocked injection" width="100%"></a><br><b>Ask and be refused</b><br><sub>Answers list the facts they used. A prompt-injection attempt is blocked and logged.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/17-agent-plan.png"><img src="submission/screenshots/17-agent-plan.png" alt="The assistant's payment plan card" width="100%"></a><br><b>Agent task</b><br><sub>One sentence in, a plan card out. The assistant only proposes the draft.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/18-plan-to-draft.png"><img src="submission/screenshots/18-plan-to-draft.png" alt="The compare page with the draft form opened from the plan" width="100%"></a><br><b>From plan to draft</b><br><sub>The plan opens the draft form with the best provider. The person chooses the recipient.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/19-send-plan.png"><img src="submission/screenshots/19-send-plan.png" alt="Send plan comparison" width="100%"></a><br><b>Smart send plan</b><br><sub>Monthly, quarterly, per term or all at once, priced by the engine.</sub></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td valign="top" align="center"><a href="submission/screenshots/21-phone-send-plan-chat.png"><img src="submission/screenshots/21-phone-send-plan-chat.png" alt="The assistant's plan on a phone" width="260"></a><br><b>On a phone</b><br><sub>The chat on a 390 px screen.</sub></td>
+<td valign="top" align="center"><a href="submission/screenshots/26-phone-bank.png"><img src="submission/screenshots/26-phone-bank.png" alt="The bank network screen on a phone" width="260"></a><br><b>Bank network on a phone</b><br><sub>No sideways scrolling; the money column stays on screen.</sub></td>
+</tr>
+</table>
+
+### Evidence
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/20-compliance-report.png"><img src="submission/screenshots/20-compliance-report.png" alt="Compliance report" width="100%"></a><br><b>Compliance report</b><br><sub>Parties, ten controls with evidence, the approval proof and a hash the browser re-checks.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/11-audit-parent.png"><img src="submission/screenshots/11-audit-parent.png" alt="Audit log" width="100%"></a><br><b>Audit log</b><br><sub>One event per state change, each with its hash.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/12-audit-verify-pass.png"><img src="submission/screenshots/12-audit-verify-pass.png" alt="Audit verification showing PASS" width="100%"></a><br><b>Verify the hash chain</b><br><sub>The reviewer presses Verify: PASS.</sub></td>
+<td width="50%"></td>
+</tr>
+</table>
+
+### The bank network
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/22-bank-accounts.png"><img src="submission/screenshots/22-bank-accounts.png" alt="Bank network: accounts and totals" width="100%"></a><br><b>Accounts and the multi-currency view</b><br><sub>The identity check, the household's money in every currency and its accounts.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/23-bank-international-plan.png"><img src="submission/screenshots/23-bank-international-plan.png" alt="A planned international transfer" width="100%"></a><br><b>Plan an international transfer</b><br><sub>Fees and what the beneficiary receives, before anything moves. Matches the Compare screen.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/24-bank-international-settled.png"><img src="submission/screenshots/24-bank-international-settled.png" alt="A settled international transfer with messages and ledger" width="100%"></a><br><b>Hop by hop</b><br><sub>Originating bank, correspondent, beneficiary bank, with the MT103 and the journals.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/25-bank-returned.png"><img src="submission/screenshots/25-bank-returned.png" alt="A returned transfer" width="100%"></a><br><b>A rejected transfer</b><br><sub>A beneficiary named FAIL_TEST rejects it: every journal is reversed and the books still balance.</sub></td>
+</tr>
+</table>
+
+### Roles and the sandbox
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/13-admin-dashboard.png"><img src="submission/screenshots/13-admin-dashboard.png" alt="Reviewer dashboard" width="100%"></a><br><b>Reviewer</b><br><sub>Audit, rules and the sandbox; the reviewer cannot approve a payment.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/14-student-dashboard.png"><img src="submission/screenshots/14-student-dashboard.png" alt="Student dashboard" width="100%"></a><br><b>Student</b><br><sub>Can look at the plan and add recipient details, not approve.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/15-sandbox-admin.png"><img src="submission/screenshots/15-sandbox-admin.png" alt="Sandbox page" width="100%"></a><br><b>What is simulated</b><br><sub>Every simulated part is listed, with the test scenarios.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/16-sandbox-scheduled.png"><img src="submission/screenshots/16-sandbox-scheduled.png" alt="Sandbox control scheduling a settlement" width="100%"></a><br><b>Reviewer control</b><br><sub>The reviewer settles an in-flight SLOW_TEST payment; the signed webhook still goes through verification.</sub></td>
+</tr>
+</table>
 
 ## Competition deliverables (FinTechathon 2026, International Track, Topic C)
 

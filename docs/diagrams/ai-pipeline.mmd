@@ -1,0 +1,21 @@
+flowchart TB
+  subgraph before ["Before the model"]
+    direction LR
+    U["Message from the<br/>parent or student"] --> Pol["<b>1 Policy check</b><br/>override attempts, requests<br/>to act, secrets, invented numbers"]
+    Pol -->|"allowed"| Eng["<b>2 Engine</b><br/>computes every number<br/>into a facts list"]
+    Eng --> Mask["<b>3 Mask</b><br/>names, accounts,<br/>passports, e-mails"]
+    Pol -->|"blocked"| Ref["Fixed refusal<br/>+ ai.blocked<br/>audit event"]
+  end
+  subgraph after ["After the model"]
+    direction LR
+    Mod["<b>4 Model</b> if a key is set<br/>(pinned version, logged),<br/>otherwise a template answer"] --> NG["<b>5 Number guard</b><br/>every figure must be in<br/>the facts, else template"]
+    NG --> RG["<b>6 Reply and tool guard</b><br/>no claimed actions, never<br/>'legal', proposals only"]
+    RG --> Out["<b>7 Reply</b><br/>+ facts used<br/>+ audit event"]
+    Out --> Human["<b>A person clicks</b><br/>create draft,<br/>approve with MFA"]
+  end
+  before --> after
+
+  classDef human fill:#dff1ef,stroke:#0f766e,color:#0b3a36,stroke-width:3px
+  classDef stop fill:#fde8e4,stroke:#a3200f,color:#4a0f06
+  class Human human
+  class Ref stop

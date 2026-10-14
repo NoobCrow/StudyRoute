@@ -1,0 +1,16 @@
+flowchart LR
+  G["GENESIS<br/>000...0"] --> E1
+  subgraph chain ["Append-only chain"]
+    direction LR
+    E1["Event 1<br/>fields + prev hash<br/><b>hash h1</b>"] --> E2["Event 2<br/>fields + h1<br/><b>hash h2</b>"] --> E3["Event 3<br/>fields + h2<br/><b>hash h3</b>"] --> E4["Event 4<br/>fields + h3<br/><b>hash h4</b>"]
+  end
+  E4 --> V{"Verify<br/>recompute every hash<br/>and every link"}
+  V -->|"nothing edited"| Pass["PASS"]
+  V -->|"event 2 edited"| Fail["FAIL at event 2<br/>its hash no longer matches<br/>and event 3 points to the old one"]
+  T["Triggers block UPDATE<br/>and DELETE on the table"] -.-> chain
+  W["Every state change appends<br/>one event, in the same transaction"] -.-> chain
+
+  classDef ok fill:#e3f4e9,stroke:#176b34,color:#0c3a1b
+  classDef bad fill:#fde8e4,stroke:#a3200f,color:#4a0f06
+  class Pass ok
+  class Fail bad

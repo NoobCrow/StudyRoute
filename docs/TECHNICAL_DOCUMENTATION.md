@@ -16,6 +16,9 @@ logged. Each part below exists to make one of those four statements true and tes
 
 ### 1.1 Components
 
+![Architecture diagram](diagrams/architecture.png)
+
+
 ```
  Browser (React + TypeScript)
         |  same origin, strict CSP
@@ -63,6 +66,9 @@ CHECK constraint, and triggers block `UPDATE` and `DELETE` on `audit_events`, `l
 `ledger_entries`.
 
 ### 1.3 Payment lifecycle
+
+![Payment state machine](diagrams/payment-lifecycle.png)
+
 
 ```
 DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
@@ -169,6 +175,9 @@ indicative, and is not a forecast.
 
 ### 2.5 The AI pipeline
 
+![AI pipeline](diagrams/ai-pipeline.png)
+
+
 ```
  user message --> 1 policy check --> 2 facts from the engine --> 3 mask personal data
               --> 4 model (optional) --> 5 number guard --> 6 tool guard --> 7 un-mask --> 8 audit
@@ -199,6 +208,9 @@ With no model key the assistant runs in **template mode**: the same pipeline wit
 UI shows a "Template mode" badge, so the demo never depends on a network.
 
 ### 2.6 Audit hash chain
+
+![Audit hash chain](diagrams/audit-chain.png)
+
 
 ```
 GENESIS             = "0" * 64
@@ -235,6 +247,9 @@ in constant time, then de-duplicates by `X-Event-Id`, and only then parses the J
 transition. Each rejection writes a `webhook.rejected` audit event and changes nothing.
 
 ### 2.9 MFA step-up
+
+![Safe approval sequence](diagrams/safe-approval.png)
+
 
 A fresh proof is required to approve a payment and to allowlist a recipient. It is valid 5 minutes,
 single use, and bound to the user, the scope (`approve_payment` or `allowlist_recipient`) and the
@@ -288,6 +303,9 @@ JSON as the backend (a test checks the two agree byte for byte, Bengali text inc
 prints cleanly or downloads as JSON. Reading a report writes nothing.
 
 ### 2.13 The bank network (interbank simulation)
+
+![International transfer through the bank network](diagrams/money-flow.png)
+
 
 `engine/interbank.py` turns a transfer request into a **plan**: a hold journal and an ordered list of
 steps, each with the institution that acts, the seconds before it runs, the simulated message that
