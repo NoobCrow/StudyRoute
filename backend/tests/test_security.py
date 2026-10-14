@@ -7,7 +7,7 @@ import logging
 import pytest
 
 from app.core.config import Settings
-from app.core.logging import redact
+from app.core.logging import redact, setup_logging
 from app.core.secret_store import MissingSecretError, SecretStore
 from tests.helpers import World
 
@@ -118,6 +118,20 @@ def test_the_redaction_helper_removes_tokens_emails_and_numbers() -> None:
     assert redact("rate 1.58 percent, BDT 25,300.00") == "rate 1.58 percent, BDT 25,300.00"
 
 
+def test_the_uvicorn_access_log_still_formats_after_redaction() -> None:
+    from uvicorn.logging import AccessFormatter
+
+    setup_logging()
+    record = logging.getLogger("uvicorn.access").makeRecord(
+        "uvicorn.access", logging.INFO, __file__, 1, '%s - "%s %s HTTP/%s" %d',
+        ("127.0.0.1:5000", "GET", "/api/v1/me?email=a.b@example.test", "1.1", 200), None,
+    )  # fmt: skip
+    line = AccessFormatter('%(client_addr)s - "%(request_line)s" %(status_code)s', use_colors=False)
+    text = line.format(record)
+    assert "GET /api/v1/me" in text and " 200" in text
+    assert "a.b@example.test" not in text
+
+
 def test_production_mode_refuses_to_invent_secrets(tmp_path, monkeypatch) -> None:
     for name in ("JWT_PRIVATE_KEY_PEM", "DATA_ENCRYPTION_KEY", "WEBHOOK_SECRET_PROV_A"):
         monkeypatch.delenv(name, raising=False)
@@ -125,6 +139,29 @@ def test_production_mode_refuses_to_invent_secrets(tmp_path, monkeypatch) -> Non
     assert settings.sandbox_mfa_code is None
     with pytest.raises(MissingSecretError):
         SecretStore(settings).assert_ready(["prov_a"])
+
+
+def test_a_pem_given_with_escaped_newlines_in_the_environment_is_accepted(
+    tmp_path, monkeypatch
+) -> None:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric import ec
+
+    pem = (
+        ec.generate_private_key(ec.SECP256R1())
+        .private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        )
+        .decode("ascii")
+    )
+    escaped = pem.strip().replace("\n", "\\n")
+    assert "\n" not in escaped and "\\n" in escaped
+    monkeypatch.setenv("JWT_PRIVATE_KEY_PEM", escaped)
+    store = SecretStore(Settings(app_env="sandbox", data_dir=tmp_path))
+    assert store.jwt_private_pem().strip() == pem.strip()
+    assert "BEGIN PUBLIC KEY" in store.jwt_public_pem()
 
 
 def test_interactive_docs_are_sandbox_only_with_their_own_csp(world: World) -> None:

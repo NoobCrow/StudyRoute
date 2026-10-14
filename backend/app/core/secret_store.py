@@ -78,7 +78,8 @@ class SecretStore:
         return self._dev_value(env_name, factory)
 
     def jwt_private_pem(self) -> str:
-        return self._require("JWT_PRIVATE_KEY_PEM", _generate_ec_pem).replace("\n", "\n")
+        # .env files and compose pass a PEM on one line, with each newline written as \n
+        return self._require("JWT_PRIVATE_KEY_PEM", _generate_ec_pem).replace("\\n", "\n")
 
     def jwt_public_pem(self) -> str:
         private = serialization.load_pem_private_key(self.jwt_private_pem().encode(), password=None)

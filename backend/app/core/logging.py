@@ -66,6 +66,10 @@ def setup_logging(level: int = logging.INFO) -> None:
 
     def factory(*args: object, **kwargs: object) -> logging.LogRecord:
         record = previous_factory(*args, **kwargs)
+        if record.name == "uvicorn.access" and isinstance(record.args, tuple):
+            # uvicorn's formatter unpacks the five request fields from args: keep the tuple.
+            record.args = tuple(redact(a) if isinstance(a, str) else a for a in record.args)
+            return record
         try:
             message = record.getMessage()
         except Exception:
