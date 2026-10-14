@@ -1667,3 +1667,22 @@ With fewer people, merge roles but keep one person as the reviewer of security c
 | Claude Code extension id                 | anthropic.claude-code (search "Claude Code" in VS Code Extensions)                                                                      |
 
 > The form and rules links are file copies hosted by a partner university, not the organisers. Prefer the official website for the latest versions. Registration is free. Never pay anyone to enter.
+
+24\. Addendum: implementation decisions (14 October 2026)
+
+This section records where the built sandbox goes beyond, or deliberately simplifies, sections 8, 10 and 12. Sections 1 to 23 above are unchanged.
+
+| **Topic** | **Decision** |
+|-----------|--------------|
+| Cancel (section 10) | A parent may also cancel a payment in DRAFT, QUOTED or PENDING_APPROVAL, not only APPROVED. The AI and admin still cannot cancel. |
+| Extra endpoints (section 8.2) | GET /payments (list, cursor), POST /payments/{id}/requote (attach a fresh quote to a DRAFT), GET /payments/{id}/instruction-preview (MT103 and pacs.008 preview), POST /auth/refresh and /auth/logout, GET /corridors, GET /quotes, GET and POST and DELETE /documents (mock files and checklist tick-off), PUT /kyc/mock-review (reviewer override), GET /planner/runway (F9), GET /rates/history (F10), POST /me/reset (Reset my data), GET /health. |
+| Idempotency (section 8.4) | Required on every payment write: create, request-approval, approve, reject, cancel and requote. |
+| Authentication (section 12.2) | Access tokens are ES256 JWTs (15 minutes). Refresh tokens rotate and reuse revokes the family. Login is password plus tokens; a full OAuth 2.0 code flow with PKCE against an external identity provider is not built. |
+| MFA (section 12.2) | A proof is valid 5 minutes, single use, and bound to the user, the scope (approve_payment or allowlist_recipient) and the object. Allowlisting and removing from the allowlist both need it. The sandbox accepts a documented fixed code next to real TOTP. |
+| Quote results (section 8.3) | Each result carries charge_code (what the provider can do) and requested_charge_code (what the user asked for). Provider C supports only SHA, so it is quoted as SHA with a shortfall warning. |
+| Drafts | The recipient is never preselected when more than one exists, so the money cannot go to a guessed recipient. |
+| Reset my data (section 12.4) | Deletes the household's payments, quotes, recipients and documents. Audit events stay because they hold no personal data. |
+| Audit log (section 15) | Append-only is enforced with SQLite triggers that block UPDATE and DELETE. A Postgres deployment should also revoke those privileges from the application role. |
+| Rate limits (section 8.7) | Groups: auth, quotes, payment writes, assistant chat, webhooks, plus a failure counter for rejected webhooks. |
+| Test IDs (section 16) | T01 to T24 each have at least one test; tests/test_blueprint_coverage.py fails if one is missing. Extra tests cover the AI layer, demo flow and repository scan. |
+| Delivery | docker-compose.yml starts the API and an nginx web server on http://localhost:8080. The security headers are in frontend/security_headers.conf. docs/SECURITY.md maps each row of 12.1 to its proof; docs/OPEN_QUESTIONS.md lists what is unverified or not built. |

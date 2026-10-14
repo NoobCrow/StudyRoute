@@ -55,6 +55,9 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Lint/format: ruff check . && ruff format .
 - Start all: docker compose up --build
 - Reset demo data: python -m app.scripts.seed
+- Run the demo script against a running API: python -m app.scripts.demo_flow
+- Scan for secrets, real e-mails and TODOs: python scripts/scan_repo.py
+- Build the submission archive: python scripts/make_submission.py
 
 ## How to work
 - Work one blueprint phase at a time. Read the relevant section first.
