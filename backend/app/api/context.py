@@ -45,3 +45,4 @@ class AppContext:
     assistant: Any = None  # set by the container once the AI layer is built
     worker: Any = None
     sandbox: Any = None  # the sandbox service, set by the container
+    reports: Any = None  # the compliance report service, set by the container

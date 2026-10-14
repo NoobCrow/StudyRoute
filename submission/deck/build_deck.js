@@ -207,20 +207,21 @@ slides.push({
 
 // 5 ---------------------------------------------------------------------------------------------
 const steps = [
-  ["AGENT", "Ranks providers by true cost"], ["AGENT", "Plans deadline and documents"],
+  ["AGENT", "Reads one sentence, makes the quote"], ["AGENT", "Ranks, plans deadline, checks KYC"],
   ["YOU", "Create a draft, choose recipient"], ["AGENT", "Gates: KYC, allowlist, caps"],
-  ["YOU", "Approve with a fresh MFA code"], ["AGENT", "Tracks to SETTLED, logs it all"],
+  ["YOU", "Approve with a fresh MFA code"], ["AGENT", "Tracks to SETTLED, seals a report"],
 ];
 slides.push({
   layout: "content", section: "The solution", title: "From question to settled payment",
   notes:
-    "This is task completion. On the left is the compare screen. On the right, the agent and the person share the work. " +
-    "The agent ranks providers by true cost, plans the deadline and the document list, and then blocks the payment until KYC, the recipient allowlist and the sandbox caps all pass. " +
-    "The person creates the draft, chooses the recipient and approves with a fresh MFA code. The agent then tracks the payment to settled and every step is logged. " +
-    "The assistant can propose a draft or an approval request, but a person always clicks.",
+    "This is task completion. On the left, the parent typed one sentence into the chat: I need to pay ten thousand pounds of tuition by 28 October. " +
+    "The agent read it, made the quote, ranked the providers, planned the deadline and checked KYC, the recipient and the documents, and it built this plan card from the engine's output. " +
+    "On the right, the agent and the person share the work. The person creates the draft, chooses the recipient and approves with a fresh MFA code. " +
+    "The agent blocks the payment until KYC, the allowlist and the sandbox caps pass, then tracks it to settled and seals a compliance report. " +
+    "Look at what the agent did not do: it created no payment. It can propose a draft, but a person always clicks.",
   elements: [
-    ...shot("02-compare.png", 0.58, 1.43, 4.34, 3.39, "Compare screen ranking providers with a shortfall warning"),
-    text(0.5, 4.95, 4.5, 0.3, "Compare screen. Synthetic data.", { size: 11, color: "text2" }),
+    ...shot("17-agent-plan.png", 0.58, 1.43, 4.34, 3.39, "The assistant's payment plan built from one sentence"),
+    text(0.5, 4.95, 4.5, 0.3, "One sentence in the chat. Synthetic data.", { size: 11, color: "text2" }),
     ...steps.flatMap(([who, label], i) => {
       const y = 1.45 + i * 0.6;
       return [
@@ -241,7 +242,8 @@ slides.push({
     "Every number comes from a deterministic engine: integer minor units, decimal rates, no floats. For one provider, total cost is the FX margin plus the fixed fee, the SWIFT fee, any fees the sender pays under OUR, " +
     "plus a shortfall when fees are deducted from the amount. We rank by that percentage. In our synthetic example, Provider B is first at 1.58 percent, " +
     "Provider C looks cheap but it is quoted as SHA, so the university would receive 35 pounds less, and Provider A is third at 2.16 percent. " +
-    "On the right is where Provider B's 25,300 taka goes: 16,000 is the margin, 3,000 the fixed fee, 1,500 the SWIFT fee and 4,800 the fees we pay under OUR.",
+    "On the right is where Provider B's 25,300 taka goes: 16,000 is the margin, 3,000 the fixed fee, 1,500 the SWIFT fee and 4,800 the fees we pay under OUR. " +
+    "The same engine powers the smart send plan: fixed fees are paid on every transfer, so sending 12,000 pounds of living costs all at once costs 28,500 taka against 68,400 monthly. It does not predict exchange rates, and says so.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -256,8 +258,9 @@ slides.push({
     text(0.5, 3.6, 5.3, 0.8,
       "Cost % = (FX margin + fixed fee + SWIFT fee + fees you pay + shortfall) / amount at the mid-market rate",
       { size: 12, color: "text2" }),
-    text(0.5, 4.45, 5.3, 0.65, "Example: GBP 10,000 at a mid rate of 160.00 BDT per GBP. Synthetic rates and fees.",
-      { size: 12, color: "text2" }),
+    text(0.5, 4.45, 5.3, 0.65,
+      "Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once. Synthetic rates.",
+      { size: 12, bold: true, color: "text1" }),
     text(6.1, 1.35, 3.4, 0.5, "Where Provider B's BDT 25,300 goes", { size: 14, bold: true, color: "text1" }),
     { type: "doughnut", x: 6.6, y: 1.9, w: 2.1, h: 2.1, values: split.map((s) => s[1]), colors: split.map((s) => s[2]) },
     text(6.6, 2.65, 2.1, 0.6, "BDT 25,300", { size: 14, bold: true, color: "text1", align: "center", valign: "middle" }),
@@ -273,7 +276,7 @@ slides.push({
 const pipeline = ["1  Policy check", "2  Engine facts", "3  Mask personal data", "4  Model (optional)", "5  Number guard", "6  Tool guard", "7  Audit"];
 const guarantees = [
   ["Every number comes from the engine", "A number guard rejects any figure the engine did not produce, then a template answer takes over."],
-  ["It can only propose", "No tool can approve, submit, cancel or change limits. A human approves with MFA."],
+  ["It can only propose", "It may make a quote. It cannot create a payment, approve, submit or cancel. A human approves with MFA."],
   ["Works with no key", "Template mode runs the same checks. A real model is one command away: check_ai."],
 ];
 slides.push({
@@ -324,7 +327,7 @@ slides.push({
     "Public, read, prepare, decide, and administer. Deciding, meaning approving a payment, is only for a human parent with a fresh MFA proof bound to that payment and to the hash of the summary they saw. " +
     "The AI has no approve, cancel, limit or config permission at all. On the right, the numbers: " +
     `${F.backendTests} backend and ${F.frontendTests} frontend tests, all ${F.scenarios} blueprint scenarios mapped to tests, and ${F.risks} known risks that we list openly in the self-assessment. ` +
-    "The audit log is hash-chained: Verify passes, we edit one row behind the application's back, and Verify fails at exactly that event. The threat matrix with a proof for each row is in the repository.",
+    "The audit log is hash-chained: Verify passes, we edit one row behind the application's back, and Verify fails at exactly that event. Each payment also gets a compliance report whose hash your browser can recompute. The threat matrix with a proof for each row is in the repository.",
   elements: [
     ...tiers.flatMap(([lead, rest, fill, color], i) => {
       const y = 1.4 + i * 0.52;
@@ -343,7 +346,7 @@ slides.push({
       ];
     }),
     text(5.1, 4.45, 4.4, 0.75,
-      "Audit chain: Verify PASS, edit one row, Verify FAIL at that event. Every threat has a test: docs/SECURITY.md",
+      "Each payment has a compliance report with a hash your browser can check. Every threat has a test: docs/SECURITY.md",
       { size: 12, color: "text2" }),
   ],
 });
@@ -355,13 +358,13 @@ slides.push({
     "Honesty is a feature. A banner on every screen and an X-Sandbox header on every API response say this is a sandbox. " +
     "The Sandbox screen on the left lists everything that is simulated and how to trigger the edge cases, such as a recipient named FAIL_TEST. " +
     "Any rule that has not been checked against an official source carries a yellow Not verified badge and the sentence: indicative, confirm with your AD bank. " +
-    "On the right is the audit log with the hash chain verified. The sandbox operation logs from a real run, including the tamper demo, are in the repository under submission slash evidence.",
+    "On the right is a payment's compliance report: the parties, ten controls with their evidence, the approval proof and the audit trail, sealed with a hash that the browser recomputes. Change a copy and it says does not match. The sandbox operation logs from a real run, including the tamper demo, are in the repository under submission slash evidence.",
   elements: [
     text(0.5, 1.2, 9, 0.4, "Every simulated part is labelled. Every unverified rule carries a badge.", { size: 16, bold: true, color: "text1", valign: "middle" }),
     ...shot("15-sandbox-admin.png", 0.58, 1.78, 4.0, 3.12, "Sandbox screen listing what is simulated"),
-    ...shot("12-audit-verify-pass.png", 5.42, 1.78, 4.0, 3.12, "Audit log with Verify showing PASS"),
+    ...shot("20-compliance-report.png", 5.42, 1.78, 4.0, 3.12, "Compliance report whose hash verifies in the browser"),
     text(0.5, 5.02, 4.16, 0.3, "Sandbox screen: what is simulated, how to test it", { size: 11, color: "text2" }),
-    text(5.34, 5.02, 4.16, 0.3, "Audit log: the hash chain verifies", { size: 11, color: "text2" }),
+    text(5.34, 5.02, 4.16, 0.3, "Compliance report: the hash verifies in the browser", { size: 11, color: "text2" }),
   ],
 });
 

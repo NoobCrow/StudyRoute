@@ -22,6 +22,7 @@ from typing import Any
 import httpx
 
 from app.core.config import DEFAULT_DEMO_PASSWORD, DEFAULT_SANDBOX_MFA_CODE
+from app.core.crypto import hash_object
 from app.core.demo import ADMIN_EMAIL, PARENT_EMAIL, STUDENT_EMAIL
 
 UNIVERSITY = "University of Example (synthetic)"
@@ -132,12 +133,14 @@ class DemoFlow:
         self._plan(due)
         quote = self._compare(due)
         self._ask_the_assistant(quote)
+        self._agent_tasks(due)
         payment_id = self._draft(quote)
         self._blocked_by_kyc(payment_id)
         approval = self._ready_and_requested(payment_id)
         self._approval_controls(payment_id, approval)
         self._security_moments(payment_id)
         self._tracker(payment_id)
+        self._compliance_report(payment_id)
         self._audit()
         return self.failures
 
@@ -196,7 +199,7 @@ class DemoFlow:
         self._say(f"      {body['reply'][:160]}")
 
     def _draft(self, quote: dict[str, Any]) -> str:
-        self._step(4, "Create a draft (Idempotency-Key makes the retry safe)")
+        self._step(5, "Create a draft (Idempotency-Key makes the retry safe)")
         key = str(uuid.uuid4())
         body = {
             "quote_id": quote["quote_id"],
@@ -215,7 +218,7 @@ class DemoFlow:
         return str(first.json()["payment_id"])
 
     def _blocked_by_kyc(self, payment_id: str) -> None:
-        self._step(5, "KYC not verified blocks the request (the approval button is disabled)")
+        self._step(6, "KYC not verified blocks the request (the approval button is disabled)")
         status = self._call("GET", "/kyc/status", "parent").json()["status"]
         self._say(f"      KYC status (simulated): {status}")
         blocked = self._call(
@@ -227,7 +230,7 @@ class DemoFlow:
         )
 
     def _ready_and_requested(self, payment_id: str) -> dict[str, Any]:
-        self._step(6, "Submit mock KYC, wait for the simulated review, allowlist the recipient")
+        self._step(7, "Submit mock KYC, wait for the simulated review, allowlist the recipient")
         required = self._call("GET", "/kyc/status", "parent").json()["required_documents"]
         submit = self._call(
             "POST", "/kyc/mock-submit", "parent", json={"documents": [d["key"] for d in required]}
@@ -263,7 +266,7 @@ class DemoFlow:
         return body
 
     def _approval_controls(self, payment_id: str, approval: dict[str, Any]) -> None:
-        self._step(7, "Approve: only a human parent with a fresh MFA proof can")
+        self._step(8, "Approve: only a human parent with a fresh MFA proof can")
         path = f"/payments/{payment_id}/approve"
         confirm = {"confirm_summary_hash": approval["summary_hash"]}
         no_mfa = self._call("POST", path, "parent", json=confirm, key=_key())
@@ -289,7 +292,7 @@ class DemoFlow:
         )
 
     def _security_moments(self, payment_id: str) -> None:
-        self._step(8, "Security moment: forged webhook and a prompt injection")
+        self._step(9, "Security moment: forged webhook and a prompt injection")
         forged = self._client.post(
             "/api/v1/webhooks/provider",
             json={"event": "payment.settled", "payment_id": payment_id, "uetr": None},
@@ -316,7 +319,7 @@ class DemoFlow:
         self._check(detail["approved_by"] == "usr_demo_parent", "the approval is still the human's")
 
     def _tracker(self, payment_id: str) -> None:
-        self._step(9, "Tracker: the simulated provider submits and settles")
+        self._step(10, "Tracker: the simulated provider submits and settles")
         path = f"/payments/{payment_id}/tracker"
         settled = self._until(
             lambda: self._call("GET", path, "parent").json()["state"] == "SETTLED", 60
@@ -327,8 +330,59 @@ class DemoFlow:
         steps = " -> ".join(t["state"] for t in tracker["timeline"])
         self._say(f"      Timeline: {steps}")
 
+    def _agent_tasks(self, due: str) -> None:
+        self._step(4, "Agent tasks: one sentence becomes a plan, and the human still decides")
+        before = len(self._call("GET", "/payments", "parent").json()["items"])
+        plan = self._call(
+            "POST",
+            "/assistant/chat",
+            "parent",
+            json={"message": f"Plan GBP 10,000 tuition due {due}", "context": {}},
+        ).json()
+        task = plan["task"] or {}
+        self._check(
+            task.get("kind") == "payment_plan" and task.get("status") == "ready",
+            "a payment plan was prepared from one sentence",
+        )
+        self._check(
+            task.get("best", {}).get("provider_id") == "prov_b", "the plan ranks Provider B first"
+        )
+        proposal = plan["proposed_actions"][0] if plan["proposed_actions"] else {}
+        self._check(
+            proposal.get("tool") == "create_draft" and proposal.get("requires_human") is True,
+            "the assistant only PROPOSES the draft (a human must confirm)",
+        )
+        after = len(self._call("GET", "/payments", "parent").json()["items"])
+        self._check(after == before, "no payment was created by the assistant")
+        cadence = self._call(
+            "POST",
+            "/assistant/chat",
+            "parent",
+            json={
+                "message": "How often should I send GBP 1,000 a month for 12 months?",
+                "context": {},
+            },
+        ).json()
+        send_plan = cadence["task"] or {}
+        self._check(
+            send_plan.get("kind") == "send_plan" and send_plan["plan"]["cheapest_key"] == "upfront",
+            "the smart send plan compares monthly, quarterly, termly and upfront sending",
+        )
+        self._check(cadence["guard"]["status"] == "passed", "its numbers all come from the engine")
+
+    def _compliance_report(self, payment_id: str) -> None:
+        self._step(11, "Compliance report: evidence for the payment, sealed with a hash")
+        body = self._call("GET", f"/payments/{payment_id}/compliance-report", "parent").json()
+        results = {c["key"]: c["result"] for c in body["controls"]}
+        self._check(
+            set(results.values()) == {"PASS"}, f"all {len(results)} controls pass with evidence"
+        )
+        claimed = body.pop("report_hash")
+        self._check(claimed == hash_object(body), "the report hash matches the report")
+        self._say(f"      Report hash {claimed}")
+
     def _audit(self) -> None:
-        self._step(10, "Audit log: verify the hash chain")
+        self._step(12, "Audit log: verify the hash chain")
         blocked = self._call("GET", "/audit/events?action=ai.blocked&limit=5", "admin").json()
         self._check(len(blocked["items"]) >= 1, "the blocked AI attempt is in the audit log")
         verify = self._call("GET", "/audit/verify", "admin").json()

@@ -33,6 +33,7 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
   sanctions check must pass. The parent reads one approval summary with an MT103 preview
   (originator and beneficiary data, charge code, reference), then approves with a fresh MFA code.
   A simulated provider submits, settles and reports back; a tracker shows the UETR and the steps.
+- **Does the work from one sentence.** Say "I need to pay GBP 10,000 tuition by 28 October" and the agent reads it, makes the quote, ranks the providers, plans the deadline, checks KYC, recipients and documents, and proposes the draft. It stops at the human gate: it creates no payment and cannot approve. A second task compares sending living costs monthly, quarterly, per term or all at once, because fixed fees are paid on every transfer (in the synthetic example GBP 12,000 costs BDT 28,500 sent at once against BDT 68,400 monthly).
 - **Explains in plain language.** The chat answers "why is B cheaper than A?" using only numbers
   the engine produced, and lists the facts it used.
 
@@ -52,9 +53,11 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
 4. **Prompt-injection and privacy controls.** Messages and uploaded text are treated as data and
    checked by a policy filter. Names, accounts, passports, e-mails and phones are masked before
    anything reaches a model.
-5. **A tamper-evident audit log.** Every state change writes one hash-chained event in the same
+5. **A tamper-evident audit log and a sealed compliance report.** Every state change writes one hash-chained event in the same
    transaction, and the reviewer screen has a Verify button. Edit one row behind the application's
-   back and Verify fails at that sequence number.
+   back and Verify fails at that sequence number. Each payment also has a compliance report (parties,
+   ten controls with evidence, approval proof, audit excerpt) whose hash the browser recomputes, so an
+   edited copy is detected.
 
 ## Security and compliance in the demo
 
@@ -69,8 +72,8 @@ with your AD bank." The app never claims a live bank or a live FX feed.
 
 A FastAPI and SQLite backend (engine, domain, audit, mock providers, AI layer), a React and
 TypeScript web app (dashboard, compare, recipients, documents, payment with approval and tracker,
-audit log, rules, chat), over 440 backend tests that trace to all 24 blueprint scenarios (T01 to
-T24), 46 frontend tests, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
+audit log, rules, chat), over 550 backend tests that trace to all 24 blueprint scenarios (T01 to
+T24), over 70 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
 secret scanning, and a one-command start: `docker compose up --build`, then open
 `http://localhost:8080`.
 

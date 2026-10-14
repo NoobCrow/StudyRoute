@@ -62,6 +62,13 @@ def test_the_execution_evidence_shows_a_passing_chain_and_a_detected_tamper() ->
     log = read("submission/evidence/sandbox_operation_log.txt")
     assert not [line for line in log.splitlines() if line.strip().startswith("FAIL")]
     assert "payment reaches SETTLED" in log
+    for step in (
+        "Agent tasks",
+        "Compliance report",
+        "all 10 controls pass",
+        "no payment was created by the assistant",
+    ):
+        assert step in log, step
 
 
 def test_the_checklist_states_the_team_size_rule_and_the_deadline() -> None:

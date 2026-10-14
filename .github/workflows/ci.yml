@@ -51,3 +51,19 @@ jobs:
           python-version: "3.12"
       # Fails on private keys, API keys, JWTs, passport-like numbers, real e-mails and TODOs.
       - run: python scripts/scan_repo.py
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pip-audit
+      # Known-vulnerability scan of the pinned backend lock and of the npm production tree.
+      - run: pip-audit -r backend/requirements.txt --no-deps --disable-pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm audit --omit=dev
+        working-directory: frontend

@@ -238,6 +238,52 @@ single use, and bound to the user, the scope (`approve_payment` or `allowlist_re
 object id, so a proof for one payment cannot approve another. TOTP (RFC 6238) works in every mode;
 sandbox mode also accepts a documented fixed code so judges need no authenticator app.
 
+### 2.10 Smart send plan (cadence optimiser)
+
+Fixed and SWIFT fees are paid on every transfer while the FX margin scales with the amount, so how
+often money is sent changes the real cost. For a total `T` over `m` months the engine considers
+sending monthly, every three months, every six months and all at once (duplicates collapse, so 6
+months lists three options). For each option it splits `T` into equal transfers (amounts differ by
+at most one minor unit and sum exactly to `T`), prices every transfer with every provider using the
+formulas of section 2.1, and keeps the provider with the lowest total. A provider that would leave the
+beneficiary short is never chosen while another does not. Savings are measured against sending monthly.
+
+Worked case (synthetic, GBP 12,000 over 12 months, charge code OUR): monthly BDT 68,400 with
+Provider A; every three months BDT 48,400; every six months BDT 37,800 with Provider B; all at once
+BDT 28,500, a saving of BDT 39,900. The tests reproduce these numbers by hand. The engine does
+not predict exchange rates, so the trade-off (money sent early, rate locked early) is stated and
+not priced.
+
+### 2.11 Agent tasks: one sentence becomes a plan
+
+The assistant can start two tasks, chosen by a deterministic classifier (`choose_intent`) that only
+fires when a message really asks for one: an amount alone, a question about a limit or its legality,
+or a question about a quote that is already open starts nothing.
+
+1. **Read the request.** A rule-based parser extracts an amount (always through `Decimal` into minor
+   units), currency, due date (ISO, "28 October", "5th of January", day/month/year, "in 3 weeks"),
+   purpose and charge code. Anything missing or impossible stays empty and the assistant asks, with
+   an example, instead of guessing.
+2. **Do the work with its own permissions.** For *plan a payment* it creates a quote through the same
+   service a human uses, ranks the providers, plans the deadline, and checks KYC, saved recipients
+   and the document checklist. For *how often should I send* it runs the cadence optimiser. Nothing
+   else changes.
+3. **Return an engine-built card.** The plan card (best provider, alternatives with shortfall
+   warnings, deadline, seven steps marked done or to do) is built from engine output, not model text,
+   so a model cannot alter it. Its reply text goes through the same number guard as every answer.
+4. **Stop at the human gate.** The result is a `create_draft` *proposal* with the fields the human
+   must still supply. The person creates the draft and approves with a fresh MFA code.
+
+### 2.12 Compliance report
+
+For one payment the report collects the originator and beneficiary (travel rule), ten controls each
+with a result (PASS, PENDING, NOT YET, BLOCKED or FAIL) and the evidence for it, the approval proof
+(who, when, the MFA proof reference, the summary hash), the state timeline, the payment's slice of
+the audit log, and the verification of the whole audit chain. It ends with the SHA-256 of the report's
+canonical JSON. The web screen recomputes that hash in the browser, using the same sorted-key compact
+JSON as the backend (a test checks the two agree byte for byte, Bengali text included), and the page
+prints cleanly or downloads as JSON. Reading a report writes nothing.
+
 ---
 
 ## 3. Security design
@@ -263,7 +309,7 @@ The full threat and control matrix, with the test that proves each row, is in
 
 - `backend/tests/` has one or more tests for each blueprint scenario T01 to T24 and fails if one
   is missing; see [TEST_CASES.md](TEST_CASES.md).
-- `python -m app.scripts.demo_flow` replays the ten-step demo against a running API and prints
+- `python -m app.scripts.demo_flow` replays the twelve-step demo against a running API and prints
   OK or FAIL for each check.
 - Operation logs from a real run are in `submission/evidence/`.
 - `python scripts/scan_repo.py` and the CI workflow scan for secrets, real e-mails and TODOs.

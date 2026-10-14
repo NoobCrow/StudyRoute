@@ -70,6 +70,7 @@ judges access; put the link in the submission e-mail.
 - [ ] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
 - [ ] `cd backend && pytest -q && ruff check . && ruff format --check .`
 - [ ] `cd frontend && npm run typecheck && npm test && npm run build`
+- [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit).
 - [ ] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs).
 - [ ] Every screen shows the sandbox banner (sign-in page included).
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in

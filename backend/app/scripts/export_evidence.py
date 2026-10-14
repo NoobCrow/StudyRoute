@@ -3,7 +3,7 @@
     python -m app.scripts.export_evidence                  # needs a running API with fresh demo data
     python -m app.scripts.export_evidence --tamper         # also records Verify FAIL then PASS
 
-Replays the ten-step demo against the API, then saves what happened into submission/evidence/:
+Replays the twelve-step demo against the API, then saves what happened into submission/evidence/:
 
     sandbox_operation_log.txt   the demo transcript, one line per check (OK or FAIL)
     audit_log.json              every audit event, oldest first, with its hashes
@@ -42,7 +42,7 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 
 | File | What it shows |
 |------|---------------|
-| `sandbox_operation_log.txt` | The ten-step demo run against the API, one line per check, OK or FAIL |
+| `sandbox_operation_log.txt` | The twelve-step demo run against the API, one line per check, OK or FAIL |
 | `audit_log.json` | Every audit event in order, each with `prev_event_hash` and `this_event_hash` |
 | `audit_verify.json` | The hash-chain verification: status, events checked, head hash |
 | `payments.json` | The payments created, with their state timeline and UETR |

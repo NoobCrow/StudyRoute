@@ -35,6 +35,7 @@ ALLOWED: dict[str, set[str]] = {
     "backend/tests/test_ai_masking.py": {"passport-like number"},  # masking test input
     "backend/tests/test_api_validation.py": {"TODO marker"},  # "XXX" is an invalid charge code
     "backend/tests/test_engine_money.py": {"TODO marker"},  # "XXX" is the no-currency ISO code
+    "backend/tests/test_api_send_plan.py": {"TODO marker"},  # "XXX" is an unsupported currency
     "backend/tests/test_security.py": {"JWT"},  # fake token used to test log redaction
 }
 

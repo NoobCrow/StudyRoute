@@ -27,6 +27,7 @@ from app.domain.quotes import QuoteRequest
 from app.domain.rbac import Actor, Perm
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
+from app.domain.send_plan import build_send_plan
 from app.engine.money import Money
 from app.engine.planner import INDICATIVE, plan_deadline
 from app.engine.rates import rate_hint, synthetic_history
@@ -336,6 +337,26 @@ def runway(
         "badge": None if living.verified else "NOT_VERIFIED",
         "note": f"Shown for comparison only. {INDICATIVE}",
     }
+    return body
+
+
+@router.get("/planner/send-plan")
+def send_plan(
+    monthly_minor: int = Query(gt=0, le=10**10),
+    currency: str = Query(pattern=r"^[A-Z]{3}$"),
+    months: int = Query(default=12, ge=1, le=60),
+    charge_code: str = Query(default="OUR", pattern=r"^(OUR|SHA|BEN)$"),
+    actor: Actor = Depends(require(Perm.PLANNER_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    """Smart send plan: the same living costs sent monthly, quarterly, per term or at once."""
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+    if currency not in rules.supported_currencies():
+        raise errors.ValidationFailed(f"Unsupported currency: {currency}.")
+    _, body = build_send_plan(
+        rules, total=Money(monthly_minor * months, currency), months=months, charge_code=charge_code
+    )
     return body
 
 

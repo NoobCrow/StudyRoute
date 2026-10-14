@@ -105,6 +105,17 @@ def instruction_preview(
         return ctx.payments.instruction_preview(session, actor, payment_id)
 
 
+@router.get("/payments/{payment_id}/compliance-report")
+def compliance_report(
+    payment_id: str,
+    actor: Actor = Depends(require(Perm.AUDIT_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    """An evidence pack for one payment: parties, controls, approval proof, audit excerpt."""
+    with ctx.db.read() as session:
+        return ctx.reports.payment_report(session, actor, load_rules(session), payment_id)
+
+
 @router.post("/payments/{payment_id}/request-approval")
 def request_approval(
     payment_id: str,

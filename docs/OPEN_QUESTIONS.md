@@ -63,6 +63,9 @@ change is written to the audit log with who, what and why.
   those privileges from the application role.
 - **CAPTCHA** (optional in blueprint 12.1) is not implemented; rate limiting is.
 - **Calendars** list fixed-date holidays only.
+- **Agent tasks are rule-based.** Reading "I need to pay GBP 10,000 by 28 October" uses patterns, not language
+  understanding. Unusual phrasing falls back to a question that asks for the amount and gives an example.
+  Only major corridor currencies are read (not "dollars" without a country), and dates are read day first.
 - **Real LLM.** The assistant runs in template mode without a key. The Anthropic and
   OpenAI-compatible clients are implemented and unit-tested against fakes, but have not been
   exercised against a live model endpoint in this sandbox. Pin `LLM_MODEL`, then run

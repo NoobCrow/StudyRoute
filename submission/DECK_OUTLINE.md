@@ -1,8 +1,8 @@
 # Deck outline (blueprint 19.2) as slide text
 
 Ten slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
-rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **7
-minutes** of speech, so keep any live demo to **3 minutes** (the scene list in `VIDEO_SCRIPT.md`
+rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **7.5
+minutes** of speech, so keep any live demo to **2 minutes** (the scene list in `VIDEO_SCRIPT.md`
 is the 4.5-minute version for the recorded video). Screenshots come from the running app; they are
 in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
 Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
@@ -30,23 +30,25 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Diagram: blueprint section 3. SWIFT carries the instruction; banks settle between their accounts.
 
 ## 5. Solution overview
-- Compare, plan, checklist, KYC gate, safe approval, tracker, audit log, explainer chat.
-- Screenshots: Compare, Payment (summary and tracker), Documents, Audit log, Chat.
+- **Agent task:** one sentence in the chat becomes a quote, a ranking, a deadline plan and a draft proposal; the human still creates the draft and approves.
+- Compare, plan, checklist, KYC gate, safe approval, tracker, compliance report, audit log.
+- Screenshot: the plan card in the chat (`17-agent-plan.png`).
 
 ## 6. The engine
 - True total cost = FX margin + fixed fee + SWIFT fee + sender-paid fees + shortfall.
 - Worked example (synthetic, GBP 10,000, mid rate 160.00): B 1.58%, C 1.63% with a GBP 35 shortfall, A 2.16%.
 - Integer minor units and `Decimal` rates; no floats.
+- Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once, because fixed fees are paid on every transfer.
 
 ## 7. AI that cannot cheat
 - Pipeline: policy check, facts from the engine, masking, model (optional), number guard, tool guard, audit.
 - The number guard blocks any figure the engine did not produce. Template mode works with no key.
-- The AI proposes; it has no approve, submit, cancel, limit or config tool.
+- The AI proposes; it may make a quote, but it has no approve, submit, cancel, limit or config tool and cannot create a payment.
 
 ## 8. Security and compliance
 - Threat and control matrix with a proof for every row (`docs/SECURITY.md`).
 - KYC gate, MFA-bound approval tied to a summary hash, idempotency, HMAC webhooks, rate limits, CSP.
-- Audit chain: Verify PASS, then Verify FAIL after an edit.
+- Audit chain: Verify PASS, then Verify FAIL after an edit. Each payment has a compliance report whose hash the browser verifies.
 
 ## 9. Sandbox honesty
 - Synthetic data everywhere, labelled on every screen.
@@ -56,7 +58,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 ## 10. Impact and next steps
 - More corridors and a verified rule set; moon-dependent holidays.
 - A real AD bank partnership for quotes and KYC.
-- Regulator-ready reporting from the audit log.
+- Regulator reporting built on the compliance report. Credit building and multi-currency management (named in Topic C, not built).
 
 ## Demo order (3 to 5 minutes)
 Follow blueprint 19.1 or run `python -m app.scripts.demo_flow` first to rehearse. Keep the security

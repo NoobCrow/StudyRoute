@@ -52,6 +52,7 @@ installed are pinned in `backend/requirements.txt` and `frontend/package-lock.js
 | @types/react | 19.3.0 | MIT |
 | @types/react-dom | 19.3.0 | MIT |
 | @vitejs/plugin-react | 6.1.2 | MIT |
+| axe-core | 4.14.0 | MPL-2.0 |
 | jsdom | 30.1.2 | MIT |
 | puppeteer-core | 25.13.0 | Apache-2.0 |
 | typescript | 7.0.2 | Apache-2.0 |

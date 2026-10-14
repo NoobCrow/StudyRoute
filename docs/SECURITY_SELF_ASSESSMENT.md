@@ -91,16 +91,17 @@ production**. "Accepted" means we chose not to fix it in this submission and say
 | R11 | **Regulatory values are unverified** (living-expense limit, circulars, cut-off, calendars, checklists) | High if presented as real | Every one is in config with `verified: false`, a yellow **Not verified** badge and an indicative disclaimer; listed in `docs/OPEN_QUESTIONS.md` | Open until checked against official sources |
 | R12 | **Sanctions screening is a test token**, not a real list | Low (sandbox) | Labelled "mock" everywhere; blocked names are audited | Accepted |
 | R13 | **Sandbox secrets are generated under `data/`** (gitignored) | Low | Never committed (scanner enforces it); production needs environment secrets | Accepted |
-| R14 | **Dependencies are pinned but not scanned automatically** for known vulnerabilities | Medium | Backend versions pinned in `requirements.txt`; npm lock file; CI runs tests, lint and a secret scan | Open: add a dependency audit to CI |
+| R14 | **Dependencies could carry known vulnerabilities** | Medium | Backend versions are pinned in `requirements.txt`; the npm lock file pins the frontend. A `dependency-audit` CI job runs `pip-audit` and `npm audit --omit=dev` on every push. On 14 Oct 2026 both reported no known vulnerabilities | Mitigated. An audit only knows published advisories, so it must keep running |
 | R15 | **The live-model path is tested with fakes only** | Low | `check_ai` command verifies a configured model end to end before use; fallback to template answers if the model fails or invents a number | Open until a key is configured |
 | R16 | **No CAPTCHA** on sign-in | Low | Rate limit by IP and account lockout | Accepted (optional in the design) |
 | R17 | **Simulated systems could be mistaken for real ones** | Medium | Banner on every screen, `X-Sandbox: true` on every API response, "simulated" on every provider-related view, no claim of a live bank or FX feed | Mitigated |
+| R18 | **The assistant can now create a quote** (a state change) when it plans a payment from a sentence | Low | The RBAC matrix already allows the AI to create quotes; it still cannot create a payment, approve, submit, cancel or allowlist. A message flagged by the policy check creates nothing; each quote is owner-scoped, audited as `quote.created` by the AI actor, and limited by the 20-chats-a-minute rate limit. Tests: `test_ai_tasks.py` | Accepted: a stray quote is harmless and expires after five minutes |
 
 ## 3. What we tested and how to repeat it
 
 ```bash
 cd backend && pytest -q               # blueprint T01-T24 plus AI, sandbox and demo tests
-python -m app.scripts.demo_flow       # ten-step demo against a running API
+python -m app.scripts.demo_flow       # twelve-step demo against a running API
 python -m app.scripts.tamper_audit    # edit one audit row, then Verify must FAIL at that sequence
 python scripts/scan_repo.py           # no secrets, real e-mails, passport-like numbers or TODOs
 ```

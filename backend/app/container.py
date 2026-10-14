@@ -13,6 +13,7 @@ from app.core.crypto import FieldCipher
 from app.core.db import Database
 from app.core.secret_store import SecretStore
 from app.domain.auth import PasswordService, TokenService
+from app.domain.compliance_report import ReportService
 from app.domain.config_service import ConfigService
 from app.domain.documents import DocumentService
 from app.domain.kyc import KycService
@@ -78,5 +79,6 @@ def build_context(
     )
     ctx.worker = BackgroundWorker(ctx)
     ctx.sandbox = SandboxService(clock, audit, payments)
+    ctx.reports = ReportService(clock, audit, payments, recipients)
     ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
     return ctx

@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **483 tests** in 45 files. Last run: `483 passed in 64.97s (0:01:04)`.
-- Frontend: **52 tests** in 7 files (Vitest).
+- Backend: **565 tests** in 51 files. Last run: `565 passed in 79.64s (0:01:19)`.
+- Frontend: **75 tests** in 11 files (Vitest).
 
 ```bash
 cd backend  && pytest -q
@@ -58,17 +58,22 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_ai_number_guard.py` | 5 |  |
 | `tests/test_ai_policy.py` | 4 |  |
 | `tests/test_ai_redteam.py` | 5 | T19: the blueprint 14.6 red-team prompts. No state change, no invented numbers, and an audit event for every blocked attempt. |
+| `tests/test_ai_request_parser.py` | 7 | Reading "I need to pay GBP 10,000 by 28 October" without a model: exact, never a float. |
+| `tests/test_ai_task_intents.py` | 5 | When the assistant starts a task (plan a payment, plan a send schedule) and when it must not. |
+| `tests/test_ai_tasks.py` | 14 | Agent tasks: one sentence becomes a quote, a ranking, a deadline and a draft PROPOSAL. The assistant may create a quote (the RBAC matrix allows it). It still cannot create a payment, approve, submit or cancel: the human confirms the draft and approves with MFA. |
 | `tests/test_ai_tools.py` | 6 |  |
 | `tests/test_api_ai_rbac.py` | 4 | The AI service account is read/draft only (T09). |
 | `tests/test_api_audit_config.py` | 7 | Audit endpoints (T16 through the API) and the admin rules configuration. |
 | `tests/test_api_auth.py` | 11 | Login, lockout, token rules and the auth rate limit (T22). |
 | `tests/test_api_compliance.py` | 10 | Mock sanctions screening (T17), sandbox caps (T18) and the KYC gate. |
+| `tests/test_api_compliance_report.py` | 10 | GET /payments/{id}/compliance-report: a regulator-style evidence pack for one payment. |
 | `tests/test_api_features.py` | 10 | Planner, checklist, documents, tracker, instruction preview, listings and data reset. |
 | `tests/test_api_idempotency.py` | 8 | Idempotency keys (T04, T05) and optimistic locking against double approval. |
 | `tests/test_api_payment_guards.py` | 11 | MFA proofs (T08), summary-hash binding, illegal transitions (T15), cancel and reject. |
 | `tests/test_api_payments.py` | 7 | Payment lifecycle: happy path, quote expiry (T06) and the KYC gate (T07). |
 | `tests/test_api_roles.py` | 6 | Human roles and object ownership (T10, T11). |
 | `tests/test_api_sandbox.py` | 11 | Sandbox marking on every response, the sandbox info endpoint and the provider-event trigger. |
+| `tests/test_api_send_plan.py` | 6 | GET /planner/send-plan: the smart send plan over the API. |
 | `tests/test_api_smoke.py` | 2 |  |
 | `tests/test_api_stretch.py` | 6 | Stretch features: F9 runway, F10 rate hint and F11 multi-corridor. |
 | `tests/test_api_validation.py` | 15 | Input validation and the RFC 7807 error format (T02, T03). |
@@ -77,6 +82,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_blueprint_coverage.py` | 2 | Traceability: every blueprint test ID (T01..T24, section 16) must have at least one test. |
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
 | `tests/test_demo_flow.py` | 1 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
+| `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
 | `tests/test_engine_money.py` | 11 | Money type: integer minor units, Decimal rounding, no floats. |
 | `tests/test_engine_mt103.py` | 5 |  |
 | `tests/test_engine_planner.py` | 12 | Deadline planner (blueprint 6.6). T21 covers weekends and holidays in both countries. |
@@ -98,10 +104,14 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 
 | File | Tests |
 |------|-------|
+| `frontend/src/a11y.test.tsx` | 8 |
 | `frontend/src/api/client.test.ts` | 6 |
 | `frontend/src/components/components.test.tsx` | 8 |
+| `frontend/src/components/tasks.test.tsx` | 7 |
+| `frontend/src/lib/canonical.test.ts` | 4 |
 | `frontend/src/lib/lib.test.ts` | 21 |
 | `frontend/src/screens/Compare.test.tsx` | 5 |
 | `frontend/src/screens/Payment.test.tsx` | 5 |
 | `frontend/src/screens/Recipients.test.tsx` | 3 |
+| `frontend/src/screens/Report.test.tsx` | 4 |
 | `frontend/src/screens/Sandbox.test.tsx` | 4 |
