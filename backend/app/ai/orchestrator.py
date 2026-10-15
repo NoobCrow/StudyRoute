@@ -16,13 +16,14 @@ from sqlalchemy.orm import Session
 
 from app.ai.context import ChatContext, gather_context
 from app.ai.guards import GuardFailure, parse_llm_json, validate_llm_output
-from app.ai.intents import Intent, choose_intent
+from app.ai.intents import Intent
 from app.ai.llm import SYSTEM_PROMPT, LLMClient, LLMError
 from app.ai.masking import Masker
+from app.ai.nlu.runtime import Reader
+from app.ai.nlu.understanding import Pending, Understanding, understand
 from app.ai.number_guard import check_numbers
 from app.ai.policy import PolicyResult, check_text
 from app.ai.prompt import build_prompt
-from app.ai.request_parser import parse_request
 from app.ai.tasks import TaskResult, TaskRunner
 from app.ai.templates import INDICATIVE, Responder, refusal
 from app.api.context import AppContext
@@ -60,11 +61,29 @@ class Outcome:
     flags: list[str] = field(default_factory=list)
 
 
+def _reader_note(understanding: Understanding) -> str:
+    """Which reader understood the message, and how sure it was (recorded in the audit log)."""
+    if understanding.source != "trained":
+        return "reader=rules"
+    return (
+        f"reader={understanding.model_id}@{(understanding.model_sha256 or '')[:12]} "
+        f"intent={understanding.model_intent}:{understanding.confidence or 0:.2f}"
+    )
+
+
 class Orchestrator:
-    def __init__(self, ctx: AppContext, llm: LLMClient | None) -> None:
+    def __init__(
+        self, ctx: AppContext, llm: LLMClient | None, reader: Reader | None = None
+    ) -> None:
         self._ctx = ctx
         self._llm = llm
+        self._reader = reader
         self._tasks = TaskRunner(ctx)
+
+    @property
+    def reader_id(self) -> str | None:
+        """The trained reader in use (model id), or None when the assistant runs on rules."""
+        return self._reader.model_id if self._reader else None
 
     @property
     def mode(self) -> str:
@@ -83,7 +102,13 @@ class Orchestrator:
 
     # --- the pipeline ---------------------------------------------------------------------
     def chat(
-        self, actor: Actor, message: str, *, quote_id: str | None, payment_id: str | None
+        self,
+        actor: Actor,
+        message: str,
+        *,
+        quote_id: str | None,
+        payment_id: str | None,
+        pending: Any = None,
     ) -> dict[str, Any]:
         ctx = self._ctx
         text = message.strip()
@@ -92,8 +117,15 @@ class Orchestrator:
             rules = load_rules(session)
             ai = self._ai_actor(session, actor)
         today = ctx.clock.now().astimezone(ZoneInfo("Asia/Dhaka")).date()
-        parsed = parse_request(text, rules.supported_currencies(), today)
-        intent = choose_intent(text, parsed, has_context=bool(quote_id or payment_id))
+        understanding = understand(
+            text, today, rules.supported_currencies(),
+            has_context=bool(quote_id or payment_id),
+            reader=self._reader,
+            pending=Pending(**pending.model_dump()) if pending is not None else None,
+        )  # fmt: skip
+        if understanding.attack and not policy.blocked:  # the model can only add a block
+            policy = PolicyResult((*policy.flags, "MODEL_FLAGGED_ATTACK"))
+        parsed, intent = understanding.parsed, understanding.intent
         task: TaskResult | None = None
         if intent in (Intent.PLAN, Intent.CADENCE) and not policy.blocked:
             task = self._tasks.run(
@@ -101,6 +133,8 @@ class Orchestrator:
             )  # a task: quote and plan, up to the human gate
             if task.quote_id:
                 quote_id, payment_id = task.quote_id, None
+            if understanding.hint and task.status == "needs_input":
+                task.facts.append(("task.conflict", "How the amount was read", understanding.hint))
         with ctx.db.read() as session:
             rules = load_rules(session)
             chat = gather_context(ctx, session, ai, rules, intent, quote_id, payment_id)  # 3. facts
@@ -127,7 +161,7 @@ class Orchestrator:
                 f" A document you uploaded ({kinds}) held instruction-like text, so I ignored it."
             )
             outcome.flags.append("DOCUMENT_INSTRUCTIONS_IGNORED")
-        self._audit(ai, chat, policy, outcome, prompt, reply)
+        self._audit(ai, chat, policy, outcome, prompt, reply, understanding)
         used = [chat.facts.by_id(i) for i in outcome.fact_ids]
         return {
             "reply": reply,
@@ -141,6 +175,7 @@ class Orchestrator:
             },
             "proposed_actions": outcome.proposals,
             "task": task.card if task else None,
+            "understanding": understanding.to_api(),
             "mode": outcome.mode,
             "model_version": outcome.model,
             "disclaimer": DISCLAIMER,
@@ -228,6 +263,7 @@ class Orchestrator:
         outcome: Outcome,
         prompt: str,
         reply: str,
+        understanding: Understanding,
     ) -> None:  # fmt: skip
         ctx = self._ctx
         problems = [outcome.failure] if outcome.failure else []
@@ -247,7 +283,10 @@ class Orchestrator:
                 action="ai.blocked" if blocked else "ai.reply",
                 decision=Decision.BLOCKED if blocked else None,
                 reason_code=",".join(dict.fromkeys(reasons))[:64] or None,
-                detail=f"for {ai.owner_id}; status={outcome.status}; mode={outcome.mode}",
+                detail=(
+                    f"for {ai.owner_id}; status={outcome.status}; mode={outcome.mode}; "
+                    f"{_reader_note(understanding)}"
+                ),
                 input_hash=sha256_ref(prompt), output_hash=sha256_ref(reply),
                 model_version=outcome.model,
             )  # fmt: skip

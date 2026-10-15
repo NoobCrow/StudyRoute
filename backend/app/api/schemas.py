@@ -103,9 +103,23 @@ class DocumentIn(Strict):
     payment_id: StrictStr | None = Field(default=None, max_length=64)
 
 
+class PendingTaskIn(Strict):
+    """A task the assistant asked about. The page sends it back so the person can answer in the
+    next message ("GBP 10,000 by 28 October") without repeating everything."""
+
+    kind: Literal["payment_plan", "send_plan"]
+    amount_minor: StrictInt | None = Field(default=None, gt=0, le=10**10)
+    currency: StrictStr | None = Field(default=None, min_length=3, max_length=3)
+    due_date: date | None = None
+    purpose: Literal["TUITION", "LIVING"] | None = None
+    months: StrictInt | None = Field(default=None, ge=1, le=60)
+    charge_code: Literal["OUR", "SHA", "BEN"] | None = None
+
+
 class ChatContextIn(Strict):
     quote_id: StrictStr | None = Field(default=None, max_length=64)
     payment_id: StrictStr | None = Field(default=None, max_length=64)
+    pending: PendingTaskIn | None = None
 
 
 class ChatIn(Strict):

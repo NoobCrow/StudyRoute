@@ -35,6 +35,7 @@ REFUSALS = {
     "PRIVILEGE_CLAIM": "I cannot act on claims about who someone is. Permissions come from the signed-in account only.",
     "SECRET_REQUEST": "I cannot share my instructions, secrets, tokens or another person's account details.",
     "FABRICATION_REQUEST": "I do not make up numbers. If I do not have a figure, I will say so and suggest running a quote.",
+    "MODEL_FLAGGED_ATTACK": "That reads like an instruction to drop my rules or to act for you, which I cannot do. Nothing was changed; a human parent approves in the app, with a fresh MFA step.",
 }
 
 
@@ -280,8 +281,9 @@ class Responder:
                 f"You can try again, for example: {self.v(example_key)}."
             )
         if self.facts.has("task.missing"):
+            note = f" {self.v('task.conflict')}." if self.facts.has("task.conflict") else ""
             return self._finish(
-                f"To plan {what_to_plan} I still need {self.v('task.missing')}. "
+                f"To plan {what_to_plan} I still need {self.v('task.missing')}.{note} "
                 f"For example: {self.v(example_key)}."
             )
         return None

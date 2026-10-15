@@ -142,7 +142,14 @@ export function chatReply(overrides: Partial<ChatResponse> = {}): ChatResponse {
   return {
     reply: "I made a quote.", facts_used: [], facts: [], guard: { status: "passed", flags: [], failure: null, retries: 0 },
     proposed_actions: [], task: null, mode: "template", model_version: "template-v1", disclaimer: "Sandbox.",
-    debug: { masked_prompt: "FACTS", note: "masked" }, ...overrides,
+    debug: { masked_prompt: "FACTS", note: "masked" },
+    understanding: {
+      source: "rules", model: null, model_sha256: null, intent: "PLAN", model_intent: null, confidence: null,
+      attack: false, out_of_scope: false, continued_earlier_task: false, spans: [],
+      values: { amount_minor: null, currency: null, due_date: null, months: null, charge_code: "OUR", purpose: "TUITION" },
+      conflicts: [], unreadable: [],
+    },
+    ...overrides,
   };
 }
 

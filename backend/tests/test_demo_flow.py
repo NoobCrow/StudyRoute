@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from app.ai.nlu.runtime import load_reader
 from app.scripts.demo_flow import DemoFlow
 from tests.helpers import MFA_CODE, PASSWORD, World
 
@@ -56,5 +57,29 @@ def test_the_demo_passes_with_the_real_rate_limits_switched_on(tmp_path: Path) -
         assert failures == [], transcript
         assert "rate limit: waiting" in transcript, "the limit really was hit and waited out"
         assert "[14] Audit log" in transcript and "chain verifies: PASS" in transcript
+    finally:
+        instance.close()
+
+
+def test_the_demo_passes_with_the_trained_reader_switched_on(tmp_path: Path) -> None:
+    """The same fourteen steps, with the model reading the messages instead of the fixed rules."""
+    if load_reader("auto") is None:
+        pytest.skip("the trained reader is not available")
+    instance = World(tmp_path, bank_network=True, nlu_mode="auto")
+    try:
+
+        def wait(seconds: float) -> None:
+            instance.clock.advance(seconds)
+            instance.ctx.worker.tick()
+
+        lines: list[str] = []
+        flow = DemoFlow(
+            instance.client, password=PASSWORD, mfa_code=MFA_CODE, wait=wait, say=lines.append
+        )
+        failures = flow.run()
+        transcript = "\n".join(lines)
+        assert failures == [], transcript
+        assert "the trained reader read 'ten thousand pounds'" in transcript
+        assert "Reader studyroute-nlu" in transcript
     finally:
         instance.close()

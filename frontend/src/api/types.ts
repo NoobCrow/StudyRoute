@@ -156,11 +156,19 @@ export interface ChatAction {
   tool: "create_draft" | "request_approval"; args: Record<string, string>;
   requires_human: true; missing: string[];
 }
+export interface Understanding {
+  source: "trained" | "rules"; model: string | null; model_sha256: string | null;
+  intent: string; model_intent: string | null; confidence: number | null;
+  attack: boolean; out_of_scope: boolean; continued_earlier_task: boolean;
+  spans: { label: string; text: string; start: number; end: number }[];
+  values: { amount_minor: number | null; currency: string | null; due_date: string | null; months: number | null; charge_code: string; purpose: string };
+  conflicts: string[]; unreadable: string[];
+}
 export interface ChatResponse {
   reply: string; facts_used: string[]; facts: { id: string; label: string; value: string }[];
   guard: { status: string; flags: string[]; failure: string | null; retries: number };
   proposed_actions: ChatAction[]; task: TaskCard | null; mode: "template" | "llm"; model_version: string;
-  disclaimer: string; debug: { masked_prompt: string; note: string };
+  disclaimer: string; debug: { masked_prompt: string; note: string }; understanding: Understanding;
 }
 export interface RunwayView {
   display: { amount: string; monthly_cost: string; covers: string; full_months: string; leftover: string };
@@ -216,7 +224,15 @@ export interface SendPlan {
   synthetic: true; disclaimer: string; trade_off: string;
 }
 export interface SendPlanCardData { kind: "send_plan"; status: "ready"; plan: SendPlan }
-export interface TaskGap { kind: "payment_plan" | "send_plan"; status: "needs_input" | "error"; missing?: string[]; message?: string }
+export interface PendingTask {
+  kind: "payment_plan" | "send_plan"; amount_minor?: number | null; currency?: string | null;
+  due_date?: string | null; purpose?: "TUITION" | "LIVING" | null; months?: number | null;
+  charge_code?: "OUR" | "SHA" | "BEN" | null;
+}
+export interface TaskGap {
+  kind: "payment_plan" | "send_plan"; status: "needs_input" | "error"; missing?: string[]; message?: string;
+  collected?: Omit<PendingTask, "kind">;
+}
 export type TaskCard = PaymentPlanCard | SendPlanCardData | TaskGap;
 
 export type ControlResult = "PASS" | "PENDING" | "NOT_YET" | "BLOCKED" | "FAIL";

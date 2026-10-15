@@ -1,0 +1,12 @@
+# Training and evaluation tools for the trained reader. Development only: the API needs none of
+# these except onnxruntime and numpy, which are in backend/requirements.txt.
+#
+# PyTorch is installed separately from its own index, with the CUDA build for your GPU:
+#   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+# (cu128 supports current NVIDIA cards including the RTX 50 series; use cu126 or cu121 for older ones.)
+transformers==5.19.0
+huggingface_hub==2.2.0
+safetensors==0.8.0
+onnx==1.23.2
+onnxruntime==1.31.0
+numpy==2.5.4

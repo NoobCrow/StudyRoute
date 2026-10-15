@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.ai.llm import build_llm_client
+from app.ai.nlu.runtime import load_reader
 from app.ai.orchestrator import Orchestrator
 from app.api.context import AppContext
 from app.api.rate_limit import RateLimiter
@@ -93,5 +94,5 @@ def build_context(
         clock, settings.max_failed_logins, settings.lockout_seconds
     )
     ctx.escrow = EscrowService(clock, audit, recipients, ctx.chain)
-    ctx.assistant = Orchestrator(ctx, build_llm_client(settings))
+    ctx.assistant = Orchestrator(ctx, build_llm_client(settings), load_reader(settings.nlu_mode))
     return ctx

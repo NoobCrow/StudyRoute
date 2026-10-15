@@ -42,3 +42,12 @@ Thumbs.db
 # Build output and submission archive
 /dist/
 /submission/*.zip
+
+# ML training workspace (checkpoints, caches and the CUDA environment stay local)
+ml/.cache/
+ml/.tmp/
+ml/runs/
+
+# the training data and generator of the trained reader are part of the project (unlike runtime data/)
+!ml/data/
+ml/data/external/

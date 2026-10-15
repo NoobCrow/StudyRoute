@@ -394,6 +394,52 @@ class DemoFlow:
             "the smart send plan compares monthly, quarterly, termly and upfront sending",
         )
         self._check(cadence["guard"]["status"] == "passed", "its numbers all come from the engine")
+        self._conversation(due)
+        self._reads_new_wording()
+
+    def _conversation(self, due: str) -> None:
+        """The assistant asks for what is missing, and the next message finishes the same task."""
+        first = self._call(
+            "POST", "/assistant/chat", "parent",
+            json={"message": "I need to pay tuition", "context": {}},
+        ).json()  # fmt: skip
+        gap = first["task"] or {}
+        self._check(gap.get("status") == "needs_input", "with no amount it asks for one")
+        pending = {"kind": gap.get("kind"), **gap.get("collected", {})}
+        second = self._call(
+            "POST", "/assistant/chat", "parent",
+            json={"message": f"GBP 10,000 by {due}", "context": {"pending": pending}},
+        ).json()  # fmt: skip
+        self._check(
+            (second["task"] or {}).get("status") == "ready",
+            "the next message finishes the same task (it remembers what it asked)",
+        )
+
+    def _reads_new_wording(self) -> None:
+        """With the trained reader on, wording the fixed rules cannot read still becomes a plan."""
+        reply = self._call(
+            "POST", "/assistant/chat", "parent",
+            json={
+                "message": "kindly help me send ten thousand pounds for my son's tuition, "
+                "last date end of November",
+                "context": {},
+            },
+        ).json()  # fmt: skip
+        reading = reply["understanding"]
+        if reading["source"] != "trained":
+            self._say("      (the trained reader is not in use here, so the fixed rules answer)")
+            return
+        values = reading["values"]
+        self._check(
+            (values["amount_minor"], values["currency"]) == (1_000_000, "GBP")
+            and (reply["task"] or {}).get("status") == "ready",
+            "the trained reader read 'ten thousand pounds' and 'end of November'",
+        )
+        marked = ", ".join(f"{s['text']} = {s['label'].lower()}" for s in reading["spans"])
+        self._say(
+            f"      Reader {reading['model']}: {reading['intent']} "
+            f"({reading['confidence']:.0%} sure); marked: {marked}"
+        )
 
     def _compliance_report(self, payment_id: str) -> None:
         self._step(11, "Compliance report: evidence for the payment, sealed with a hash")

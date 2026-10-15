@@ -1076,6 +1076,21 @@ Expected result for each: refusal or safe explanation, no state change, an audit
 
 - Label every simulated integration as simulated. Never claim a live bank or live FX feed.
 
+14.8 The trained reader (added 15 October 2026)
+
+- A small fine-tuned model (bge-small-en-v1.5, int8 ONNX, runs locally on CPU) reads each message
+  before the pipeline in 14.2: it predicts the intent and marks the words that carry an amount,
+  currency, date, period, charge code, purpose or provider. Deterministic code turns the marked words
+  into typed values; the model never produces a number and never acts.
+
+- Two readers must agree: the rule-based reader stays as the baseline and fallback. If they read a
+  field differently the field is left empty and the assistant asks. The model's intent is used only
+  above a confidence threshold, a confident ATTACK can only add a block, and NLU_MODE=off (or a
+  missing runtime, model or a failed SHA-256 check) leaves the rules in charge.
+
+- Each AI audit event records the reader's id, short hash and confidence. See docs/AI_AGENT.md for
+  the design, dataset card and limits, and docs/AI_EVALUATION.md for the measured comparison.
+
 15\. Audit log specification \[DESIGN\]
 
 15.1 Event fields

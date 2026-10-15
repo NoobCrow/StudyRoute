@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { post } from "../api/client";
-import type { ChatAction, ChatResponse } from "../api/types";
+import type { ChatAction, ChatResponse, PendingTask, Understanding } from "../api/types";
 import { useCurrentChatScope } from "../chatContext";
 import { TaskView } from "./PlanCard";
 import { Badge, ErrorNotice } from "./Ui";
@@ -43,10 +43,42 @@ function GuardNote({ reply }: { reply: ChatResponse }) {
   );
 }
 
+const SLOT_NAMES: Record<string, string> = {
+  AMOUNT: "amount", CURRENCY: "currency", DATE: "date", DURATION: "period", CHARGE: "charge code",
+  PURPOSE: "purpose", PROVIDER: "provider",
+};
+
+function HowIRead({ understanding }: { understanding: Understanding }) {
+  const trained = understanding.source === "trained";
+  const notes = [...understanding.conflicts.map((c) => `the reader and the rules read the ${c.replace("_", " ")} differently, so I left it empty`),
+    ...understanding.unreadable.map((u) => `I could not read "${u.split(":").slice(1).join(":")}" as a ${(SLOT_NAMES[u.split(":")[0] ?? ""] ?? "value")}`)];
+  return (
+    <details>
+      <summary>How I read this ({trained ? "trained reader" : "rules"})</summary>
+      <p className="small">
+        <Badge tone={trained ? "info" : "warn"}>{trained ? `Reader: ${understanding.model}` : "Rules only"}</Badge>{" "}
+        Intent <strong>{understanding.model_intent ?? understanding.intent}</strong>
+        {understanding.confidence !== null ? ` (${Math.round(understanding.confidence * 100)}% sure)` : ""}.
+        {understanding.continued_earlier_task ? " I continued the task I asked about earlier." : ""}
+      </p>
+      {understanding.spans.length > 0 ? (
+        <ul className="small">
+          {understanding.spans.map((s) => (
+            <li key={`${s.start}-${s.label}`}><code>{s.text}</code> is the {SLOT_NAMES[s.label] ?? s.label}</li>
+          ))}
+        </ul>
+      ) : <p className="small muted">No amounts, dates or other values found in the words.</p>}
+      {notes.length > 0 ? <p className="small">{notes.join(". ")}.</p> : null}
+      <p className="small muted">The model only marks words. Plain code turns them into values and the engine does every calculation.</p>
+    </details>
+  );
+}
+
 function Details({ reply, paymentId }: { reply: ChatResponse; paymentId?: string }) {
   return (
     <>
       <GuardNote reply={reply} />
+      <HowIRead understanding={reply.understanding} />
       {reply.facts.length > 0 ? (
         <details>
           <summary>Facts used ({reply.facts.length})</summary>
@@ -83,6 +115,7 @@ export function ChatPanel() {
   const [error, setError] = useState<Error | null>(null);
   const [mode, setMode] = useState<ChatResponse | null>(null);
   const [planQuote, setPlanQuote] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingTask | null>(null);
   const counter = useRef(0);
   const newest = useCallback((node: HTMLDivElement | null) => {
     node?.scrollIntoView?.({ block: "start" });
@@ -96,10 +129,12 @@ export function ChatPanel() {
     setBusy(true);
     setTurns((t) => [...t, { id: ++counter.current, role: "me", text: clean }]);
     try {
-      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null };
+      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null, pending };
       const reply = await post<ChatResponse>("/assistant/chat", { message: clean, context });
       setMode(reply);
       if (reply.task?.kind === "payment_plan" && reply.task.status === "ready") setPlanQuote(reply.task.quote.quote_id);
+      const task = reply.task;
+      setPending(task && task.status === "needs_input" ? { kind: task.kind, ...(task as { collected?: object }).collected } : null);
       setTurns((t) => [...t, { id: ++counter.current, role: "bot", text: reply.reply, reply }]);
     } catch (e) {
       setError(e as Error);
@@ -125,6 +160,11 @@ export function ChatPanel() {
             <Badge tone={mode?.mode === "llm" ? "info" : "warn"} title="Template mode answers from fixed templates and engine numbers. No model is called.">
               {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Template mode"}
             </Badge>
+            {mode?.understanding.source === "trained" ? (
+              <Badge tone="info" title="A small trained model marks the words that carry a value. Plain code checks them and the engine calculates.">
+                Trained reader
+              </Badge>
+            ) : null}
           </div>
           <div className="chat-log" aria-live="polite">
             <p className="small muted">

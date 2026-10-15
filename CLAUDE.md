@@ -36,6 +36,8 @@ over clever and unfinished.
 - One-command start: docker compose up
 - AI: provider-agnostic client in backend/app/ai/. Must run in TEMPLATE MODE
   with no API key. Pin and log the model version when a key is present.
+- The trained reader (backend/app/ai/nlu/) only PROPOSES: it marks words, plain code
+  turns them into values, the engine calculates. NLU_MODE=off must keep working.
 
 ## Layout
 backend/app/engine/     money, fx, quote, ranking, planner (pure, no I/O)
@@ -44,6 +46,8 @@ backend/app/api/        routes, auth, idempotency, errors (RFC 7807)
 backend/app/audit/      hash chain, verify
 backend/app/providers/  mock provider adapters, signed webhooks
 backend/app/ai/         orchestrator, masking, number guard, tools
+backend/app/ai/nlu/     the trained reader (tokenizer, ONNX runtime, value checks); model in model/
+ml/                     training and evaluation of the reader (needs a GPU; the app does not)
 backend/tests/          pytest. One test per blueprint test ID (T01..T24)
 frontend/               screens: dashboard, compare, recipient, documents,
                         approval, tracker, audit, chat
@@ -60,6 +64,8 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Regenerate the destination countries (needs `pip install babel`, a dev tool only): python scripts/gen_countries.py
 - Scan for secrets, real e-mails and TODOs: python scripts/scan_repo.py
 - Attack the running app (lab only; see scripts/security/README.md): scripts/security/attack_probe.py, brute_probe.py, browser_audit.mjs
+- Re-measure the trained reader against the rules: python ml/evaluate.py (backend venv)
+- Retrain the reader on a GPU: docs/AI_AGENT.md section 7
 - Build the submission archive: python scripts/make_submission.py
 
 ## How to work

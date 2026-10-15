@@ -3,9 +3,9 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   every API response carries X-Sandbox: true
       OK   GET /sandbox lists the simulated parts and the test scenarios
 
-[1] Dashboard: tuition GBP 10,000 due 2026-10-28
+[1] Dashboard: tuition GBP 10,000 due 2026-10-29
       OK   deadline planner answers
-      Latest send date 2026-10-20, status ON_TRACK
+      Latest send date 2026-10-21, status ON_TRACK
 
 [2] Compare: three providers ranked by true total cost
       OK   quote created (synthetic rates)
@@ -25,6 +25,10 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   no payment was created by the assistant
       OK   the smart send plan compares monthly, quarterly, termly and upfront sending
       OK   its numbers all come from the engine
+      OK   with no amount it asks for one
+      OK   the next message finishes the same task (it remembers what it asked)
+      OK   the trained reader read 'ten thousand pounds' and 'end of November'
+      Reader studyroute-nlu-v1: PLAN (99% sure); marked: ten thousand = amount, pounds = currency, tuition = purpose, end of November = date
 
 [5] Create a draft (Idempotency-Key makes the retry safe)
       OK   draft created in state QUOTED
@@ -55,13 +59,13 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [10] Tracker: the simulated provider submits and settles
       OK   payment reaches SETTLED (simulated)
-      OK   UETR assigned: 88ac7e19-1e7f-4ee6-971f-5b9cbfc84c98
+      OK   UETR assigned: e97ce122-5a84-4b16-af5f-8ae2cf77121b
       Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
 
 [11] Compliance report: evidence for the payment, sealed with a hash
       OK   all 10 controls pass with evidence
       OK   the report hash matches the report
-      Report hash sha256:3b26ed8e88bf173cbd03be51b3440a4daeeb9528e227a864afd2c87ae45aeb96
+      Report hash sha256:50b18e84dffd9aac9e47df031e8b002f0e0f2e44778b3a352c6b27134137f9d9
 
 [12] Bank network: money moves between invented banks, at home and abroad
       OK   the books balance and every nostro agrees with its mirror account
@@ -80,16 +84,17 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   the first tranche is due today, so the schedule pays it by itself
       OK   the bank's reviewer freezes it; even the parent cannot move funds while frozen
       OK   the reviewer unfreezes it
-      (rate limit: waiting 11 s as the server asks)
+      (rate limit: waiting 10 s as the server asks)
       OK   the parent pays the second tranche early (a human decision, so MFA)
+      (rate limit: waiting 2 s as the server asks)
       OK   cancelling takes back only the tranche that was not yet due
       OK   the audit log's head hash is anchored on the chain and the database matches it
       After tamper_audit, /chain/verify fails even if every hash is rebuilt.
 
 [14] Audit log: verify the hash chain
       OK   the blocked AI attempt is in the audit log
-      OK   chain verifies: PASS (60 events)
-      Head hash fc2e1b6a1b545956f170b707de2307af4db269e00bb5f80df1efd9e710a505f1
+      OK   chain verifies: PASS (67 events)
+      Head hash 8a5f14657d9fb7d90a3f526c0c21f4dee432d09cc55f55dbc379f32e7deac203
 
 To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
 Undo it with:        python -m app.scripts.tamper_audit --restore

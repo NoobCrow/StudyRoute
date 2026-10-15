@@ -209,6 +209,26 @@ indicative, and is not a forecast.
 With no model key the assistant runs in **template mode**: the same pipeline without step 4. The
 UI shows a "Template mode" badge, so the demo never depends on a network.
 
+### 2.5.1 The trained reader (what the model is allowed to do)
+
+Before step 2 above, the message is read by two readers. The rule-based reader is the baseline.
+A small fine-tuned language model (`bge-small-en-v1.5`, 33 million parameters, int8 ONNX, 34 MB, about
+7 ms a message on CPU) predicts one of 14 intents and marks the exact words that carry an amount,
+a currency, a date, a period, a charge code, a purpose or a provider. Plain code
+(`backend/app/ai/nlu/normalize.py`) turns the marked words into typed values (integer minor units, a
+real date) and refuses anything it cannot read exactly. When the rules and the model read a field
+differently, the field is left empty and the assistant asks. The model's intent is used only above a
+confidence threshold (higher for anything that starts a quote, a draft or an approval request), a
+question about limits or legality never starts a quote, and a confident `ATTACK` can only add a
+block. The model has no permission of its own: the AI account still cannot approve, submit, cancel,
+allowlist or change a limit.
+
+The model is trained on a GPU from generated messages plus real bank-customer questions (Banking77,
+CC BY 4.0) and is evaluated against the rule-based reader on held-out, natural and blind data. The
+design, the dataset card, the numbers (including the weak ones) and the limits are in
+[AI_AGENT.md](AI_AGENT.md) and [AI_EVALUATION.md](AI_EVALUATION.md). With no `onnxruntime`, no model
+file, a failed integrity check or `NLU_MODE=off`, the assistant runs on the rules alone.
+
 ### 2.6 Audit hash chain
 
 ![Audit hash chain](diagrams/audit-chain.png)
@@ -280,10 +300,12 @@ The assistant can start two tasks, chosen by a deterministic classifier (`choose
 fires when a message really asks for one: an amount alone, a question about a limit or its legality,
 or a question about a quote that is already open starts nothing.
 
-1. **Read the request.** A rule-based parser extracts an amount (always through `Decimal` into minor
-   units), currency, due date (ISO, "28 October", "5th of January", day/month/year, "in 3 weeks"),
-   purpose and charge code. Anything missing or impossible stays empty and the assistant asks, with
-   an example, instead of guessing.
+1. **Read the request.** A rule-based parser and the trained reader (section 2.5.1) each extract an
+   amount (always through `Decimal` into minor units), currency, due date (ISO, "28 October", "5th of
+   January", day/month/year, "in 3 weeks", "end of November", "next Friday"), purpose and charge
+   code, and the number words, suffixes and slang the rules do not know ("ten thousand", "10k",
+   "1.5 lakh", "quid"). Anything missing, impossible or read two ways stays empty and the assistant
+   asks, with an example, instead of guessing. If it asked, the next message finishes the same task.
 2. **Do the work with its own permissions.** For *plan a payment* it creates a quote through the same
    service a human uses, ranks the providers, plans the deadline, and checks KYC, saved recipients
    and the document checklist. For *how often should I send* it runs the cadence optimiser. Nothing
@@ -386,6 +408,9 @@ The full threat and control matrix, with the test that proves each row, is in
 
 - `backend/tests/` has one or more tests for each blueprint scenario T01 to T24 and fails if one
   is missing; see [TEST_CASES.md](TEST_CASES.md).
+- The trained reader has its own tests (`test_nlu_*.py`, `test_ai_reader_agent.py`,
+  `test_ml_dataset.py`) and a quality floor on held-out data (`test_nlu_quality.py`); the measured
+  comparison with the rules is generated into [AI_EVALUATION.md](AI_EVALUATION.md).
 - `python -m app.scripts.demo_flow` replays the fourteen-step demo against a running API and prints
   OK or FAIL for each check.
 - Operation logs from a real run are in `submission/evidence/`.

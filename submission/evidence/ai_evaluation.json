@@ -1,0 +1,823 @@
+{
+  "data": {
+    "blind": 113,
+    "dev": 10977,
+    "hard": 136,
+    "natural": 680,
+    "oos_public": 700,
+    "test": 1708,
+    "test_heldout": 11004,
+    "train": 35588,
+    "val": 2279
+  },
+  "latency_cpu": {
+    "median_ms": 6.55,
+    "n": 436,
+    "p95_ms": 10.72
+  },
+  "model": {
+    "base_model": "BAAI/bge-small-en-v1.5",
+    "created": "2026-10-15",
+    "model_id": "studyroute-nlu-v1",
+    "quantisation": "int8 dynamic (weights)",
+    "temperature": 1.4,
+    "thresholds": {
+      "action": 0.5,
+      "attack": 0.5,
+      "intent": 0.8
+    },
+    "training": {
+      "args": {
+        "backbone": "BAAI/bge-small-en-v1.5",
+        "batch_size": 64,
+        "epochs": 6,
+        "lr": 8e-05,
+        "name": "bge",
+        "seed": 7,
+        "smoothing": 0.0
+      },
+      "gpu": "NVIDIA GeForce RTX 5060 Ti",
+      "seed": 7,
+      "torch": "2.11.0+cu128",
+      "train_seconds": 238.2
+    }
+  },
+  "model_bytes": 33826615,
+  "model_sha256": "94146e8c4b7292a1ac79365028c7765692a0f8a0aaedd01b85769c82f7fa69c8",
+  "results": {
+    "agent": {
+      "blind": {
+        "attack_blocked": 0.9285714285714286,
+        "attack_n": 14,
+        "benign_blocked": 0.020202020202020204,
+        "by_group": {
+          "blind": {
+            "correct": 100,
+            "n": 113
+          }
+        },
+        "macro_f1": 0.8598959543256626,
+        "n": 113,
+        "routing_accuracy": 0.8849557522123894,
+        "routing_ci95": [
+          0.8131,
+          0.9315
+        ],
+        "slots": {
+          "amount": {
+            "f1": 1.0,
+            "gold": 35,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 26,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 10,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 33,
+        "task_success": 1.0,
+        "wrongly_starts_action": 0.0
+      },
+      "hard": {
+        "attack_blocked": 0.9,
+        "attack_n": 20,
+        "benign_blocked": 0.017241379310344827,
+        "by_group": {
+          "attack": {
+            "correct": 18,
+            "n": 20
+          },
+          "lookalike": {
+            "correct": 7,
+            "n": 8
+          },
+          "messy": {
+            "correct": 17,
+            "n": 17
+          },
+          "multi_amount": {
+            "correct": 2,
+            "n": 2
+          },
+          "oos": {
+            "correct": 11,
+            "n": 14
+          },
+          "paraphrase": {
+            "correct": 56,
+            "n": 62
+          },
+          "slots": {
+            "correct": 13,
+            "n": 13
+          }
+        },
+        "macro_f1": 0.8965920956871183,
+        "n": 136,
+        "routing_accuracy": 0.9117647058823529,
+        "routing_ci95": [
+          0.8521,
+          0.9488
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.9411764705882353,
+            "gold": 51,
+            "precision": 0.9411764705882353,
+            "recall": 0.9411764705882353
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 40,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 0.888888888888889,
+            "gold": 8,
+            "precision": 0.8,
+            "recall": 1.0
+          }
+        },
+        "task_n": 49,
+        "task_success": 0.9183673469387755,
+        "wrongly_starts_action": 0.024691358024691357
+      },
+      "natural": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0014705882352941176,
+        "by_group": {},
+        "macro_f1": 0.9491389944229098,
+        "n": 680,
+        "routing_accuracy": 0.9514705882352941,
+        "routing_ci95": [
+          0.9326,
+          0.9652
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 8,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.0
+      },
+      "oos_public": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0014326647564469914,
+        "by_group": {},
+        "macro_f1": 0.9971264367816092,
+        "n": 698,
+        "routing_accuracy": 0.994269340974212,
+        "routing_ci95": [
+          0.9854,
+          0.9978
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 2,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.0
+      },
+      "test": {
+        "attack_blocked": 0.9961977186311787,
+        "attack_n": 263,
+        "benign_blocked": 0.011764705882352941,
+        "by_group": {},
+        "macro_f1": 0.9901139297813649,
+        "n": 1708,
+        "routing_accuracy": 0.9894613583138173,
+        "routing_ci95": [
+          0.9834,
+          0.9933
+        ],
+        "slots": {
+          "amount": {
+            "f1": 1.0,
+            "gold": 531,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 439,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 0.9012875536480687,
+            "gold": 105,
+            "precision": 0.8203125,
+            "recall": 1.0
+          }
+        },
+        "task_n": 624,
+        "task_success": 0.9439102564102564,
+        "wrongly_starts_action": 0.0
+      },
+      "test_heldout": {
+        "attack_blocked": 0.8506315211422295,
+        "attack_n": 1821,
+        "benign_blocked": 0.01274093433518458,
+        "by_group": {},
+        "macro_f1": 0.8798517633904074,
+        "n": 11004,
+        "routing_accuracy": 0.9023991275899673,
+        "routing_ci95": [
+          0.8967,
+          0.9078
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.9985557481224726,
+            "gold": 3467,
+            "precision": 1.0,
+            "recall": 0.9971156619555812
+          },
+          "due_date": {
+            "f1": 0.998492840994725,
+            "gold": 2657,
+            "precision": 0.999622783855149,
+            "recall": 0.9973654497553632
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 1036,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 4055,
+        "task_success": 0.974845869297164,
+        "wrongly_starts_action": 0.04657097288676236
+      }
+    },
+    "reader": {
+      "blind": {
+        "attack_blocked": 0.9285714285714286,
+        "attack_n": 14,
+        "benign_blocked": 0.0,
+        "by_group": {
+          "blind": {
+            "correct": 102,
+            "n": 113
+          }
+        },
+        "macro_f1": 0.8842852304390766,
+        "n": 113,
+        "routing_accuracy": 0.9026548672566371,
+        "routing_ci95": [
+          0.8341,
+          0.9448
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.9855072463768115,
+            "gold": 35,
+            "precision": 1.0,
+            "recall": 0.9714285714285714
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 26,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 10,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 33,
+        "task_success": 0.9696969696969697,
+        "wrongly_starts_action": 0.0273972602739726
+      },
+      "hard": {
+        "attack_blocked": 0.9,
+        "attack_n": 20,
+        "benign_blocked": 0.008620689655172414,
+        "by_group": {
+          "attack": {
+            "correct": 18,
+            "n": 20
+          },
+          "lookalike": {
+            "correct": 7,
+            "n": 8
+          },
+          "messy": {
+            "correct": 17,
+            "n": 17
+          },
+          "multi_amount": {
+            "correct": 2,
+            "n": 2
+          },
+          "oos": {
+            "correct": 10,
+            "n": 14
+          },
+          "paraphrase": {
+            "correct": 56,
+            "n": 62
+          },
+          "slots": {
+            "correct": 13,
+            "n": 13
+          }
+        },
+        "macro_f1": 0.8807911184631833,
+        "n": 136,
+        "routing_accuracy": 0.9044117647058824,
+        "routing_ci95": [
+          0.8433,
+          0.9433
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.9306930693069307,
+            "gold": 51,
+            "precision": 0.94,
+            "recall": 0.9215686274509803
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 40,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 8,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 49,
+        "task_success": 0.9183673469387755,
+        "wrongly_starts_action": 0.04938271604938271
+      },
+      "natural": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0,
+        "by_group": {},
+        "macro_f1": 0.9565095300032397,
+        "n": 680,
+        "routing_accuracy": 0.9602941176470589,
+        "routing_ci95": [
+          0.9428,
+          0.9726
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.0
+      },
+      "oos_public": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0014326647564469914,
+        "by_group": {},
+        "macro_f1": 0.9964054636951833,
+        "n": 698,
+        "routing_accuracy": 0.9928366762177651,
+        "routing_ci95": [
+          0.9833,
+          0.9969
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.0
+      },
+      "test": {
+        "attack_blocked": 1.0,
+        "attack_n": 263,
+        "benign_blocked": 0.0,
+        "by_group": {},
+        "macro_f1": 1.0,
+        "n": 1708,
+        "routing_accuracy": 1.0,
+        "routing_ci95": [
+          0.9978,
+          1.0
+        ],
+        "slots": {
+          "amount": {
+            "f1": 1.0,
+            "gold": 531,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "due_date": {
+            "f1": 1.0,
+            "gold": 439,
+            "precision": 1.0,
+            "recall": 1.0
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 105,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 624,
+        "task_success": 1.0,
+        "wrongly_starts_action": 0.0
+      },
+      "test_heldout": {
+        "attack_blocked": 0.7380560131795717,
+        "attack_n": 1821,
+        "benign_blocked": 0.005227049983665469,
+        "by_group": {},
+        "macro_f1": 0.8644563632711171,
+        "n": 11004,
+        "routing_accuracy": 0.886223191566703,
+        "routing_ci95": [
+          0.8802,
+          0.892
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.9989894615273567,
+            "gold": 3467,
+            "precision": 1.0,
+            "recall": 0.9979809633689068
+          },
+          "due_date": {
+            "f1": 0.9981153411232568,
+            "gold": 2657,
+            "precision": 0.9996224990562477,
+            "recall": 0.9966127211140384
+          },
+          "months": {
+            "f1": 1.0,
+            "gold": 1036,
+            "precision": 1.0,
+            "recall": 1.0
+          }
+        },
+        "task_n": 4055,
+        "task_success": 0.9745992601726264,
+        "wrongly_starts_action": 0.07320574162679426
+      }
+    },
+    "rules": {
+      "blind": {
+        "attack_blocked": 0.2857142857142857,
+        "attack_n": 14,
+        "benign_blocked": 0.020202020202020204,
+        "by_group": {
+          "blind": {
+            "correct": 69,
+            "n": 113
+          }
+        },
+        "macro_f1": 0.6002558854491039,
+        "n": 113,
+        "routing_accuracy": 0.6106194690265486,
+        "routing_ci95": [
+          0.5185,
+          0.6955
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.923076923076923,
+            "gold": 35,
+            "precision": 1.0,
+            "recall": 0.8571428571428571
+          },
+          "due_date": {
+            "f1": 0.7906976744186047,
+            "gold": 26,
+            "precision": 1.0,
+            "recall": 0.6538461538461539
+          },
+          "months": {
+            "f1": 0.888888888888889,
+            "gold": 10,
+            "precision": 1.0,
+            "recall": 0.8
+          }
+        },
+        "task_n": 33,
+        "task_success": 0.5757575757575758,
+        "wrongly_starts_action": 0.0136986301369863
+      },
+      "hard": {
+        "attack_blocked": 0.25,
+        "attack_n": 20,
+        "benign_blocked": 0.017241379310344827,
+        "by_group": {
+          "attack": {
+            "correct": 5,
+            "n": 20
+          },
+          "lookalike": {
+            "correct": 5,
+            "n": 8
+          },
+          "messy": {
+            "correct": 12,
+            "n": 17
+          },
+          "multi_amount": {
+            "correct": 2,
+            "n": 2
+          },
+          "oos": {
+            "correct": 11,
+            "n": 14
+          },
+          "paraphrase": {
+            "correct": 34,
+            "n": 62
+          },
+          "slots": {
+            "correct": 6,
+            "n": 13
+          }
+        },
+        "macro_f1": 0.5034508553277256,
+        "n": 136,
+        "routing_accuracy": 0.5514705882352942,
+        "routing_ci95": [
+          0.4676,
+          0.6325
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.8444444444444443,
+            "gold": 51,
+            "precision": 0.9743589743589743,
+            "recall": 0.7450980392156863
+          },
+          "due_date": {
+            "f1": 0.8059701492537313,
+            "gold": 40,
+            "precision": 1.0,
+            "recall": 0.675
+          },
+          "months": {
+            "f1": 0.6666666666666666,
+            "gold": 8,
+            "precision": 0.7142857142857143,
+            "recall": 0.625
+          }
+        },
+        "task_n": 49,
+        "task_success": 0.3469387755102041,
+        "wrongly_starts_action": 0.012345679012345678
+      },
+      "natural": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0014705882352941176,
+        "by_group": {},
+        "macro_f1": 0.33518016905789433,
+        "n": 680,
+        "routing_accuracy": 0.40147058823529413,
+        "routing_ci95": [
+          0.3653,
+          0.4388
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 8,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.010294117647058823
+      },
+      "oos_public": {
+        "attack_blocked": null,
+        "attack_n": 0,
+        "benign_blocked": 0.0014326647564469914,
+        "by_group": {},
+        "macro_f1": 0.9169899146625291,
+        "n": 698,
+        "routing_accuracy": 0.8467048710601719,
+        "routing_ci95": [
+          0.8181,
+          0.8715
+        ],
+        "slots": {
+          "amount": {
+            "f1": null,
+            "false_values": 2,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "due_date": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          },
+          "months": {
+            "f1": null,
+            "false_values": 0,
+            "gold": 0,
+            "precision": null,
+            "recall": null
+          }
+        },
+        "task_n": 0,
+        "task_success": null,
+        "wrongly_starts_action": 0.0
+      },
+      "test": {
+        "attack_blocked": 0.4790874524714829,
+        "attack_n": 263,
+        "benign_blocked": 0.01522491349480969,
+        "by_group": {},
+        "macro_f1": 0.6741357425663702,
+        "n": 1708,
+        "routing_accuracy": 0.6270491803278688,
+        "routing_ci95": [
+          0.6039,
+          0.6497
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.8761904761904762,
+            "gold": 531,
+            "precision": 1.0,
+            "recall": 0.7796610169491526
+          },
+          "due_date": {
+            "f1": 0.8857868020304568,
+            "gold": 439,
+            "precision": 1.0,
+            "recall": 0.7949886104783599
+          },
+          "months": {
+            "f1": 0.7924528301886793,
+            "gold": 105,
+            "precision": 0.7850467289719626,
+            "recall": 0.8
+          }
+        },
+        "task_n": 624,
+        "task_success": 0.4807692307692308,
+        "wrongly_starts_action": 0.0020325203252032522
+      },
+      "test_heldout": {
+        "attack_blocked": 0.5211422295442065,
+        "attack_n": 1821,
+        "benign_blocked": 0.009038440596754873,
+        "by_group": {},
+        "macro_f1": 0.7042379591552818,
+        "n": 11004,
+        "routing_accuracy": 0.6200472555434388,
+        "routing_ci95": [
+          0.6109,
+          0.6291
+        ],
+        "slots": {
+          "amount": {
+            "f1": 0.8783325254483761,
+            "gold": 3467,
+            "precision": 0.9985304922850845,
+            "recall": 0.7839630804730314
+          },
+          "due_date": {
+            "f1": 0.8657417289220918,
+            "gold": 2657,
+            "precision": 1.0,
+            "recall": 0.7632668423033496
+          },
+          "months": {
+            "f1": 0.8866200967221924,
+            "gold": 1036,
+            "precision": 1.0,
+            "recall": 0.7963320463320464
+          }
+        },
+        "task_n": 4055,
+        "task_success": 0.42860665844636253,
+        "wrongly_starts_action": 0.0007974481658692185
+      }
+    }
+  }
+}

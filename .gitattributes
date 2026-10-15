@@ -1,3 +1,6 @@
 * text=auto eol=lf
 *.png binary
 *.docx binary
+*.onnx binary
+*.gz binary
+*.pptx binary

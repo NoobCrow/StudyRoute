@@ -27,6 +27,7 @@ services:
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_MODEL: ${LLM_MODEL:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
+      NLU_MODE: ${NLU_MODE:-}
     volumes:
       - studyroute-data:/srv/data
     expose:

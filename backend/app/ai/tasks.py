@@ -44,11 +44,25 @@ class TaskResult:
     missing: list[str] = field(default_factory=list)
 
 
-def _needs(kind: str, what: str, example_key: str, example: str) -> TaskResult:
+def _collected(parsed: ParsedRequest) -> dict[str, Any]:
+    """What the assistant already understood, so the next message only has to add the rest."""
+    return {
+        "amount_minor": parsed.amount_minor if parsed.has_amount else None,
+        "currency": parsed.currency if parsed.has_amount else None,
+        "due_date": parsed.due_date.isoformat() if parsed.due_date else None,
+        "purpose": parsed.purpose,
+        "months": parsed.months,
+        "charge_code": parsed.charge_code,
+    }
+
+
+def _needs(
+    kind: str, what: str, example_key: str, example: str, collected: dict[str, Any] | None = None
+) -> TaskResult:
     return TaskResult(
         kind,
         "needs_input",
-        {"kind": kind, "status": "needs_input", "missing": [what]},
+        {"kind": kind, "status": "needs_input", "missing": [what], "collected": collected or {}},
         [
             ("task.missing", "What I still need to plan this", what),
             (example_key, "Example request", example),
@@ -82,7 +96,9 @@ class TaskRunner:
     def _payment_plan(self, ai: Actor, parsed: ParsedRequest) -> TaskResult:
         kind = "payment_plan"
         if not parsed.has_amount or parsed.amount_minor is None or parsed.currency is None:
-            return _needs(kind, "an amount and a currency", "example.plan", EXAMPLE_PLAN)
+            return _needs(
+                kind, "an amount and a currency", "example.plan", EXAMPLE_PLAN, _collected(parsed)
+            )
         ctx = self._ctx
         with ctx.db.write() as session:
             rules = load_rules(session)
@@ -137,7 +153,10 @@ class TaskRunner:
     def _send_plan(self, parsed: ParsedRequest) -> TaskResult:
         kind = "send_plan"
         if not parsed.has_amount or parsed.amount_minor is None or parsed.currency is None:
-            return _needs(kind, "an amount and a currency", "example.cadence", EXAMPLE_CADENCE)
+            return _needs(
+                kind, "an amount and a currency", "example.cadence", EXAMPLE_CADENCE,
+                _collected(parsed),
+            )  # fmt: skip
         months = parsed.months or DEFAULT_MONTHS
         total_minor = parsed.amount_minor * months if parsed.per_month else parsed.amount_minor
         with self._ctx.db.read() as session:

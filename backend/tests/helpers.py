@@ -52,6 +52,7 @@ def make_settings(tmp_path: Path, **overrides: Any) -> Settings:
         "argon2_parallelism": 1,
         "seed_demo_password": PASSWORD,
         "sandbox_mfa_code": MFA_CODE,
+        "nlu_mode": "off",  # the existing tests exercise the rules; new tests switch the reader on
     }
     values.update(overrides)
     return Settings(**values)

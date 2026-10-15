@@ -94,6 +94,51 @@ describe("assistant chat", () => {
     expect(second.context.quote_id).toBe("qte_plan1");
   });
 
+  it("remembers a task it asked about and sends it back with the next message", async () => {
+    const asked = chatReply({
+      task: { kind: "payment_plan", status: "needs_input", missing: ["an amount and a currency"],
+        collected: { amount_minor: null, currency: null, due_date: null, purpose: "TUITION", months: null, charge_code: "OUR" } },
+    });
+    const fetchMock = mockApi({ "/assistant/chat": asked });
+    render(<MemoryRouter><ChatPanel /></MemoryRouter>);
+    await openChat();
+    await userEvent.type(screen.getByLabelText("Your question"), "I need to pay tuition");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await screen.findByText("I made a quote.");
+    await userEvent.type(screen.getByLabelText("Your question"), "GBP 10,000 by 28 October");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { context: { pending: { kind: string; purpose: string } | null } };
+    expect(second.context.pending).toMatchObject({ kind: "payment_plan", purpose: "TUITION" });
+  });
+
+  it("shows how the message was read: the intent, how sure the model was and each marked word", async () => {
+    mockApi({
+      "/assistant/chat": chatReply({
+        understanding: {
+          source: "trained", model: "studyroute-nlu-v1", model_sha256: "94146e8c4b72", intent: "PLAN", model_intent: "PLAN",
+          confidence: 0.97, attack: false, out_of_scope: false, continued_earlier_task: false,
+          spans: [
+            { label: "AMOUNT", text: "ten thousand", start: 8, end: 20 },
+            { label: "CURRENCY", text: "pounds", start: 21, end: 27 },
+          ],
+          values: { amount_minor: 1000000, currency: "GBP", due_date: null, months: null, charge_code: "OUR", purpose: "TUITION" },
+          conflicts: ["amount"], unreadable: ["DATE:soon"],
+        },
+      }),
+    });
+    render(<MemoryRouter><ChatPanel /></MemoryRouter>);
+    await openChat();
+    await userEvent.click(screen.getByRole("button", { name: "I need to pay GBP 10,000 tuition by 28 October" }));
+    await userEvent.click(await screen.findByText(/How I read this \(trained reader\)/));
+    expect(screen.getByText("Reader: studyroute-nlu-v1")).toBeInTheDocument();
+    expect(screen.getByText(/97% sure/)).toBeInTheDocument();
+    expect(screen.getByText("ten thousand")).toBeInTheDocument();
+    expect(screen.getByText(/the reader and the rules read the amount differently, so I left it empty/)).toBeInTheDocument();
+    expect(screen.getByText(/I could not read "soon" as a date/)).toBeInTheDocument();
+  });
+
   it("shows the send plan table for a how-often question", async () => {
     mockApi({ "/assistant/chat": chatReply({ task: { kind: "send_plan", status: "ready", plan: SEND_PLAN } }) });
     render(<MemoryRouter><ChatPanel /></MemoryRouter>);

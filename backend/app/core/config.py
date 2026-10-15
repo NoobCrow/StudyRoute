@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     llm_model: str | None = None
     llm_base_url: str | None = None
     llm_timeout_seconds: float = 20.0
+    # The small trained reader that understands what a parent typed (runs locally, no network).
+    # "auto" uses it when onnxruntime and the model file are present; "off" uses the rules only.
+    nlu_mode: Literal["auto", "off"] = "auto"
 
     @model_validator(mode="after")
     def _finalise(self) -> Settings:

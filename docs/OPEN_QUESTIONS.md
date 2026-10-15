@@ -90,6 +90,14 @@ change is written to the audit log with who, what and why.
   tried**. Which party would really issue the token, hold the compliance key and run the nodes in a
   Bangladeshi AD-bank setting, and what Bangladesh Bank allows for tokenised deposits, are open and
   not answered here. See `docs/SMART_ESCROW.md`.
+- **The trained reader.** A small model fine-tuned on a GPU reads what a parent types (see
+  `docs/AI_AGENT.md`). Its training data is **synthetic plus public** (generated messages and a UK
+  bank's questions from Banking77); no real parent's messages exist, so it has not been tested on
+  real users and its confidence thresholds were tuned on generated data. The blind test set is small
+  (113 messages), so its numbers are good to about plus or minus 7 points. Attack detection is an
+  extra layer: on unseen wording it blocked 85% of attacks, and a few novel ones get through to a
+  harmless answer. It was not red-teamed by outsiders. The model file is not signed (R33).
+  A real language model through `LLM_PROVIDER` has still never been run in this project.
 - **Docker.** `docker compose up --build` was run for real on 15 October 2026 from the unzipped
   submission archive, with Docker Engine 29.1.3 and Compose 2.40.3 inside an Ubuntu 24.04 `amd64`
   virtual machine (Docker Desktop could not be installed on the development machine). Both images

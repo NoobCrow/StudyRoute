@@ -1,26 +1,26 @@
 {
   "edited_event": {
-    "seq": 59,
+    "seq": 66,
     "column": "amount_minor"
   },
   "verify_after_edit": {
     "status": "FAIL",
-    "events_checked": 58,
-    "failed_seq": 59,
+    "events_checked": 65,
+    "failed_seq": 66,
     "reason": "HASH_MISMATCH",
     "head": {
-      "seq": 60,
-      "hash": "fc2e1b6a1b545956f170b707de2307af4db269e00bb5f80df1efd9e710a505f1"
+      "seq": 67,
+      "hash": "8a5f14657d9fb7d90a3f526c0c21f4dee432d09cc55f55dbc379f32e7deac203"
     }
   },
   "verify_after_restore": {
     "status": "PASS",
-    "events_checked": 60,
+    "events_checked": 67,
     "failed_seq": null,
     "reason": null,
     "head": {
-      "seq": 60,
-      "hash": "fc2e1b6a1b545956f170b707de2307af4db269e00bb5f80df1efd9e710a505f1"
+      "seq": 67,
+      "hash": "8a5f14657d9fb7d90a3f526c0c21f4dee432d09cc55f55dbc379f32e7deac203"
     }
   }
 }

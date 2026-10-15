@@ -45,6 +45,7 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F13 | **Smart send plan**: monthly, quarterly, per-term or all-at-once, priced by the engine | Dashboard, Chat |
 | F14 | **Compliance report** per payment: parties, controls with evidence, approval proof, audit trail, a hash you can verify in your browser | Payment |
 | F15 | **Bank network**: invented banks pass simulated money to each other, inside Bangladesh and abroad (clearing house, or SWIFT through a correspondent), with a double-entry ledger, MFA-confirmed transfers and a books-balance check | Bank network |
+| F17 | **A trained agent**: a small language model, fine-tuned on a GPU, reads what a parent types (intent plus the exact words that carry an amount, a currency or a date). Plain code checks every value, the engine computes every number, and the model can never act. Measured against the old rule-based reader in [docs/AI_EVALUATION.md](docs/AI_EVALUATION.md) | Chat |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
 ## Quick start (one command)
@@ -196,6 +197,8 @@ backend/app/api/        routes, auth, idempotency, rate limit, errors
 backend/app/audit/      hash chain and verify
 backend/app/providers/  mock providers, simulator, signed webhooks
 backend/app/ai/         orchestrator, masking, number guard, tools, template mode
+backend/app/ai/nlu/     the trained reader: tokenizer, ONNX runtime, checks, the shipped model files
+ml/                     training: data generator, train, export, evaluate (needs an NVIDIA GPU)
 backend/tests/          pytest, one or more tests per blueprint ID T01..T24
 frontend/               React + TypeScript (Vite): dashboard, compare, recipients,
                         documents, payment (approval, tracker), audit, rules, chat
@@ -250,17 +253,36 @@ event. The same checks apply in both modes: policy check, masking, number guard,
 
 ### What the assistant can do for you (and what it cannot)
 
-Ask in plain words. It reads the amount, currency, due date, purpose and charge code with
-deterministic code (no model needed), then does the work with its own permissions:
+Ask in plain words. A small trained model marks the amount, currency, due date, purpose and charge
+code in your message, deterministic code turns those words into exact values (and asks when it cannot),
+then the assistant does the work with its own permissions. If the model or its runtime is missing it
+falls back to fixed rules, so nothing depends on it:
 
 - *"I need to pay GBP 10,000 tuition by 28 October"*: it makes a quote, ranks the providers, plans the
   deadline, checks your KYC, recipients and documents, and proposes the draft.
 - *"How often should I send GBP 800 a month for 9 months?"*: it compares sending monthly, every three
   months, every six months and all at once, because fixed fees are paid on every transfer.
 
+It also follows a conversation: if it asks for the amount, your next message ("GBP 10,000 by 28
+October") finishes the same task. Open **How I read this** under any reply to see what it understood.
+
 If something is missing it asks, with an example. It never guesses a number, never creates a payment,
 and never approves: you create the draft and approve it with a fresh MFA code. The cards it shows are
 built from engine output, so even a model cannot change them.
+
+### The trained agent
+
+The assistant's "reader" is a fine-tuned `bge-small-en-v1.5` (33 million parameters, 34 MB as an int8
+ONNX file, about 7 ms a message on CPU, no network, no key). It was trained for a few minutes on an
+NVIDIA RTX 5060 Ti with 35,588 messages: generated ones, plus real bank-customer questions from
+Banking77 (CC BY 4.0). It is **not** trusted with anything: it only proposes, and the engine, the
+deterministic parser and the human approval stay in charge.
+
+Measured on 113 messages written by hand after the model was frozen (evaluated once, so treat it as
+a small sample): the right intent 88.5% of the time against 61.1% for the old rules, a plan request
+read completely and exactly 100% against 57.6%, and attacks blocked 92.9% against 28.6%. Full tables,
+the dataset card, the limits and how to retrain: [docs/AI_AGENT.md](docs/AI_AGENT.md) and
+[docs/AI_EVALUATION.md](docs/AI_EVALUATION.md). Set `NLU_MODE=off` to run on the rules alone.
 
 ### Adding the AI
 
@@ -285,6 +307,7 @@ cd backend  && pytest -q && ruff check . && ruff format --check .
 cd frontend && npm run typecheck && npm test && npm run build
 python scripts/scan_repo.py      # secrets, real e-mails, passport-like numbers, TODOs
 python -m app.scripts.check_ai   # (from backend/) template mode, or your model once a key is set
+python ml/evaluate.py            # re-measure the trained reader against the rules (writes docs/AI_EVALUATION.md)
 ```
 
 `backend/tests/test_blueprint_coverage.py` fails if any blueprint test ID (T01 to T24) has no test.
@@ -343,6 +366,15 @@ All taken from the running app on synthetic data. Click an image for the full si
 <tr>
 <td valign="top" align="center"><a href="submission/screenshots/21-phone-send-plan-chat.png"><img src="submission/screenshots/21-phone-send-plan-chat.png" alt="The assistant's plan on a phone" width="260"></a><br><b>On a phone</b><br><sub>The chat on a 390 px screen.</sub></td>
 <td valign="top" align="center"><a href="submission/screenshots/26-phone-bank.png"><img src="submission/screenshots/26-phone-bank.png" alt="The bank network screen on a phone" width="260"></a><br><b>Bank network on a phone</b><br><sub>No sideways scrolling; the money column stays on screen.</sub></td>
+</tr>
+</table>
+
+The trained reader, in the real chat (the model only marks the words; plain code turns them into values):
+
+<table>
+<tr>
+<td valign="top" align="center" width="50%"><a href="submission/screenshots/30-reader-reads.png"><img src="submission/screenshots/30-reader-reads.png" alt="The assistant read 'ten thousand pounds' and 'end of November' from a messy sentence" width="300"></a><br><b>Wording the fixed rules cannot read</b><br><sub>"ten thousand pounds ... last date end of November" becomes GBP 10,000 due 30 November. <b>How I read this</b> shows each marked word.</sub></td>
+<td valign="top" align="center" width="50%"><a href="submission/screenshots/31-reader-continues.png"><img src="submission/screenshots/31-reader-continues.png" alt="The assistant finished the task it had asked about" width="300"></a><br><b>A short conversation</b><br><sub>"I need to pay tuition" makes it ask for the amount; the next message "GBP 10,000 by 28 October" finishes the same task.</sub></td>
 </tr>
 </table>
 

@@ -65,6 +65,7 @@ function facts() {
     risks: (assessment.match(/^\| R\d+ \|/gm) || []).length,
   };
 }
+const AI = JSON.parse(read("submission/evidence/ai_evaluation.json"));
 const F = facts();
 if (F.scenarios !== 24) throw new Error(`Expected 24 blueprint scenarios, found ${F.scenarios}.`);
 
@@ -190,7 +191,7 @@ slides.push({
   notes:
     "This is the real chain. The parent pays in taka to an authorised dealer bank, which sells foreign currency and sends a SWIFT instruction carrying a UETR and a charge code. " +
     "A correspondent bank may take a lifting fee, the receiving bank may take another, and the university matches the payment by reference. Each step has a typical failure, shown in red. " +
-    "SWIFT only carries the instruction; banks settle between their own accounts. StudyRoute simulates this chain end to end with invented banks, a correspondent and a double-entry ledger where debits equal credits, and a failed payment is returned in full. It never moves real money.",
+    "StudyRoute simulates this chain end to end with invented banks, a correspondent and a double-entry ledger where debits equal credits, and a failed payment is returned in full. It never moves real money.",
   elements: [
     ...chain.flatMap(([head, sub, fill, risk], i) => {
       const x = 0.5 + i * 1.84;
@@ -222,7 +223,7 @@ slides.push({
   notes:
     "This is task completion. On the left, the parent typed one sentence into the chat: I need to pay ten thousand pounds of tuition by 28 October. " +
     "The agent read it, made the quote, ranked the providers, planned the deadline and checked KYC, the recipient and the documents, and it built this plan card from the engine's output. " +
-    "On the right, the agent and the person share the work. The person creates the draft, chooses the recipient and approves with a fresh MFA code. " +
+    "The person creates the draft, chooses the recipient and approves with a fresh MFA code. " +
     "The agent blocks the payment until KYC, the allowlist and the sandbox caps pass, then tracks it to settled and seals a compliance report. " +
     "Look at what the agent did not do: it created no payment. It can propose a draft, but a person always clicks.",
   elements: [
@@ -249,7 +250,7 @@ slides.push({
     "plus a shortfall when fees are deducted from the amount. We rank by that percentage. In our synthetic example, Provider B is first at 1.58 percent, " +
     "Provider C looks cheap but it is quoted as SHA, so the university would receive 35 pounds less, and Provider A is third at 2.16 percent. " +
     "On the right is where Provider B's 25,300 taka goes: 16,000 is the margin, 3,000 the fixed fee, 1,500 the SWIFT fee and 4,800 the fees we pay under OUR. " +
-    "The same engine powers the smart send plan: fixed fees are paid on every transfer, so sending 12,000 pounds of living costs all at once costs 28,500 taka against 68,400 monthly. It does not predict exchange rates, and says so.",
+    "The same engine powers the smart send plan. It does not predict exchange rates, and says so.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -320,7 +321,7 @@ slides.push({
     "The assistant follows a fixed pipeline. A policy check flags attempts to override rules, approve or reveal secrets, and a flagged message never reaches the model. " +
     "Facts come only from the engine. Personal data is masked before any model call. The model is the only step that is not deterministic, and it is optional. " +
     "Then a number guard checks every figure in the reply against the engine's facts and falls back to a template if anything is invented, a tool guard allows only proposals, and everything is audited. " +
-    "So: every number comes from the engine, the AI can only propose, and it works with no API key at all. Adding a model later is one command, check_ai.",
+    "So: every number comes from the engine, the AI can only propose, and it works with no API key at all.",
   elements: [
     ...pipeline.flatMap((label, i) => {
       const x = 0.5 + i * 1.3;
@@ -343,6 +344,47 @@ slides.push({
 });
 
 // 9 ---------------------------------------------------------------------------------------------
+const blind = { rules: AI.results.rules.blind, agent: AI.results.agent.blind };
+const pc = (v) => `${(100 * v).toFixed(1).replace(/\.0$/, "")}%`;
+const trained = [
+  ["What it does", "Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates."],
+  ["How it was trained", `A few minutes on an RTX 5060 Ti. ${AI.data.train.toLocaleString("en-US")} messages: generated ones plus real bank questions (Banking77). ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
+  ["Honest limits", "Synthetic data, English, no real users yet. About 1 attack in 14 still slips past it; permissions and MFA remain the real defence."],
+];
+slides.push({
+  layout: "content", section: "Trust", title: "A trained agent, measured",
+  notes:
+    "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number. " +
+    "Plain code turns those words into values and refuses what it cannot read exactly, and if the old rules and the model disagree, the assistant asks. " +
+    `On messages we wrote by hand after the model was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, ` +
+    `read a plan request completely and exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. ` +
+    "The sample is small and the training data is synthetic, and we say so on the slide.",
+  elements: [
+    {
+      type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,
+      rows: [
+        ["On 113 new messages", "Rules", "Agent"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" })),
+        [{ text: "Right intent", fill: "background2" }, { text: pc(blind.rules.routing_accuracy), fill: "background2" }, { text: pc(blind.agent.routing_accuracy), bold: true, color: "accent1", fill: "background2" }],
+        [{ text: "Plan read exactly" }, { text: pc(blind.rules.task_success) }, { text: pc(blind.agent.task_success), bold: true, color: "accent1" }],
+        [{ text: "Attacks blocked", fill: "background2" }, { text: pc(blind.rules.attack_blocked), fill: "background2" }, { text: pc(blind.agent.attack_blocked), bold: true, color: "accent1", fill: "background2" }],
+        [{ text: "Harmless blocked" }, { text: pc(blind.rules.benign_blocked) }, { text: pc(blind.agent.benign_blocked), bold: true }],
+      ],
+    },
+    text(0.5, 4.3, 4.4, 0.9,
+      `Written by hand after the model was frozen, scored once. A small sample: about plus or minus 7 points. Real bank questions: rules ${pc(AI.results.rules.natural.routing_accuracy)}, agent ${pc(AI.results.agent.natural.routing_accuracy)}.`,
+      { size: 12, color: "text2" }),
+    ...trained.flatMap(([head, body], i) => {
+      const y = 1.4 + i * 1.25;
+      return [
+        card(5.3, y, 4.2, 1.15),
+        text(5.45, y + 0.04, 3.9, 0.3, head, { size: 14, bold: true, color: "accent1" }),
+        text(5.45, y + 0.36, 3.95, 0.78, body, { size: 11, color: "text1" }),
+      ];
+    }),
+  ],
+});
+
+// 10 --------------------------------------------------------------------------------------------
 const tiers = [
   ["Public:", " sign in, health", "background2", "text1"],
   ["Read:", " own household only", "background2", "text1"],
@@ -362,7 +404,7 @@ slides.push({
     "Public, read, prepare, decide, and administer. Deciding, meaning approving a payment, is only for a human parent with a fresh MFA proof bound to that payment and to the hash of the summary they saw. " +
     "The AI has no approve, cancel, limit or config permission at all. On the right, the numbers: " +
     `${F.backendTests} backend and ${F.frontendTests} frontend tests, all ${F.scenarios} blueprint scenarios mapped to tests, and ${F.risks} known risks that we list openly in the self-assessment. ` +
-    "The audit log is hash-chained: Verify passes, we edit one row behind the application's back, and Verify fails at exactly that event. Each payment also gets a compliance report whose hash your browser can recompute. The threat matrix with a proof for each row is in the repository.",
+    "The audit log is hash-chained: Verify passes, we edit one row behind the application's back, and Verify fails at exactly that event.",
   elements: [
     ...tiers.flatMap(([lead, rest, fill, color], i) => {
       const y = 1.4 + i * 0.52;
@@ -386,14 +428,14 @@ slides.push({
   ],
 });
 
-// 10 --------------------------------------------------------------------------------------------
+// 11 --------------------------------------------------------------------------------------------
 slides.push({
   layout: "content", section: "Trust", title: "Honest by design",
   notes:
     "Honesty is a feature. A banner on every screen and an X-Sandbox header on every API response say this is a sandbox. " +
     "The Sandbox screen on the left lists everything that is simulated and how to trigger the edge cases, such as a recipient named FAIL_TEST. " +
     "Any rule that has not been checked against an official source carries a yellow Not verified badge and the sentence: indicative, confirm with your AD bank. " +
-    "On the right is a payment's compliance report: the parties, ten controls with their evidence, the approval proof and the audit trail, sealed with a hash that the browser recomputes. Change a copy and it says does not match. The sandbox operation logs from a real run, including the tamper demo, are in the repository under submission slash evidence.",
+    "On the right is a payment's compliance report: the parties, ten controls with their evidence, the approval proof and the audit trail, sealed with a hash that the browser recomputes. Change a copy and it says does not match.",
   elements: [
     text(0.5, 1.2, 9, 0.4, "Every simulated part is labelled. Every unverified rule carries a badge.", { size: 16, bold: true, color: "text1", valign: "middle" }),
     ...shot("15-sandbox-admin.png", 0.58, 1.78, 4.0, 3.12, "Sandbox screen listing what is simulated"),
@@ -403,7 +445,7 @@ slides.push({
   ],
 });
 
-// 11 --------------------------------------------------------------------------------------------
+// 12 --------------------------------------------------------------------------------------------
 const next = [
   ["Verified rules", "Replace each placeholder rule with an official Bangladesh Bank source."],
   ["A real AD bank partner", "Real quotes, real KYC, and regulator-ready reports from the audit log."],
@@ -414,7 +456,7 @@ slides.push({
   layout: "closing", section: "Close", title: "What comes next",
   notes:
     "Next steps. First, replace every placeholder rule with an official Bangladesh Bank source and add the moon-dependent holidays. " +
-    "We would also add the moon-dependent holidays to the planner. Second, a partnership with an authorised dealer bank for real quotes and real KYC, and regulator-ready reports from the audit log. " +
+    "Second, a partnership with an authorised dealer bank for real quotes and real KYC, and regulator-ready reports from the audit log. " +
     "Third, the escrow contracts would move from our simulated chain to a permissioned one with a deposit token issued by a bank. " +
     "Topic C also mentions credit building. We have not built it, and we would rather say so than pretend. We do show a household's money in every currency, but those are simulated accounts, not real ones. " +
     "To close: StudyRoute is clear, cheap and safe, because the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
