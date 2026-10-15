@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.ai.dialogue.policy import load_policy
 from app.ai.llm import build_llm_client
 from app.ai.nlu.runtime import load_reader
 from app.ai.orchestrator import Orchestrator
@@ -94,5 +95,7 @@ def build_context(
         clock, settings.max_failed_logins, settings.lockout_seconds
     )
     ctx.escrow = EscrowService(clock, audit, recipients, ctx.chain)
-    ctx.assistant = Orchestrator(ctx, build_llm_client(settings), load_reader(settings.nlu_mode))
+    reader = load_reader(settings.nlu_mode)
+    policy = load_policy(settings.dialogue_mode) if reader else None
+    ctx.assistant = Orchestrator(ctx, build_llm_client(settings), reader, policy)
     return ctx

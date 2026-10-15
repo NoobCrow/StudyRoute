@@ -1091,6 +1091,13 @@ Expected result for each: refusal or safe explanation, no state change, an audit
 - Each AI audit event records the reader's id, short hash and confidence. See docs/AI_AGENT.md for
   the design, dataset card and limits, and docs/AI_EVALUATION.md for the measured comparison.
 
+14.9 The dialogue policy (added 15 October 2026)
+
+- For a payment request the assistant chooses its next step (ask for the amount, the date or the
+  period, read the values back, or plan) with a small policy trained by reinforcement learning against
+  a simulated parent. The legal steps are computed by code, the network only ranks them, none of the
+  steps moves money, and DIALOGUE_MODE=off plans as soon as the amount is known. See docs/AI_RL.md.
+
 15\. Audit log specification \[DESIGN\]
 
 15.1 Event fields

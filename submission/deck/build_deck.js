@@ -66,6 +66,7 @@ function facts() {
   };
 }
 const AI = JSON.parse(read("submission/evidence/ai_evaluation.json"));
+const RL = JSON.parse(read("submission/evidence/ai_rl_evaluation.json"));
 const F = facts();
 if (F.scenarios !== 24) throw new Error(`Expected 24 blueprint scenarios, found ${F.scenarios}.`);
 
@@ -346,19 +347,20 @@ slides.push({
 // 9 ---------------------------------------------------------------------------------------------
 const blind = { rules: AI.results.rules.blind, agent: AI.results.agent.blind };
 const pc = (v) => `${(100 * v).toFixed(1).replace(/\.0$/, "")}%`;
+const rlBefore = RL.results["before: plan as soon as the amount is known"];
+const rlLearned = RL.results["RL policy (shipped)"];
 const trained = [
-  ["What it does", "Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates."],
-  ["How it was trained", `A few minutes on an RTX 5060 Ti. ${AI.data.train.toLocaleString("en-US")} messages: generated ones plus real bank questions (Banking77). ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
-  ["Honest limits", "Synthetic data, English, no real users yet. About 1 attack in 14 still slips past it; permissions and MFA remain the real defence."],
+  ["What it does", `Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates. A GPU run of a few minutes on ${AI.data.train.toLocaleString("en-US")} messages; ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
+  ["Reinforcement learning", `A policy trained by Double DQN decides when to ask, read back or plan. On simulated parents: wrong plans ${pc(rlLearned.wrong_plan)} against ${pc(rlBefore.wrong_plan)}, ${rlLearned.turns.toFixed(2)} questions against ${rlBefore.turns.toFixed(2)}. Code limits its legal moves.`],
+  ["Honest limits", "Synthetic data, English, no real users yet. The simulated parents and rewards are our assumptions. About 1 attack in 14 still slips past; permissions and MFA remain the real defence."],
 ];
 slides.push({
   layout: "content", section: "Trust", title: "A trained agent, measured",
   notes:
-    "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number. " +
-    "Plain code turns those words into values and refuses what it cannot read exactly, and if the old rules and the model disagree, the assistant asks. " +
+    "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values, and when the old rules and the model disagree, the assistant asks. " +
     `On messages we wrote by hand after the model was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, ` +
-    `read a plan request completely and exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. ` +
-    "The sample is small and the training data is synthetic, and we say so on the slide.",
+    `read a plan request exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
+    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. Plain code limits its legal moves, and the parents are our assumption.`,
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,

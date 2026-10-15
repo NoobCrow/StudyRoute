@@ -35,6 +35,7 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
   (originator and beneficiary data, charge code, reference), then approves with a fresh MFA code.
   A simulated provider submits, settles and reports back; a tracker shows the UETR and the steps.
 - **Does the work from one sentence.** Say "I need to pay GBP 10,000 tuition by 28 October" and the agent reads it, makes the quote, ranks the providers, plans the deadline, checks KYC, recipients and documents, and proposes the draft. It stops at the human gate: it creates no payment and cannot approve. A second task compares sending living costs monthly, quarterly, per term or all at once, because fixed fees are paid on every transfer (in the synthetic example GBP 12,000 costs BDT 28,500 sent at once against BDT 68,400 monthly).
+- **Two small trained models, both optional.** A fine-tuned language model reads untidy wording ("ten thousand pounds ... last date end of November"), and a policy trained with reinforcement learning decides when to ask a question, when to read the values back for a "yes" and when to plan. Plain code checks every value and limits the policy's legal moves, so neither model can calculate, approve or move money. Measured results and limits, including that the simulated parents are an assumption: `docs/AI_EVALUATION.md` and `docs/AI_RL_EVALUATION.md`.
 - **Explains in plain language.** The chat answers "why is B cheaper than A?" using only numbers
   the engine produced, and lists the facts it used.
 

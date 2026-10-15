@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
 import { post } from "../api/client";
-import type { ChatAction, ChatResponse, PendingTask, Understanding } from "../api/types";
+import type { ChatAction, ChatResponse, DialogueChoice, PendingTask, Understanding } from "../api/types";
 import { useCurrentChatScope } from "../chatContext";
 import { TaskView } from "./PlanCard";
 import { Badge, ErrorNotice } from "./Ui";
@@ -48,7 +48,12 @@ const SLOT_NAMES: Record<string, string> = {
   PURPOSE: "purpose", PROVIDER: "provider",
 };
 
-function HowIRead({ understanding }: { understanding: Understanding }) {
+const NEXT_STEP: Record<string, string> = {
+  RUN: "plan it", CONFIRM: "read the values back and ask you to confirm",
+  ASK_AMOUNT: "ask for the amount", ASK_DATE: "ask for the date", ASK_MONTHS: "ask for the period",
+};
+
+function HowIRead({ understanding, dialogue }: { understanding: Understanding; dialogue: DialogueChoice | null }) {
   const trained = understanding.source === "trained";
   const notes = [...understanding.conflicts.map((c) => `the reader and the rules read the ${c.replace("_", " ")} differently, so I left it empty`),
     ...understanding.unreadable.map((u) => `I could not read "${u.split(":").slice(1).join(":")}" as a ${(SLOT_NAMES[u.split(":")[0] ?? ""] ?? "value")}`)];
@@ -69,16 +74,29 @@ function HowIRead({ understanding }: { understanding: Understanding }) {
         </ul>
       ) : <p className="small muted">No amounts, dates or other values found in the words.</p>}
       {notes.length > 0 ? <p className="small">{notes.join(". ")}.</p> : null}
+      {dialogue ? (
+        <p className="small">
+          <Badge tone="info">Next step: {dialogue.action.replace("_", " ").toLowerCase()}</Badge>{" "}
+          A small policy trained with reinforcement learning chose to {NEXT_STEP[dialogue.action] ?? dialogue.action}. It can only choose
+          among steps that are safe for the values it holds, and none of them moves money.
+        </p>
+      ) : null}
       <p className="small muted">The model only marks words. Plain code turns them into values and the engine does every calculation.</p>
     </details>
   );
 }
 
-function Details({ reply, paymentId }: { reply: ChatResponse; paymentId?: string }) {
+function Details({ reply, paymentId, onAnswer }: { reply: ChatResponse; paymentId?: string; onAnswer?: (text: string) => void }) {
   return (
     <>
       <GuardNote reply={reply} />
-      <HowIRead understanding={reply.understanding} />
+      {reply.task?.status === "needs_confirmation" && onAnswer ? (
+        <div className="chips" role="group" aria-label="Confirm what I understood">
+          <button type="button" className="btn small primary" onClick={() => onAnswer("yes")}>Yes, plan it</button>
+          <button type="button" className="btn small" onClick={() => onAnswer("no")}>No, change something</button>
+        </div>
+      ) : null}
+      <HowIRead understanding={reply.understanding} dialogue={reply.dialogue} />
       {reply.facts.length > 0 ? (
         <details>
           <summary>Facts used ({reply.facts.length})</summary>
@@ -134,7 +152,8 @@ export function ChatPanel() {
       setMode(reply);
       if (reply.task?.kind === "payment_plan" && reply.task.status === "ready") setPlanQuote(reply.task.quote.quote_id);
       const task = reply.task;
-      setPending(task && task.status === "needs_input" ? { kind: task.kind, ...(task as { collected?: object }).collected } : null);
+      const waiting = task && (task.status === "needs_input" || task.status === "needs_confirmation");
+      setPending(waiting ? { kind: task.kind, ...(task as { collected?: object }).collected } : null);
       setTurns((t) => [...t, { id: ++counter.current, role: "bot", text: reply.reply, reply }]);
     } catch (e) {
       setError(e as Error);
@@ -179,7 +198,9 @@ export function ChatPanel() {
               >
                 {turn.reply ? <TaskView task={turn.reply.task} /> : null}
                 {turn.text}
-                {turn.reply ? <Details reply={turn.reply} paymentId={scope.paymentId} /> : null}
+                {turn.reply ? (
+                  <Details reply={turn.reply} paymentId={scope.paymentId} onAnswer={index === turns.length - 1 ? (t) => void ask(t) : undefined} />
+                ) : null}
               </div>
             ))}
             {turns.length === 0 ? (

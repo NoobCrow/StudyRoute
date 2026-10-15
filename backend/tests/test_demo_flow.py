@@ -65,7 +65,7 @@ def test_the_demo_passes_with_the_trained_reader_switched_on(tmp_path: Path) -> 
     """The same fourteen steps, with the model reading the messages instead of the fixed rules."""
     if load_reader("auto") is None:
         pytest.skip("the trained reader is not available")
-    instance = World(tmp_path, bank_network=True, nlu_mode="auto")
+    instance = World(tmp_path, bank_network=True, nlu_mode="auto", dialogue_mode="auto")
     try:
 
         def wait(seconds: float) -> None:

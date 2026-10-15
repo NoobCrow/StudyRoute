@@ -66,6 +66,9 @@ class Settings(BaseSettings):
     # The small trained reader that understands what a parent typed (runs locally, no network).
     # "auto" uses it when onnxruntime and the model file are present; "off" uses the rules only.
     nlu_mode: Literal["auto", "off"] = "auto"
+    # The small policy, trained with reinforcement learning, that chooses whether to ask, confirm or
+    # plan. Needs the trained reader. "off" plans as soon as the amount is known.
+    dialogue_mode: Literal["auto", "off"] = "auto"
 
     @model_validator(mode="after")
     def _finalise(self) -> Settings:

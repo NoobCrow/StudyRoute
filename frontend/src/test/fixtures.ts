@@ -149,6 +149,7 @@ export function chatReply(overrides: Partial<ChatResponse> = {}): ChatResponse {
       values: { amount_minor: null, currency: null, due_date: null, months: null, charge_code: "OUR", purpose: "TUITION" },
       conflicts: [], unreadable: [],
     },
+    dialogue: null,
     ...overrides,
   };
 }

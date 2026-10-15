@@ -47,7 +47,8 @@ backend/app/audit/      hash chain, verify
 backend/app/providers/  mock provider adapters, signed webhooks
 backend/app/ai/         orchestrator, masking, number guard, tools
 backend/app/ai/nlu/     the trained reader (tokenizer, ONNX runtime, value checks); model in model/
-ml/                     training and evaluation of the reader (needs a GPU; the app does not)
+backend/app/ai/dialogue/ the RL dialogue policy: state, legal-action rules, NumPy policy; weights in model/
+ml/                     training and evaluation of the reader; ml/rl/ the RL simulator and trainer
 backend/tests/          pytest. One test per blueprint test ID (T01..T24)
 frontend/               screens: dashboard, compare, recipient, documents,
                         approval, tracker, audit, chat
@@ -66,6 +67,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Attack the running app (lab only; see scripts/security/README.md): scripts/security/attack_probe.py, brute_probe.py, browser_audit.mjs
 - Re-measure the trained reader against the rules: python ml/evaluate.py (backend venv)
 - Retrain the reader on a GPU: docs/AI_AGENT.md section 7
+- Retrain / re-evaluate the RL dialogue policy: docs/AI_RL.md section 8 (ml/rl/)
 - Build the submission archive: python scripts/make_submission.py
 
 ## How to work

@@ -169,6 +169,7 @@ export interface ChatResponse {
   guard: { status: string; flags: string[]; failure: string | null; retries: number };
   proposed_actions: ChatAction[]; task: TaskCard | null; mode: "template" | "llm"; model_version: string;
   disclaimer: string; debug: { masked_prompt: string; note: string }; understanding: Understanding;
+  dialogue: DialogueChoice | null;
 }
 export interface RunwayView {
   display: { amount: string; monthly_cost: string; covers: string; full_months: string; leftover: string };
@@ -228,11 +229,15 @@ export interface PendingTask {
   kind: "payment_plan" | "send_plan"; amount_minor?: number | null; currency?: string | null;
   due_date?: string | null; purpose?: "TUITION" | "LIVING" | null; months?: number | null;
   charge_code?: "OUR" | "SHA" | "BEN" | null;
+  date_skipped?: boolean; awaiting_confirmation?: boolean; extra_amount?: boolean; turns?: number;
+  asked?: boolean[]; conf_amount?: number | null; conf_date?: number | null; conf_months?: number | null;
 }
 export interface TaskGap {
-  kind: "payment_plan" | "send_plan"; status: "needs_input" | "error"; missing?: string[]; message?: string;
+  kind: "payment_plan" | "send_plan"; status: "needs_input" | "needs_confirmation" | "error";
+  missing?: string[]; message?: string; asking?: "amount" | "date" | "months"; text?: string;
   collected?: Omit<PendingTask, "kind">;
 }
+export interface DialogueChoice { policy: string; sha256: string; action: string; scores: Record<string, number> }
 export type TaskCard = PaymentPlanCard | SendPlanCardData | TaskGap;
 
 export type ControlResult = "PASS" | "PENDING" | "NOT_YET" | "BLOCKED" | "FAIL";

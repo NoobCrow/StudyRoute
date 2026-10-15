@@ -46,6 +46,7 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F14 | **Compliance report** per payment: parties, controls with evidence, approval proof, audit trail, a hash you can verify in your browser | Payment |
 | F15 | **Bank network**: invented banks pass simulated money to each other, inside Bangladesh and abroad (clearing house, or SWIFT through a correspondent), with a double-entry ledger, MFA-confirmed transfers and a books-balance check | Bank network |
 | F17 | **A trained agent**: a small language model, fine-tuned on a GPU, reads what a parent types (intent plus the exact words that carry an amount, a currency or a date). Plain code checks every value, the engine computes every number, and the model can never act. Measured against the old rule-based reader in [docs/AI_EVALUATION.md](docs/AI_EVALUATION.md) | Chat |
+| F18 | **Reinforcement learning**: a small policy, trained by Double DQN against simulated parents, decides whether the assistant asks for a missing amount, date or period, reads the values back for a "yes", or plans. Plain code limits which choices are legal; it never approves or moves money. Measured against the old behaviour and a hand-written rule in [docs/AI_RL_EVALUATION.md](docs/AI_RL_EVALUATION.md) | Chat |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
 ## Quick start (one command)
@@ -198,7 +199,9 @@ backend/app/audit/      hash chain and verify
 backend/app/providers/  mock providers, simulator, signed webhooks
 backend/app/ai/         orchestrator, masking, number guard, tools, template mode
 backend/app/ai/nlu/     the trained reader: tokenizer, ONNX runtime, checks, the shipped model files
+backend/app/ai/dialogue/  the dialogue policy (reinforcement learning): legal-action rules, NumPy policy, weights
 ml/                     training: data generator, train, export, evaluate (needs an NVIDIA GPU)
+ml/rl/                  the simulator, baselines, Double DQN trainer and evaluation of the dialogue policy
 backend/tests/          pytest, one or more tests per blueprint ID T01..T24
 frontend/               React + TypeScript (Vite): dashboard, compare, recipients,
                         documents, payment (approval, tracker), audit, rules, chat
@@ -284,6 +287,26 @@ read completely and exactly 100% against 57.6%, and attacks blocked 92.9% agains
 the dataset card, the limits and how to retrain: [docs/AI_AGENT.md](docs/AI_AGENT.md) and
 [docs/AI_EVALUATION.md](docs/AI_EVALUATION.md). Set `NLU_MODE=off` to run on the rules alone.
 
+### Reinforcement learning
+
+Reading the message is half of the job; the other half is what to do next. Every question costs the
+parent time, and a wrong quote on screen costs more. A 30 -> 64 -> 64 -> 5 policy, **trained with
+Double DQN and action masking**, picks one of five actions: ask for the amount, the date or the
+period, read the values back and wait for "yes", or plan. It learned from simulated parents whose
+sentences were run through the real reader, so the noise it learned from is the system's own.
+
+Plain code decides which actions are **legal** (no plan without an amount, no read-back before the
+date is settled), and the network only ranks the legal ones, so a corrupted or biased policy file
+cannot make the assistant plan without an amount. The weights are JSON, checked against a SHA-256
+manifest and run in NumPy; the audit event records the policy, its hash and the action.
+
+On 6,000 simulated test conversations: return +1.358 against +1.164 for the old behaviour, wrong
+plans 0.8% against 2.8%, 1.17 questions a conversation against 0.44. The best hand-written rule
+reaches +1.343 with 1.97 questions and no wrong plans, so this is a trade-off, not a free lunch. The
+parents and the rewards are my assumptions and the policy has not met a real person; the limits are
+listed in [docs/AI_RL.md](docs/AI_RL.md) and the tables in [docs/AI_RL_EVALUATION.md](docs/AI_RL_EVALUATION.md).
+Set `DIALOGUE_MODE=off` to plan as soon as the amount is known.
+
 ### Adding the AI
 
 1. Copy `.env.example` to `.env` (it is gitignored) and set three values:
@@ -308,6 +331,7 @@ cd frontend && npm run typecheck && npm test && npm run build
 python scripts/scan_repo.py      # secrets, real e-mails, passport-like numbers, TODOs
 python -m app.scripts.check_ai   # (from backend/) template mode, or your model once a key is set
 python ml/evaluate.py            # re-measure the trained reader against the rules (writes docs/AI_EVALUATION.md)
+python ml/rl/evaluate_rl.py      # re-measure the dialogue policy against the baselines (writes docs/AI_RL_EVALUATION.md)
 ```
 
 `backend/tests/test_blueprint_coverage.py` fails if any blueprint test ID (T01 to T24) has no test.
@@ -373,8 +397,11 @@ The trained reader, in the real chat (the model only marks the words; plain code
 
 <table>
 <tr>
-<td valign="top" align="center" width="50%"><a href="submission/screenshots/30-reader-reads.png"><img src="submission/screenshots/30-reader-reads.png" alt="The assistant read 'ten thousand pounds' and 'end of November' from a messy sentence" width="300"></a><br><b>Wording the fixed rules cannot read</b><br><sub>"ten thousand pounds ... last date end of November" becomes GBP 10,000 due 30 November. <b>How I read this</b> shows each marked word.</sub></td>
-<td valign="top" align="center" width="50%"><a href="submission/screenshots/31-reader-continues.png"><img src="submission/screenshots/31-reader-continues.png" alt="The assistant finished the task it had asked about" width="300"></a><br><b>A short conversation</b><br><sub>"I need to pay tuition" makes it ask for the amount; the next message "GBP 10,000 by 28 October" finishes the same task.</sub></td>
+<td valign="top" align="center" width="50%"><a href="submission/screenshots/30-reader-reads.png"><img src="submission/screenshots/30-reader-reads.png" alt="The assistant read 'ten thousand pounds' and 'end of November' from a messy sentence" width="300"></a><br><b>Wording the fixed rules cannot read</b><br><sub>"ten thousand pounds ... last date end of November" becomes GBP 10,000 due 30 November. <b>How I read this</b> shows each marked word, and the next step the reinforcement-learning policy chose: read it back and wait for a yes.</sub></td>
+<td valign="top" align="center" width="50%"><a href="submission/screenshots/31-reader-continues.png"><img src="submission/screenshots/31-reader-continues.png" alt="The assistant finished the task it had asked about" width="300"></a><br><b>A short conversation</b><br><sub>"I need to pay tuition" makes it ask for the amount; the next message "GBP 10,000 by 28 October" finishes the same task. Both values were read clearly, so the policy plans at once.</sub></td>
+</tr>
+<tr>
+<td valign="top" align="center" width="50%"><a href="submission/screenshots/32-policy-asks-date.png"><img src="submission/screenshots/32-policy-asks-date.png" alt="The assistant asks for the missing deadline" width="300"></a><br><b>Asking instead of guessing</b><br><sub>"Plan GBP 10,000 tuition" has no date. The policy asks for it (or "no deadline") instead of planning without one.</sub></td>
 </tr>
 </table>
 

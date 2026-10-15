@@ -114,6 +114,17 @@ class PendingTaskIn(Strict):
     purpose: Literal["TUITION", "LIVING"] | None = None
     months: StrictInt | None = Field(default=None, ge=1, le=60)
     charge_code: Literal["OUR", "SHA", "BEN"] | None = None
+    # Where the conversation about the task stands (see app.ai.dialogue). All optional.
+    date_skipped: bool = False
+    awaiting_confirmation: bool = False
+    extra_amount: bool = False
+    turns: StrictInt = Field(default=0, ge=0, le=20)
+    asked: list[bool] = Field(
+        default_factory=lambda: [False, False, False], min_length=3, max_length=3
+    )
+    conf_amount: float | None = Field(default=None, ge=0, le=1)
+    conf_date: float | None = Field(default=None, ge=0, le=1)
+    conf_months: float | None = Field(default=None, ge=0, le=1)
 
 
 class ChatContextIn(Strict):

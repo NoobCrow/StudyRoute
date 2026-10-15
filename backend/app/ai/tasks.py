@@ -12,7 +12,7 @@ The human creates the draft and approves with MFA.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from app.ai.intents import Intent
@@ -44,9 +44,28 @@ class TaskResult:
     missing: list[str] = field(default_factory=list)
 
 
-def _collected(parsed: ParsedRequest) -> dict[str, Any]:
+ASK_TEXT = {
+    "amount": "an amount and a currency",
+    "date": 'the date the university needs it by (or say "no deadline")',
+    "months": "how many months it has to cover",
+}
+
+
+@dataclass(frozen=True)
+class Progress:
+    """Where the conversation about a task stands. The page sends it back with the next message."""
+
+    turns: int = 0  # assistant turns so far
+    asked: tuple[bool, bool, bool] = (False, False, False)  # amount, date, months asked already
+    date_skipped: bool = False
+    awaiting_confirmation: bool = False
+    extra_amount: bool = False
+    confidence: dict[str, float] = field(default_factory=dict)  # amount, date, months
+
+
+def _collected(parsed: ParsedRequest, progress: Progress | None = None) -> dict[str, Any]:
     """What the assistant already understood, so the next message only has to add the rest."""
-    return {
+    values: dict[str, Any] = {
         "amount_minor": parsed.amount_minor if parsed.has_amount else None,
         "currency": parsed.currency if parsed.has_amount else None,
         "due_date": parsed.due_date.isoformat() if parsed.due_date else None,
@@ -54,15 +73,37 @@ def _collected(parsed: ParsedRequest) -> dict[str, Any]:
         "months": parsed.months,
         "charge_code": parsed.charge_code,
     }
+    if progress is not None:
+        values |= {
+            "turns": progress.turns,
+            "asked": list(progress.asked),
+            "date_skipped": progress.date_skipped,
+            "awaiting_confirmation": progress.awaiting_confirmation,
+            "extra_amount": progress.extra_amount,
+            "conf_amount": progress.confidence.get("amount"),
+            "conf_date": progress.confidence.get("date"),
+            "conf_months": progress.confidence.get("months"),
+        }
+    return values
 
 
 def _needs(
-    kind: str, what: str, example_key: str, example: str, collected: dict[str, Any] | None = None
+    kind: str,
+    what: str,
+    example_key: str,
+    example: str,
+    collected: dict[str, Any] | None = None,
+    asking: str | None = None,
 ) -> TaskResult:
+    card: dict[str, Any] = {
+        "kind": kind, "status": "needs_input", "missing": [what], "collected": collected or {},
+    }  # fmt: skip
+    if asking:
+        card["asking"] = asking
     return TaskResult(
         kind,
         "needs_input",
-        {"kind": kind, "status": "needs_input", "missing": [what], "collected": collected or {}},
+        card,
         [
             ("task.missing", "What I still need to plan this", what),
             (example_key, "Example request", example),
@@ -91,6 +132,55 @@ class TaskRunner:
         if intent is Intent.CADENCE:
             return self._send_plan(parsed)
         return self._payment_plan(ai, parsed)
+
+    # --- dialogue turns chosen by the policy (none of them touches money) ----------------------
+    @staticmethod
+    def _example(intent: Intent) -> tuple[str, str, str]:
+        if intent is Intent.CADENCE:
+            return "send_plan", "example.cadence", EXAMPLE_CADENCE
+        return "payment_plan", "example.plan", EXAMPLE_PLAN
+
+    def ask(
+        self, intent: Intent, slot: str, parsed: ParsedRequest, progress: Progress
+    ) -> TaskResult:
+        """Ask for one missing or unclear value."""
+        kind, key, example = self._example(intent)
+        return _needs(kind, ASK_TEXT[slot], key, example, _collected(parsed, progress), asking=slot)
+
+    def ask_change(self, intent: Intent, parsed: ParsedRequest, progress: Progress) -> TaskResult:
+        """The person said the read-back was wrong: ask what to change."""
+        kind, key, example = self._example(intent)
+        what = "what to change: the amount, the date or the period"
+        return _needs(kind, what, key, example, _collected(parsed, progress))
+
+    def confirm(self, intent: Intent, parsed: ParsedRequest, progress: Progress) -> TaskResult:
+        """Read the understood values back and wait for a yes or a correction."""
+        kind, key, example = self._example(intent)
+        if parsed.amount_minor is None or parsed.currency is None:
+            return self.ask(intent, "amount", parsed, progress)  # nothing to read back yet
+        money = Money(parsed.amount_minor, parsed.currency).format()
+        if intent is Intent.CADENCE:
+            months = parsed.months or DEFAULT_MONTHS
+            text = f"{money} a month for {months} months"
+        else:
+            due = parsed.due_date
+            when = f", due {due.day} {due:%B %Y}" if due else ", with no deadline"
+            text = f"{money} for {parsed.purpose.lower()}{when}"
+        text += f", charge code {parsed.charge_code}"
+        read_back = {
+            "amount": money,
+            "due_date": parsed.due_date.isoformat() if parsed.due_date else None,
+            "months": parsed.months,
+            "purpose": parsed.purpose,
+            "charge_code": parsed.charge_code,
+        }
+        collected = _collected(parsed, replace(progress, awaiting_confirmation=True))
+        card = {"kind": kind, "status": "needs_confirmation", "read_back": read_back,
+                "text": text, "collected": collected}  # fmt: skip
+        return TaskResult(
+            kind, "needs_confirmation", card,
+            [("task.confirm", "What I understood", text), (key, "Example request", example)],
+        )  # fmt: skip
 
     # --- plan a payment ------------------------------------------------------------------------
     def _payment_plan(self, ai: Actor, parsed: ParsedRequest) -> TaskResult:

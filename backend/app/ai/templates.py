@@ -280,6 +280,11 @@ class Responder:
                 f"I could not build that plan: {self.v('task.error')}. "
                 f"You can try again, for example: {self.v(example_key)}."
             )
+        if self.facts.has("task.confirm"):
+            return self._finish(
+                f"Before I plan {what_to_plan}, please check what I understood: "
+                f"{self.v('task.confirm')}. Say yes to go ahead, or tell me what to change."
+            )
         if self.facts.has("task.missing"):
             note = f" {self.v('task.conflict')}." if self.facts.has("task.conflict") else ""
             return self._finish(

@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1043 tests** in 72 files. Last run: `1043 passed in 404.26s (0:06:44)`.
-- Frontend: **128 tests** in 16 files (Vitest).
+- Backend: **1079 tests** in 77 files. Last run: `1079 passed in 166.25s (0:02:46)`.
+- Frontend: **130 tests** in 16 files (Vitest).
 
 ```bash
 cd backend  && pytest -q
@@ -89,6 +89,9 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
 | `tests/test_countries.py` | 17 | Every country is a destination: generated defaults sit under the six hand-written corridors. The hand-written rules (GB, US, DE, AU, CA, MY) must win. Everything else comes from the `countries` section of config/rules.yaml, which scripts/gen_countries.py writes. |
 | `tests/test_demo_flow.py` | 3 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
+| `tests/test_dialogue_flow.py` | 8 | The conversation the dialogue policy drives, end to end with the trained reader. A scripted policy stands in for the learned one so each turn is predictable; the legal-action rules still apply to it. One test at the end uses the shipped policy and checks only what must hold whatever it chooses. |
+| `tests/test_dialogue_policy.py` | 7 | Loading and running the dialogue policy: integrity, shape, and the mask that beats the network. |
+| `tests/test_dialogue_state.py` | 10 | The safety rules of the dialogue policy are plain code, and they hold in every state. The network may rank actions; it may never pick one these rules forbid. So the rules are checked exhaustively over a grid of states, not sampled. |
 | `tests/test_docker_config.py` | 18 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
 | `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
@@ -112,6 +115,8 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
+| `tests/test_rl_env.py` | 7 | The reinforcement-learning simulator: its reward accounting and its rules, on a hand-made bank. The bank here has no model in it (the values the assistant "perceives" are written out), so these tests check the simulator and the baseline policies, not the reader. |
+| `tests/test_rl_quality.py` | 4 | A quality floor for the shipped dialogue policy, and a guard against a stale report. The simulator is an assumption (see docs/AI_RL.md), so this only checks what the training claims: on goals the policy never trained on, it beats the old behaviour (plan as soon as the amount is known) by a clear margin, and the report and manifest describe the policy that is shipped. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
 | `tests/test_security.py` | 12 | Headers, CORS, body limits, XSS handling (T23) and log privacy (T24). |
 | `tests/test_security_households.py` | 6 | Two unrelated households: nothing crosses between them. The household is the security boundary of the product. A second family signs in and tries to read, change or borrow the first family's records, MFA proofs and idempotency keys. Everything must answer 403 or 404 and reveal nothing. |
@@ -129,7 +134,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `frontend/src/api/client.test.ts` | 6 |
 | `frontend/src/components/CountryOptions.test.tsx` | 4 |
 | `frontend/src/components/components.test.tsx` | 8 |
-| `frontend/src/components/tasks.test.tsx` | 9 |
+| `frontend/src/components/tasks.test.tsx` | 11 |
 | `frontend/src/lib/canonical.test.ts` | 4 |
 | `frontend/src/lib/corridors.test.ts` | 8 |
 | `frontend/src/lib/lib.test.ts` | 21 |

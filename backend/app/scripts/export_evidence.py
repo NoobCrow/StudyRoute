@@ -57,6 +57,7 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 | `docker_telemetry_capture.txt` | A packet capture of the real backend container: ONNX Runtime's Microsoft telemetry was found phoning home, switched off, and re-checked (0 packets to a public address, with the demo and 130 s idle). Recorded by hand; **this command does not regenerate it** |
 | `ai_evaluation.json` | The trained reader against the rule-based reader on held-out, natural and blind data: routing, values, attacks blocked, harmless blocked, latency. Written by `ml/evaluate.py` (readable version: `docs/AI_EVALUATION.md`); **this command does not regenerate it** |
 | `ai_backbone_ablation.json` | The six base models that were fine-tuned and compared on the dev split. Written by `ml/collect_ablation.py`; **this command does not regenerate it** |
+| `ai_rl_evaluation.json` | The reinforcement-learning dialogue policy against the old behaviour and the hand-written rules on simulated test conversations, with the reward-sensitivity runs and the SHA-256 of the policy it describes. Written by `ml/rl/evaluate_rl.py` (readable version: `docs/AI_RL_EVALUATION.md`); **this command does not regenerate it** |
 
 To reproduce: start the API with fresh demo data, then run the command above.
 """

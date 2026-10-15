@@ -358,12 +358,9 @@ class DemoFlow:
     def _agent_tasks(self, due: str) -> None:
         self._step(4, "Agent tasks: one sentence becomes a plan, and the human still decides")
         before = len(self._call("GET", "/payments", "parent").json()["items"])
-        plan = self._call(
-            "POST",
-            "/assistant/chat",
-            "parent",
-            json={"message": f"Plan GBP 10,000 tuition due {due}", "context": {}},
-        ).json()
+        plan, asked, _ = self._converse(f"Plan GBP 10,000 tuition due {due}", due)
+        if asked:
+            self._say(f"      (it asked {asked} question(s) first; its dialogue policy decides)")
         task = plan["task"] or {}
         self._check(
             task.get("kind") == "payment_plan" and task.get("status") == "ready",
@@ -379,15 +376,9 @@ class DemoFlow:
         )
         after = len(self._call("GET", "/payments", "parent").json()["items"])
         self._check(after == before, "no payment was created by the assistant")
-        cadence = self._call(
-            "POST",
-            "/assistant/chat",
-            "parent",
-            json={
-                "message": "How often should I send GBP 1,000 a month for 12 months?",
-                "context": {},
-            },
-        ).json()
+        cadence, _, _ = self._converse(
+            "How often should I send GBP 1,000 a month for 12 months?", due
+        )
         send_plan = cadence["task"] or {}
         self._check(
             send_plan.get("kind") == "send_plan" and send_plan["plan"]["cheapest_key"] == "upfront",
@@ -397,6 +388,37 @@ class DemoFlow:
         self._conversation(due)
         self._reads_new_wording()
 
+    def _chat(self, message: str, pending: dict[str, Any] | None = None) -> dict[str, Any]:
+        context = {"pending": pending} if pending else {}
+        reply = self._call(
+            "POST", "/assistant/chat", "parent", json={"message": message, "context": context}
+        )
+        return dict(reply.json())
+
+    def _converse(
+        self, message: str, due: str | None = None
+    ) -> tuple[dict[str, Any], int, dict[str, Any]]:
+        """Send a request and answer the assistant's questions like a parent would, until it
+        plans. Returns the final reply, how many questions it asked, and the first reply."""
+        first = reply = self._chat(message)
+        questions = 0
+        while questions < 4 and (reply["task"] or {}).get("status") in (
+            "needs_confirmation",
+            "needs_input",
+        ):
+            task = reply["task"]
+            pending = {"kind": task["kind"], **task.get("collected", {})}
+            if task["status"] == "needs_confirmation":
+                answer = "yes"
+            elif task.get("asking") == "date":
+                answer = f"by {due}" if due else "no deadline"
+            elif task.get("asking") == "months":
+                answer = "12 months"
+            else:
+                answer = "GBP 10,000"
+            reply, questions = self._chat(answer, pending), questions + 1
+        return reply, questions, first
+
     def _conversation(self, due: str) -> None:
         """The assistant asks for what is missing, and the next message finishes the same task."""
         first = self._call(
@@ -404,7 +426,7 @@ class DemoFlow:
             json={"message": "I need to pay tuition", "context": {}},
         ).json()  # fmt: skip
         gap = first["task"] or {}
-        self._check(gap.get("status") == "needs_input", "with no amount it asks for one")
+        self._check(gap.get("status") == "needs_input", "with no amount it asks a question")
         pending = {"kind": gap.get("kind"), **gap.get("collected", {})}
         second = self._call(
             "POST", "/assistant/chat", "parent",
@@ -417,15 +439,11 @@ class DemoFlow:
 
     def _reads_new_wording(self) -> None:
         """With the trained reader on, wording the fixed rules cannot read still becomes a plan."""
-        reply = self._call(
-            "POST", "/assistant/chat", "parent",
-            json={
-                "message": "kindly help me send ten thousand pounds for my son's tuition, "
-                "last date end of November",
-                "context": {},
-            },
-        ).json()  # fmt: skip
-        reading = reply["understanding"]
+        reply, _, first = self._converse(
+            "kindly help me send ten thousand pounds for my son's tuition, "
+            "last date end of November"
+        )
+        reading = first["understanding"]
         if reading["source"] != "trained":
             self._say("      (the trained reader is not in use here, so the fixed rules answer)")
             return

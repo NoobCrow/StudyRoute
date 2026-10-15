@@ -229,6 +229,25 @@ design, the dataset card, the numbers (including the weak ones) and the limits a
 [AI_AGENT.md](AI_AGENT.md) and [AI_EVALUATION.md](AI_EVALUATION.md). With no `onnxruntime`, no model
 file, a failed integrity check or `NLU_MODE=off`, the assistant runs on the rules alone.
 
+### 2.5.2 The dialogue policy (reinforcement learning)
+
+When a message starts a payment plan, a second small model decides what the assistant does next:
+ask for the amount, the date or the period, read the understood values back and ask for a yes, or
+plan. It is a 30 -> 64 -> 64 -> 5 network trained with Double DQN against a simulated parent whose
+sentences were run through the real reader, so the noise it learns from is the system's own. The
+state is how each value was read (by both readers, by the model only, earlier), how sure the model
+was, whether the message mentioned a second amount, and the turn count. The reward is +1 for a
+correct plan, +0.5 for a correct deadline or period, -2 for a wrong amount, -1 for a wrong deadline,
+-0.05 per question and -0.5 if the parent gives up.
+
+The network never decides what is allowed: `backend/app/ai/dialogue/state.py` computes the legal
+actions in plain code (no plan with the amount missing or read two ways, no second confirmation, a
+send plan needs its period) and the network only ranks those. None of the five actions moves money;
+planning builds a quote card and a human still approves. The weights are JSON checked against a
+manifest hash, and with `DIALOGUE_MODE=off` or any failure the assistant plans as soon as the amount
+is known. Design, simulator assumptions, results and limits: [AI_RL.md](AI_RL.md) and
+[AI_RL_EVALUATION.md](AI_RL_EVALUATION.md).
+
 ### 2.6 Audit hash chain
 
 ![Audit hash chain](diagrams/audit-chain.png)
@@ -408,6 +427,10 @@ The full threat and control matrix, with the test that proves each row, is in
 
 - `backend/tests/` has one or more tests for each blueprint scenario T01 to T24 and fails if one
   is missing; see [TEST_CASES.md](TEST_CASES.md).
+- The dialogue policy has its own tests (`test_dialogue_*.py`, `test_rl_*.py`): the safety rules are
+  checked exhaustively over a grid of states, a policy that always wants to plan is shown to be
+  overruled by the rules, and the conversation (read-back, yes, no, correction, no deadline) is run
+  end to end.
 - The trained reader has its own tests (`test_nlu_*.py`, `test_ai_reader_agent.py`,
   `test_ml_dataset.py`) and a quality floor on held-out data (`test_nlu_quality.py`); the measured
   comparison with the rules is generated into [AI_EVALUATION.md](AI_EVALUATION.md).

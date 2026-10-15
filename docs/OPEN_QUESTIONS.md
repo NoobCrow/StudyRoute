@@ -101,6 +101,16 @@ change is written to the audit log with who, what and why.
   needs a CPU with SSE4.2; without it the reader is skipped and the rules answer (tested by accident
   in a VM). The submission archive is about 30 MB because the model is in it; the source deliverable
   is the GitHub link.
+- **The reinforcement-learning dialogue policy.** A small policy decides when to ask, read back or
+  plan (see `docs/AI_RL.md`). It was trained against **simulated parents** whose behaviour and
+  rewards are my assumptions (how often a parent mistypes or mentions another amount, that a wrong
+  amount costs twice what a correct plan earns, that a question costs a twentieth of it). What a
+  real parent would find annoying, and how much a wrong quote card really costs, are not known; the
+  policy has never met a real person. On the simulator it keeps about 1% wrong plans while asking
+  40% fewer questions than the best hand-written rule, which asks every time and has none. Whether
+  that trade is right is a product decision, not a result. Under a -10 wrong-amount reward it did
+  not quite match "always confirm" (a limit of DQN on rare costly events). Nobody outside the
+  project has reviewed the simulator or the policy (R39 and R40).
 - **Docker.** `docker compose up --build` was run for real on 15 October 2026 from the unzipped
   submission archive, with Docker Engine 29.1.3 and Compose 2.40.3 inside an Ubuntu 24.04 `amd64`
   virtual machine (Docker Desktop could not be installed on the development machine). Both images

@@ -139,6 +139,41 @@ describe("assistant chat", () => {
     expect(screen.getByText(/I could not read "soon" as a date/)).toBeInTheDocument();
   });
 
+  it("reads the values back and sends yes with what it held when the person confirms", async () => {
+    const readBack = chatReply({
+      task: { kind: "payment_plan", status: "needs_confirmation", text: "GBP 10,000.00 for tuition",
+        collected: { amount_minor: 1000000, currency: "GBP", due_date: "2026-10-28", purpose: "TUITION", months: null,
+          charge_code: "OUR", turns: 1, asked: [false, false, false], awaiting_confirmation: true, extra_amount: true } },
+      dialogue: { policy: "studyroute-dm-v1", sha256: "abc123abc123", action: "CONFIRM", scores: { CONFIRM: 1.1, RUN: 1.0 } },
+    });
+    const fetchMock = mockApi({ "/assistant/chat": readBack });
+    render(<MemoryRouter><ChatPanel /></MemoryRouter>);
+    await openChat();
+    await userEvent.type(screen.getByLabelText("Your question"), "pay GBP 10,000 by 28 October");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    const yes = await screen.findByRole("button", { name: "Yes, plan it" });
+    expect(screen.getByRole("button", { name: "No, change something" })).toBeInTheDocument();
+    await userEvent.click(yes);
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as { message: string; context: { pending: { awaiting_confirmation: boolean; amount_minor: number } } };
+    expect(second.message).toBe("yes");
+    expect(second.context.pending).toMatchObject({ awaiting_confirmation: true, amount_minor: 1000000 });
+  });
+
+  it("says which step the dialogue policy chose and that it was learned", async () => {
+    mockApi({
+      "/assistant/chat": chatReply({
+        dialogue: { policy: "studyroute-dm-v1", sha256: "abc123abc123", action: "ASK_DATE", scores: { ASK_DATE: 1.2, RUN: 1.1 } },
+      }),
+    });
+    render(<MemoryRouter><ChatPanel /></MemoryRouter>);
+    await openChat();
+    await userEvent.click(screen.getByRole("button", { name: "I need to pay GBP 10,000 tuition by 28 October" }));
+    await userEvent.click(await screen.findByText(/How I read this/));
+    expect(screen.getByText(/chose to ask for the date/)).toBeInTheDocument();
+    expect(screen.getByText(/reinforcement learning/)).toBeInTheDocument();
+  });
+
   it("shows the send plan table for a how-often question", async () => {
     mockApi({ "/assistant/chat": chatReply({ task: { kind: "send_plan", status: "ready", plan: SEND_PLAN } }) });
     render(<MemoryRouter><ChatPanel /></MemoryRouter>);

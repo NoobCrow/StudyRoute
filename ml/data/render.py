@@ -98,10 +98,18 @@ def _number_text(rng: random.Random, value: int, allow_words: bool = True) -> tu
     return f"{value:,}", False
 
 
-def money(rng: random.Random, purpose: str, *, with_currency: float = 0.93) -> str:
-    """An amount with its currency, e.g. "[[£|CURRENCY]][[10,000|AMOUNT]]"."""
-    code = pick_currency(rng)
-    value = amount_value(rng, purpose)
+def money(
+    rng: random.Random,
+    purpose: str,
+    *,
+    with_currency: float = 0.93,
+    value: int | None = None,
+    code: str | None = None,
+) -> str:
+    """An amount with its currency, e.g. "[[£|CURRENCY]][[10,000|AMOUNT]]". Value and code can be
+    fixed (the reinforcement-learning simulator needs a parent who keeps saying the same amount)."""
+    code = code or pick_currency(rng)
+    value = value if value is not None else amount_value(rng, purpose)
     number, _ = _number_text(rng, value)
     amount = mark(number, "AMOUNT")
     if rng.random() > with_currency:
@@ -219,3 +227,24 @@ JUNK = [
     "invoice INV-2026-4471", "ref 883201", "student ID STU-5521", "semester 2", "year 3",
     "page 3", "order 12", "my 2 kids", "case 7741", "form 17B", "flat 4B", "batch 2026",
 ]  # fmt: skip
+
+
+def date_for(rng: random.Random, d: date) -> str:
+    """The given date in one of the absolute written styles (no relative phrases)."""
+    month, mon = MONTHS[d.month - 1], MONTHS[d.month - 1][:3]
+    style = rng.choice(["dm"] * 4 + ["d_mon"] * 3 + ["m_d"] * 2 + ["d_ord_m"] * 2 + ["d_of_m"]
+                       + ["dmy"] + ["slash"] * 2 + ["iso"])  # fmt: skip
+    text = {
+        "dm": f"{d.day} {month}", "d_mon": f"{d.day} {mon}", "m_d": f"{mon} {d.day}",
+        "d_ord_m": f"{_ordinal(d.day)} {month}", "d_of_m": f"{_ordinal(d.day)} of {month}",
+        "dmy": f"{d.day} {month} {d.year}", "slash": f"{d.day:02d}/{d.month:02d}/{d.year}",
+        "iso": d.isoformat(),
+    }[style]
+    return mark(text, "DATE")
+
+
+def months_for(rng: random.Random, n: int) -> str:
+    """A period of n months as people write it."""
+    if n == 12 and rng.random() < 0.4:
+        return mark(rng.choice(["a year", "one year", "the academic year"]), "DURATION")
+    return mark(rng.choice([f"{n} months", f"{n} months", f"{number_words(n)} months"]), "DURATION")

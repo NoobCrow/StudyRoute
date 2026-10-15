@@ -15,6 +15,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ai.context import ChatContext, gather_context
+from app.ai.dialogue.bridge import build_state
+from app.ai.dialogue.policy import Choice, DialoguePolicy
+from app.ai.dialogue.state import Action
 from app.ai.guards import GuardFailure, parse_llm_json, validate_llm_output
 from app.ai.intents import Intent
 from app.ai.llm import SYSTEM_PROMPT, LLMClient, LLMError
@@ -24,7 +27,7 @@ from app.ai.nlu.understanding import Pending, Understanding, understand
 from app.ai.number_guard import check_numbers
 from app.ai.policy import PolicyResult, check_text
 from app.ai.prompt import build_prompt
-from app.ai.tasks import TaskResult, TaskRunner
+from app.ai.tasks import Progress, TaskResult, TaskRunner
 from app.ai.templates import INDICATIVE, Responder, refusal
 from app.api.context import AppContext
 from app.core import errors
@@ -61,23 +64,35 @@ class Outcome:
     flags: list[str] = field(default_factory=list)
 
 
-def _reader_note(understanding: Understanding) -> str:
-    """Which reader understood the message, and how sure it was (recorded in the audit log)."""
+def _reader_note(understanding: Understanding, choice: Choice | None = None) -> str:
+    """Which reader understood the message, how sure it was, and what the dialogue policy chose
+    to do next (recorded in the audit log)."""
     if understanding.source != "trained":
         return "reader=rules"
-    return (
+    note = (
         f"reader={understanding.model_id}@{(understanding.model_sha256 or '')[:12]} "
         f"intent={understanding.model_intent}:{understanding.confidence or 0:.2f}"
     )
+    if choice is not None:
+        note += f" policy={choice.policy_id}@{choice.sha256[:12]} action={choice.action.name}"
+    return note
+
+
+_ASKED = {Action.ASK_AMOUNT: "amount", Action.ASK_DATE: "date", Action.ASK_MONTHS: "months"}
 
 
 class Orchestrator:
     def __init__(
-        self, ctx: AppContext, llm: LLMClient | None, reader: Reader | None = None
+        self,
+        ctx: AppContext,
+        llm: LLMClient | None,
+        reader: Reader | None = None,
+        policy: DialoguePolicy | None = None,
     ) -> None:
         self._ctx = ctx
         self._llm = llm
         self._reader = reader
+        self._policy = policy
         self._tasks = TaskRunner(ctx)
 
     @property
@@ -117,20 +132,20 @@ class Orchestrator:
             rules = load_rules(session)
             ai = self._ai_actor(session, actor)
         today = ctx.clock.now().astimezone(ZoneInfo("Asia/Dhaka")).date()
+        held = self._pending(pending)
         understanding = understand(
             text, today, rules.supported_currencies(),
             has_context=bool(quote_id or payment_id),
             reader=self._reader,
-            pending=Pending(**pending.model_dump()) if pending is not None else None,
+            pending=held,
         )  # fmt: skip
         if understanding.attack and not policy.blocked:  # the model can only add a block
             policy = PolicyResult((*policy.flags, "MODEL_FLAGGED_ATTACK"))
-        parsed, intent = understanding.parsed, understanding.intent
+        intent = understanding.intent
         task: TaskResult | None = None
+        choice: Choice | None = None
         if intent in (Intent.PLAN, Intent.CADENCE) and not policy.blocked:
-            task = self._tasks.run(
-                ai, intent, parsed
-            )  # a task: quote and plan, up to the human gate
+            task, choice = self._task_turn(ai, understanding, held)  # quote and plan, or ask
             if task.quote_id:
                 quote_id, payment_id = task.quote_id, None
             if understanding.hint and task.status == "needs_input":
@@ -161,7 +176,7 @@ class Orchestrator:
                 f" A document you uploaded ({kinds}) held instruction-like text, so I ignored it."
             )
             outcome.flags.append("DOCUMENT_INSTRUCTIONS_IGNORED")
-        self._audit(ai, chat, policy, outcome, prompt, reply, understanding)
+        self._audit(ai, chat, policy, outcome, prompt, reply, understanding, choice)
         used = [chat.facts.by_id(i) for i in outcome.fact_ids]
         return {
             "reply": reply,
@@ -176,6 +191,7 @@ class Orchestrator:
             "proposed_actions": outcome.proposals,
             "task": task.card if task else None,
             "understanding": understanding.to_api(),
+            "dialogue": self._dialogue_view(choice),
             "mode": outcome.mode,
             "model_version": outcome.model,
             "disclaimer": DISCLAIMER,
@@ -184,6 +200,56 @@ class Orchestrator:
                 "note": "This is exactly what a model would see: masked, facts only.",
             },
         }
+
+    @staticmethod
+    def _pending(pending: Any) -> Pending | None:
+        """The task the person is answering, from what the page sent back (already validated)."""
+        if pending is None:
+            return None
+        data = pending.model_dump()
+        data["asked"] = tuple(data["asked"])
+        return Pending(**data)
+
+    @staticmethod
+    def _dialogue_view(choice: Choice | None) -> dict[str, Any] | None:
+        if choice is None:
+            return None
+        return {
+            "policy": choice.policy_id,
+            "sha256": choice.sha256[:12],
+            "action": choice.action.name,
+            "scores": choice.q_values,
+        }
+
+    def _task_turn(
+        self, ai: Actor, understanding: Understanding, held: Pending | None
+    ) -> tuple[TaskResult, Choice | None]:
+        """One assistant turn on a payment request: ask, read back, or plan.
+
+        With the dialogue policy the choice among those is learned (see docs/AI_RL.md); without it
+        the assistant plans as soon as the amount is known. Either way a plan is only a quote card:
+        the person creates the draft and a human approves it.
+        """
+        intent, parsed = understanding.intent, understanding.parsed
+        if self._policy is None or not understanding.evidence:
+            return self._tasks.run(ai, intent, parsed), None
+        state = build_state(understanding, held)
+        known = {n: s.confidence for n, s in understanding.evidence.items() if s.present}
+        progress = Progress(state.turns + 1, state.asked, state.date_skipped, False,
+                            state.extra_amount, known)  # fmt: skip
+        if understanding.rejected:
+            return self._tasks.ask_change(intent, parsed, progress), None
+        choice = self._policy.choose(state)
+        if choice.action == Action.RUN:
+            return self._tasks.run(ai, intent, parsed), choice
+        if choice.action == Action.CONFIRM:
+            return self._tasks.confirm(intent, parsed, progress), choice
+        slot = _ASKED[choice.action]
+        names = ("amount", "date", "months")
+        asked = tuple(a or n == slot for a, n in zip(state.asked, names, strict=True))
+        progress = Progress(progress.turns, asked, state.date_skipped, False,  # type: ignore[arg-type]
+                            state.extra_amount, known)  # fmt: skip
+        return self._tasks.ask(intent, slot, parsed, progress), choice
 
     def _decide(
         self, ai: Actor, intent: Any, policy: PolicyResult, chat: ChatContext,
@@ -264,6 +330,7 @@ class Orchestrator:
         prompt: str,
         reply: str,
         understanding: Understanding,
+        choice: Choice | None = None,
     ) -> None:  # fmt: skip
         ctx = self._ctx
         problems = [outcome.failure] if outcome.failure else []
@@ -285,7 +352,7 @@ class Orchestrator:
                 reason_code=",".join(dict.fromkeys(reasons))[:64] or None,
                 detail=(
                     f"for {ai.owner_id}; status={outcome.status}; mode={outcome.mode}; "
-                    f"{_reader_note(understanding)}"
+                    f"{_reader_note(understanding, choice)}"
                 ),
                 input_hash=sha256_ref(prompt), output_hash=sha256_ref(reply),
                 model_version=outcome.model,
