@@ -191,3 +191,28 @@ PASS  signing out clears the refresh token from sessionStorage
 PASS  none of 5 downloaded assets reference a source map
 PASS  none of the downloaded JavaScript or CSS contains a key, token or password
 40/40 checks passed
+
+---- Second run, 15 October 2026: the reinforcement-learned dialogue policy (commit 5449bd7) ----
+Recorded by hand. Source: dist/studyroute-submission.zip built from that commit, copied into the
+same Ubuntu 24.04 VM, unzipped in an empty directory.
+
+$ docker compose -f docker-compose.yml -f docker-compose.hardened.yml up -d --build --wait
+backend and web: Healthy (exit 0)
+
+$ docker compose exec backend python -c "<load the policy and the reader>"
+policy studyroute-dm-v1 0d4b9ca9b6cd reader True
+
+$ docker inspect studyroute-backend-1
+readonly=true capdrop=[ALL] user=studyroute
+
+$ python scripts/docker_smoke.py   (host to forwarded port 8080)
+All smoke checks passed.
+
+$ docker compose exec backend python -m app.scripts.demo_flow   (hardened stack)
+14 steps, 56 OK lines, "All demo checks passed." Step 4: a payment plan from one sentence, the
+send plan, "with no amount it asks a question", "the next message finishes the same task", and
+"the trained reader read 'ten thousand pounds' and 'end of November'". Step 14: chain verifies
+PASS (68 events).
+
+Not repeated for this build: the packet capture (docker_telemetry_capture.txt) and the browser
+audit. The policy is NumPy only and opens no connection.

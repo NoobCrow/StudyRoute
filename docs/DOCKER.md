@@ -148,6 +148,15 @@ model (no SSE4.2) NumPy 2 refused to start; the assistant logged "trained reader
 whole demo still passed on its rules, which is the fallback working as designed. Real x86-64 CPUs
 have had SSE4.2 since about 2009.
 
+**Run again with the dialogue policy (same day).** The stack was rebuilt once more from a fresh
+archive of the commit that adds the reinforcement-learned policy, with the hardened overlay.
+Both containers became healthy; inside the backend container the policy loaded
+(`studyroute-dm-v1`, SHA-256 `0d4b9ca9b6cd...`) next to the reader; Docker confirmed
+`ReadonlyRootfs=true` and all capabilities dropped; `scripts/docker_smoke.py` passed; and the
+14-step demo passed (56 OK lines), with the assistant asking its question, remembering it and
+finishing the task. The policy is NumPy only and opens no connection, but **the packet capture
+and the browser audit were not repeated for this build**.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs
