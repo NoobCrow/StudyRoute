@@ -23,6 +23,7 @@ no flaw exists, and an independent penetration test has not been done.
 | **Data leakage (responses)** | Every response (about 260) scanned for password hashes, MFA secrets, the encrypted-account field, private keys, full IBANs, token hashes, database paths | None |
 | **Data leakage (logs, files, audit)** | The server log, the database file at byte level and every audit event scanned for e-mails, passwords, tokens, MFA codes, IBANs, names and attack payloads | None. A user's IBAN is stored encrypted; only the synthetic bank-network account numbers are plain text |
 | **Git** | Current tree and all 34 commits searched for keys, tokens and sensitive files; commit identities | None; only GitHub no-reply addresses |
+| **Server-side egress** | A packet capture of the real backend container while the 14-step demo ran with the trained reader on, then 130 s idle | No packet to a public address (after fixing ONNX Runtime's telemetry, see "Found and fixed") |
 | **Tracking and third parties** | Real Chrome through every screen as parent and reviewer, recording all 120 requests, cookies, storage, referrers and global variables | Every request went to the app's own origin. No cookie, no `Referer` header, no analytics, no CDN, no remote font |
 | **Stored and reflected XSS** | Markup planted in recipient names, document names and rule reasons; hostile URLs | Shown as literal text on every screen; nothing ran |
 | **CSP and framing** | Injected inline script and style, a script from another origin, a request to another origin, an iframe of the app | All blocked by the production CSP |
@@ -38,6 +39,13 @@ no flaw exists, and an independent penetration test has not been done.
    `test_real_and_made_up_addresses_lock_the_same_way...` and two more in `test_api_auth.py`.
 2. **The server announced itself** (`Server: uvicorn`). The container now starts uvicorn with
    `--no-server-header` (a test checks the entrypoint).
+4. **A dependency phoned home.** After the trained reader was added, a packet capture of the real
+   backend container showed ONNX Runtime 1.31 looking up `mobile.events.data.microsoft.com` and
+   opening an HTTPS connection about ten seconds after first use: its telemetry is on by default on
+   Linux. It is now switched off in the code (before the library is imported, and through its API)
+   and in the image (`ENV ORT_DISABLE_TELEMETRY=1`), both checked by tests, and the capture was
+   repeated: with the demo and 130 seconds of idle, no packet left for a public address and no DNS
+   lookup mentioned Microsoft. Evidence: `submission/evidence/docker_telemetry_capture.txt`.
 3. **A real accessibility bug in the MFA dialog** (`role="dialog"` on a `<form>`), found when the
    dialog was first checked while open. Fixed.
 

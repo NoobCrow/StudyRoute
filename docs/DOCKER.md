@@ -137,6 +137,17 @@ The stack was built and run with **real Docker** from a clean copy: the submissi
   smoke script and the full 14-step demo passed on it. The only message is nginx's harmless
   "can not modify default.conf (read-only file system?)" from its IPv6 start-up script.
 
+**Run again with the trained reader (same day).** The stack was rebuilt from the new archive
+(backend image 616 MB, because the model and ONNX Runtime are in it). Under the same checks the
+reader loaded inside the container (also under the read-only overlay), the 14-step demo passed
+including "the trained reader read 'ten thousand pounds' and 'end of November'", and the smoke
+script passed. Two findings came out of it. First, a packet capture showed ONNX Runtime's own
+telemetry contacting Microsoft; that is now disabled and re-checked
+(`submission/evidence/docker_telemetry_capture.txt`). Second, in a VM whose CPU was the bare `qemu64`
+model (no SSE4.2) NumPy 2 refused to start; the assistant logged "trained reader not used" and the
+whole demo still passed on its rules, which is the fallback working as designed. Real x86-64 CPUs
+have had SSE4.2 since about 2009.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs

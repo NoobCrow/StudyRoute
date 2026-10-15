@@ -54,6 +54,7 @@ accounts, simulated providers, simulated settlement. No real money moved and no 
 | `smart_escrow.json` | The smart escrows (schedule, state, the contract call log with its hashes), the simulated chain's status, the audit anchors written to it and the check that the database still matches the chain |
 | `tamper_demo.json` | Verify after one audit row was edited behind the application's back (FAIL at that sequence), and after it was restored (PASS). Only present when run with `--tamper` |
 | `docker_run.txt` | A real `docker compose` run (Docker 29.1.3, Compose 2.40.3, Ubuntu 24.04 VM): container health, the read-only and capability-dropped settings, the smoke script, the 14-step demo and the browser audit. Recorded by hand from that run; **this command does not regenerate it** |
+| `docker_telemetry_capture.txt` | A packet capture of the real backend container: ONNX Runtime's Microsoft telemetry was found phoning home, switched off, and re-checked (0 packets to a public address, with the demo and 130 s idle). Recorded by hand; **this command does not regenerate it** |
 | `ai_evaluation.json` | The trained reader against the rule-based reader on held-out, natural and blind data: routing, values, attacks blocked, harmless blocked, latency. Written by `ml/evaluate.py` (readable version: `docs/AI_EVALUATION.md`); **this command does not regenerate it** |
 | `ai_backbone_ablation.json` | The six base models that were fine-tuned and compared on the dev split. Written by `ml/collect_ablation.py`; **this command does not regenerate it** |
 

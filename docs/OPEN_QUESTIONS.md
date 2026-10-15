@@ -97,7 +97,10 @@ change is written to the audit log with who, what and why.
   (113 messages), so its numbers are good to about plus or minus 7 points. Attack detection is an
   extra layer: on unseen wording it blocked 85% of attacks, and a few novel ones get through to a
   harmless answer. It was not red-teamed by outsiders. The model file is not signed (R33).
-  A real language model through `LLM_PROVIDER` has still never been run in this project.
+  A real language model through `LLM_PROVIDER` has still never been run in this project. NumPy 2
+  needs a CPU with SSE4.2; without it the reader is skipped and the rules answer (tested by accident
+  in a VM). The submission archive is about 30 MB because the model is in it; the source deliverable
+  is the GitHub link.
 - **Docker.** `docker compose up --build` was run for real on 15 October 2026 from the unzipped
   submission archive, with Docker Engine 29.1.3 and Compose 2.40.3 inside an Ubuntu 24.04 `amd64`
   virtual machine (Docker Desktop could not be installed on the development machine). Both images

@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1041 tests** in 72 files. Last run: `1041 passed in 148.45s (0:02:28)`.
+- Backend: **1043 tests** in 72 files. Last run: `1043 passed in 404.26s (0:06:44)`.
 - Frontend: **128 tests** in 16 files (Vitest).
 
 ```bash
@@ -89,7 +89,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
 | `tests/test_countries.py` | 17 | Every country is a destination: generated defaults sit under the six hand-written corridors. The hand-written rules (GB, US, DE, AU, CA, MY) must win. Everything else comes from the `countries` section of config/rules.yaml, which scripts/gen_countries.py writes. |
 | `tests/test_demo_flow.py` | 3 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
-| `tests/test_docker_config.py` | 17 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
+| `tests/test_docker_config.py` | 18 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
 | `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
 | `tests/test_engine_escrow_schedule.py` | 10 | Escrow release schedules: integer money, no rounding drift, month-end dates. |
@@ -107,7 +107,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_nlu_decoder.py` | 7 | Turning the model's per-word tags into spans of the original message. |
 | `tests/test_nlu_normalize.py` | 14 | The deterministic half of the trained reader: spans of the person's words become typed values. The model only marks words; this code decides what they mean. A span it cannot read gives None (the assistant then asks), never a guess. Today in these tests is Thursday 15 October 2026. |
 | `tests/test_nlu_quality.py` | 5 | A quality floor for the shipped reader, so a worse model cannot be swapped in quietly. The floors sit a few points below what ml/evaluate.py measured, on data the model never trained on (natural questions, held-out templates, out-of-scope questions). The full report is docs/AI_EVALUATION.md; this test only guards against a regression. |
-| `tests/test_nlu_tokenizer.py` | 9 | The tokenizer used both to train the reader and to run it, so the two cannot disagree. |
+| `tests/test_nlu_tokenizer.py` | 10 | The tokenizer used both to train the reader and to run it, so the two cannot disagree. |
 | `tests/test_nlu_understanding.py` | 15 | How the trained reader and the rules are combined. A scripted reader stands in for the model, so these tests check the combining rules themselves, not the model's quality. |
 | `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |

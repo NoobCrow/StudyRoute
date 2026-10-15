@@ -122,6 +122,7 @@ production**. "Accepted" means we chose not to fix it in this submission and say
 | R35 | **Over-trust**: a reader may assume the model decides money matters | Low | The chat shows "How I read this" (what the model marked and what plain code made of it), the audit log records the reader's id, hash and confidence on every AI event, and the engine still computes every number | Mitigated |
 | R36 | **Data and model licences**: the training data includes Banking77 (CC BY 4.0) and the base model is `bge-small-en-v1.5` (MIT) | Low | Both are credited in `docs/THIRD_PARTY.md`; only short questions are used; the fine-tuned weights are the team's own derivative | Mitigated |
 | R37 | **The reader sees the message unmasked** (it runs inside the API) | Low | It runs locally on CPU with no network. Personal data is still masked before any text reaches an external language model (unchanged), and the audit log stores only a hash of the message | Mitigated |
+| R38 | **A dependency can phone home.** ONNX Runtime 1.31 sends Microsoft telemetry on Linux by default (found by a packet capture of the real container, 15 Oct 2026) | Medium | Switched off in code and in the image, with tests; the capture was repeated and showed no packet to a public address. The backend does not need the internet (only an optional language-model provider does), so an operator can also block its outbound traffic | Mitigated for this dependency. Other libraries were not each audited for egress beyond that capture |
 
 ## 3. What we tested and how to repeat it
 
