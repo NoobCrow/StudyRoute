@@ -104,7 +104,8 @@ def _smart_escrow(flow: DemoFlow) -> dict[str, Any]:
 
 
 def _write(path: Path, data: Any) -> None:
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    text = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def collect_evidence(
@@ -127,7 +128,8 @@ def collect_evidence(
     flow = DemoFlow(client, password=password, mfa_code=mfa_code, wait=wait, say=record)
     failures = flow.run()
     out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "sandbox_operation_log.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    log = out_dir / "sandbox_operation_log.txt"
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     events = _audit_events(flow)
     _write(out_dir / "audit_log.json", {"events": events, "count": len(events)})
     verify = flow.fetch("/audit/verify", "admin")
@@ -152,7 +154,7 @@ def collect_evidence(
             failures.append(
                 "tamper demo: Verify did not FAIL after the edit and PASS after restore"
             )
-    (out_dir / "README.md").write_text(README, encoding="utf-8")
+    (out_dir / "README.md").write_text(README, encoding="utf-8", newline="\n")
     return failures
 
 
