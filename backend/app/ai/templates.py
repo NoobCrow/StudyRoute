@@ -77,6 +77,41 @@ class Responder:
         ids = [p for p in self.provider_ids if self.facts.has(f"{p}.rank")]
         return sorted(ids, key=lambda p: int(self.facts.value(f"{p}.rank")))
 
+    def _deadline_pick(self, ranked: list[str]) -> str:
+        """The provider to propose: the cheapest that arrives in time, else the fastest."""
+        if self.facts.has("deadline.best_id"):
+            return self.facts.value("deadline.best_id")
+        if self.facts.has("deadline.fastest_id"):
+            return self.facts.value("deadline.fastest_id")
+        return ranked[0]
+
+    def _lowest_cost_sentence(self, ranked: list[str], best: str) -> str:
+        cost = (
+            f"{self.v(f'{best}.name')} at {self.v(f'{best}.cost_pct')} of the amount, "
+            f"{self.v(f'{best}.total_cost')} in total. You would pay {self.v(f'{best}.parent_pays')}."
+        )
+        if not self.facts.has("deadline.cheapest_misses"):
+            return f"The lowest true cost is {cost}"
+        if not self.facts.has("deadline.best_id"):
+            return (
+                f"No provider can arrive by {self.v('deadline.due_date')} if the money is sent on "
+                f"{self.v('deadline.send_date')}. The fastest is {self.v(f'{best}.name')}, arriving on "
+                f"{self.v(f'{best}.arrives_on')}: true cost {self.v(f'{best}.cost_pct')} of the "
+                f"amount, {self.v(f'{best}.total_cost')} in total, and you would pay "
+                f"{self.v(f'{best}.parent_pays')}. Ask the university whether it can wait."
+            )
+        if self.facts.value("deadline.cheapest_misses") == "yes":
+            cheapest = ranked[0]
+            return (
+                f"The lowest true cost overall is {self.v(f'{cheapest}.name')} at "
+                f"{self.v(f'{cheapest}.cost_pct')}, but it would arrive on "
+                f"{self.v(f'{cheapest}.arrives_on')}, after your due date. The cheapest provider that "
+                f"arrives in time is {cost} It arrives on {self.v(f'{best}.arrives_on')}."
+            )
+        return (
+            f"The lowest true cost is {cost} It arrives on {self.v(f'{best}.arrives_on')}, in time."
+        )
+
     def _has_shortfall(self, pid: str) -> bool:
         return any(n != 0 for n in numbers_in(self.facts.value(f"{pid}.shortfall")))
 
@@ -100,9 +135,29 @@ class Responder:
             Intent.DEADLINE: self.deadline, Intent.CHECKLIST: self.checklist,
             Intent.LIMITS: self.limits, Intent.KYC: self.kyc, Intent.STATUS: self.status,
             Intent.DRAFT: self.draft, Intent.REQUEST_APPROVAL: self.request_approval,
-            Intent.PLAN: self.plan, Intent.CADENCE: self.cadence,
+            Intent.PLAN: self.plan, Intent.CADENCE: self.cadence, Intent.STRESS: self.stress,
         }.get(intent, self.help)  # fmt: skip
         return handler()
+
+    def stress(self) -> Answer:
+        if not self._have_quote() or not self.facts.has("stress.count"):
+            return self._finish(NO_QUOTE)
+        cases = [
+            f"if each {self.v('stress.currency')} costs {self.v(f'stress.{i}.drop')} more taka, you pay "
+            f"{self.v(f'stress.{i}.pays')}, which is {self.v(f'stress.{i}.extra')} more "
+            f"({self.v(f'stress.{i}.extra_pct')})"
+            for i in range(int(self.v("stress.count")))
+        ]
+        joined = "; ".join(cases)
+        text = (
+            f"Currency-drop stress test for {self.v('quote.target')} with {self.v('stress.provider')}. "
+            f"Today you would pay {self.v('stress.baseline_pays')}. "
+            + joined[0].upper()
+            + joined[1:]
+            + f". {self.v('stress.assumption')} This is a what-if on synthetic rates, not a "
+            f"forecast. {INDICATIVE}"
+        )
+        return self._finish(" ".join(text.split()))
 
     def help(self) -> Answer:
         return self._finish(
@@ -299,13 +354,11 @@ class Responder:
         if not self._have_quote():
             return self._finish(NO_QUOTE)
         ranked = self._ranked()
-        best = ranked[0]
+        best = self._deadline_pick(ranked)
         parts = [
             f"I made a quote for {self.v('quote.target')} to {self.v('request.country')} and "
             "prepared your payment plan.",
-            f"The lowest true cost is {self.v(f'{best}.name')} at {self.v(f'{best}.cost_pct')} of "
-            f"the amount, {self.v(f'{best}.total_cost')} in total. You would pay "
-            f"{self.v(f'{best}.parent_pays')}.",
+            self._lowest_cost_sentence(ranked, best),
             self._shortfall_note(ranked),
         ]
         if self.facts.has("plan.latest"):

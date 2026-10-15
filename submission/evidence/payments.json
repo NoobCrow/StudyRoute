@@ -1,7 +1,7 @@
 [
   {
     "payment": {
-      "payment_id": "pay_01M4ZFJNB2EYVW2E95EQZQQPV5",
+      "payment_id": "pay_01M4ZKZK3KC3694RZ4Z3BT2HMP",
       "state": "SETTLED",
       "target": {
         "amount_minor": 1000000,
@@ -13,49 +13,49 @@
       "recipient_label": "University of Example (synthetic) GB** **** 4821",
       "reference": "INV-2026-4471 / STU-883201",
       "due_date": "2026-10-29",
-      "uetr": "f76e07fd-ce0a-45a6-8d2a-e902d43236fb",
+      "uetr": "02582bb5-51aa-434b-8087-0dd0081a0f66",
       "parent_pays": "BDT 1,625,300.00",
-      "created_at": "2026-10-15T09:51:30Z",
-      "updated_at": "2026-10-15T09:51:48Z"
+      "created_at": "2026-10-15T11:08:28Z",
+      "updated_at": "2026-10-15T11:08:46Z"
     },
     "tracker": {
-      "payment_id": "pay_01M4ZFJNB2EYVW2E95EQZQQPV5",
-      "uetr": "f76e07fd-ce0a-45a6-8d2a-e902d43236fb",
+      "payment_id": "pay_01M4ZKZK3KC3694RZ4Z3BT2HMP",
+      "uetr": "02582bb5-51aa-434b-8087-0dd0081a0f66",
       "state": "SETTLED",
       "timeline": [
         {
           "state": "DRAFT",
-          "at": "2026-10-15T09:51:30Z",
+          "at": "2026-10-15T11:08:28Z",
           "note": "Draft created",
           "actor_type": "user"
         },
         {
           "state": "QUOTED",
-          "at": "2026-10-15T09:51:30Z",
+          "at": "2026-10-15T11:08:28Z",
           "note": "Quote attached",
           "actor_type": "user"
         },
         {
           "state": "PENDING_APPROVAL",
-          "at": "2026-10-15T09:51:39Z",
+          "at": "2026-10-15T11:08:37Z",
           "note": "Approval requested",
           "actor_type": "user"
         },
         {
           "state": "APPROVED",
-          "at": "2026-10-15T09:51:39Z",
+          "at": "2026-10-15T11:08:37Z",
           "note": "Approved by the parent",
           "actor_type": "user"
         },
         {
           "state": "SUBMITTED",
-          "at": "2026-10-15T09:51:42Z",
+          "at": "2026-10-15T11:08:41Z",
           "note": "Instruction sent (simulated)",
           "actor_type": "system"
         },
         {
           "state": "SETTLED",
-          "at": "2026-10-15T09:51:48Z",
+          "at": "2026-10-15T11:08:46Z",
           "note": "Credited (simulated)",
           "actor_type": "provider"
         }

@@ -2,7 +2,7 @@
 
 Twelve slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
 rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.7
-minutes** of speech at a brisk 160 words a minute (a calmer 140 is closer to 9.9), so keep any
+minutes** of speech at a brisk 160 words a minute (a calmer 140 is just under 10), so keep any
 live demo to **1 minute** or none and point to the recorded video (`VIDEO_SCRIPT.md` is its scene
 list, 4:50). Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
 in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
@@ -41,6 +41,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Worked example (synthetic, GBP 10,000, mid rate 160.00): B 1.58%, C 1.63% with a GBP 35 shortfall, A 2.16%.
 - Integer minor units and `Decimal` rates; no floats.
 - Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once, because fixed fees are paid on every transfer.
+- Deadline fit: the cheapest provider that ARRIVES before the due date (both countries' working days); if the cheapest would be late, the plan says so. Currency-drop stress test: the same quote priced again if the taka weakens 5, 10, 15 or 20%, a what-if on synthetic rates and not a forecast.
 
 ## 7. Smart escrow for living costs
 - The parent locks money in a smart contract that pays on dates they choose; tuition is one payment, living costs one a month.

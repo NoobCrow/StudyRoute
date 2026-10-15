@@ -423,6 +423,26 @@ Check for C: fx_cost = 2.00 x 10,000 = 20,000. Shortfall = 35 x 160 = 5,600. Tot
 >
 > warnings (holiday overlap, quote expiry, KYC still pending)
 
+6.7 Deadline fit and currency-drop stress test (added 15 October 2026)
+
+> Deadline fit (engine/deadline_fit.py, pure). Money with a deadline needs the cheapest provider
+> that ARRIVES in time, not just the cheapest. Inputs: the ranked providers (cheapest first), the
+> earliest send date (planner: today, or the next business day after the cut-off), the due date and
+> the two calendars. arrival = send date + eta_business_days, counting only days that both countries
+> work. A provider is in time when arrival is on or before the due date. best_in_time is the first
+> in time in cost order; if the cheapest misses the date the plan says so and proposes the next one;
+> if nobody is in time it says so, proposes the fastest and asks the person to talk to the
+> university. Stored beside the quote (not inside the hashed results), shown on Compare and in the
+> chat plan card. Indicative.
+>
+> Currency-drop stress test (domain/stress.py, read-only). The stored quote is priced again by the
+> same fee engine with the foreign currency X% more expensive in taka (default 5, 10, 15 and 20;
+> any 1 to 50, at most 6) for one provider (default: the one the plan proposes). Fixed fees in taka
+> do not move; the rate-driven part does. Output: today's cost, and for each drop the cost, the
+> extra taka and the extra share. GET /quotes/{id}/stress; no state changes, so no audit event.
+> It is a what-if on synthetic rates, not a forecast. The assistant answers "what if the taka
+> drops 10%?" from these figures (a rule picks the intent; the trained reader cannot override it).
+
 7\. System architecture \[DESIGN\]
 
 > +-------------+ HTTPS +---------------------------------------------+

@@ -48,12 +48,32 @@ export interface QuoteResult {
     string
   >;
 }
+/** Who arrives before the due date, decided by the engine (see engine/deadline_fit.py). */
+export interface DeadlineFit {
+  due_date: string; send_date: string;
+  best_in_time: string | null; cheapest_overall: string | null; cheapest_misses_deadline: boolean;
+  fastest: string | null;
+  providers: { provider_id: string; arrives_on: string; meets_deadline: boolean; days_to_spare: number }[];
+  indicative: string;
+}
+/** The currency-drop what-if: the quote priced again if the taka weakens (engine, read-only). */
+export interface StressTest {
+  quote_id: string; provider_id: string; provider_name: string; target: Money;
+  baseline: { mid_rate: string; parent_pays_bdt_minor: number; display: { parent_pays: string; provider_rate: string } };
+  scenarios: {
+    drop_pct: string; mid_rate: string; provider_rate: string; parent_pays_bdt_minor: number;
+    extra_bdt_minor: number; extra_pct: string;
+    display: { parent_pays: string; extra: string; extra_pct: string; provider_rate: string };
+  }[];
+  assumption: string; synthetic: true; note: string;
+}
 export interface Quote {
   quote_id: string; created_at: string; expires_at: string; status: "ACTIVE" | "EXPIRED";
   seconds_left: number; target: Money; purpose: string; destination_country: string;
   charge_code: ChargeCode; due_date: string | null; recipient_id: string | null;
   mid_rate: { value: string; source: string; as_of: string; display: string };
-  results: QuoteResult[]; input_hash: string; synthetic: boolean; disclaimer: string;
+  results: QuoteResult[]; deadline_fit?: DeadlineFit | null;
+  input_hash: string; synthetic: boolean; disclaimer: string;
 }
 
 export interface Recipient {
@@ -204,12 +224,14 @@ export interface PlanStep { key: string; label: string; state: "done" | "todo"; 
 export interface PlanProvider {
   provider_id: string; provider_name: string; cost_pct: string; parent_pays: string; total_cost: string;
   shortfall: string; has_shortfall: boolean; charge_code: ChargeCode; eta_business_days: number;
+  arrives_on?: string | null; meets_deadline?: boolean | null;
 }
 export interface PaymentPlanCard {
   kind: "payment_plan"; status: "ready";
   request: { amount: Money; purpose: string; country: string; country_name: string; due_date: string | null; charge_code: ChargeCode };
   quote: { quote_id: string; expires_at: string };
   best: PlanProvider; alternatives: PlanProvider[];
+  deadline_fit?: DeadlineFit | null; cheapest_misses_deadline?: boolean;
   deadline: { due_date: string; latest_send_date: string; recommended_send_date: string; status: PlanView["status"] } | null;
   recipients: { recipient_id: string; label: string; allowlisted: boolean }[];
   steps: PlanStep[];

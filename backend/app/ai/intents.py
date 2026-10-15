@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
+from decimal import Decimal
 from enum import StrEnum
 
 from app.ai.request_parser import ParsedRequest
+from app.domain.stress import DEFAULT_DROPS, MAX_DROP, MAX_SCENARIOS
 
 
 class Intent(StrEnum):
@@ -22,9 +24,34 @@ class Intent(StrEnum):
     HELP = "HELP"
     PLAN = "PLAN"  # a task: read a payment request, quote it, prepare the plan
     CADENCE = "CADENCE"  # a task: compare monthly, quarterly, termly and upfront sending
+    STRESS = "STRESS"  # a question: what if the taka weakened before the money is sent
+
+
+_STRESS = re.compile(
+    r"stress[- ]?test|currency[- ]?(?:drop|crash|shock|risk)"
+    r"|\btaka\s+(?:drop|drops|dropped|fall|falls|fell|weak\w*|depreciat\w*|lose[sd]?|slides?|crash\w*)"
+    r"|\b(?:drop|fall|dip|slide|weakening|depreciation)\s+(?:in|of)\s+(?:the\s+)?(?:taka|bdt|currency|rate)"
+    r"|what\s+if\s+(?:the\s+)?(?:taka|bdt|rate|pound|gbp|dollar|usd|euro|eur|exchange)"
+    r"|if\s+(?:the\s+)?(?:taka|bdt|rate)\s+(?:drops?|falls?|weakens?|depreciat\w+|loses?|slides?"
+    r"|changes?|moves?|goes)",
+    re.I,
+)
+_DROP_PCT = re.compile(r"(\d{1,2}(?:\.\d+)?)\s*(?:%|percent|per\s+cent)", re.I)
+
+
+def stress_drops(message: str) -> tuple[Decimal, ...]:
+    """Percentages the person named ("what if the taka drops 12%"), on top of the usual four."""
+    named = {Decimal(m.group(1)) for m in _DROP_PCT.finditer(message)}
+    named = {v for v in named if Decimal(1) <= v <= MAX_DROP}
+    merged = sorted(set(DEFAULT_DROPS) | named)
+    while len(merged) > MAX_SCENARIOS:  # keep the named ones, drop the usual ones that fit least
+        removable = [v for v in merged if v not in named]
+        merged.remove(removable[-1] if removable else merged[-1])
+    return tuple(merged)
 
 
 _RULES: list[tuple[Intent, re.Pattern[str]]] = [
+    (Intent.STRESS, _STRESS),
     (
         Intent.DRAFT,
         re.compile(
@@ -135,6 +162,8 @@ def choose_intent(message: str, parsed: ParsedRequest, *, has_context: bool) -> 
     about limits or legality, or a question about a quote that is already open never creates
     a new quote.
     """
+    if _STRESS.search(message):
+        return Intent.STRESS  # a what-if about the rate never starts a new quote
     if _NOT_A_PLAN.search(message):
         return classify(message)
     if parsed.has_amount:

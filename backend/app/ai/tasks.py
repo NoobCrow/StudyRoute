@@ -296,7 +296,11 @@ def _plan_result(
     ttl_minutes: int,
 ) -> TaskResult:
     results = sorted(quote["results"], key=lambda r: r["rank"])
-    best, others = results[0], results[1:]
+    fit = quote.get("deadline_fit")
+    arrival = {p["provider_id"]: p for p in fit["providers"]} if fit else {}
+    pick = (fit["best_in_time"] or fit["fastest"]) if fit else None
+    best = next((r for r in results if r["provider_id"] == pick), results[0])
+    others = [r for r in results if r is not best]
     keys = [item["key"] for item in checklist["items"]]
     ready = sum(1 for key in keys if key in provided)
     allowlisted = sum(1 for r in recipients if r["allowlisted"])
@@ -313,6 +317,8 @@ def _plan_result(
             "has_shortfall": r["shortfall_foreign_minor"] > 0,
             "charge_code": r["charge_code"],
             "eta_business_days": r["eta_business_days"],
+            "arrives_on": arrival.get(r["provider_id"], {}).get("arrives_on"),
+            "meets_deadline": arrival.get(r["provider_id"], {}).get("meets_deadline"),
         }
 
     missing = ["reference"] + ([] if only_recipient else ["recipient_id"])
@@ -361,6 +367,8 @@ def _plan_result(
         "best": shown(best),
         "alternatives": [shown(r) for r in others],
         "deadline": deadline,
+        "deadline_fit": fit,
+        "cheapest_misses_deadline": bool(fit and fit["cheapest_misses_deadline"]),
         "recipients": recipients,
         "steps": steps,
         "draft": {
@@ -374,7 +382,11 @@ def _plan_result(
         ("example.plan", "Example request", EXAMPLE_PLAN),
         ("request.country", "Destination country", country_name),
         ("request.charge_code", "Charge code requested", parsed.charge_code),
-        ("plan.best", "Lowest-cost provider", best["provider_name"]),
+        (
+            "plan.best",
+            "Lowest-cost provider that arrives in time" if fit else "Lowest-cost provider",
+            best["provider_name"],
+        ),
         ("recipient.matching", "Recipients saved for this country", str(len(recipients))),
         ("recipient.allowlisted", "Of those, allowlisted for payments", str(allowlisted)),
         ("docs.provided", "Checklist documents already added", str(ready)),

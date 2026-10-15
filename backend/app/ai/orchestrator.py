@@ -19,7 +19,7 @@ from app.ai.dialogue.bridge import build_state
 from app.ai.dialogue.policy import Choice, DialoguePolicy
 from app.ai.dialogue.state import Action
 from app.ai.guards import GuardFailure, parse_llm_json, validate_llm_output
-from app.ai.intents import Intent
+from app.ai.intents import Intent, stress_drops
 from app.ai.llm import SYSTEM_PROMPT, LLMClient, LLMError
 from app.ai.masking import Masker
 from app.ai.nlu.runtime import Reader
@@ -152,7 +152,9 @@ class Orchestrator:
                 task.facts.append(("task.conflict", "How the amount was read", understanding.hint))
         with ctx.db.read() as session:
             rules = load_rules(session)
-            chat = gather_context(ctx, session, ai, rules, intent, quote_id, payment_id)  # 3. facts
+            chat = gather_context(
+                ctx, session, ai, rules, intent, quote_id, payment_id, stress_drops(text)
+            )  # 3. facts
         for key, label, value in task.facts if task else ():
             chat.facts.add(key, label, value)
         masker = Masker(chat.person_names)  # 4. mask personal data

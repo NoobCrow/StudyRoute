@@ -15,8 +15,17 @@ export function PlanCard({ card }: { card: PaymentPlanCard }) {
     <section className="plan-card" aria-label="Payment plan">
       <h3>Payment plan: {request.amount.formatted} to {request.country_name}</h3>
       <dl className="kv small">
-        <dt>Lowest true cost</dt>
+        <dt>{card.deadline_fit ? "Lowest cost that arrives in time" : "Lowest true cost"}</dt>
         <dd><strong>{best.provider_name}</strong> at {best.cost_pct}</dd>
+        {best.arrives_on ? (
+          <>
+            <dt>Arrives</dt>
+            <dd>
+              {formatDate(best.arrives_on)}{" "}
+              <Badge tone={best.meets_deadline ? "ok" : "danger"}>{best.meets_deadline ? "in time" : "too late"}</Badge>
+            </dd>
+          </>
+        ) : null}
         <dt>You would pay</dt>
         <dd>{best.parent_pays}</dd>
         <dt>Send by</dt>
@@ -31,6 +40,11 @@ export function PlanCard({ card }: { card: PaymentPlanCard }) {
           )}
         </dd>
       </dl>
+      {card.cheapest_misses_deadline ? (
+        <p className="small error-text" role="alert">
+          {card.alternatives.filter((a) => a.meets_deadline === false).map((a) => `${a.provider_name} would arrive after the due date.`).join(" ")}
+        </p>
+      ) : null}
       {card.alternatives.some((a) => a.has_shortfall) ? (
         <p className="small error-text" role="alert">
           {card.alternatives.filter((a) => a.has_shortfall).map((a) => `${a.provider_name} may leave the university ${a.shortfall} short.`).join(" ")}

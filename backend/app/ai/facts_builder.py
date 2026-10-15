@@ -92,10 +92,66 @@ def build_quote_facts(facts: FactSet, quote: dict[str, Any]) -> None:
         facts.add(
             f"{pid}.eta", f"{name}: estimated business days to settle", str(r["eta_business_days"])
         )
+    if quote.get("deadline_fit"):
+        _add_deadline_facts(
+            facts, quote["deadline_fit"], {r["provider_id"]: r["provider_name"] for r in results}
+        )
     ordered = sorted(results, key=lambda r: r["rank"])
     for index, cheaper in enumerate(ordered):
         for dearer in ordered[index + 1 :]:
             _add_difference(facts, cheaper, dearer)
+
+
+def build_stress_facts(facts: FactSet, stress: dict[str, Any]) -> None:
+    """The currency-drop what-if, as the engine priced it."""
+    facts.add("stress.provider", "Provider the stress test used", stress["provider_name"])
+    facts.add("stress.currency", "Currency being paid", stress["target"]["currency"])
+    facts.add(
+        "stress.baseline_pays",
+        "Today: the parent pays in BDT",
+        stress["baseline"]["display"]["parent_pays"],
+    )
+    facts.add("stress.count", "Number of stress scenarios", str(len(stress["scenarios"])))
+    facts.add("stress.assumption", "What the stress test assumes", stress["assumption"])
+    for index, row in enumerate(stress["scenarios"]):
+        label = f"If the foreign currency costs {row['drop_pct']} more"
+        facts.add(f"stress.{index}.drop", f"{label}: the size of the drop", row["drop_pct"])
+        facts.add(
+            f"stress.{index}.pays",
+            f"{label}: the parent pays in BDT",
+            row["display"]["parent_pays"],
+        )
+        facts.add(f"stress.{index}.extra", f"{label}: extra BDT to pay", row["display"]["extra"])
+        facts.add(
+            f"stress.{index}.extra_pct", f"{label}: extra as a share", row["display"]["extra_pct"]
+        )
+
+
+def _add_deadline_facts(facts: FactSet, fit: dict[str, Any], names: dict[str, str]) -> None:
+    """Who arrives before the due date. The engine decided; these are its answers as facts."""
+    facts.add("deadline.due_date", "University due date", fit["due_date"])
+    facts.add("deadline.send_date", "Date the money would be sent", fit["send_date"])
+    for entry in fit["providers"]:
+        pid, name = entry["provider_id"], names[entry["provider_id"]]
+        facts.add(f"{pid}.arrives_on", f"{name}: date the money would arrive", entry["arrives_on"])
+        facts.add(
+            f"{pid}.in_time",
+            f"{name}: arrives by the due date",
+            "yes" if entry["meets_deadline"] else "no",
+        )
+    for key, label, pid in (
+        ("cheapest", "Lowest-cost provider overall", fit["cheapest_overall"]),
+        ("best", "Lowest-cost provider that arrives in time", fit["best_in_time"]),
+        ("fastest", "Fastest provider", fit["fastest"]),
+    ):
+        if pid is not None:
+            facts.add(f"deadline.{key}", label, names[pid])
+            facts.add(f"deadline.{key}_id", f"{label} (provider id)", pid)
+    facts.add(
+        "deadline.cheapest_misses",
+        "The lowest-cost provider would arrive after the due date",
+        "yes" if fit["cheapest_misses_deadline"] else "no",
+    )
 
 
 def _add_difference(facts: FactSet, cheaper: dict[str, Any], dearer: dict[str, Any]) -> None:

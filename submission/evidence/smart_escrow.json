@@ -1,7 +1,7 @@
 {
   "escrows": [
     {
-      "escrow_id": "esc_01M4ZFM4NY86FDHSSBZ8X3NJM6",
+      "escrow_id": "esc_01M4ZM135XS1HX7J7BP89KY3VQ",
       "status": "ON_CHAIN",
       "chain_status": "CANCELLED",
       "purpose": "LIVING",
@@ -14,7 +14,7 @@
       },
       "reference": "Demo living costs",
       "recipient": {
-        "recipient_id": "rcp_01M4ZFJDJJE62MMDM99VPE6ZM2",
+        "recipient_id": "rcp_01M4ZKZ0WYQY38N71WKEEH81J4",
         "label": "University of Example (synthetic) GB** **** 4821"
       },
       "tranches": [
@@ -52,95 +52,95 @@
           "due": false
         }
       ],
-      "plan_hash": "42b083a6606446916589efc8933d2ccf50fb037a6a48a18c602fcbcafdc9442b",
-      "created_at": "2026-10-15T09:52:18Z",
-      "confirmed_at": "2026-10-15T09:52:18Z",
+      "plan_hash": "67aedfe54c89fec36c8dcb48f61adff915955b95556037c55e6aa56000c95329",
+      "created_at": "2026-10-15T11:09:17Z",
+      "confirmed_at": "2026-10-15T11:09:17Z",
       "chain": {
         "escrow_id": 1,
         "contract": "0xdf57bcf7ee30a144a25e6e13b474cd5f6b663aa0",
         "token": "0x60212ff9f3cc4175e67cef4e061077aecda3c996",
         "payer_wallet": "0x3b6205561e0fcd3e957a3d9f4e240940bfbe5235",
-        "beneficiary_wallet": "0x232cf5f9b98e7d10b58cb207d6ccddff127d4375",
+        "beneficiary_wallet": "0xa51e1a955131d1ca314863ca0bdea5a0b2f23483",
         "locked": {
           "amount_minor": 0,
           "currency": "GBP",
           "formatted": "GBP 0.00"
         },
-        "chain_time": "2026-10-15T09:52:31Z"
+        "chain_time": "2026-10-15T11:09:29Z"
       },
       "simulated": true,
       "transactions": [
         {
           "seq": 4,
-          "tx_hash": "c28e638914215146bc1eaba69499f1f50614cea587f0952844a2dd3814a84ef1",
+          "tx_hash": "38768e467353c0d156477ee53e1320961eb10d913ede049d48e266fb850c3b2b",
           "kind": "CALL",
           "contract": "token:GBP",
           "function": "mint",
           "sender": "bank",
-          "time": "2026-10-15T09:52:18Z"
+          "time": "2026-10-15T11:09:17Z"
         },
         {
           "seq": 5,
-          "tx_hash": "9f4fe9a13c8fd7a50435f29b959962922885ca4f96e2effab3d3e22145f729a9",
+          "tx_hash": "95dff910a71af2606449a4209ca783378dc6364aa5fcd28c5d883e6520466ffc",
           "kind": "CALL",
           "contract": "token:GBP",
           "function": "approve",
           "sender": "user:usr_demo_parent",
-          "time": "2026-10-15T09:52:18Z"
+          "time": "2026-10-15T11:09:17Z"
         },
         {
           "seq": 6,
-          "tx_hash": "c9882dd59357fe1b432a9d53d9876d0c2c0d48e50eb681a1f2a111fdac75aeb3",
+          "tx_hash": "eb0f9150a87a51ee969ef2ebeff2837e7dfdd178aa354a204bad465acfcb8ff9",
           "kind": "CALL",
           "contract": "escrow",
           "function": "create",
           "sender": "user:usr_demo_parent",
-          "time": "2026-10-15T09:52:18Z"
+          "time": "2026-10-15T11:09:17Z"
         },
         {
           "seq": 7,
-          "tx_hash": "986a2792585884f69824aa3650da8ec810cc0c500fa252ba8f7ea56b7a4b379f",
+          "tx_hash": "61e7c6d003b2df2fa140af3c533c545ca329d41af3295fa568ed4662b522bb7a",
           "kind": "CALL",
           "contract": "escrow",
           "function": "releaseDue",
-          "sender": "recipient:rcp_01M4ZFJDJJE62MMDM99VPE6ZM2",
-          "time": "2026-10-15T09:52:19Z"
+          "sender": "recipient:rcp_01M4ZKZ0WYQY38N71WKEEH81J4",
+          "time": "2026-10-15T11:09:17Z"
         },
         {
           "seq": 8,
-          "tx_hash": "33f1d7d5c877d586df809b112609fca0451fb70080f1fd816be144d9575386da",
+          "tx_hash": "9fc15027ac5fd3c11c9dd69d34b21beb6d7af86cfeb6cfaa1b6c726942c80f30",
           "kind": "CALL",
           "contract": "escrow",
           "function": "freeze",
           "sender": "compliance",
-          "time": "2026-10-15T09:52:19Z"
+          "time": "2026-10-15T11:09:18Z"
         },
         {
           "seq": 9,
-          "tx_hash": "e1afc0b1fa7439a87337ba496367366fabfe7dd3b1d26f3665c51284e0bac7e6",
+          "tx_hash": "a98ebcf33a565006a56832aea9ce5d96dd71ddb88c6a53a2e80589a346d5ae7f",
           "kind": "CALL",
           "contract": "escrow",
           "function": "unfreeze",
           "sender": "compliance",
-          "time": "2026-10-15T09:52:19Z"
+          "time": "2026-10-15T11:09:18Z"
         },
         {
           "seq": 10,
-          "tx_hash": "690eece80db86797ce5e5c768933b03672288044fee6bcdb39a26fdfb3aa756b",
+          "tx_hash": "4379e931b98649c3d66a74e6b757749f45566582f3638c8cffa00be46c18c727",
           "kind": "CALL",
           "contract": "escrow",
           "function": "releaseEarly",
           "sender": "user:usr_demo_parent",
-          "time": "2026-10-15T09:52:31Z"
+          "time": "2026-10-15T11:09:29Z"
         },
         {
           "seq": 11,
-          "tx_hash": "99d534bc423fe2b0f59b2da82b044d610301d4e374c04497b84a3b1e9092aa6c",
+          "tx_hash": "c77005119320dcf81c475fadc30c9b6012500ddac8fea483ecbb3db7cae2c6c9",
           "kind": "CALL",
           "contract": "escrow",
           "function": "cancel",
           "sender": "user:usr_demo_parent",
-          "time": "2026-10-15T09:52:31Z"
+          "time": "2026-10-15T11:09:29Z"
         }
       ],
       "blockers": []
@@ -151,7 +151,7 @@
     "engine": "py-evm, an in-memory EVM. No network, no peers, no real tokens.",
     "ready": true,
     "block": 12,
-    "chain_time": "2026-10-15T09:52:31Z",
+    "chain_time": "2026-10-15T11:09:29Z",
     "time_offset_seconds": 0,
     "contracts": [
       {
@@ -181,7 +181,7 @@
     ],
     "log": {
       "transactions": 12,
-      "head": "9cb1ee4e9a72e6c8b64b02698cf11206cd1c1035c4d86267260d166c98d1005c"
+      "head": "66fd35c03eb5c0623d5365f2cf694dbe4d2110b1bd704ff48e5576527df2c2ef"
     },
     "integrity": {
       "ok": true,
@@ -191,30 +191,30 @@
   "anchors": [
     {
       "index": 0,
-      "seq": 67,
-      "head": "27a06263c65ce708f6cb26233539a0625e6bdabf8fda6f42eb9ac90b665445fc",
-      "time": "2026-10-15T09:52:31Z"
+      "seq": 68,
+      "head": "c66936c7f24276365bdc6fdb44cbbf15c503f8c8c6d0b90002c1c3647825babd",
+      "time": "2026-10-15T11:09:29Z"
     }
   ],
   "anchor_check": {
     "status": "PASS",
     "audit_chain": {
       "status": "PASS",
-      "events_checked": 68,
+      "events_checked": 69,
       "failed_seq": null,
       "reason": null,
       "head": {
-        "seq": 68,
-        "hash": "d7d2bc4310a713b6a4f48f3c1d3170127551a3473173b23a7159373d157749ee"
+        "seq": 69,
+        "hash": "c7d4a107fe3dd8f4e43032c2fd2f2f015d48df53dd9bb3d5c3201de01a970664"
       }
     },
     "anchors": [
       {
         "index": 0,
-        "seq": 67,
-        "head": "27a06263c65ce708f6cb26233539a0625e6bdabf8fda6f42eb9ac90b665445fc",
-        "time": "2026-10-15T09:52:31Z",
-        "database_hash": "27a06263c65ce708f6cb26233539a0625e6bdabf8fda6f42eb9ac90b665445fc",
+        "seq": 68,
+        "head": "c66936c7f24276365bdc6fdb44cbbf15c503f8c8c6d0b90002c1c3647825babd",
+        "time": "2026-10-15T11:09:29Z",
+        "database_hash": "c66936c7f24276365bdc6fdb44cbbf15c503f8c8c6d0b90002c1c3647825babd",
         "state": "MATCH"
       }
     ],

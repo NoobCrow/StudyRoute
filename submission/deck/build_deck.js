@@ -250,8 +250,8 @@ slides.push({
     "Every number comes from a deterministic engine: integer minor units, decimal rates, no floats. For one provider, total cost is the FX margin plus the fixed fee, the SWIFT fee, any fees the sender pays under OUR, " +
     "plus a shortfall when fees are deducted from the amount. We rank by that percentage. In our synthetic example, Provider B is first at 1.58 percent, " +
     "Provider C looks cheap but it is quoted as SHA, so the university would receive 35 pounds less, and Provider A is third at 2.16 percent. " +
-    "On the right is where Provider B's 25,300 taka goes: 16,000 is the margin, 3,000 the fixed fee, 1,500 the SWIFT fee and 4,800 the fees we pay under OUR. " +
-    "The same engine powers the smart send plan. It does not predict exchange rates, and says so.",
+    "On the right is where Provider B's 25,300 taka goes: most of it is the margin. " +
+    "The same engine powers the smart send plan, names the cheapest provider that arrives before the due date, and can stress-test a quote if the taka weakens. It does not predict exchange rates, and says so.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -267,7 +267,7 @@ slides.push({
       "Cost % = (FX margin + fixed fee + SWIFT fee + fees you pay + shortfall) / amount at the mid-market rate",
       { size: 12, color: "text2" }),
     text(0.5, 4.45, 5.3, 0.65,
-      "Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once. Synthetic rates.",
+      "Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once. Also: the cheapest that arrives before the due date, and a currency-drop stress test. Synthetic rates.",
       { size: 12, bold: true, color: "text1" }),
     text(6.1, 1.35, 3.4, 0.5, "Where Provider B's BDT 25,300 goes", { size: 14, bold: true, color: "text1" }),
     { type: "doughnut", x: 6.6, y: 1.9, w: 2.1, h: 2.1, values: split.map((s) => s[1]), colors: split.map((s) => s[2]) },

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -18,7 +19,9 @@ from app.domain.constants import Purpose
 from app.domain.rbac import Actor, Perm, authorize
 from app.domain.recipients import RecipientService
 from app.domain.rules import Rules
+from app.engine.deadline_fit import choose_for_deadline
 from app.engine.money import Money
+from app.engine.planner import earliest_send_date
 from app.engine.quote import ChargeCode, build_quote
 from app.models import Quote
 from app.providers.rates import synthetic_mid_rate
@@ -85,6 +88,11 @@ class QuoteService:
             now=now,
         )
         results = [r.to_api_dict() for r in quote.results]
+        stored: dict[str, Any] = {"results": results}
+        if req.due_date:
+            stored["deadline_fit"] = self._deadline_fit(
+                rules, corridor.country, quote, req.due_date
+            )
         row = Quote(
             id=new_id("qte"),
             owner_id=actor.owner_id,
@@ -102,7 +110,7 @@ class QuoteService:
             created_at=quote.created_at,
             expires_at=quote.expires_at,
             input_hash=quote.input_hash,
-            results_json={"results": results},
+            results_json=stored,
         )
         session.add(row)
         session.flush()
@@ -119,6 +127,18 @@ class QuoteService:
             output_hash=hash_object(results),
         )
         return self.view(row, now)
+
+    @staticmethod
+    def _deadline_fit(rules: Rules, country: str, quote: Any, due_date: date) -> dict[str, Any]:
+        """Who arrives before the due date if the money is sent at the first possible moment."""
+        params = rules.planner_params()
+        calendars = rules.calendars(country)
+        local_now = quote.created_at.astimezone(ZoneInfo(params.cutoff_tz))
+        send = earliest_send_date(local_now, calendars, params.cutoff)
+        choice = choose_for_deadline(
+            quote.results, send_date=send, due_date=due_date, calendars=calendars
+        )
+        return choice.to_api_dict()
 
     def get_owned(self, session: Session, actor: Actor, quote_id: str) -> Quote:
         row = session.get(Quote, quote_id)
@@ -163,6 +183,7 @@ class QuoteService:
                 "display": f"BDT {row.mid_rate} per 1 {row.target_currency} (synthetic)",
             },
             "results": row.results_json["results"],
+            "deadline_fit": row.results_json.get("deadline_fit"),
             "input_hash": row.input_hash,
             "synthetic": True,
             "disclaimer": DISCLAIMER,

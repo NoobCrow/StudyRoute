@@ -103,7 +103,7 @@ export function problem(status: number, code: string, detail: string): Response 
   return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 }
 
-import type { ChatResponse, PaymentPlanCard, SendPlan } from "../api/types";
+import type { ChatResponse, PaymentPlanCard, SendPlan, StressTest } from "../api/types";
 
 export const PLAN_CARD: PaymentPlanCard = {
   kind: "payment_plan", status: "ready",
@@ -296,3 +296,18 @@ export function verdict(overrides: Partial<AnchorVerdict> = {}): AnchorVerdict {
     ...overrides,
   };
 }
+
+export const STRESS: StressTest = {
+  quote_id: "qte_1", provider_id: "prov_b", provider_name: "Provider B (synthetic)",
+  target: { amount_minor: 1000000, currency: "GBP", formatted: "GBP 10,000.00" },
+  baseline: { mid_rate: "160.000000", parent_pays_bdt_minor: 162530000, display: { parent_pays: "BDT 1,625,300.00", provider_rate: "161.600000" } },
+  scenarios: [
+    { drop_pct: "5%", mid_rate: "168.000000", provider_rate: "169.680000", parent_pays_bdt_minor: 170930000, extra_bdt_minor: 8400000, extra_pct: "5.17",
+      display: { parent_pays: "BDT 1,709,300.00", extra: "BDT 84,000.00", extra_pct: "5.17%", provider_rate: "169.680000" } },
+    { drop_pct: "10%", mid_rate: "176.000000", provider_rate: "177.760000", parent_pays_bdt_minor: 179330000, extra_bdt_minor: 16800000, extra_pct: "10.34",
+      display: { parent_pays: "BDT 1,793,300.00", extra: "BDT 168,000.00", extra_pct: "10.34%", provider_rate: "177.760000" } },
+  ],
+  assumption: "The taka weakens so that each GBP costs the given percentage more taka; fixed fees in taka stay as they are.",
+  synthetic: true,
+  note: "A what-if on synthetic rates, not a forecast. Indicative. Confirm with your AD bank.",
+};

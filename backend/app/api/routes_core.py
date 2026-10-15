@@ -28,6 +28,7 @@ from app.domain.rbac import Actor, Perm
 from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
 from app.domain.send_plan import build_send_plan
+from app.domain.stress import parse_drops, stress_quote
 from app.engine import fx
 from app.engine.money import CURRENCY_EXPONENTS, Money
 from app.engine.planner import INDICATIVE, plan_deadline
@@ -66,6 +67,21 @@ def get_quote(
 ) -> dict[str, Any]:
     with ctx.db.read() as session:
         return ctx.quotes.get(session, actor, quote_id)
+
+
+@router.get("/quotes/{quote_id}/stress")
+def quote_stress(
+    quote_id: str,
+    drops: str | None = Query(default=None, max_length=40, pattern=r"^[0-9., ]+$"),
+    provider_id: str | None = Query(default=None, max_length=40, pattern=r"^[a-z0-9_]+$"),
+    actor: Actor = Depends(require(Perm.QUOTE_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    """Currency-drop stress test: the same quote priced again if the taka weakens. Read-only."""
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+        quote = ctx.quotes.get(session, actor, quote_id)
+    return stress_quote(rules, quote, drops=parse_drops(drops), provider_id=provider_id)
 
 
 @router.get("/quotes")

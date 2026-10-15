@@ -3,8 +3,10 @@ permissions (the same checks a human call would face)."""
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import or_, select
@@ -18,6 +20,7 @@ from app.api.context import AppContext
 from app.domain.constants import RecipientType
 from app.domain.rbac import Actor, Perm, authorize
 from app.domain.rules import Rules
+from app.domain.stress import DEFAULT_DROPS, stress_quote
 from app.engine.planner import plan_deadline
 from app.models import Recipient, User
 
@@ -51,6 +54,7 @@ def gather_context(
     intent: Intent,
     quote_id: str | None,
     payment_id: str | None,
+    drops: Sequence[Decimal] = DEFAULT_DROPS,
 ) -> ChatContext:
     owner = ai.owner_id or ""
     facts = FactSet()
@@ -69,6 +73,8 @@ def gather_context(
     if quote_id:
         quote: dict[str, Any] = ctx.quotes.get(session, ai, quote_id)
         fb.build_quote_facts(facts, quote)
+        if intent is Intent.STRESS:
+            fb.build_stress_facts(facts, stress_quote(rules, quote, drops=drops))
         chat.quote_id = quote["quote_id"]
         country, purpose = quote["destination_country"], quote["purpose"]
         if due is None and quote["due_date"]:

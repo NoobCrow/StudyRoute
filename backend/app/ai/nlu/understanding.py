@@ -172,6 +172,8 @@ def _model_intent(
         if confidence >= limits["attack"]:
             return Intent.HELP, True, False
         return rules_intent, False, False
+    if rules_intent is Intent.STRESS:
+        return rules_intent, False, False  # the model never saw this question; the rule is exact
     if confidence < limits["intent"]:
         return rules_intent, False, False
     if name == "OUT_OF_SCOPE":

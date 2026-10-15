@@ -524,14 +524,14 @@
   },
   "transfers": [
     {
-      "id": "btr_01M4ZFK748TQEZBG9KDTQ7XBEM",
+      "id": "btr_01M4ZM055PR0CNG3Q2BCE1XZDC",
       "status": "SETTLED",
       "kind": "NATIONAL",
       "rail": "INSTANT",
       "reference": "Sandbox transfer",
       "uetr": null,
       "source": {
-        "id": "bacc_01M4ZFJDP402923H834PECZ7F2",
+        "id": "bacc_01M4ZKZ13X2B9NZF26Y1MY7ZWH",
         "bank_code": "EXMPBDA1",
         "bank_name": "Example Bank A (sandbox)",
         "country": "BD",
@@ -549,7 +549,7 @@
         "simulated": true
       },
       "destination": {
-        "id": "bacc_01M4ZFJDP93CX5PYDGZM44K5Y2",
+        "id": "bacc_01M4ZKZ1472NHK6KEKMP2V2S5R",
         "bank_code": "EXMPBDB1",
         "bank_name": "Example Bank B (sandbox)",
         "country": "BD",
@@ -633,15 +633,15 @@
       ],
       "next_step_at": null,
       "failure_reason": null,
-      "created_at": "2026-10-15T09:51:48Z",
-      "confirmed_at": "2026-10-15T09:51:48Z",
-      "settled_at": "2026-10-15T09:51:52Z",
+      "created_at": "2026-10-15T11:08:46Z",
+      "confirmed_at": "2026-10-15T11:08:46Z",
+      "settled_at": "2026-10-15T11:08:50Z",
       "blockers": [],
       "simulated": true,
       "note": "Simulated. No real bank is contacted and no real money moves.",
       "events": [
         {
-          "at": "2026-10-15T09:51:48Z",
+          "at": "2026-10-15T11:08:46Z",
           "stage": "PLAN",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -650,7 +650,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:51:48Z",
+          "at": "2026-10-15T11:08:46Z",
           "stage": "HOLD",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -659,7 +659,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:51:50Z",
+          "at": "2026-10-15T11:08:48Z",
           "stage": "SENDING_BANK",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -679,7 +679,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:51:51Z",
+          "at": "2026-10-15T11:08:49Z",
           "stage": "CLEARING",
           "bank_code": "CLR-BD",
           "bank_name": "Sandbox Clearing House Dhaka",
@@ -699,7 +699,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:51:52Z",
+          "at": "2026-10-15T11:08:50Z",
           "stage": "RECEIVING_BANK",
           "bank_code": "EXMPBDB1",
           "bank_name": "Example Bank B (sandbox)",
@@ -721,11 +721,11 @@
       ],
       "journals": [
         {
-          "id": "jrn_01M4ZFK74N6C37KAWST35ZCJBD",
+          "id": "jrn_01M4ZM056GM9H640JN1ATQWAMZ",
           "kind": "HOLD",
           "stage": "HOLD",
           "memo": "Funds reserved for transfer",
-          "posted_at": "2026-10-15T09:51:48Z",
+          "posted_at": "2026-10-15T11:08:46Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -750,11 +750,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFK8WS57G5Q4EJF65BS2ZX",
+          "id": "jrn_01M4ZM06Z18M8MVDRPQCETHWGA",
           "kind": "STEP",
           "stage": "SENDING_BANK",
           "memo": "Send via clearing house",
-          "posted_at": "2026-10-15T09:51:50Z",
+          "posted_at": "2026-10-15T11:08:48Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -789,11 +789,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFK9WER79KCXNJVMP1VZCM",
+          "id": "jrn_01M4ZM07YSBHXQ0B3YAT3BPMJA",
           "kind": "STEP",
           "stage": "CLEARING",
           "memo": "Interbank settlement",
-          "posted_at": "2026-10-15T09:51:51Z",
+          "posted_at": "2026-10-15T11:08:49Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -818,11 +818,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFKAW327YBX33NQKTWFFRV",
+          "id": "jrn_01M4ZM08YPCMJ964CGSA63TW1G",
           "kind": "STEP",
           "stage": "RECEIVING_BANK",
           "memo": "Credit beneficiary",
-          "posted_at": "2026-10-15T09:51:52Z",
+          "posted_at": "2026-10-15T11:08:50Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -849,14 +849,14 @@
       ]
     },
     {
-      "id": "btr_01M4ZFKB34XFTN2FK2J4A4JE4E",
+      "id": "btr_01M4ZM0974NWQHW0BG1ES908RN",
       "status": "SETTLED",
       "kind": "INTERNATIONAL",
       "rail": "SWIFT",
       "reference": "Sandbox transfer",
-      "uetr": "6f6b64d9-261b-49bd-9458-95244d797a6a",
+      "uetr": "83328b3c-5347-4b90-9c03-c9f883f9a14d",
       "source": {
-        "id": "bacc_01M4ZFJDP402923H834PECZ7F2",
+        "id": "bacc_01M4ZKZ13X2B9NZF26Y1MY7ZWH",
         "bank_code": "EXMPBDA1",
         "bank_name": "Example Bank A (sandbox)",
         "country": "BD",
@@ -874,7 +874,7 @@
         "simulated": true
       },
       "destination": {
-        "id": "bacc_01M4ZFJDPDBS51962JR3W78E4T",
+        "id": "bacc_01M4ZKZ14DQ77FAEFSAG0D7BTP",
         "bank_code": "EXMPGB2L",
         "bank_name": "University Bank of Example (sandbox)",
         "country": "GB",
@@ -988,15 +988,15 @@
       ],
       "next_step_at": null,
       "failure_reason": null,
-      "created_at": "2026-10-15T09:51:52Z",
-      "confirmed_at": "2026-10-15T09:51:52Z",
-      "settled_at": "2026-10-15T09:52:05Z",
+      "created_at": "2026-10-15T11:08:50Z",
+      "confirmed_at": "2026-10-15T11:08:50Z",
+      "settled_at": "2026-10-15T11:09:03Z",
       "blockers": [],
       "simulated": true,
       "note": "Simulated. No real bank is contacted and no real money moves.",
       "events": [
         {
-          "at": "2026-10-15T09:51:52Z",
+          "at": "2026-10-15T11:08:50Z",
           "stage": "PLAN",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1005,7 +1005,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:51:52Z",
+          "at": "2026-10-15T11:08:50Z",
           "stage": "HOLD",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1014,7 +1014,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:51:57Z",
+          "at": "2026-10-15T11:08:55Z",
           "stage": "ORIGINATING_BANK",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1031,13 +1031,13 @@
               {
                 "tag": "{121:}",
                 "name": "UETR (header)",
-                "value": "6f6b64d9-261b-49bd-9458-95244d797a6a",
+                "value": "83328b3c-5347-4b90-9c03-c9f883f9a14d",
                 "note": "Unique end-to-end transaction reference (UUID v4)."
               },
               {
                 "tag": ":20:",
                 "name": "Sender's reference",
-                "value": "btr_01M4ZFKB34XFTN2FK2J4A4JE4E",
+                "value": "btr_01M4ZM0974NWQHW0BG1ES908RN",
                 "note": "The sandbox shows the full payment id."
               },
               {
@@ -1085,7 +1085,7 @@
             ],
             "pacs008": {
               "ChrgBr": "DEBT",
-              "UETR": "6f6b64d9-261b-49bd-9458-95244d797a6a",
+              "UETR": "83328b3c-5347-4b90-9c03-c9f883f9a14d",
               "InstdAmt": {
                 "currency": "GBP",
                 "amount": "1000.00"
@@ -1099,7 +1099,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:52:01Z",
+          "at": "2026-10-15T11:08:59Z",
           "stage": "CORRESPONDENT",
           "bank_code": "EXMPUS6C",
           "bank_name": "Example Correspondent Bank (sandbox)",
@@ -1116,13 +1116,13 @@
               {
                 "tag": "{121:}",
                 "name": "UETR (header)",
-                "value": "6f6b64d9-261b-49bd-9458-95244d797a6a",
+                "value": "83328b3c-5347-4b90-9c03-c9f883f9a14d",
                 "note": "Unique end-to-end transaction reference (UUID v4)."
               },
               {
                 "tag": ":20:",
                 "name": "Sender's reference",
-                "value": "btr_01M4ZFKB34XFTN2FK2J4A4JE4E",
+                "value": "btr_01M4ZM0974NWQHW0BG1ES908RN",
                 "note": "The sandbox shows the full payment id."
               },
               {
@@ -1170,7 +1170,7 @@
             ],
             "pacs008": {
               "ChrgBr": "DEBT",
-              "UETR": "6f6b64d9-261b-49bd-9458-95244d797a6a",
+              "UETR": "83328b3c-5347-4b90-9c03-c9f883f9a14d",
               "InstdAmt": {
                 "currency": "GBP",
                 "amount": "1000.00"
@@ -1184,7 +1184,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:52:05Z",
+          "at": "2026-10-15T11:09:03Z",
           "stage": "BENEFICIARY_BANK",
           "bank_code": "EXMPGB2L",
           "bank_name": "University Bank of Example (sandbox)",
@@ -1206,11 +1206,11 @@
       ],
       "journals": [
         {
-          "id": "jrn_01M4ZFKB3F5FE20EDVYJK3NSMN",
+          "id": "jrn_01M4ZM097TYS4RY7PGCR1DGMSK",
           "kind": "HOLD",
           "stage": "HOLD",
           "memo": "Funds reserved for transfer",
-          "posted_at": "2026-10-15T09:51:52Z",
+          "posted_at": "2026-10-15T11:08:50Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1235,11 +1235,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFKFTDDV8SA6GE8JD48HYQ",
+          "id": "jrn_01M4ZM0DWZ0CKVQE66JHVEP9VT",
           "kind": "STEP",
           "stage": "ORIGINATING_BANK",
           "memo": "Sell foreign currency, take fees, pay out of nostro",
-          "posted_at": "2026-10-15T09:51:57Z",
+          "posted_at": "2026-10-15T11:08:55Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1294,11 +1294,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFKKRXR7Y0C9EJ2RN7EQMX",
+          "id": "jrn_01M4ZM0HVQ0ZK0M7AA8MW16C74",
           "kind": "STEP",
           "stage": "CORRESPONDENT",
           "memo": "Correspondent forwards the payment",
-          "posted_at": "2026-10-15T09:52:01Z",
+          "posted_at": "2026-10-15T11:08:59Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1323,11 +1323,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFKQPTVHXHSB0JW0RPRZHG",
+          "id": "jrn_01M4ZM0NT7PMF3937SYDBR7PMG",
           "kind": "STEP",
           "stage": "BENEFICIARY_BANK",
           "memo": "Beneficiary bank credits the customer",
-          "posted_at": "2026-10-15T09:52:05Z",
+          "posted_at": "2026-10-15T11:09:03Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1354,14 +1354,14 @@
       ]
     },
     {
-      "id": "btr_01M4ZFKQWC0AQKT7C6M5G6D6M4",
+      "id": "btr_01M4ZM0P6069H605AACTANGS3M",
       "status": "RETURNED",
       "kind": "INTERNATIONAL",
       "rail": "SWIFT",
       "reference": "Sandbox transfer",
-      "uetr": "0a3d7f89-9c80-40ad-aba1-53083e99e6c6",
+      "uetr": "eae114ee-76af-48c8-bc52-03e65ab84c49",
       "source": {
-        "id": "bacc_01M4ZFJDP402923H834PECZ7F2",
+        "id": "bacc_01M4ZKZ13X2B9NZF26Y1MY7ZWH",
         "bank_code": "EXMPBDA1",
         "bank_name": "Example Bank A (sandbox)",
         "country": "BD",
@@ -1379,7 +1379,7 @@
         "simulated": true
       },
       "destination": {
-        "id": "bacc_01M4ZFJDPE75EY8V4T6EZ2WQP7",
+        "id": "bacc_01M4ZKZ14FYGTJQGAZTVBTKYMY",
         "bank_code": "EXMPGB2L",
         "bank_name": "University Bank of Example (sandbox)",
         "country": "GB",
@@ -1493,15 +1493,15 @@
       ],
       "next_step_at": null,
       "failure_reason": "The beneficiary bank rejected the payment (simulated).",
-      "created_at": "2026-10-15T09:52:05Z",
-      "confirmed_at": "2026-10-15T09:52:05Z",
+      "created_at": "2026-10-15T11:09:04Z",
+      "confirmed_at": "2026-10-15T11:09:04Z",
       "settled_at": null,
       "blockers": [],
       "simulated": true,
       "note": "Simulated. No real bank is contacted and no real money moves.",
       "events": [
         {
-          "at": "2026-10-15T09:52:05Z",
+          "at": "2026-10-15T11:09:04Z",
           "stage": "PLAN",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1510,7 +1510,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:52:05Z",
+          "at": "2026-10-15T11:09:04Z",
           "stage": "HOLD",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1519,7 +1519,7 @@
           "message": null
         },
         {
-          "at": "2026-10-15T09:52:10Z",
+          "at": "2026-10-15T11:09:08Z",
           "stage": "ORIGINATING_BANK",
           "bank_code": "EXMPBDA1",
           "bank_name": "Example Bank A (sandbox)",
@@ -1536,13 +1536,13 @@
               {
                 "tag": "{121:}",
                 "name": "UETR (header)",
-                "value": "0a3d7f89-9c80-40ad-aba1-53083e99e6c6",
+                "value": "eae114ee-76af-48c8-bc52-03e65ab84c49",
                 "note": "Unique end-to-end transaction reference (UUID v4)."
               },
               {
                 "tag": ":20:",
                 "name": "Sender's reference",
-                "value": "btr_01M4ZFKQWC0AQKT7C6M5G6D6M4",
+                "value": "btr_01M4ZM0P6069H605AACTANGS3M",
                 "note": "The sandbox shows the full payment id."
               },
               {
@@ -1590,7 +1590,7 @@
             ],
             "pacs008": {
               "ChrgBr": "DEBT",
-              "UETR": "0a3d7f89-9c80-40ad-aba1-53083e99e6c6",
+              "UETR": "eae114ee-76af-48c8-bc52-03e65ab84c49",
               "InstdAmt": {
                 "currency": "GBP",
                 "amount": "1000.00"
@@ -1604,7 +1604,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:52:14Z",
+          "at": "2026-10-15T11:09:12Z",
           "stage": "CORRESPONDENT",
           "bank_code": "EXMPUS6C",
           "bank_name": "Example Correspondent Bank (sandbox)",
@@ -1621,13 +1621,13 @@
               {
                 "tag": "{121:}",
                 "name": "UETR (header)",
-                "value": "0a3d7f89-9c80-40ad-aba1-53083e99e6c6",
+                "value": "eae114ee-76af-48c8-bc52-03e65ab84c49",
                 "note": "Unique end-to-end transaction reference (UUID v4)."
               },
               {
                 "tag": ":20:",
                 "name": "Sender's reference",
-                "value": "btr_01M4ZFKQWC0AQKT7C6M5G6D6M4",
+                "value": "btr_01M4ZM0P6069H605AACTANGS3M",
                 "note": "The sandbox shows the full payment id."
               },
               {
@@ -1675,7 +1675,7 @@
             ],
             "pacs008": {
               "ChrgBr": "DEBT",
-              "UETR": "0a3d7f89-9c80-40ad-aba1-53083e99e6c6",
+              "UETR": "eae114ee-76af-48c8-bc52-03e65ab84c49",
               "InstdAmt": {
                 "currency": "GBP",
                 "amount": "1000.00"
@@ -1689,7 +1689,7 @@
           }
         },
         {
-          "at": "2026-10-15T09:52:18Z",
+          "at": "2026-10-15T11:09:16Z",
           "stage": "RETURN",
           "bank_code": "EXMPGB2L",
           "bank_name": "University Bank of Example (sandbox)",
@@ -1700,11 +1700,11 @@
       ],
       "journals": [
         {
-          "id": "jrn_01M4ZFKQWQG92QB135E9KD92TJ",
+          "id": "jrn_01M4ZM0P6N48RV9TDAAWHMBBP3",
           "kind": "HOLD",
           "stage": "HOLD",
           "memo": "Funds reserved for transfer",
-          "posted_at": "2026-10-15T09:52:05Z",
+          "posted_at": "2026-10-15T11:09:04Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1729,11 +1729,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFKWMKYGG75YZCN0HA05HN",
+          "id": "jrn_01M4ZM0TS3CJQF581GEQMYKS81",
           "kind": "STEP",
           "stage": "ORIGINATING_BANK",
           "memo": "Sell foreign currency, take fees, pay out of nostro",
-          "posted_at": "2026-10-15T09:52:10Z",
+          "posted_at": "2026-10-15T11:09:08Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1788,11 +1788,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFM0JWDM019QYVK57SAAMK",
+          "id": "jrn_01M4ZM0YQH72XWDXNKD0VQYR66",
           "kind": "STEP",
           "stage": "CORRESPONDENT",
           "memo": "Correspondent forwards the payment",
-          "posted_at": "2026-10-15T09:52:14Z",
+          "posted_at": "2026-10-15T11:09:12Z",
           "lines": [
             {
               "side": "DEBIT",
@@ -1817,11 +1817,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFM4HAQQ0GD9Y1FPYMQKA3",
+          "id": "jrn_01M4ZM12PCPCRKJ0V13Q4ZD0J9",
           "kind": "REVERSAL",
           "stage": "CORRESPONDENT",
           "memo": "Reversal: Correspondent forwards the payment",
-          "posted_at": "2026-10-15T09:52:18Z",
+          "posted_at": "2026-10-15T11:09:16Z",
           "lines": [
             {
               "side": "CREDIT",
@@ -1846,11 +1846,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFM4HBEQV0WNVV6ZSQZX91",
+          "id": "jrn_01M4ZM12PFGCTTQNMXWY7C4Z55",
           "kind": "REVERSAL",
           "stage": "ORIGINATING_BANK",
           "memo": "Reversal: Sell foreign currency, take fees, pay out of nostro",
-          "posted_at": "2026-10-15T09:52:18Z",
+          "posted_at": "2026-10-15T11:09:16Z",
           "lines": [
             {
               "side": "CREDIT",
@@ -1905,11 +1905,11 @@
           ]
         },
         {
-          "id": "jrn_01M4ZFM4HD3JZC2PBRRMXXVXVG",
+          "id": "jrn_01M4ZM12PH7B38H1CWYCHT4ARS",
           "kind": "REVERSAL",
           "stage": "HOLD",
           "memo": "Reversal: Funds reserved for transfer",
-          "posted_at": "2026-10-15T09:52:18Z",
+          "posted_at": "2026-10-15T11:09:16Z",
           "lines": [
             {
               "side": "CREDIT",

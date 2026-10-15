@@ -4,7 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useAuth } from "../auth/AuthContext";
-import { PARENT_PERMISSIONS, QUOTE, RECIPIENT, STUDENT_PERMISSIONS, corridor, mockApi, user } from "../test/fixtures";
+import { PARENT_PERMISSIONS, QUOTE, RECIPIENT, STRESS, STUDENT_PERMISSIONS, corridor, mockApi, user } from "../test/fixtures";
 import { CompareScreen } from "./Compare";
 
 vi.mock("../auth/AuthContext", () => ({ useAuth: vi.fn() }));
@@ -23,7 +23,10 @@ function signIn(role: "parent" | "student") {
 }
 
 async function getQuotes(recipients: unknown[]) {
-  mockApi({ "/corridors": CORRIDORS, "/recipients": { items: recipients }, "/quotes": QUOTE });
+  mockApi({
+    "/corridors": CORRIDORS, "/recipients": { items: recipients }, "/quotes": QUOTE,
+    "/quotes/qte_1/stress": STRESS,
+  });
   render(<MemoryRouter><CompareScreen /></MemoryRouter>);
   await screen.findByRole("option", { name: /United Kingdom/ });
   await userEvent.click(screen.getByRole("button", { name: "Get quotes" }));

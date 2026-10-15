@@ -203,6 +203,15 @@ class DemoFlow:
         self._check(
             shortfall["shortfall_foreign_minor"] > 0, "provider C carries a shortfall warning"
         )
+        fit = quote.get("deadline_fit") or {}
+        self._check(
+            fit.get("best_in_time") is not None and fit.get("cheapest_overall") == "prov_b",
+            "the quote names the cheapest provider that arrives before the due date",
+        )
+        self._say(
+            f"      Cheapest overall {fit.get('cheapest_overall')}, cheapest in time "
+            f"{fit.get('best_in_time')} (send {fit.get('send_date')}, due {fit.get('due_date')})"
+        )
         quote["_recipient_id"] = recipient["recipient_id"]
         return quote
 
@@ -222,6 +231,33 @@ class DemoFlow:
         self._check(body["guard"]["status"] == "passed", "number guard passed")
         self._check(len(body["facts_used"]) > 0, f"facts_used listed ({len(body['facts_used'])})")
         self._say(f"      {body['reply'][:160]}")
+        self._stress_test(quote)
+
+    def _stress_test(self, quote: dict[str, Any]) -> None:
+        """What if the taka weakens: the same quote priced again by the engine, read-only."""
+        stress = self._call("GET", f"/quotes/{quote['quote_id']}/stress?drops=5,10", "parent")
+        scenarios = stress.json().get("scenarios", []) if stress.status_code == 200 else []
+        extras = [s["extra_bdt_minor"] for s in scenarios]
+        self._check(
+            len(extras) == 2 and 0 < extras[0] < extras[1],
+            "the currency-drop stress test costs more for a bigger drop",
+        )
+        reply = self._call(
+            "POST",
+            "/assistant/chat",
+            "parent",
+            json={
+                "message": "What if the taka drops 10%?",
+                "context": {"quote_id": quote["quote_id"]},
+            },
+        )
+        body = reply.json()
+        self._check(
+            reply.status_code == 200
+            and body["reply"].startswith("Currency-drop stress test")
+            and body["guard"]["status"] == "passed",
+            "the assistant answers the what-if with the engine's numbers",
+        )
 
     def _draft(self, quote: dict[str, Any]) -> str:
         self._step(5, "Create a draft (Idempotency-Key makes the retry safe)")

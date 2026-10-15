@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1079 tests** in 77 files. Last run: `1079 passed in 166.25s (0:02:46)`.
-- Frontend: **130 tests** in 16 files (Vitest).
+- Backend: **1129 tests** in 82 files. Last run: `1129 passed in 313.86s (0:05:13)`.
+- Frontend: **139 tests** in 18 files (Vitest).
 
 ```bash
 cd backend  && pytest -q
@@ -49,6 +49,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | File | Tests | Covers |
 |------|-------|--------|
 | `tests/test_ai_assistant.py` | 12 | The assistant in TEMPLATE MODE (no API key): explanations from engine facts only. |
+| `tests/test_ai_deadline_fit.py` | 5 | The assistant proposes the cheapest provider that ARRIVES before the due date. The fake clock starts on Wednesday 14 October 2026. The synthetic providers settle in 1 (A), 2 (B) and 3 (C) business days, counting only days that both Bangladesh and the UK work. B is the cheapest overall, so a very tight deadline makes the assistant pass over it, and say why. |
 | `tests/test_ai_guards.py` | 10 |  |
 | `tests/test_ai_intents.py` | 2 |  |
 | `tests/test_ai_llm_clients.py` | 7 | LLM backends: request shape, pinned model, error mapping and template mode. |
@@ -60,6 +61,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_ai_reader_agent.py` | 9 | The assistant with the trained reader switched on, end to end. These tests use the shipped model, so they need ONNX Runtime and the model files. The point is not the model's accuracy (``test_nlu_quality.py`` covers that) but that the whole agent still obeys the rules: the model proposes, plain code verifies, the engine computes, a human decides. |
 | `tests/test_ai_redteam.py` | 5 | T19: the blueprint 14.6 red-team prompts. No state change, no invented numbers, and an audit event for every blocked attempt. |
 | `tests/test_ai_request_parser.py` | 7 | Reading "I need to pay GBP 10,000 by 28 October" without a model: exact, never a float. |
+| `tests/test_ai_stress.py` | 8 | The assistant answers "what if the taka drops?" from the engine's stress test. It is a question (a what-if on a quote that is already open), not a task: it creates nothing, every figure comes from the fee engine, and the number guard checks the answer like any other. |
 | `tests/test_ai_task_intents.py` | 5 | When the assistant starts a task (plan a payment, plan a send schedule) and when it must not. |
 | `tests/test_ai_tasks.py` | 14 | Agent tasks: one sentence becomes a quote, a ranking, a deadline and a draft PROPOSAL. The assistant may create a quote (the RBAC matrix allows it). It still cannot create a payment, approve, submit or cancel: the human confirms the draft and approves with MFA. |
 | `tests/test_ai_tools.py` | 6 |  |
@@ -69,6 +71,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_api_bank.py` | 39 | The sandbox bank network through the API: national and international transfers end to end. |
 | `tests/test_api_compliance.py` | 10 | Mock sanctions screening (T17), sandbox caps (T18) and the KYC gate. |
 | `tests/test_api_compliance_report.py` | 10 | GET /payments/{id}/compliance-report: a regulator-style evidence pack for one payment. |
+| `tests/test_api_deadline_fit.py` | 6 | The quote knows the deadline: it names the cheapest provider that arrives in time. The fake clock starts on Wednesday 14 October 2026, so the earliest send date is today. The synthetic providers settle in 1 (A), 2 (B) and 3 (C) business days, counting only days that both Bangladesh and the UK work. |
 | `tests/test_api_escrow.py` | 24 | Programmable escrow on the sandbox chain, through the API. Planning is free. Locking funds, paying early and cancelling need MFA for that exact escrow. The schedule pays itself, the bank's reviewer can freeze (and nothing more), and the AI has no escrow permission at all. |
 | `tests/test_api_features.py` | 10 | Planner, checklist, documents, tracker, instruction preview, listings and data reset. |
 | `tests/test_api_idempotency.py` | 8 | Idempotency keys (T04, T05) and optimistic locking against double approval. |
@@ -78,6 +81,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_api_sandbox.py` | 11 | Sandbox marking on every response, the sandbox info endpoint and the provider-event trigger. |
 | `tests/test_api_send_plan.py` | 6 | GET /planner/send-plan: the smart send plan over the API. |
 | `tests/test_api_smoke.py` | 2 |  |
+| `tests/test_api_stress.py` | 9 | Currency-drop stress test: the same quote priced again if the taka weakens. A what-if on synthetic rates. It uses the fee engine (no separate maths), keeps the same provider, changes nothing and writes no audit event. |
 | `tests/test_api_stretch.py` | 6 | Stretch features: F9 runway, F10 rate hint and F11 multi-corridor. |
 | `tests/test_api_validation.py` | 15 | Input validation and the RFC 7807 error format (T02, T03). |
 | `tests/test_api_webhooks.py` | 10 | Signed provider webhooks: T12 (bad signature), T13 (replay window), T14 (duplicates). |
@@ -95,6 +99,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_docker_config.py` | 18 | The Docker set-up, checked statically: what must hold even on a machine without Docker. |
 | `tests/test_docker_smoke.py` | 6 | scripts/docker_smoke.py: it passes a healthy stack and names what is wrong with a broken one. |
 | `tests/test_engine_cadence.py` | 8 | Smart send plan: the same money sent monthly, quarterly, per term or all at once. Fixed and SWIFT fees are paid per transfer and the FX margin scales with the amount, so how often you send changes the real cost. Hand-worked case, mid rate 160.00, charge code OUR: GBP 12,000 over 12 months monthly 12 x GBP 1,000 best A (no shortfall): 12 x BDT 5,700 = BDT 68,400 quarterly 4 x GBP 3,000 best A: 4 x BDT 12,100 = BDT 48,400 termly 2 x GBP 6,000 best B: 2 x BDT 18,900 = BDT 37,800 upfront 1 x GBP 12,000 best B: BDT 28,500 |
+| `tests/test_engine_deadline_fit.py` | 8 | Deadline fit: the cheapest provider that ARRIVES before the due date, not just the cheapest. Hand-worked case (calendars as in the planner tests). A business day is a day both countries work, so the working week is Monday to Thursday (Bangladesh rests Friday and Saturday, the UK Saturday and Sunday). Sent on Wednesday 14 October 2026: eta 1 business day arrives Thursday 15 October eta 2 business days arrives Monday 19 October (Friday, Saturday and Sunday are skipped) eta 3 business days arrives Tuesday 20 October |
 | `tests/test_engine_escrow_schedule.py` | 10 | Escrow release schedules: integer money, no rounding drift, month-end dates. |
 | `tests/test_engine_interbank.py` | 23 | Interbank engine: balanced journals, rails, and numbers that agree with the fee engine. |
 | `tests/test_engine_money.py` | 11 | Money type: integer minor units, Decimal rounding, no floats. |
@@ -134,6 +139,8 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `frontend/src/api/client.test.ts` | 6 |
 | `frontend/src/components/CountryOptions.test.tsx` | 4 |
 | `frontend/src/components/components.test.tsx` | 8 |
+| `frontend/src/components/deadlineFit.test.tsx` | 6 |
+| `frontend/src/components/stress.test.tsx` | 3 |
 | `frontend/src/components/tasks.test.tsx` | 11 |
 | `frontend/src/lib/canonical.test.ts` | 4 |
 | `frontend/src/lib/corridors.test.ts` | 8 |

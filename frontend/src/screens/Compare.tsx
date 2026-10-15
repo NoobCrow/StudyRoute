@@ -8,6 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useChatScope } from "../chatContext";
 import { Countdown } from "../components/Countdown";
 import { QuoteTable } from "../components/QuoteTable";
+import { StressCard } from "../components/StressCard";
 import { CountryOptions } from "../components/CountryOptions";
 import { ErrorNotice, Field, Loading, Notice, PageHead } from "../components/Ui";
 import { useAsync } from "../hooks";
@@ -154,7 +155,7 @@ export function CompareScreen() {
       .then((loaded) => {
         setQuote(loaded);
         setCountry(loaded.destination_country);
-        setSelected(sharedProvider || loaded.results[0]?.provider_id || null);
+        setSelected(sharedProvider || loaded.deadline_fit?.best_in_time || loaded.results[0]?.provider_id || null);
       })
       .catch((e: unknown) => setError(e as Error));
   }, [sharedQuote, sharedProvider]);
@@ -185,7 +186,7 @@ export function CompareScreen() {
         due_date: dueDate || undefined,
       });
       setQuote(created);
-      setSelected(created.results[0]?.provider_id ?? null);
+      setSelected(created.deadline_fit?.best_in_time ?? created.results[0]?.provider_id ?? null);
     } catch (e) {
       setError(e as Error);
     } finally {
@@ -257,6 +258,7 @@ export function CompareScreen() {
           <p className="small muted">Quote {quote.quote_id}. Input hash {quote.input_hash.slice(0, 18)}...</p>
         </section>
       ) : null}
+      {quote ? <StressCard quoteId={quote.quote_id} providerId={selected ?? quote.results[0]?.provider_id ?? ""} /> : null}
       {quote && selected && canDraft ? (
         <DraftForm
           key={`${quote.quote_id}-${selected}`}

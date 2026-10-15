@@ -47,6 +47,8 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F15 | **Bank network**: invented banks pass simulated money to each other, inside Bangladesh and abroad (clearing house, or SWIFT through a correspondent), with a double-entry ledger, MFA-confirmed transfers and a books-balance check | Bank network |
 | F17 | **A trained agent**: a small language model, fine-tuned on a GPU, reads what a parent types (intent plus the exact words that carry an amount, a currency or a date). Plain code checks every value, the engine computes every number, and the model can never act. Measured against the old rule-based reader in [docs/AI_EVALUATION.md](docs/AI_EVALUATION.md) | Chat |
 | F18 | **Reinforcement learning**: a small policy, trained by Double DQN against simulated parents, decides whether the assistant asks for a missing amount, date or period, reads the values back for a "yes", or plans. Plain code limits which choices are legal; it never approves or moves money. Measured against the old behaviour and a hand-written rule in [docs/AI_RL_EVALUATION.md](docs/AI_RL_EVALUATION.md) | Chat |
+| F19 | **Deadline-aware choice**: the quote names the cheapest provider that arrives before the university's due date, counting only days both countries work. If the cheapest would be late, Compare and the chat say so and propose the next one; if nobody can arrive in time, they say that too | Compare, Chat |
+| F20 | **Currency-drop stress test**: the quote priced again by the same engine if the taka weakens (5, 10, 15 and 20% by default). A what-if on synthetic rates, not a forecast; read-only | Compare, Chat |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
 ## Quick start (one command)
@@ -263,6 +265,8 @@ falls back to fixed rules, so nothing depends on it:
 
 - *"I need to pay GBP 10,000 tuition by 28 October"*: it makes a quote, ranks the providers, plans the
   deadline, checks your KYC, recipients and documents, and proposes the draft.
+- *"What if the taka drops 10%?"* (with a quote open): it prices that quote again at weaker rates and
+  lists what you would pay and how much more, from the engine. It is a what-if, not a forecast.
 - *"How often should I send GBP 800 a month for 9 months?"*: it compares sending monthly, every three
   months, every six months and all at once, because fixed fees are paid on every transfer.
 
@@ -402,6 +406,15 @@ The trained reader, in the real chat (the model only marks the words; plain code
 </tr>
 <tr>
 <td valign="top" align="center" width="50%"><a href="submission/screenshots/32-policy-asks-date.png"><img src="submission/screenshots/32-policy-asks-date.png" alt="The assistant asks for the missing deadline" width="300"></a><br><b>Asking instead of guessing</b><br><sub>"Plan GBP 10,000 tuition" has no date. The policy asks for it (or "no deadline") instead of planning without one.</sub></td>
+</tr>
+</table>
+
+The deadline-aware choice and the currency-drop stress test (synthetic rates, read-only):
+
+<table>
+<tr>
+<td valign="top" width="62%"><a href="submission/screenshots/33-deadline-and-stress.png"><img src="submission/screenshots/33-deadline-and-stress.png" alt="Compare: Provider B is cheapest but arrives too late, Provider A is the cheapest in time, and the stress test below" width="100%"></a><br><b>Cheapest that arrives in time</b><br><sub>With a due date of 20 October the cheapest provider would arrive on the 21st, so Compare says so and picks the cheapest one that arrives in time. Below, the same quote priced again if the taka weakens.</sub></td>
+<td valign="top" align="center" width="38%"><a href="submission/screenshots/34-chat-stress.png"><img src="submission/screenshots/34-chat-stress.png" alt="The assistant answers what if the taka drops 10 percent with the engine's figures" width="300"></a><br><b>Ask the assistant</b><br><sub>"What if the taka drops 10%?" is answered from the engine's stress test, marked as a what-if and not a forecast.</sub></td>
 </tr>
 </table>
 
