@@ -18,6 +18,10 @@ RUN useradd --system --uid 10001 --home-dir /srv --shell /usr/sbin/nologin study
 COPY backend/requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt
 
+# ONNX Runtime sends Microsoft telemetry on Linux unless told not to (found with a packet capture).
+# StudyRoute promises no tracking, so this is off in the image as well as in the code.
+ENV ORT_DISABLE_TELEMETRY=1
+
 COPY backend/app ./app
 COPY config ./config
 COPY backend/docker-entrypoint.sh ./docker-entrypoint.sh

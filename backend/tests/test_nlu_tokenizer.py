@@ -77,3 +77,12 @@ def test_the_shipped_vocabulary_loads_and_knows_the_special_tokens() -> None:
 def test_labels_are_consistent() -> None:
     assert len(INTENTS) == len(set(INTENTS)) and "ATTACK" in INTENTS and "OUT_OF_SCOPE" in INTENTS
     assert TAGS[0] == "O" and len(TAGS) == 1 + 2 * len(SLOTS)
+
+
+def test_the_reader_switches_off_onnx_runtime_telemetry() -> None:
+    """The library phones home to Microsoft on Linux by default; StudyRoute promises no tracking."""
+    import os
+
+    import app.ai.nlu.runtime  # noqa: F401  (importing it sets the variable)
+
+    assert os.environ["ORT_DISABLE_TELEMETRY"] == "1"

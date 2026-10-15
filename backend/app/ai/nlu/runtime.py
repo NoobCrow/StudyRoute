@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,11 @@ from app.ai.nlu.slots import Span
 from app.ai.nlu.tokenizer import WordPiece
 
 logger = logging.getLogger("studyroute.ai")
+# ONNX Runtime 1.31 ships Microsoft telemetry that is ON by default on Linux: about ten seconds
+# after first use it contacts mobile.events.data.microsoft.com (found with a packet capture inside
+# the container). StudyRoute promises no tracking and the reader needs no network, so switch it off
+# before the library is imported, and again through its API.
+os.environ["ORT_DISABLE_TELEMETRY"] = "1"
 MODEL_DIR = Path(__file__).resolve().parent / "model"
 
 
@@ -49,6 +55,7 @@ class Reader:
     def __init__(self, directory: Path = MODEL_DIR) -> None:
         import onnxruntime as ort
 
+        ort.disable_telemetry_events()
         manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
         for name in ("model.onnx", "vocab.txt"):
             if _sha256(directory / name) != manifest["files"][name]:

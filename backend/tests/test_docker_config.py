@@ -163,3 +163,9 @@ def test_ci_builds_and_smoke_tests_the_compose_stack() -> None:
     assert "python scripts/docker_smoke.py http://localhost:8080" in steps
     assert "demo_flow" in steps
     assert "docker compose down -v" in steps
+
+
+def test_the_image_switches_off_onnx_runtime_telemetry() -> None:
+    """ONNX Runtime 1.31 contacts Microsoft on Linux unless told not to (seen in a packet capture)."""
+    dockerfile = (ROOT / "backend" / "Dockerfile").read_text(encoding="utf-8")
+    assert re.search(r"^ENV ORT_DISABLE_TELEMETRY=1$", dockerfile, re.MULTILINE)
