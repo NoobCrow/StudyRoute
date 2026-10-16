@@ -15,6 +15,7 @@ import { EscrowScreen } from "@/components/escrow/escrow-screen";
 import { AppShell } from "@/components/layout/app-shell";
 import { SandboxBanner } from "@/components/layout/sandbox-banner";
 import { PaymentScreen } from "@/components/payment/payment-screen";
+import { PaymentsScreen } from "@/components/payment/payments-screen";
 import { ReportScreen } from "@/components/payment/report-screen";
 import { useAuth } from "@/components/providers/auth-provider";
 import { RecipientsScreen } from "@/components/recipients/recipients-screen";
@@ -217,6 +218,18 @@ describe("accessibility (axe)", () => {
     const { container } = renderWithProviders(<CompareScreen />);
     await screen.findByText("On track");
     expect(await violations(container)).toEqual([]);
+  });
+
+  it("the due date calendar opened from the compare form", async () => {
+    mockApi({
+      "/corridors": CORRIDORS,
+      "/recipients": { items: [] },
+      "/planner/deadline": PLAN_VIEW,
+    });
+    renderWithProviders(<CompareScreen />);
+    await userEvent.click(await screen.findByRole("button", { name: "University due date" }));
+    const calendar = await screen.findByRole("dialog", { name: "Choose a date" });
+    expect(await violations(calendar)).toEqual([]);
   });
 
   it("the compare screen with results, the stress test and the breakdown sheet", async () => {
@@ -531,6 +544,69 @@ describe("accessibility (axe): smart escrow", () => {
     await screen.findByRole("form", { name: /Reviewer control/ });
     await userEvent.click(screen.getByRole("button", { name: "Verify against the chain" }));
     await screen.findByText("Nothing anchored yet");
+    expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe("accessibility (axe): payments list", () => {
+  const row = (id: string, state: string, extra: Record<string, unknown> = {}) => ({
+    payment_id: `pay_${id}`,
+    state,
+    target: { amount_minor: 1000000, currency: "GBP", formatted: "GBP 10,000.00" },
+    provider_id: "prov_b",
+    provider_name: "Provider B (synthetic)",
+    recipient_label: "University of Example (synthetic) GB** **** 4821",
+    reference: `INV-${id}`,
+    due_date: "2026-10-30",
+    uetr: null,
+    parent_pays: "BDT 1,625,300.00",
+    created_at: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    updated_at: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+    ...extra,
+  });
+
+  it("the empty list with its tabs, filters, pager and the three steps", async () => {
+    mockApi({ "/payments": { items: [], next_cursor: null } });
+    const { container } = renderWithProviders(<PaymentsScreen />);
+    await screen.findByText("No payments yet.");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("a list with rows, then the detail sheet, the cancel dialog and the date range menu", async () => {
+    mockApi({
+      "/payments": {
+        items: [row("1", "QUOTED"), row("2", "SETTLED"), row("3", "FAILED"), row("4", "CANCELLED")],
+        next_cursor: null,
+      },
+    });
+    const { container } = renderWithProviders(<PaymentsScreen />);
+    await screen.findByText("4 payments");
+    expect(await violations(container)).toEqual([]);
+
+    await userEvent.click(screen.getByRole("button", { name: /Last 30 days/ }));
+    const presets = await screen.findByRole("button", { name: "All time" });
+    expect(await violations(presets.closest("[data-slot=popover-content]") as HTMLElement)).toEqual(
+      [],
+    );
+    await userEvent.keyboard("{Escape}");
+
+    await userEvent.click(screen.getByRole("button", { name: "Actions for INV-1" }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: "View details" }));
+    const sheet = await screen.findByRole("dialog", { name: "INV-1" });
+    expect(await violations(sheet)).toEqual([]);
+    await userEvent.keyboard("{Escape}");
+
+    await userEvent.click(screen.getByRole("button", { name: "Actions for INV-1" }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Cancel payment" }));
+    expect(await violations(await screen.findByRole("alertdialog"))).toEqual([]);
+  });
+
+  it("the no-match state", async () => {
+    mockApi({ "/payments": { items: [row("1", "QUOTED")], next_cursor: null } });
+    const { container } = renderWithProviders(<PaymentsScreen />);
+    await screen.findByText("1 payment");
+    await userEvent.type(screen.getByLabelText("Search by reference or recipient"), "zzz");
+    await screen.findByText("No payments match these filters.");
     expect(await violations(container)).toEqual([]);
   });
 });

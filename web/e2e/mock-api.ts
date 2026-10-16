@@ -10,6 +10,7 @@ const PERMISSIONS = [
   "planner:read",
   "data:reset",
   "recipients:allowlist",
+  "payments:cancel",
 ];
 
 export const USER = {
@@ -250,9 +251,29 @@ function problem(route: Route, status: number, code: string, detail: string): Pr
   );
 }
 
+function payments(cancelled: boolean) {
+  const created = new Date(Date.now() - 2 * 86_400_000).toISOString();
+  const base = {
+    target: { amount_minor: 1000000, currency: "GBP", formatted: "GBP 10,000.00" },
+    provider_id: "prov_b",
+    provider_name: "Provider B (synthetic)",
+    recipient_label: "University of Example (synthetic) GB** **** 4821",
+    due_date: "2026-10-30",
+    uetr: null,
+    parent_pays: "BDT 1,625,300.00",
+    created_at: created,
+    updated_at: created,
+  };
+  return [
+    { ...base, payment_id: "pay_1", reference: "INV-1", state: cancelled ? "CANCELLED" : "QUOTED" },
+    { ...base, payment_id: "pay_2", reference: "FEES-2", state: "SETTLED" },
+  ];
+}
+
 /** Answers every /api/v1 call the dashboard, sign-in and compare screens make. */
 export async function mockApi(page: Page): Promise<void> {
   let allowlisted = false;
+  let cancelled = false;
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/api/v1", "");
@@ -269,7 +290,13 @@ export async function mockApi(page: Page): Promise<void> {
     if (path === "/me") return json(route, USER);
     if (path === "/corridors") return json(route, CORRIDORS);
     if (path === "/kyc/status") return json(route, KYC);
-    if (path === "/payments") return json(route, { items: [], next_cursor: null });
+    if (path === "/payments") {
+      return json(route, { items: payments(cancelled), next_cursor: null });
+    }
+    if (path === "/payments/pay_1/cancel" && method === "POST") {
+      cancelled = true;
+      return json(route, { payment_id: "pay_1", state: "CANCELLED" });
+    }
     if (path === "/recipients") {
       return json(route, {
         items: [

@@ -128,3 +128,23 @@ test("the add form checks the IBAN's check digits and keeps Save off until it is
   await expect(page.getByText(/The check digits do not match/)).toBeVisible();
   await expect(save).toBeDisabled();
 });
+
+test("payments: filter by status, open a payment's sheet and cancel it", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/payments/");
+  await expect(page.getByRole("heading", { name: "Payments" })).toBeVisible();
+  await expect(page.getByText("2 payments", { exact: true })).toBeVisible();
+
+  await page.getByRole("tab", { name: /Completed/ }).click();
+  await expect(page.getByText("1 payment", { exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/status=completed/);
+  await page.getByRole("tab", { name: /^All/ }).click();
+
+  await page.getByRole("row", { name: /INV-1/ }).click();
+  const sheet = page.getByRole("dialog", { name: "INV-1" });
+  await expect(sheet).toContainText("Simulated. Nothing was sent to a real bank.");
+  await sheet.getByRole("button", { name: "Cancel payment" }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Cancel payment" }).click();
+  await expect(page.getByRole("tab", { name: /In progress\s*0/ })).toBeVisible();
+  await expect(page.getByText("Cancelled", { exact: true }).first()).toBeVisible();
+});
