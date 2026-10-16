@@ -252,6 +252,17 @@ class RefreshToken(Base):
     revoked_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
 
+class BrowserSession(Base):
+    """Opaque, host-only browser session; never returned to JavaScript."""
+
+    __tablename__ = "browser_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+
+
 class MfaProof(Base):
     __tablename__ = "mfa_proofs"
 

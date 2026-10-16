@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -42,8 +44,12 @@ export function AppSidebar() {
   const items = NAV.filter((item) => item.roles.includes(user.role));
 
   async function signOut() {
-    await logout();
-    router.replace("/login/");
+    try {
+      await logout();
+      router.replace("/login/");
+    } catch {
+      toast.error("Sign out failed. Check your connection and try again.");
+    }
   }
 
   return (

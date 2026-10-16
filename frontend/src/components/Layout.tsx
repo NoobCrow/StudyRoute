@@ -28,8 +28,7 @@ export function Layout() {
   const items = NAV.filter((item) => item.roles.includes(user.role));
 
   async function signOut() {
-    await logout();
-    navigate("/login");
+    try { await logout(); navigate("/login"); } catch { window.alert("Sign out failed. Check your connection and try again."); }
   }
 
   return (
@@ -59,7 +58,7 @@ export function Layout() {
       <main id="main" className="page">
         <Outlet />
       </main>
-      {user.role !== "admin" ? <ChatPanel /> : null}
+      {user.role !== "admin" ? <ChatPanel key={user.user_id} /> : null}
     </>
   );
 }

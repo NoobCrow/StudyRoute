@@ -28,6 +28,15 @@ class FactSet:
         self._by_id[fact.id] = fact
         return fact
 
+    def selected(self, prefixes: tuple[str, ...]) -> FactSet:
+        """Read-only subset preserving engine fact IDs (no renumbering)."""
+        result = FactSet()
+        for fact in self.all():
+            if fact.key.startswith(prefixes):
+                result._by_key[fact.key] = fact
+                result._by_id[fact.id] = fact
+        return result
+
     def get(self, key: str) -> Fact | None:
         return self._by_key.get(key)
 

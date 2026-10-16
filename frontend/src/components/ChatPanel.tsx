@@ -1,14 +1,14 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import { post } from "../api/client";
-import type { ChatAction, ChatResponse, DialogueChoice, PendingTask, Understanding } from "../api/types";
+import type { ChatAction, ChatResponse, DialogueChoice, Understanding } from "../api/types";
 import { useCurrentChatScope } from "../chatContext";
+import { AssistantProvider, useAssistant } from "./AssistantContext";
+import { CloudSettings } from "./CloudSettings";
 import { TaskView } from "./PlanCard";
 import { Badge, ErrorNotice } from "./Ui";
 
-interface Turn { id: number; role: "me" | "bot"; text: string; reply?: ChatResponse }
 
 const SUGGESTIONS = [
   "I need to pay GBP 10,000 tuition by 28 October",
@@ -29,7 +29,7 @@ function actionLink(action: ChatAction, paymentId?: string): { to: string; label
 
 function GuardNote({ reply }: { reply: ChatResponse }) {
   const { status, failure, flags } = reply.guard;
-  if (status === "passed" && flags.length === 0) return null;
+  if (status === "cloud_unavailable" || (status === "passed" && flags.length === 0)) return null;
   const text: Record<string, string> = {
     policy_blocked: "Blocked by the safety check. Nothing was changed.",
     template_fallback: `A model reply was discarded (${failure ?? "guard"}). This is the engine's template answer.`,
@@ -83,7 +83,7 @@ function HowIRead({ understanding, dialogue }: { understanding: Understanding; d
           among steps that are safe for the values it holds, and none of them moves money.
         </p>
       ) : null}
-      <p className="small muted">The model only marks words. Plain code turns them into values and the engine does every calculation.</p>
+      <p className="small muted">The small reader marks payment details; it is not the cloud language model. The engine calculates amounts. A connected cloud model writes the reply.</p>
     </details>
   );
 }
@@ -127,42 +127,21 @@ function Details({ reply, paymentId, onAnswer }: { reply: ChatResponse; paymentI
 }
 
 export function ChatPanel() {
+  return <AssistantProvider><ChatPanelBody /></AssistantProvider>;
+}
+
+function ChatPanelBody() {
   const scope = useCurrentChatScope();
   const [open, setOpen] = useState(false);
-  const [turns, setTurns] = useState<Turn[]>([]);
   const [text, setText] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [mode, setMode] = useState<ChatResponse | null>(null);
-  const [planQuote, setPlanQuote] = useState<string | null>(null);
-  const [pending, setPending] = useState<PendingTask | null>(null);
-  const counter = useRef(0);
+  const { turns, busy, connecting, error, mode, connected, ask: send } = useAssistant();
   const newest = useCallback((node: HTMLDivElement | null) => {
     node?.scrollIntoView?.({ block: "start" });
   }, []);
 
   async function ask(message: string) {
-    const clean = message.trim();
-    if (!clean || busy) return;
     setText("");
-    setError(null);
-    setBusy(true);
-    setTurns((t) => [...t, { id: ++counter.current, role: "me", text: clean }]);
-    try {
-      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null, pending,
-        history: turns.filter((t) => t.role === "me").slice(-6).map((t) => t.text) };
-      const reply = await post<ChatResponse>("/assistant/chat", { message: clean, context });
-      setMode(reply);
-      if (reply.task?.kind === "payment_plan" && reply.task.status === "ready") setPlanQuote(reply.task.quote.quote_id);
-      const task = reply.task;
-      const waiting = task && (task.status === "needs_input" || task.status === "needs_confirmation");
-      setPending(waiting ? { kind: task.kind, ...(task as { collected?: object }).collected } : null);
-      setTurns((t) => [...t, { id: ++counter.current, role: "bot", text: reply.reply, reply }]);
-    } catch (e) {
-      setError(e as Error);
-    } finally {
-      setBusy(false);
-    }
+    await send(message);
   }
 
   function submit(event: FormEvent) {
@@ -179,8 +158,8 @@ export function ChatPanel() {
         <section id="chat-panel" className="chat-panel" aria-label="Assistant chat">
           <div className="chat-head">
             <strong>StudyRoute assistant</strong>
-            <Badge tone={mode?.mode === "llm" ? "info" : "warn"} title="Offline answers use topic routing, reviewed guidance and engine facts. No external language model is called.">
-              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Offline assistant"}
+            <Badge tone={mode?.mode === "llm" ? "info" : "warn"} title="Cloud models generate checked replies. Offline mode, if explicitly enabled, uses reviewed templates.">
+              {connected ? `${connected.provider}: ${connected.model}` : mode?.mode === "llm" ? `Model: ${mode.model_version}` : mode?.mode === "unavailable" ? "Cloud unavailable" : mode?.mode === "template" ? "Offline assistant" : "Cloud assistant"}
             </Badge>
             {mode?.understanding.source === "trained" ? (
               <Badge tone="info" title="A small trained model marks the words that carry a value. Plain code checks them and the engine calculates.">
@@ -213,12 +192,13 @@ export function ChatPanel() {
                 ))}
               </div>
             ) : null}
+            <CloudSettings />
             <ErrorNotice error={error} />
           </div>
           <form className="chat-form" onSubmit={submit}>
             <label htmlFor="chat-input" className="sr-only">Your question</label>
             <input id="chat-input" value={text} onChange={(e) => setText(e.target.value)} placeholder="Ask about costs, deadlines, documents" maxLength={1000} />
-            <button type="submit" className="btn primary" disabled={busy || !text.trim()}>Send</button>
+            <button type="submit" className="btn primary" disabled={busy || connecting || !text.trim()}>Send</button>
           </form>
         </section>
       ) : null}

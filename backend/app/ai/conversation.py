@@ -61,6 +61,49 @@ GUIDES: dict[str, str] = {
         "deadline or document checklist."
     ),
     "identity": (
+        "I'm the StudyRoute assistant. I help families understand education-payment costs, "
+        "deadlines, documents and simulated payment tracking. I can prepare a quote-based "
+        "plan for you to review, but I am not a bank and cannot approve or send payments."
+    ),
+    "capabilities": (
+        "I can help you:\n"
+        "• Prepare a tuition or living-cost payment plan for review.\n"
+        "• Compare quoted provider costs, FX margins and recipient shortfalls.\n"
+        "• Explain deadlines, documents and your mock KYC status.\n"
+        "• Explain the payment you have open and the sandbox features.\n\n"
+        "Try 'What is my KYC status?' or open a quote and ask 'Compare my providers'. "
+        "I use synthetic engine data, not live bank rates, and a human must approve payments."
+    ),
+    "capabilities_bn": (
+        "আমি যেভাবে সাহায্য করতে পারি:\n"
+        "• Tuition বা living costs-এর payment plan তৈরি করে review-এর জন্য দেখাতে।\n"
+        "• Quote-এর provider costs, FX margin ও shortfall তুলনা করতে।\n"
+        "• Deadline, documents ও তোমার mock KYC status বুঝিয়ে বলতে।\n"
+        "• খোলা payment-এর অবস্থা ও sandbox features ব্যাখ্যা করতে।\n\n"
+        "শুরু করতে 'What is my KYC status?' জিজ্ঞেস করো, অথবা quote খুলে "
+        "'Compare my providers' বলো। তথ্য synthetic; আমি payment approve বা আসল টাকা পাঠাই না।"
+    ),
+    "wellbeing": (
+        "I'm here and ready to help—thanks for asking! "
+        "How can I help with your StudyRoute payment planning today?"
+    ),
+    "wellbeing_bn": (
+        "আমি সাহায্য করতে প্রস্তুত—খোঁজ নেওয়ার জন্য ধন্যবাদ! তুমি কেমন আছো? StudyRoute-এ কী নিয়ে সাহায্য লাগবে?"
+    ),
+    "wellbeing_reply": (
+        "Thanks for sharing. When you're ready, tell me what you want to do in StudyRoute "
+        "or ask 'What can you do?' to see how I can help."
+    ),
+    "wellbeing_reply_bn": (
+        "জানানোর জন্য ধন্যবাদ! StudyRoute-এ কী নিয়ে সাহায্য দরকার বলো। "
+        "চাইলে 'তুমি কী করতে পারো?' জিজ্ঞেস করে শুরু করতে পারো।"
+    ),
+    "greeting_again": (
+        "Hi again! What would you like to work on—payment planning, provider costs, "
+        "documents or your mock KYC?"
+    ),
+    "farewell": "Goodbye! You can return whenever you need help with StudyRoute.",
+    "mode": (
         "I'm StudyRoute's read-only finance assistant, not a bank or a payment approver. "
         "In offline mode I use topic routing, reviewed guidance and engine facts, not an "
         "external "
@@ -170,11 +213,57 @@ GUIDES: dict[str, str] = {
 
 
 def _normal(text: str) -> str:
-    return " ".join(text.casefold().strip().split()).strip(" .!?।")
+    return " ".join(text.casefold().replace("\u2019", "'").strip().split()).strip(" .!?,;:।")
+
+
+def _social(t: str) -> Route | None:
+    """Whole-message social/help requests, not substrings of financial instructions."""
+    body = re.sub(r"^(?:hi|hello|hey|হ্যালো|হাই|salam)[,!]?\s+", "", t)
+    body = body.removeprefix("please ").removesuffix(" please")
+    if re.fullmatch(
+        r"(?:studyroute|তুমি|আপনি)\s*(?:কীভাবে|কিভাবে)\s*(?:আমাকে|আমাদের)\s*সাহায্য\s*করতে\s*(?:পারো|পারেন|পারে)"
+        r"(?:[?।!\s]*(?:সহজ\s*)?বাংলা[য়য়]\s*বোঝাও)?[?।!\s]*",
+        body,
+    ):
+        return Route("about", guide="about_bn")
+    if re.fullmatch(
+        r"what (?:all )?(?:can|could) you (?:do(?: for me)?|help(?: me)? with)|"
+        r"what do you do|how can you (?:help|assist)(?: me)?|"
+        r"(?:can|could) you help(?: me)?|(?:show|list|explain) (?:me )?your "
+        r"(?:capabilities|features)|what(?: is|'s) your (?:role|purpose)|help(?: me)?",
+        body,
+    ):
+        return Route("capabilities", guide="capabilities")
+    if re.fullmatch(
+        r"(?:tumi |apni )?(?:ki ki|ki) (?:korte paro|korte paren|paro|paren)|"
+        r"(?:তুমি |আপনি )?(?:কী কী|কি কি|কী|কি) (?:করতে পারো|করতে পারেন|পারো|পারেন)|"
+        r"(?:tumi|apni) (?:kivabe|kibhabe) help (?:korba|korbe|korben)|"
+        r"(?:সাহায্য করো|সাহায্য করুন|help koro)",
+        body,
+    ):
+        return Route("capabilities", guide="capabilities_bn")
+    if re.fullmatch(r"how are you(?: doing)?|how(?:'s| is) it going|how do you do", body):
+        return Route("wellbeing", guide="wellbeing")
+    if re.fullmatch(
+        r"k(?:e|a)mon (?:acho|achho|aso|achen|asen)|ki obostha|"
+        r"কেমন (?:আছো|আছ|আছেন)|কী অবস্থা|কি অবস্থা",
+        body,
+    ):
+        return Route("wellbeing", guide="wellbeing_bn")
+    if re.fullmatch(r"i(?:'m| am) (?:fine|good|well)|doing (?:well|good)|fine(?: thanks)?", body):
+        return Route("wellbeing_reply", guide="wellbeing_reply")
+    if re.fullmatch(r"(?:ami )?bha?lo achi|(?:আমি )?ভা(?:লো|ল) আছি", body):
+        return Route("wellbeing_reply", guide="wellbeing_reply_bn")
+    if re.fullmatch(r"bye|goodbye|see you(?: later)?|বিদায়|বিদায়", body):
+        return Route("farewell", guide="farewell")
+    return None
 
 
 def _explicit(text: str) -> Route | None:
     t = _normal(text)
+    social = _social(t)
+    if social:
+        return social
     if re.fullmatch(
         r"(?:hi|hello|hey|assalamu ?alaikum|salam|হাই|হ্যালো|আসসালামু আলাইকুম)"
         r"(?: there| studyroute)?",
@@ -184,12 +273,12 @@ def _explicit(text: str) -> Route | None:
         return Route("greeting", guide="greeting_bn" if bn else "greeting")
     if re.fullmatch(r"(?:thanks|thank you|thank you so much|ধন্যবাদ|dhonnobad|ok thanks)", t):
         return Route("thanks", guide="thanks")
-    if re.search(
-        r"who are you|are you (?:an? )?(?:ai|bot)|template mode|offline mode|"
-        r"same answer|api key|তুমি কে",
-        t,
-    ):
+    if re.fullmatch(r"(?:ke|key) (?:apni|tumi)|(?:apni|tumi) (?:ke|key)", t):
         return Route("identity", guide="identity")
+    if re.search(r"who are you|তুমি কে|আপনি কে", t):
+        return Route("identity", guide="identity")
+    if re.search(r"are you (?:an? )?(?:ai|bot)|template mode|offline mode|same answer|api key", t):
+        return Route("mode", guide="mode")
     if re.fullmatch(
         r"(?:what is (?:it|this|that)|what'?s (?:it|this|that)|what does (?:it|this|that) mean)", t
     ):
@@ -262,6 +351,10 @@ def route_message(message: str, history: Sequence[str] = ()) -> Route | None:
     """A route can only request a read-only handler or reviewed prose, never an action."""
     explicit = _explicit(message)
     if explicit:
+        if explicit.topic == "greeting" and explicit.guide == "greeting" and history:
+            previous = _explicit(history[-1])
+            if previous and previous.topic == "greeting":
+                return Route("greeting", guide="greeting_again")
         return explicit
     t = _normal(message)
     if not _FOLLOWUP.fullmatch(t):
@@ -275,7 +368,13 @@ def route_message(message: str, history: Sequence[str] = ()) -> Route | None:
         prior = _explicit(previous)
         if prior or not _FOLLOWUP.fullmatch(_normal(previous)):
             break
-    if prior and prior.topic not in {"greeting", "thanks"}:
+    if prior and prior.topic not in {
+        "greeting",
+        "thanks",
+        "wellbeing",
+        "wellbeing_reply",
+        "farewell",
+    }:
         guide = _MORE.get(prior.topic, prior.guide)
         if prior.topic == "kyc" and re.search(r"fix|do|next", t):
             guide = "kyc_steps"

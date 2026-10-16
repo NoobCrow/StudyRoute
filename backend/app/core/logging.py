@@ -14,6 +14,9 @@ from re import Pattern
 
 request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="-")
 
+_API_CREDENTIAL = re.compile(
+    r"\b(?:AIza[A-Za-z0-9_-]{20,}|gsk_[A-Za-z0-9_-]{16,}|hf_[A-Za-z0-9]{16,}|sk-[A-Za-z0-9_-]{16,})\b"
+)
 _JWT = re.compile(r"eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}")
 _BEARER = re.compile(r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{8,}")
 _KEY_VALUE = re.compile(
@@ -39,7 +42,7 @@ _LATER_RULES: list[tuple[Pattern[str], str]] = [
 
 def redact(text: str) -> str:
     """Remove tokens, secrets, e-mail addresses, IBANs and long digit runs from text."""
-    result = text
+    result = _API_CREDENTIAL.sub("[REDACTED_API_KEY]", text)
     for pattern, replacement in _RULES:  # tokens first, so "Authorization: Bearer x" is caught
         result = pattern.sub(replacement, result)
     result = _KEY_VALUE.sub(lambda m: f"{m.group(1)}{m.group(2)}[REDACTED]", result)

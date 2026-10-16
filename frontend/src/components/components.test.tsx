@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AuthProvider, useAuth } from "../auth/AuthContext";
-import { setRefreshToken } from "../api/client";
+import { invalidateSession } from "../api/client";
 import { useIdempotencyKey } from "../idempotency";
 import { QUOTE, problem, mockApi } from "../test/fixtures";
 import { Countdown } from "./Countdown";
@@ -58,17 +58,17 @@ describe("useIdempotencyKey", () => {
 });
 
 describe("sign out", () => {
-  it("signs out locally even when the server cannot revoke the token", async () => {
-    setRefreshToken(null);
+  it("keeps the account when server logout fails", async () => {
+    invalidateSession();
     mockApi({
-      "/auth/login": { access_token: "a", refresh_token: "r".repeat(20), expires_in: 900, expires_at: "x", user: { user_id: "u", role: "parent", permissions: [] } },
-      "/auth/logout": problem(429, "RATE_LIMITED", "Slow down."),
+      "/auth/browser/login": { access_token: "a", refresh_token: "r".repeat(20), expires_in: 900, expires_at: "x", user: { user_id: "u", role: "parent", permissions: [] } },
+      "/auth/browser/logout": problem(429, "RATE_LIMITED", "Slow down."),
     });
     const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
     await act(async () => result.current.login("a@b.test", "pw"));
     expect(result.current.user).not.toBeNull();
-    await act(async () => result.current.logout());
-    expect(result.current.user).toBeNull();
+    await act(async () => { await expect(result.current.logout()).rejects.toMatchObject({status: 429}); });
+    expect(result.current.user).not.toBeNull();
   });
 });
 

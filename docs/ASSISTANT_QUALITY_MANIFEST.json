@@ -1,0 +1,57 @@
+{
+  "format": "studyroute-quality-cumulative-v3",
+  "base": "previous cloud-assistant update",
+  "validation": {
+    "see": "ASSISTANT_SESSION_VALIDATION.json",
+    "live_provider_inference_for_this_update": false,
+    "frontend_or_auth_changed": true
+  },
+  "limitations": [
+    "Targeted claim guards are not a general semantic truth verifier.",
+    "No live Hugging Face/Gemini/Groq inference was tested by the developer for this update.",
+    "Extension-injected hydration attributes require verification in the user browser; warnings were not suppressed."
+  ],
+  "files": [
+    {
+      "path": "backend/app/ai/facts.py",
+      "sha256": "987a46cbd984033153c4008d52581951ad279ddcce6460ef211dd94d7adc1536"
+    },
+    {
+      "path": "backend/app/ai/relevance.py",
+      "sha256": "268856943d05032e8e0ae6ce640b04ae68ef0616d5c5bdb38af7e6039e519ca0"
+    },
+    {
+      "path": "backend/app/ai/claim_checks.py",
+      "sha256": "a93a6393bbfc73678a133d3b848b0e36c2edcfc7f4f60f7617f902b2f481a953"
+    },
+    {
+      "path": "backend/app/ai/conversation.py",
+      "sha256": "168b316db98d0f778e1ae6001d40155f272a4bb33c4cbedfbd2c5ae146dad8c6"
+    },
+    {
+      "path": "backend/app/ai/guards.py",
+      "sha256": "561287e3551b131e48061e7b82adc370defde7a985d0ba56f508cabc450b3ee1"
+    },
+    {
+      "path": "backend/app/ai/llm.py",
+      "sha256": "bdc0bfa976f3c3bf6e5ce3ec7edec1d7a969d3af12b0e547189ceb1157f22ccc"
+    },
+    {
+      "path": "backend/app/ai/orchestrator.py",
+      "sha256": "f9f617aeed68bd51d7c85e59602a90521a2442198089372eba4b0b3f9a47f597"
+    },
+    {
+      "path": "backend/tests/test_ai_quality.py",
+      "sha256": "f8cf2c5252f46a1fa2d33e78c0d68a94a1d79b230d8305bcffb88e430634e522"
+    },
+    {
+      "path": "deploy/huggingface-space/requirements.txt",
+      "sha256": "6636bf3b82f33c05e42f7a165c3a117f0c4b2c01b404cc44645f1a6720b80e7e"
+    },
+    {
+      "path": "docs/ASSISTANT_QUALITY_UPDATE.bn.md",
+      "sha256": "1397a99635fec572fdc67b3d8ca5c67214d0e8ad1bb77ee645fe00b44d7007ee"
+    }
+  ],
+  "supersedes": "standalone quality v1/v2"
+}

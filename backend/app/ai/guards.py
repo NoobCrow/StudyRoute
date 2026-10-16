@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.ai.claim_checks import claim_failure
 from app.ai.facts import FactSet
 from app.ai.number_guard import check_numbers
 from app.ai.templates import INDICATIVE
@@ -94,6 +95,8 @@ def validate_llm_output(
     reply = parsed.get("reply")
     if not isinstance(reply, str) or not reply.strip() or len(reply) > MAX_REPLY_CHARS:
         raise GuardFailure("BAD_SHAPE", "reply missing, empty or too long")
+    if failure := claim_failure(reply, facts):
+        raise GuardFailure(failure, "unsafe success promise or ungrounded account/limit wording")
     if _ACTION_CLAIM.search(reply):
         raise GuardFailure("ACTION_CLAIM", "the reply claims an action was taken")
     if _LEGAL_CLAIM.search(_HEDGE.sub(" ", reply)):  # "I cannot say whether it is legal" is fine

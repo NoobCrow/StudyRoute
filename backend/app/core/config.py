@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     rules_file: Path | None = None
     bank_network_file: Path | None = None
-    cors_origins: str = "http://localhost:5173,http://localhost:8080,http://127.0.0.1:8080"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://localhost:8080,http://127.0.0.1:8080"
 
     sandbox_mfa_code: str | None = DEFAULT_SANDBOX_MFA_CODE
     seed_demo_password: str | None = None
@@ -58,7 +58,16 @@ class Settings(BaseSettings):
     webhook_base_url: str = "http://127.0.0.1:8000"
     worker_tick_seconds: float = 1.0
 
-    llm_provider: Literal["anthropic", "openai_compatible"] | None = None
+    # Cloud chat never silently impersonates a generative model with templates.
+    assistant_cloud_enabled: bool = True
+    hf_space_url: str | None = None
+    hf_token: SecretStr | None = None
+    hf_space_app_secret: SecretStr | None = None
+    hf_space_model: str = "Qwen/Qwen3-4B-Instruct-2507"
+    gemini_model: str = "gemini-2.5-flash"
+    groq_model: str = "llama-3.3-70b-versatile"
+    cloud_timeout_seconds: float = 90.0
+    llm_provider: Literal["anthropic", "openai_compatible", "gemini", "groq"] | None = None
     llm_api_key: SecretStr | None = None
     llm_model: str | None = None
     llm_base_url: str | None = None

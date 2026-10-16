@@ -1,66 +1,53 @@
-# Assistant fix — validation record
+# Assistant fix v2 — validation record
 
-Validated on Linux with Python 3.13.14 and Node.js 24.14.1. Windows installation
-instructions target the user's existing Python virtual environment and Next.js dev setup;
-Windows itself was not available for executing this release.
+## Reported gaps addressed
 
-## Results
+- `what can you do?` now gives a concrete capability list, not an ambiguity response.
+- `kemon acho?` receives a short Bangla social response.
+- Capability/help variants in English, Bangla and Banglish are recognized.
+- An immediate repeated greeting gets a short greeting instead of the full introduction.
+- `who are you?` has a concise identity answer; offline/model details remain a separate route.
+- Whole-message social patterns do not swallow financial instructions or bypass policy checks.
 
-- Clean-source backend suite: **1194 passed**, including **65 new conversation regressions**.
-- Next.js suite: **190 passed** (single worker for stable accessibility-test timing).
-- Legacy Vite suite: **140 passed**.
-- Next.js assistant-specific suite: **14 passed**.
-- Legacy assistant/task-specific suite: **12 passed**.
-- Python Ruff checks, frontend TypeScript checks and Next.js ESLint: passed.
-- Next.js production build and CSP hash generation: passed.
-- Real headless Chromium browser, desktop and mobile: passed. Each viewport submitted
-  eight questions through the UI to the real backend with the actual trained reader.
-  All returned distinct, rendered replies; bounded previous-user-message serialization
-  was verified; all output guards passed; no task or payment proposal was generated;
-  no browser console errors were observed.
-- Existing engine comparison regression still returns verified quote figures and fact IDs.
-- Final source archive checked with the project's repository scanner; runtime data,
-  environments, dependencies and generated builds excluded.
+## Validation
 
-## Scope and limitations
+Platform: Python 3.13.14, Node.js 24.14.1, Linux, real trained reader enabled in integration
+and browser checks. Windows execution was not available; the update uses the existing
+working virtual environment and requires no dependency changes.
 
-This is a deterministic offline conversation/routing fix, not a newly trained generative
-model. Existing NLU and dialogue model binaries are unchanged. API response mode remains
-`template` for compatibility; the UI accurately labels it `Offline assistant`.
-Existing task confirmation, ownership checks, number guards, policy refusal, audit and
-human/MFA approval are preserved. External LLM mode remains available through the existing
-configuration, but no external provider was called during this validation.
+- V2 conversation regression suite: **104 passed** (v1 had 65).
+- V2 complete clean-source backend suite: **1233 passed**.
+- V2 real Chromium desktop and mobile: eight distinct replies per viewport through the
+  actual frontend and backend. Verified capabilities, repeated greeting, Banglish wellbeing,
+  Banglish capability question, factual KYC status, KYC follow-up and concise identity.
+  Guard results passed, no task or payment proposal generated, no browser console errors.
+- V2 Ruff checks: passed.
+- Frontend source is byte-identical to the previously delivered v1 fixed release. That source
+  passed Next.js **190 tests**, Vite **140 tests**, TypeScript, Next.js ESLint and production
+  build/CSP generation. No frontend dependency, lockfile, model binary or database migration
+  changed in v2. Browser checks exercise the same built frontend against the updated backend.
+- Final clean source repository scan and ZIP integrity verification: passed.
 
-An initial parallel build did not complete under memory pressure. The final build was
-rerun and completed including static export and CSP hashes; only that completed run is
-reported as passing. No dependency audit auto-fixes or unrelated dashboard/auth changes
-were included.
+Existing engine numbers, ownership checks, task continuation, policy refusal, audit,
+number guards and human/MFA approval remain in place. History remains an untrusted,
+bounded topic hint, never a source of amounts, dates, permissions or action authorization.
+
+## Limitations
+
+This is a bounded offline conversation fix, not a new generative model or a promise of
+unrestricted multilingual conversation. Existing external-LLM configuration is unchanged;
+no external model service was called. Assistant API mode remains `template` for compatibility,
+while the UI labels it `Offline assistant`.
 
 ## Reproduction
 
-From `backend/`, with project requirements installed:
+From `backend/`, with existing requirements installed:
 
 ```sh
+python -m pytest tests/test_ai_conversation.py -o addopts='' -q
 python -m pytest -o addopts='' -q
 ruff check app tests/test_ai_conversation.py
 ```
 
-From `web/`:
-
-```sh
-npm run typecheck
-npm run lint
-npm test -- --maxWorkers=1
-npm run build
-```
-
-From `frontend/`:
-
-```sh
-npm run typecheck
-npm test
-```
-
-The real-browser smoke check was run against an isolated seeded database and a local
-production-like static server using the generated CSP. Those runtime databases and
-installed test tools are deliberately not included in either ZIP.
+The real-browser checks use an isolated database and local production-like server, not
+any user's database. Runtime state and installed dependencies are not included in the ZIPs.

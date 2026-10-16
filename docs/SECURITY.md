@@ -46,9 +46,11 @@ test or demo step that proves it. Test names refer to `backend/tests/`. Demo ste
 ## Layers
 
 - **Browser.** Static files with a strict CSP (no inline script or style), `nosniff`,
-  `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, HSTS. Tokens live in memory; only the
-  rotating refresh token is kept in `sessionStorage`. `credentials: "omit"`, so cookies are never
-  sent and CSRF does not apply.
+  `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, HSTS. Browser access tokens live in memory. Browser sessions use a hashed, server-revocable
+  opaque HttpOnly/SameSite=Strict cookie, Secure in production, with an absolute expiry.
+  The browser uses same-origin credentials; cookie-auth endpoints require an exact trusted
+  Origin and X-StudyRoute-Browser header. CSRF protection is required (see SESSION_FIX.bn.md).
+  No refresh token is kept in JavaScript storage. Legacy bearer API refresh tokens still rotate.
 - **nginx.** Serves the UI and proxies `/api` on the same origin, so no CORS is needed. It sets
   `X-Forwarded-For` from the real client address (overwriting any client value). Only nginx is
   published by `docker-compose.yml`. nginx adds the page's security headers to the UI and its

@@ -19,7 +19,7 @@ export function AssistantSheet({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { mode } = useAssistant();
+  const { mode, connected } = useAssistant();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full gap-0 sm:max-w-md">
@@ -31,10 +31,20 @@ export function AssistantSheet({
               title={
                 mode?.mode === "llm"
                   ? "A configured external language model explains checked engine facts."
-                  : "Offline answers use topic routing, reviewed guidance and engine facts. No external language model is called."
+                  : mode?.mode === "unavailable"
+                    ? "No model answer was returned. Check cloud connection settings."
+                    : "Configure Hugging Face or connect a provider to use cloud chat."
               }
             >
-              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Offline assistant"}
+              {connected
+                ? `${connected.provider}: ${connected.model}`
+                : mode?.mode === "llm"
+                  ? `Model: ${mode.model_version}`
+                  : mode?.mode === "unavailable"
+                    ? "Cloud unavailable"
+                    : mode?.mode === "template"
+                      ? "Offline assistant"
+                      : "Cloud assistant"}
             </Chip>
             {mode?.understanding.source === "trained" ? (
               <Chip

@@ -1,3 +1,11 @@
+> **Cloud assistant update:** Gemini/Groq session-key controls and an owned Hugging Face
+> ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
+> and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). With no provider key, cloud
+> mode needs your deployed HF Space; without it, the assistant reports not connected.
+> Explicit offline templates are available only with `ASSISTANT_CLOUD_ENABLED=false`.
+> This deployment has **not** been live-tested with your HF account or real provider keys.
+> This note supersedes older statements below about the default no-key template behavior.
+
 # StudyRoute
 
 **A sandbox AI assistant for paying tuition and living costs abroad from Bangladesh.**
@@ -493,3 +501,8 @@ what only a person can supply (registration, video, deck).
 StudyRoute is a sandbox for a competition. It is not a bank, an Authorised Dealer or a financial
 adviser, gives no legal, tax or investment advice, and never moves real money. Regulatory figures
 are placeholders until checked against official sources.
+
+
+> **Cumulative assistant + session update:** See [বাংলা installation and session guide](docs/SESSION_FIX.bn.md).
+Browser login now uses an HttpOnly server session instead of a refresh token in sessionStorage;
+legacy bearer API rotation is unchanged. Preserve your existing `.env`, `.venv` and database.

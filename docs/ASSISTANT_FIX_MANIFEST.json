@@ -1,10 +1,18 @@
 {
-  "base_archive": "StudyRoute-redwan1.0.zip",
-  "purpose": "Read-only assistant conversation fix",
+  "version": "assistant-offline-v2",
+  "base_source_archive": "StudyRoute-redwan1.0.zip",
+  "incremental_update_requires": "StudyRoute assistant fix v1 already applied",
+  "incremental_paths": [
+    "backend/app/ai/conversation.py",
+    "backend/tests/test_ai_conversation.py",
+    "docs/ASSISTANT_FIX.bn.md",
+    "docs/ASSISTANT_FIX_TESTS.md",
+    "docs/ASSISTANT_FIX_MANIFEST.json"
+  ],
   "files": [
     {
       "path": "backend/app/ai/conversation.py",
-      "sha256": "06071dcb986ac5173676e14071ace44dd770bef49fa84c59dd0f21fb84a45cdb"
+      "sha256": "4679b5ad1ebea865a0db008cff0a69736de4fa605f055ea1193e955d4cbdf8f5"
     },
     {
       "path": "backend/app/ai/orchestrator.py",
@@ -28,15 +36,15 @@
     },
     {
       "path": "backend/tests/test_ai_conversation.py",
-      "sha256": "cfcbe7ba128031fc5ec6849eeb0dcb46741a1544c3f3a6e99222f9b283259578"
+      "sha256": "3d9b5c02ef34db7c4ed7fb0adb9cafbf8ab44536f864cf78ab9a6e8eccf0545e"
     },
     {
       "path": "docs/ASSISTANT_FIX.bn.md",
-      "sha256": "a5d3eea90200046f978fec07d31d01544179c99f294de9f03181948a4fe1fd30"
+      "sha256": "45aa4ea8c5fd5ff03d85ec90148f1f0c7413a26e236852495a621e4a5a0273c3"
     },
     {
       "path": "docs/ASSISTANT_FIX_TESTS.md",
-      "sha256": "ee02eca9c3d188cfbfb2d2f2559ec13ca8b2252edea8d3ee945f3a595429709e"
+      "sha256": "2eb468cbc901ce2c7b2cb298950b1264b025cdad9ea37783716acc8b9dd92e0c"
     },
     {
       "path": "frontend/src/components/ChatPanel.tsx",

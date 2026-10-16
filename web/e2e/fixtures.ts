@@ -11,7 +11,9 @@ export const test = base.extend<{ problems: string[] }>({
     async ({ page }, use) => {
       const problems: string[] = [];
       page.on("console", (message) => {
-        if (message.type() === "error") problems.push(message.text());
+        const expectedAnonymousRestore = message.location().url.endsWith("/api/v1/auth/browser/session")
+          && /status of 401/.test(message.text());
+        if (message.type() === "error" && !expectedAnonymousRestore) problems.push(message.text());
       });
       page.on("pageerror", (error) => problems.push(`pageerror: ${error.message}`));
       await mockApi(page);

@@ -8,6 +8,7 @@ from uuid import UUID
 from fastapi import Depends, Header, Request
 
 from app.api.context import AppContext
+from app.core import browser_session as browser
 from app.core import errors
 from app.domain.auth import ai_actor, human_actor
 from app.domain.constants import ActorKind
@@ -30,6 +31,12 @@ def current_actor(request: Request, ctx: AppContext = Depends(get_ctx)) -> Actor
         raise errors.Unauthenticated("Send an Authorization: Bearer <token> header.")
     claims = ctx.tokens.decode(token.strip(), ctx.clock.now())
     with ctx.db.read() as session:
+        if claims.browser_session:
+            row = browser.active_session(session, request.cookies.get(browser.COOKIE), ctx)
+            if row.token_hash != claims.browser_session or row.user_id != claims.user_id:
+                raise errors.Unauthenticated(
+                    "Browser session changed. Restore the current session."
+                )
         user = session.get(User, claims.user_id)
         if user is None or user.role != claims.kind.value:
             raise errors.Unauthenticated("The token does not match a known user.")

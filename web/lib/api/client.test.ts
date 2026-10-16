@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ApiError, api, newKey, post, setAccessToken, setRefreshToken } from "./client";
+import { ApiError, api, newKey, post, setAccessToken, clearLegacyAuthStorage } from "./client";
 
 function respond(status: number, body: unknown, headers: Record<string, string> = {}): Response {
   const base = { "Content-Type": "application/json", ...headers };
@@ -12,7 +12,7 @@ const fetchMock = vi.fn<typeof fetch>();
 beforeEach(() => {
   vi.stubGlobal("fetch", fetchMock);
   setAccessToken("access-1");
-  setRefreshToken("refresh-1");
+  clearLegacyAuthStorage();
 });
 afterEach(() => {
   fetchMock.mockReset();
@@ -30,7 +30,7 @@ describe("api client", () => {
     expect(headers.Authorization).toBe("Bearer access-1");
     expect(headers["Idempotency-Key"]).toBe("key-1");
     expect(headers["X-MFA-Proof"]).toBe("mfa_1");
-    expect(init?.credentials).toBe("omit");
+    expect(init?.credentials).toBe("same-origin");
   });
 
   it("turns RFC 7807 problems into ApiError with the code and request id", async () => {
@@ -74,7 +74,8 @@ describe("api client", () => {
     await expect(api("GET", "/me")).resolves.toEqual({ hello: "world" });
     const retry = fetchMock.mock.calls[2]?.[1]?.headers as Record<string, string>;
     expect(retry.Authorization).toBe("Bearer access-2");
-    expect(sessionStorage.getItem("sr.refresh")).toBe("refresh-2");
+    expect(sessionStorage.getItem("sr.refresh")).toBeNull();
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/v1/auth/browser/session");
   });
 
   it("signs the user out when the refresh fails", async () => {
@@ -96,4 +97,63 @@ describe("api client", () => {
       Object.defineProperty(crypto, "randomUUID", { value: original, configurable: true });
     }
   });
+});
+
+it("does not refresh or replace the server's invalid-MFA error", async () => {
+  fetchMock.mockResolvedValueOnce(
+    respond(401, { code: "MFA_INVALID", detail: "That code is not valid." }),
+  );
+  await expect(post("/auth/mfa/verify", { code: "000000" })).rejects.toMatchObject({
+    code: "MFA_INVALID",
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
+
+it("does not resurrect an old cookie restore after logout/account change", async () => {
+  const { restoreBrowserSession, invalidateSession, onSessionRestored } = await import("./client");
+  const restored = vi.fn();
+  onSessionRestored(restored);
+  let resolve!: (response: Response) => void;
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise<Response>((r) => {
+        resolve = r;
+      }),
+  );
+  const pending = restoreBrowserSession();
+  invalidateSession();
+  setAccessToken("new-account-access");
+  resolve(respond(200, { access_token: "old-account-access", user: { user_id: "old" } }));
+  expect(await pending).toBeNull();
+  expect(restored).not.toHaveBeenCalled();
+  onSessionRestored(null);
+  fetchMock.mockResolvedValueOnce(respond(200, { ok: true }));
+  await post("/probe");
+  expect((fetchMock.mock.calls.at(-1)?.[1]?.headers as Record<string, string>).Authorization).toBe(
+    "Bearer new-account-access",
+  );
+});
+
+it("does not clear a new access token when an older retry finishes", async () => {
+  const { invalidateSession } = await import("./client");
+  let resolve!: (response: Response) => void;
+  fetchMock.mockResolvedValueOnce(respond(401, { code: "UNAUTHENTICATED" }));
+  fetchMock.mockImplementationOnce(
+    () =>
+      new Promise<Response>((r) => {
+        resolve = r;
+      }),
+  );
+  const pending = api("GET", "/old");
+  const rejected = expect(pending).rejects.toBeInstanceOf(ApiError);
+  await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  invalidateSession();
+  setAccessToken("new-account-access");
+  resolve(respond(200, { access_token: "old-account-access", user: { user_id: "old" } }));
+  await rejected;
+  fetchMock.mockResolvedValueOnce(respond(200, { ok: true }));
+  await post("/probe");
+  expect((fetchMock.mock.calls.at(-1)?.[1]?.headers as Record<string, string>).Authorization).toBe(
+    "Bearer new-account-access",
+  );
 });

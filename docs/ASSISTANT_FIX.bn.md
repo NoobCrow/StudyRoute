@@ -1,4 +1,29 @@
-# StudyRoute assistant fix — ব্যবহার ও পরিবর্তনের নোট
+# StudyRoute assistant fix v2 — ব্যবহার ও পরিবর্তনের নোট
+
+## v2: বর্তমানে চলা app update করার সহজ উপায়
+
+Screenshot-এর `what can you do?` এবং `kemon acho?` প্রশ্নে ভুল clarification response
+সংশোধন করা হয়েছে। Capabilities/help-এর একাধিক phrasing, English/Bangla/Banglish wellbeing,
+সংক্ষিপ্ত repeated greeting এবং সহজ assistant পরিচয় যোগ হয়েছে। এটি এখনো সীমিত offline routing;
+একটি নতুন generative model বা পূর্ণ multilingual assistant তৈরি করা হয়নি।
+
+যদি v1 fixed app ইতিমধ্যে চলছে, **নতুন clone/install/seed লাগবে না**:
+
+- Backend terminal-এ `Ctrl+C` দাও।
+- `StudyRoute-assistant-v2-update.zip`-এর contents বর্তমান project root-এ overlay করো।
+  এই incremental update-এ শুধু backend source/tests ও documentation আছে।
+- Backend আবার চালাও:
+
+```powershell
+cd "E:\ETC\FinTech\Working\StudyRoute\backend"
+.\.venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
+```
+
+- Frontend চলতে পারে; `http://localhost:3000`-এ `Ctrl+Shift+R` দিয়ে নতুন conversation শুরু করো।
+- `what can you do?`, `kemon acho?`, `tumi ki ki korte paro?` এবং পরপর `hello`, `hi` পরীক্ষা করো।
+- `.env`, `.venv`, database বা node_modules মুছবে না। আগের local edits থাকলে আগে diff/backup রাখবে।
+
+নিচের বিস্তারিত নির্দেশনা সম্পূর্ণ source copy বা প্রথম setup-এর জন্য।
 
 ## কী সমস্যা ছিল
 
@@ -25,7 +50,7 @@ Trained reader intent/slots বোঝে, কিন্তু নিজে নত
 
 এটি API key ছাড়া ব্যবহারযোগ্য, সীমিত offline assistant—ChatGPT-এর মতো সাধারণ বিষয় নিয়ে
 অসীম free-form chat নয়। সাধারণ app/finance প্রশ্নে reviewed guidance, ব্যক্তিগত status ও
-হিসাবে engine facts ব্যবহার করে। Bangla greeting এবং কিছু Banglish প্রশ্ন চেনে; পূর্ণ multilingual
+হিসাবে engine facts ব্যবহার করে। Bangla greeting, wellbeing ও capability-এর কিছু Banglish phrasing চেনে; পূর্ণ multilingual
 conversation দাবি করা হচ্ছে না। আগের external-LLM configuration অক্ষুণ্ণ আছে, কিন্তু এই fix-এর
 জন্য কোনো key লাগে না। External provider call এই delivery-তে বাস্তবে পরীক্ষা করা হয়নি।
 
@@ -41,20 +66,20 @@ conversation দাবি করা হচ্ছে না। আগের exter
 PowerShell দিয়ে overlay করতে পারো; download অন্য জায়গায় হলে প্রথম path বদলাবে:
 
 ```powershell
-Expand-Archive -LiteralPath "$HOME\Downloads\StudyRoute-assistant-fix-patch.zip" -DestinationPath "E:\ETC\FinTech\StudyRoute-redwan1.0" -Force
+Expand-Archive -LiteralPath "$HOME\Downloads\StudyRoute-assistant-fix-patch.zip" -DestinationPath "E:\ETC\FinTech\Working\StudyRoute" -Force
 ```
 
 Backend terminal:
 
 ```powershell
-cd "E:\ETC\FinTech\StudyRoute-redwan1.0\backend"
+cd "E:\ETC\FinTech\Working\StudyRoute\backend"
 .\.venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
 ```
 
 আলাদা frontend terminal:
 
 ```powershell
-cd "E:\ETC\FinTech\StudyRoute-redwan1.0\web"
+cd "E:\ETC\FinTech\Working\StudyRoute\web"
 npm run dev
 ```
 

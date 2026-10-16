@@ -184,10 +184,31 @@ export interface Understanding {
   values: { amount_minor: number | null; currency: string | null; due_date: string | null; months: number | null; charge_code: string; purpose: string };
   conflicts: string[]; unreadable: string[];
 }
+export interface CloudAvailability {
+  provider: string;
+  code: string;
+  message: string;
+  retry_at: string | null;
+  wait_known: boolean;
+  can_add_key: boolean;
+}
+export interface CloudConnection {
+  provider: "gemini" | "groq";
+  api_key: string;
+  consent: true;
+}
+export interface ConnectionResult {
+  ok: boolean;
+  provider?: string;
+  model?: string;
+  availability?: CloudAvailability;
+}
 export interface ChatResponse {
+  availability?: CloudAvailability | null;
+  provider?: string | null;
   reply: string; facts_used: string[]; facts: { id: string; label: string; value: string }[];
   guard: { status: string; flags: string[]; failure: string | null; retries: number };
-  proposed_actions: ChatAction[]; task: TaskCard | null; mode: "template" | "llm"; model_version: string;
+  proposed_actions: ChatAction[]; task: TaskCard | null; mode: "template" | "llm" | "unavailable"; model_version: string;
   disclaimer: string; debug: { masked_prompt: string; note: string }; understanding: Understanding;
   dialogue: DialogueChoice | null;
 }
@@ -208,7 +229,7 @@ export interface RateHistory {
 export interface Page<T> { items: T[]; next_cursor: string | number | null }
 
 export interface SandboxInfo {
-  sandbox: true; banner: string; disclaimer: string; ai_mode: "template" | "llm";
+  sandbox: true; banner: string; disclaimer: string; ai_mode: "template" | "llm" | "unavailable";
   simulated: { component: string; what: string }[];
   scenarios: { token: string; where: string; effect: string }[];
   providers: { provider_id: string; name: string }[];
@@ -375,4 +396,13 @@ export interface AnchorVerdict {
     status: "PASS" | "FAIL"; events_checked: number; failed_seq: number | null; reason: string | null;
     head: { seq: number; hash: string };
   };
+}
+
+/** Browser refresh credential is HttpOnly; it is never returned in JSON. */
+export interface BrowserSessionResponse {
+  access_token: string;
+  expires_in: number;
+  expires_at: string;
+  session_expires_at: string;
+  user: UserView;
 }

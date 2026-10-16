@@ -58,8 +58,10 @@ entrypoint check.
 * **The sandbox publishes its demo password and MFA code** on purpose (R29). Never put a sandbox on
   the internet. To do so anyway, set `SHOW_DEMO_HINTS=false`, `SEED_DEMO_PASSWORD` and
   `SANDBOX_MFA_CODE`.
-* **The refresh token is in `sessionStorage`** (R3). No XSS flaw was found and the CSP forbids
-  injected script, but a cookie that script cannot read would be stronger.
+* **Browser sessions use an HttpOnly cookie** (R3 updated). Tokens are not stored in
+  sessionStorage/localStorage. XSS could still act as the user; HttpOnly is not an XSS cure.
+  CSRF rejection, absolute expiry, logout revocation and concurrent tab restore are tested in
+  `test_browser_session.py`. Legacy bearer API refresh rotation is retained.
 * **The container trusts `X-Forwarded-For`** because only nginx can reach the API (R30). A test keeps
   the API port unpublished.
 * **Account lockout can be used to lock out someone else's account for 15 minutes.** That is the
