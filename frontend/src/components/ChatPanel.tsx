@@ -167,6 +167,7 @@ function ChatPanelBody() {
               </Badge>
             ) : null}
           </div>
+          <div className="chat-connection-top" style={{ flexShrink: 0, padding: "8px 16px", borderBottom: "1px solid var(--border)" }}><CloudSettings /></div>
           <div className="chat-log" aria-live="polite">
             <p className="small muted">
               I explain the engine's numbers. I cannot approve, submit, cancel or change anything.
@@ -192,8 +193,7 @@ function ChatPanelBody() {
                 ))}
               </div>
             ) : null}
-            <CloudSettings />
-            <ErrorNotice error={error} />
+                <ErrorNotice error={error} />
           </div>
           <form className="chat-form" onSubmit={submit}>
             <label htmlFor="chat-input" className="sr-only">Your question</label>

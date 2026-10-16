@@ -1,0 +1,37 @@
+{
+  "base": "StudyRoute-saved-api-key-update.zip",
+  "files": [
+    {
+      "path": "backend/app/ai/prompt.py",
+      "sha256": "b003d4449473491b9bccf28f1ad312636788702f6ba409ebf13366b2c9452ea3"
+    },
+    {
+      "path": "backend/app/ai/llm.py",
+      "sha256": "2af8d3027d9617f4d6478688e78594a246c42afaeb3af312d6b485db74a0eddc"
+    },
+    {
+      "path": "backend/tests/test_response_language.py",
+      "sha256": "4799254ecc05ecd29a046e6e1cd346eabcf06f740fa77157e50157d93887a727"
+    },
+    {
+      "path": "web/components/assistant/assistant-panel.tsx",
+      "sha256": "7b5bf5fb083ab05c6526a8691651200f3affd51c7a6a032a4d75e26608ad816c"
+    },
+    {
+      "path": "web/components/assistant/cloud-settings.tsx",
+      "sha256": "097433df0e64e9a5c9d4bdd02b5ca1b21ff8acffd8c21bfdd780468491e1e441"
+    },
+    {
+      "path": "frontend/src/components/ChatPanel.tsx",
+      "sha256": "09cb3cf522c1f549b39ee2bec450f34923cf1563dcaae17e1f00c018c5967730"
+    },
+    {
+      "path": "frontend/src/components/CloudSettings.tsx",
+      "sha256": "0ad070d9f63118c1e7fa9b671f59d15298549571341b9cb8051f264f83712216"
+    },
+    {
+      "path": "docs/QUICK_LANGUAGE_TOP_SETTINGS.md",
+      "sha256": "121559540135d5358fd6bfb95dce0d2cf9168c99742b16421ca7bb1650263a04"
+    }
+  ]
+}

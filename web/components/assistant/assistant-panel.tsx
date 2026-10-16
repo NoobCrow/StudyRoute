@@ -252,6 +252,9 @@ export function AssistantPanel() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b px-4 py-2">
+        <CloudSettings />
+      </div>
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3" aria-live="polite">
         <p className="text-muted-foreground text-xs">
           I explain the engine&apos;s numbers. I cannot approve, submit, cancel or change anything.
@@ -302,7 +305,6 @@ export function AssistantPanel() {
             Thinking with the engine&apos;s numbers...
           </p>
         ) : null}
-        <CloudSettings />
         <ErrorNotice error={error} />
       </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-center gap-2 border-t p-3">

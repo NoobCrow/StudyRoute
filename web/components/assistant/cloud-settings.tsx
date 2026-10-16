@@ -52,9 +52,9 @@ export function CloudSettings() {
   }
 
   return (
-    <section aria-label="Cloud connection" className="space-y-2 border-t pt-3">
+    <section aria-label="Cloud connection" className="max-h-[40vh] space-y-2 overflow-y-auto">
       {unavailable ? <WaitNotice availability={unavailable} /> : null}
-      <details open={Boolean(unavailable || connected || connecting || connectionResult)}>
+      <details open={Boolean(unavailable || connecting || connectionResult)}>
         <summary className="cursor-pointer text-xs font-medium">AI connection settings</summary>
         <div className="mt-2 space-y-2 text-xs">
           <p>

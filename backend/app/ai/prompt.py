@@ -2,9 +2,28 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 
 from app.ai.facts import FactSet
+
+
+def response_language(message: str) -> str:
+    """Resolve this turn only; history and Bengali terminology must not set the language."""
+    text = message.casefold()
+    if re.search(r"\b(?:reply|answer|respond|explain)\s+in\s+(?:english)\b", text):
+        return "English"
+    if re.search(r"\b(?:reply|answer|respond|explain)\s+in\s+(?:bangla|bengali)\b", text):
+        return "Bengali"
+    if re.search(r"[\u0980-\u09ff]", text):
+        return "Bengali"
+    if re.search(
+        r"\b(?:apni|tumi|ami|amar|amake|kivabe|kibhabe|korbo|koro|lagbe|dorkar|keno|kno|"
+        r"ki koro|ke apni)\b",
+        text,
+    ):
+        return "Banglish (Bengali written in Latin letters)"
+    return "English"
 
 
 def build_prompt(
@@ -16,7 +35,11 @@ def build_prompt(
     conversation_note: str | None = None,
     masked_conversation: Sequence[tuple[str, str]] = (),
 ) -> str:
+    language = response_language(masked_message)
     lines = [
+        f"RESPONSE LANGUAGE FOR THIS TURN: {language}.",
+        "Use this turn language, not conversation history or terminology examples. "
+        "For English, write English prose, not Bengali script. Keep JSON keys unchanged.",
         "FACTS (the only numbers you may use). Columns: id | label | value",
         *facts.prompt_lines(),
         "",
@@ -49,6 +72,6 @@ def build_prompt(
         masked_message,
         ">>>",
         "",
-        "Return JSON only.",
+        f"Write the reply in {language}. Return JSON only.",
     ]
     return "\n".join(lines)

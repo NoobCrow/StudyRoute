@@ -54,13 +54,13 @@ export function CloudSettings() {
     await connect({ provider, api_key: secret, consent: true });
   }
   return (
-    <section className="small" aria-label="Cloud connection">
+    <section className="small" style={{ maxHeight: "40vh", overflowY: "auto" }} aria-label="Cloud connection">
       {mode?.availability ? (
         <WaitNotice availability={mode.availability} />
       ) : null}
       <details
         open={Boolean(
-          mode?.availability || connected || connecting || connectionResult,
+          mode?.availability || connecting || connectionResult,
         )}
       >
         <summary>AI connection settings</summary>
