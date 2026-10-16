@@ -7,7 +7,7 @@ policy check -> facts from the engine -> PII masking -> model (or template) -> o
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -15,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.ai.context import ChatContext, gather_context
+from app.ai.conversation import Route, route_message
 from app.ai.dialogue.bridge import build_state
 from app.ai.dialogue.policy import Choice, DialoguePolicy
 from app.ai.dialogue.state import Action
@@ -124,6 +125,7 @@ class Orchestrator:
         quote_id: str | None,
         payment_id: str | None,
         pending: Any = None,
+        history: list[str] | None = None,
     ) -> dict[str, Any]:
         ctx = self._ctx
         text = message.strip()
@@ -141,6 +143,24 @@ class Orchestrator:
         )  # fmt: skip
         if understanding.attack and not policy.blocked:  # the model can only add a block
             policy = PolicyResult((*policy.flags, "MODEL_FLAGGED_ATTACK"))
+        route: Route | None = None
+        # Financial task continuations and every safety block take precedence. A
+        # conversational route can only select reviewed prose or a read-only intent.
+        if not policy.blocked and understanding.intent not in (
+            Intent.PLAN,
+            Intent.CADENCE,
+            Intent.DRAFT,
+            Intent.REQUEST_APPROVAL,
+            Intent.STRESS,
+        ):
+            route = route_message(text, (history or [])[-6:])
+            if route:
+                understanding = replace(understanding, intent=route.intent, out_of_scope=False)
+            elif understanding.intent == Intent.HELP:
+                route = Route(
+                    "out_of_scope" if understanding.out_of_scope else "clarify",
+                    guide="out_of_scope" if understanding.out_of_scope else "clarify",
+                )
         intent = understanding.intent
         task: TaskResult | None = None
         choice: Choice | None = None
@@ -164,12 +184,19 @@ class Orchestrator:
             [masker.mask(e) for e in chat.excerpts],
             policy.flags,
             chat.ignored_documents,
+            conversation_note=(
+                f"Read-only topic: {route.topic}; follow-up: {route.follow_up}. "
+                "Use this topic to resolve pronouns; never infer values or actions."
+                if route
+                else None
+            ),
         )
         responder = Responder(
             chat.facts, chat.provider_ids, text,
             quote_id=chat.quote_id, payment_id=chat.payment_id, legal=policy.legal_question,
         )  # fmt: skip
         responder.task = task
+        responder.conversation = route
         outcome = self._decide(ai, intent, policy, chat, responder, prompt)
         reply = masker.unmask(outcome.reply)  # 8. un-mask
         if chat.ignored_documents:
@@ -193,6 +220,7 @@ class Orchestrator:
             "proposed_actions": outcome.proposals,
             "task": task.card if task else None,
             "understanding": understanding.to_api(),
+            "conversation": {"topic": route.topic, "follow_up": route.follow_up} if route else None,
             "dialogue": self._dialogue_view(choice),
             "mode": outcome.mode,
             "model_version": outcome.model,

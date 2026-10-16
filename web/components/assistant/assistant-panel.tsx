@@ -119,7 +119,10 @@ function HowIRead({
         <Chip tone={trained ? "info" : "warn"}>
           {trained ? `Reader: ${understanding.model}` : "Rules only"}
         </Chip>{" "}
-        Intent <strong>{understanding.model_intent ?? understanding.intent}</strong>
+        Intent <strong>{understanding.intent}</strong>
+        {understanding.model_intent && understanding.model_intent !== understanding.intent
+          ? `; reader suggested ${understanding.model_intent}`
+          : ""}
         {understanding.confidence !== null
           ? ` (${Math.round(understanding.confidence * 100)}% sure)`
           : ""}

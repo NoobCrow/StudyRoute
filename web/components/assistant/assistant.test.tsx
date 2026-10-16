@@ -153,6 +153,36 @@ describe("assistant chat", () => {
     expect(second.context.pending).toMatchObject({ kind: "payment_plan", purpose: "TUITION" });
   });
 
+  it("sends bounded previous user questions for contextual follow-ups, not assistant answers", async () => {
+    const fetchMock = mockApi({
+      "/assistant/chat": chatReply({ reply: "Distinct assistant answer" }),
+    });
+    panel();
+    const questions = [
+      "hello",
+      "What is my KYC status?",
+      "how do I fix it?",
+      "tell me more",
+      "What is escrow?",
+      "What is bank network?",
+      "What is the audit log?",
+      "explain",
+    ];
+    for (let i = 0; i < questions.length; i++) {
+      await userEvent.type(screen.getByLabelText("Your question"), questions[i]!);
+      await userEvent.click(screen.getByRole("button", { name: "Send" }));
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(i + 1));
+      await vi.waitFor(() =>
+        expect(screen.getByRole("button", { name: "Send" })).not.toBeDisabled(),
+      );
+      const body = JSON.parse(String(fetchMock.mock.calls[i]?.[1]?.body)) as {
+        context: { history: string[] };
+      };
+      expect(body.context.history).toEqual(questions.slice(Math.max(0, i - 6), i));
+      expect(body.context.history).not.toContain("Distinct assistant answer");
+    }
+  });
+
   it("shows how the message was read: the intent, how sure the model was and each marked word", async () => {
     mockApi({
       "/assistant/chat": chatReply({
@@ -195,6 +225,22 @@ describe("assistant chat", () => {
       screen.getByText(/the reader and the rules read the amount differently, so I left it empty/),
     ).toBeInTheDocument();
     expect(screen.getByText(/I could not read "soon" as a date/)).toBeInTheDocument();
+  });
+
+  it("shows the effective intent separately from a reader suggestion", async () => {
+    const response = chatReply();
+    mockApi({
+      "/assistant/chat": chatReply({
+        reply: "KYC guidance",
+        understanding: { ...response.understanding, intent: "KYC", model_intent: "OUT_OF_SCOPE" },
+      }),
+    });
+    panel();
+    await userEvent.type(screen.getByLabelText("Your question"), "how do I fix it?");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await userEvent.click(await screen.findByText(/How I read this/));
+    expect(screen.getByText("KYC", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByText(/reader suggested OUT_OF_SCOPE/)).toBeInTheDocument();
   });
 
   it("reads the values back and sends yes with what it held when the person confirms", async () => {

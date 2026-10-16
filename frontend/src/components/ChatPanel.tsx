@@ -62,7 +62,9 @@ function HowIRead({ understanding, dialogue }: { understanding: Understanding; d
       <summary>How I read this ({trained ? "trained reader" : "rules"})</summary>
       <p className="small">
         <Badge tone={trained ? "info" : "warn"}>{trained ? `Reader: ${understanding.model}` : "Rules only"}</Badge>{" "}
-        Intent <strong>{understanding.model_intent ?? understanding.intent}</strong>
+        Intent <strong>{understanding.intent}</strong>
+        {understanding.model_intent && understanding.model_intent !== understanding.intent
+          ? `; reader suggested ${understanding.model_intent}` : ""}
         {understanding.confidence !== null ? ` (${Math.round(understanding.confidence * 100)}% sure)` : ""}.
         {understanding.continued_earlier_task ? " I continued the task I asked about earlier." : ""}
       </p>
@@ -147,7 +149,8 @@ export function ChatPanel() {
     setBusy(true);
     setTurns((t) => [...t, { id: ++counter.current, role: "me", text: clean }]);
     try {
-      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null, pending };
+      const context = { quote_id: scope.quoteId ?? planQuote, payment_id: scope.paymentId ?? null, pending,
+        history: turns.filter((t) => t.role === "me").slice(-6).map((t) => t.text) };
       const reply = await post<ChatResponse>("/assistant/chat", { message: clean, context });
       setMode(reply);
       if (reply.task?.kind === "payment_plan" && reply.task.status === "ready") setPlanQuote(reply.task.quote.quote_id);
@@ -176,8 +179,8 @@ export function ChatPanel() {
         <section id="chat-panel" className="chat-panel" aria-label="Assistant chat">
           <div className="chat-head">
             <strong>StudyRoute assistant</strong>
-            <Badge tone={mode?.mode === "llm" ? "info" : "warn"} title="Template mode answers from fixed templates and engine numbers. No model is called.">
-              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Template mode"}
+            <Badge tone={mode?.mode === "llm" ? "info" : "warn"} title="Offline answers use topic routing, reviewed guidance and engine facts. No external language model is called.">
+              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Offline assistant"}
             </Badge>
             {mode?.understanding.source === "trained" ? (
               <Badge tone="info" title="A small trained model marks the words that carry a value. Plain code checks them and the engine calculates.">

@@ -54,6 +54,10 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           quote_id: scope.quoteId ?? planQuote,
           payment_id: scope.paymentId ?? null,
           pending,
+          history: turns
+            .filter((t) => t.role === "me")
+            .slice(-6)
+            .map((t) => t.text),
         };
         const reply = await post<ChatResponse>("/assistant/chat", { message: clean, context });
         setMode(reply);
@@ -74,7 +78,7 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
         setBusy(false);
       }
     },
-    [busy, scope.quoteId, scope.paymentId, planQuote, pending],
+    [busy, scope.quoteId, scope.paymentId, planQuote, pending, turns],
   );
 
   const value = useMemo(() => ({ turns, busy, error, mode, ask }), [turns, busy, error, mode, ask]);

@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.ai.conversation import GUIDES, Route
 from app.ai.facts import FactSet
 from app.ai.intents import Intent, mentioned_providers
 from app.ai.number_guard import numbers_in
@@ -58,6 +59,7 @@ class Responder:
         self.quote_id = quote_id
         self.payment_id = payment_id
         self.legal = legal
+        self.conversation: Route | None = None
         self.used: list[str] = []
         self.task: Any = None  # set by the orchestrator when a task ran
 
@@ -130,6 +132,8 @@ class Responder:
 
     # --- intents ------------------------------------------------------------------------
     def answer(self, intent: Intent) -> Answer:
+        if self.conversation and self.conversation.guide:
+            return self._finish(GUIDES[self.conversation.guide])
         handler = {
             Intent.COMPARE: self.compare, Intent.CHARGES: self.charges,
             Intent.DEADLINE: self.deadline, Intent.CHECKLIST: self.checklist,

@@ -30,5 +30,6 @@ def chat(
         quote_id=body.context.quote_id,
         payment_id=body.context.payment_id,
         pending=body.context.pending,
+        history=body.context.history,
     )
     return result

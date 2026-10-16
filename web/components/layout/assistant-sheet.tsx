@@ -28,9 +28,13 @@ export function AssistantSheet({
           <div className="flex flex-wrap gap-1.5">
             <Chip
               tone={mode?.mode === "llm" ? "info" : "warn"}
-              title="Template mode answers from fixed templates and engine numbers. No model is called."
+              title={
+                mode?.mode === "llm"
+                  ? "A configured external language model explains checked engine facts."
+                  : "Offline answers use topic routing, reviewed guidance and engine facts. No external language model is called."
+              }
             >
-              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Template mode"}
+              {mode?.mode === "llm" ? `Model: ${mode.model_version}` : "Offline assistant"}
             </Chip>
             {mode?.understanding.source === "trained" ? (
               <Chip

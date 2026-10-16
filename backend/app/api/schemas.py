@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 
@@ -131,6 +131,9 @@ class ChatContextIn(Strict):
     quote_id: StrictStr | None = Field(default=None, max_length=64)
     payment_id: StrictStr | None = Field(default=None, max_length=64)
     pending: PendingTaskIn | None = None
+    history: list[Annotated[StrictStr, Field(min_length=1, max_length=1000)]] = Field(
+        default_factory=list, max_length=6
+    )
 
 
 class ChatIn(Strict):

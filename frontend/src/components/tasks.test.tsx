@@ -67,6 +67,23 @@ describe("assistant chat", () => {
     await userEvent.click(screen.getByRole("button", { name: "Ask the assistant" }));
   }
 
+  it("sends prior user questions, not generated answers, for a follow-up", async () => {
+    const fetchMock = mockApi({ "/assistant/chat": chatReply({ reply: "Mock KYC explanation" }) });
+    render(<MemoryRouter><ChatPanel /></MemoryRouter>);
+    await openChat();
+    const input = screen.getByLabelText("Your question");
+    await userEvent.type(input, "What is my KYC status?");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await screen.findByText("Mock KYC explanation");
+    await userEvent.type(input, "how do I fix it?");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const body = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as {
+      context: { history: string[] };
+    };
+    expect(body.context.history).toEqual(["What is my KYC status?"]);
+  });
+
   it("turns one sentence into a plan card and does not repeat the proposal as a second link", async () => {
     mockApi({
       "/assistant/chat": chatReply({
