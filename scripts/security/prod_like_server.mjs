@@ -9,11 +9,14 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-const DIST = path.join(ROOT, "frontend", "dist");
+// WEB=1 serves the Next.js static export (web/out) with the headers generated for it.
+const WEB = process.env.WEB === "1";
+const DIST = path.join(ROOT, WEB ? "web/out" : "frontend/dist");
+const HEADERS_FILE = path.join(ROOT, WEB ? "web/security_headers.conf" : "frontend/security_headers.conf");
 const API = { host: "127.0.0.1", port: Number(process.argv[3] ?? 8002) };
 const PORT = Number(process.argv[2] ?? 8090);
 const headers = {};
-for (const line of fs.readFileSync(path.join(ROOT, "frontend", "security_headers.conf"), "utf8").split("\n")) {
+for (const line of fs.readFileSync(HEADERS_FILE, "utf8").split("\n")) {
   const m = line.match(/^add_header\s+(\S+)\s+"(.*)"\s+always;/);
   if (m) headers[m[1]] = m[2];
 }
@@ -29,7 +32,11 @@ http.createServer((req, res) => {
   }
   const root = path.resolve(DIST);
   let file = path.resolve(root, "." + decodeURIComponent(req.url.split("?")[0]));
-  if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(root, "index.html");
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory() && fs.existsSync(path.join(file, "index.html"))) file = path.join(file, "index.html");
+  if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
+    const dynamic = WEB && /^\/payments\/[^/]+\/?$/.test(req.url.split("?")[0]) ? path.join(root, "payments", "_", "index.html") : null;
+    file = dynamic && fs.existsSync(dynamic) ? dynamic : path.join(root, "index.html");
+  }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] ?? "application/octet-stream", "Cache-Control": file.endsWith("index.html") ? "no-cache" : "public, max-age=31536000, immutable", ...headers });
   fs.createReadStream(file).pipe(res);
 }).listen(PORT, "127.0.0.1", () => console.log(`prod-like server on ${PORT}, CSP: ${headers["Content-Security-Policy"]}`));

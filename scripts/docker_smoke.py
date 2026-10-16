@@ -131,12 +131,17 @@ def check_api(base: str, report: Report) -> None:
     )
 
 
+# The built page names its app root (Vite: id="root") or its Next.js bundles under /_next/static/.
+def is_app_shell(body: bytes) -> bool:
+    return b'id="root"' in body or b"/_next/static/" in body
+
+
 def check_web(base: str, report: Report) -> None:
     print("The web server")
     index = fetch(f"{base}/")
     report.check(index.status == 200, "GET / answers 200")
     report.check("text/html" in index.header("content-type"), "the page is served as HTML")
-    report.check(b'id="root"' in index.body, "the React app shell is present")
+    report.check(is_app_shell(index.body), "the app shell is present")
     csp = index.header("content-security-policy")
     report.check(
         "default-src 'self'" in csp
@@ -157,9 +162,11 @@ def check_web(base: str, report: Report) -> None:
 
     deep = fetch(f"{base}/payments")
     report.check(
-        deep.status == 200 and b'id="root"' in deep.body, "a deep link falls back to the app"
+        deep.status == 200 and is_app_shell(deep.body), "a deep link falls back to the app"
     )
-    asset = re.search(r'src="(/assets/[^"]+\.js)"', index.body.decode("utf-8", "replace"))
+    asset = re.search(
+        r'src="(/(?:assets|_next/static)/[^"]+\.js)"', index.body.decode("utf-8", "replace")
+    )
     report.check(asset is not None, "the page references a built JavaScript asset")
     if asset:
         script = fetch(f"{base}{asset.group(1)}")

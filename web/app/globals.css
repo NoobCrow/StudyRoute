@@ -1,0 +1,188 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "sonner/dist/styles.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Design tokens from the StudyRoute dashboard design, mapped to shadcn's variables.
+   Components never hard-code a colour: they use these. */
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-foreground: var(--info-soft-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-foreground: var(--danger-soft-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Radius: 10px for cards, 8px for controls. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+}
+
+:root {
+  --radius: 10px;
+  --background: #f7f7f8;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #0f6b52;
+  --primary-hover: #0b5a45;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #0f6b52;
+  --success-soft: #e5f3ed;
+  --success-soft-foreground: #0b5a45;
+  --info-soft: #e8efff;
+  --info-soft-foreground: #1e40af;
+  --warning-soft: #fef3dc;
+  --warning-soft-foreground: #92400e;
+  --danger-soft: #fde8e8;
+  --danger-soft-foreground: #991b1b;
+  --chart-1: #0f6b52;
+  --chart-2: #1e40af;
+  --chart-3: #92400e;
+  --chart-4: #71717a;
+  --chart-5: #b91c1c;
+  --sidebar: #fbfbfb;
+  --sidebar-foreground: #3f3f46;
+  --sidebar-primary: #0f6b52;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #0f6b52;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --card: #111113;
+  --card-foreground: #fafafa;
+  --popover: #111113;
+  --popover-foreground: #fafafa;
+  --primary: #34c796;
+  --primary-hover: #5fd8ae;
+  --primary-foreground: #04281e;
+  --secondary: #1a1a1e;
+  --secondary-foreground: #fafafa;
+  --muted: #1a1a1e;
+  --muted-foreground: #a1a1aa;
+  --accent: #1a1a1e;
+  --accent-foreground: #fafafa;
+  --destructive: #f87171;
+  --destructive-foreground: #1a0505;
+  --border: #26262b;
+  --input: #2f2f35;
+  --ring: #34c796;
+  --success-soft: #0f2a22;
+  --success-soft-foreground: #6ee7b7;
+  --info-soft: #172554;
+  --info-soft-foreground: #bfdbfe;
+  --warning-soft: #3a2a0a;
+  --warning-soft-foreground: #fcd34d;
+  --danger-soft: #3b1212;
+  --danger-soft-foreground: #fca5a5;
+  --chart-1: #34c796;
+  --chart-2: #93c5fd;
+  --chart-3: #fcd34d;
+  --chart-4: #a1a1aa;
+  --chart-5: #f87171;
+  --sidebar: #0d0d0f;
+  --sidebar-foreground: #d4d4d8;
+  --sidebar-primary: #34c796;
+  --sidebar-primary-foreground: #04281e;
+  --sidebar-accent: #1a1a1e;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #26262b;
+  --sidebar-ring: #34c796;
+}
+
+/* Radix Select used to add this as an inline <style> element, which the production policy forbids
+   (see scripts/postinstall.mjs). The rules are the same. */
+[data-radix-select-viewport] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+[data-radix-select-viewport]::-webkit-scrollbar {
+  display: none;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground text-sm antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  h1 {
+    @apply text-[28px] leading-tight font-semibold tracking-[-0.02em];
+  }
+  /* Rates, dates and amounts line up in columns. */
+  .num,
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -46,18 +46,22 @@ page.on("pageerror", (e) => consoleLines.push(`pageerror: ${e.message}`));
 let docHeaders = null;
 page.on("response", (r) => { if (r.request().resourceType() === "document" && !docHeaders) docHeaders = r.headers(); });
 
+// The selectors below match both web UIs: the Vite one (frontend/: .app-header, .nav) and the Next.js one (web/: main#main, nav[aria-label=Main]).
+const EMAIL = 'input[type="email"]', PASSWORD = 'input[type="password"]', SIGNED_IN = ".app-header, main#main";
+const navLink = (href) => `.nav a[href="${href}"], nav[aria-label="Main"] a[href="${href === "/" ? "/" : `${href}/`}"]`;
+const signOut = () => page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Sign out")?.click());
 async function signIn(email) {
   await page.evaluate(() => { try { sessionStorage.clear(); } catch {} }).catch(() => {});
   await page.goto(`${APP}/login`, { waitUntil: "networkidle0" });
-  if (!(await page.$("#email"))) { await page.evaluate(() => sessionStorage.clear()); await page.goto(`${APP}/login`, { waitUntil: "networkidle0" }); }
-  await page.type("#email", email); await page.type("#password", "Sandbox#2026");
-  await Promise.all([page.waitForSelector(".app-header"), page.click('button[type="submit"]')]);
+  if (!(await page.$(EMAIL))) { await page.evaluate(() => sessionStorage.clear()); await page.goto(`${APP}/login`, { waitUntil: "networkidle0" }); }
+  await page.type(EMAIL, email); await page.type(PASSWORD, "Sandbox#2026");
+  await Promise.all([page.waitForSelector(SIGNED_IN), page.click('button[type="submit"]')]);
   await sleep(900);
 }
 const screens = ["/", "/compare", "/payments", "/recipients", "/documents", "/audit", "/rules", "/bank", "/escrow", "/sandbox"];
 async function tour(label) {
   for (const href of screens) {
-    const link = await page.$(`.nav a[href="${href}"]`);
+    const link = await page.$(navLink(href));
     if (!link) continue;
     await link.click(); await sleep(900);
     check(`${label}: ${href} ran no injected script`, (await page.evaluate(() => window.__xss)) === undefined, String(await page.evaluate(() => window.__xss)));
@@ -65,9 +69,9 @@ async function tour(label) {
 }
 await signIn("parent@demo.studyroute.test");
 await tour("parent");
-const shown = await (async () => { await page.click('.nav a[href="/recipients"]'); await sleep(900); return page.$eval("main", (el) => el.innerText); })();
+const shown = await (async () => { await page.click(navLink("/recipients")); await sleep(900); return page.$eval("main", (el) => el.innerText); })();
 check("the planted markup is shown as literal text, not interpreted", /<img src=x onerror/.test(shown), shown.slice(0, 80).replace(/\n/g, " "));
-await page.evaluate(() => [...document.querySelectorAll(".user-box button")].find((b) => b.textContent === "Sign out")?.click()); await sleep(600);
+await signOut(); await sleep(600);
 await signIn("admin@demo.studyroute.test");
 await tour("admin");
 
@@ -108,11 +112,11 @@ check("localStorage holds nothing sensitive (only a theme choice and rate-alert 
 check("sessionStorage holds only the refresh token, never a password, e-mail or access token", Object.keys(storage.session).every((k) => k === "sr.refresh") && !/Sandbox#2026|@|eyJ/.test(JSON.stringify(storage.session).replace(/"sr\.refresh":"[^"]*"/, "")), JSON.stringify(Object.keys(storage.session)));
 const fp = await page.evaluate(() => ({ canvas: typeof HTMLCanvasElement.prototype.toDataURL, ga: typeof window.ga, gtag: typeof window.gtag, dl: typeof window.dataLayer, fbq: typeof window.fbq }));
 check("no analytics globals (ga, gtag, dataLayer, fbq) exist", fp.ga === "undefined" && fp.gtag === "undefined" && fp.dl === "undefined" && fp.fbq === "undefined", JSON.stringify(fp));
-await page.evaluate(() => [...document.querySelectorAll(".user-box button")].find((b) => b.textContent === "Sign out")?.click()); await sleep(800);
+await signOut(); await sleep(800);
 const after = await page.evaluate(() => ({ s: Object.keys(sessionStorage), l: Object.keys(localStorage) }));
 check("signing out clears the refresh token from sessionStorage", !after.s.includes("sr.refresh"), JSON.stringify(after));
 // no source maps or secrets in what the browser can download
-const assets = [...new Set(requests.filter((u) => /\/assets\//.test(u)))];
+const assets = [...new Set(requests.filter((u) => /[/](assets|_next[/]static)[/]/.test(u)))];
 let maps = 0, secretish = 0;
 for (const url of assets.filter((u) => u.endsWith(".js") || u.endsWith(".css"))) {
   const text = await (await fetch(url)).text();
