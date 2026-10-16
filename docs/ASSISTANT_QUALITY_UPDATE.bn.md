@@ -58,8 +58,8 @@ cd "E:\ETC\FinTech\Working\StudyRoute\backend"
   SESSION_FIX.bn.md অনুযায়ী HttpOnly browser session যোগ হয়েছে। আগের standalone quality patch auth
   migration নয়। Secure multi-tab session-এর জন্য HttpOnly cookie, CSRF/origin handling,
   refresh rotation/concurrency ও logout tests-সহ আলাদা কাজ দরকার। localStorage-এ token সরানো হয়নি।
-- Gemini/Groq key memory-only ও tab-specific থাকা উদ্দেশ্যপ্রণোদিত; login session-এর সঙ্গে
-  key automatically অন্য tab-এ ছড়িয়ে দেওয়া হবে না।
+- আগের tab-memory-only key আচরণ এখন superseded: [encrypted saved API key update](SAVED_API_KEY.bn.md)।
+  Browser-এ key ফেরত আসে না; একই user-এর সব tab backend setting ব্যবহার করে।
 
 ## কী যাচাই হয়েছে
 Automated tests স্থানীয় sandbox-এ; cloud HTTP responses mocked। এই patch দিয়ে real HF/Groq/

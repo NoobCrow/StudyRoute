@@ -50,8 +50,10 @@
     },
     {
       "path": "docs/ASSISTANT_QUALITY_UPDATE.bn.md",
-      "sha256": "1397a99635fec572fdc67b3d8ca5c67214d0e8ad1bb77ee645fe00b44d7007ee"
+      "sha256": "d4e47926ec46446a3a500171e20a62ad5ba6c7492540b01649f96663ee0427c3"
     }
   ],
-  "supersedes": "standalone quality v1/v2"
+  "supersedes": "standalone quality v1/v2",
+  "status": "superseded cumulative layer; use SAVED_API_KEY_MANIFEST.json",
+  "current_validation": "SAVED_API_KEY_VALIDATION.json"
 }

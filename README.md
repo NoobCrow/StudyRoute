@@ -1,4 +1,8 @@
-> **Cloud assistant update:** Gemini/Groq session-key controls and an owned Hugging Face
+> **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
+> Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
+> the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
+
+> **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
 > ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
 > and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). With no provider key, cloud
 > mode needs your deployed HF Space; without it, the assistant reports not connected.

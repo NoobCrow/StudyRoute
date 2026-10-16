@@ -53,19 +53,22 @@ Browser: http://localhost:3000 । দরকার হলে Ctrl+Shift+R। এ
 
 1. Sign in → Ask the assistant → **AI connection settings** খোলো।
 2. Gemini বা Groq নির্বাচন করে provider-এর নিজের API key password input-এ দাও।
-3. Context পাঠানোর consent checkbox পড়ো/টিক দাও → **Test and connect**।
+3. Context পাঠানো ও encrypted storage-এর consent checkbox পড়ো/টিক দাও → **Test and save connection**।
 4. Success হলে পরের প্রশ্ন পাঠাও। আগের conversation থাকবে। Test নিজেও অল্প quota খরচ করতে পারে।
 5. `hello`, `ki koro?`, `আমার KYC status কী?`, `how do I fix it?` দিয়ে পরীক্ষা করো।
    Generative model context অনুযায়ী লিখবে; quality model/provider-এর ওপর নির্ভরশীল।
 6. Key invalid/blocked হলে activate হবে না। আগের valid connection থাকলে সেটি থাকবে।
    কোনো provider থেকে অন্য paid provider-এ নিজে নিজে switch হবে না।
 
-Key frontend memory-তে থাকে; request-এর সঙ্গে authenticated backend-এ যায় এবং শুধু
-নির্বাচিত provider-এ authentication header হিসেবে ব্যবহার হয়। Chat/model prompt/database/
-API URL-এ key রাখা হয় না। Reload, sign out বা Remove key করলে app-এর key reference clear হয়।
-Browser memory-কে encrypted vault বা forensic erasure হিসেবে ধরে নিও না।
-HTTPS ব্যবহার করো, localhost ছাড়া plain HTTP-তে personal key দিও না। Shared demo login
-দিয়ে personal key ব্যবহার না করাই ভালো। অচেনা third-party deployment-এ key দিও না।
+Key authenticated backend-এ একবার save request-এ যায়; AES-256-GCM encrypted অবস্থায়
+নিজের user account-এর setting হিসেবে database-এ থাকে। Browser GET-এ শুধু provider/model/status;
+plaintext/ciphertext/key suffix ফেরত আসে না। Chat request-এ key আবার পাঠানো লাগে না।
+Refresh, new tab ও logout/login-এ setting থাকে; **Remove saved key** দিয়ে delete করুন।
+Quota exhaustion-এর test-এ key save হতে পারে, কিন্তু **unverified** দেখাবে—quota/validity verified নয়।
+অন্য invalid/network/unsafe test failure-এ আগের saved setting overwrite হয় না।
+HTTPS ব্যবহার করুন, localhost ছাড়া plain HTTP নয়। Shared demo account-এ personal key রাখবেন না:
+একই account-এ login করতে পারলে অন্য ব্যক্তি saved key-এর quota ব্যবহার করতে পারবে।
+Server encryption secret/DB backup রাখুন। বিস্তারিত: [SAVED_API_KEY.bn.md](SAVED_API_KEY.bn.md)।
 
 ## Hugging Face free model চালু করা — একবার করতে হবে
 

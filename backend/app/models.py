@@ -466,3 +466,18 @@ class ChainLog(Base):
     prev_hash: Mapped[str] = mapped_column(String(64))
     tx_hash: Mapped[str] = mapped_column(String(64), unique=True)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+class SavedAIConnection(Base):
+    """One encrypted provider credential per actual signed-in user, not household."""
+
+    __tablename__ = "saved_ai_connections"
+    __table_args__ = (
+        CheckConstraint("provider IN ('gemini', 'groq')", name="ck_ai_connection_provider"),
+    )
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(16))
+    model: Mapped[str] = mapped_column(String(128))
+    api_key_enc: Mapped[str] = mapped_column(Text)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime)

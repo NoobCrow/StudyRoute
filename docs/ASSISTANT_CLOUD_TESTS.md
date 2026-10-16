@@ -1,3 +1,6 @@
+> Historical initial-cloud test record. Memory-only/reload-clearing assertions below are
+> superseded by [saved-key verification](SAVED_API_KEY_VALIDATION.json) and [setup](SAVED_API_KEY.bn.md).
+
 # Cloud assistant verification and limitations
 
 ## Verified

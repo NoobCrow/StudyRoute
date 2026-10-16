@@ -15,8 +15,10 @@
 - Exact Origin + `X-StudyRoute-Browser: 1` required; cross-site/null/missing Origin rejected।
   HttpOnly একা CSRF/XSS protection নয়। CORS credentials বন্ধই আছে; browser same-origin proxy ব্যবহার করে।
 - BroadcastChannel-এ শুধু `auth-changed` event, কোনো token/key/user data নয়। Focus/visibility-তেও restore।
-- Account বদলালে account UI/chat unmount এবং Next query cache নতুন হয়। Gemini/Groq key tab-memory-only;
-  অন্য tab-এ share নয়, logout/account change-এ মুছে যায়।
+- Account বদলালে account UI/chat unmount এবং Next query cache নতুন হয়। Gemini/Groq key এখন
+  backend-এ encrypted personal setting; refresh/new tab/login-এ metadata ফিরে আসে। Sign-out key
+  delete করে না; **Remove saved key** দিয়ে মুছুন। Parent/student-এর key আলাদা।
+  বিস্তারিত: [Saved API key update](SAVED_API_KEY.bn.md)।
 - Logout request fail হলে “logout হয়েছে” বলা হয় না; connection ঠিক করে retry করতে হবে।
 - পুরোনো async restore নতুন login/logout-এর token overwrite করতে পারে না। Invalid MFA response-এ
   অপ্রয়োজনীয় session restore দিয়ে আসল error ঢেকে দেওয়া হয় না।
@@ -47,7 +49,7 @@ account দিয়ে live quality test আলাদা করতে হবে।
    cd "E:\ETC\FinTech\Working\StudyRoute\backend"
    .\.venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
    ```
-   Startup-এ additive `browser_sessions` table তৈরি হয়; existing DB reset/seed/delete করবেন না।
+   Startup-এ additive `browser_sessions` ও `saved_ai_connections` table তৈরি হয়; existing DB reset/seed/delete করবেন না।
 6. আরেক terminal:
    ```powershell
    cd "E:\ETC\FinTech\Working\StudyRoute\web"

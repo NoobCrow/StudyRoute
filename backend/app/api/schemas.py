@@ -133,6 +133,10 @@ class CloudConnectionIn(Strict):
     consent: Literal[True]
 
 
+class SaveCloudConnectionIn(CloudConnectionIn):
+    storage_consent: Literal[True]
+
+
 class ConversationTurnIn(Strict):
     role: Literal["user", "assistant"]
     text: StrictStr = Field(min_length=1, max_length=2000)

@@ -15,7 +15,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "eeb1bd7f2abae0ed011a1585659d264867a1a13cd599af909ed4701e4e2b4734"
+      "sha256": "03f456a1ae28b484d5d275359005ed18474a906bdd9566e7b8697dd262927a04"
     },
     {
       "path": "backend/app/ai/arithmetic.py",
@@ -75,7 +75,7 @@
     },
     {
       "path": "backend/app/api/routes_assistant.py",
-      "sha256": "89d88af06689a7e9d9a3aa281ecc7a45b1c2925d80b2f0a4fbd447e1c19aaeff"
+      "sha256": "88468a68207c7b0979730474c9fad9ac55388d67391230508429b454e287bbc6"
     },
     {
       "path": "backend/app/api/routes_auth.py",
@@ -83,7 +83,7 @@
     },
     {
       "path": "backend/app/api/schemas.py",
-      "sha256": "6c8bd7c77dba2179fc45f3f5c7af9a26581ec0e7984d63e9db106277cb4d58bd"
+      "sha256": "a8681a85bfbb9768f136a080b96912d990c91baa66ba9a2656f47c2637c01176"
     },
     {
       "path": "backend/app/core/browser_session.py",
@@ -103,7 +103,7 @@
     },
     {
       "path": "backend/app/models.py",
-      "sha256": "6f9cce78d807f32a7eb55c4754ec45ac646b6cb54bebb1982ebb67541f44836e"
+      "sha256": "5f8673219875edccd6c28b5c2669c330a43e721aecd5205435f31513b38241f3"
     },
     {
       "path": "backend/app/scripts/check_ai.py",
@@ -154,40 +154,28 @@
       "sha256": "d6031f2c57d20a07aeed4fdd76c9d9218f585466e6c762b4b327832f141c78f5"
     },
     {
-      "path": "docs/ASSISTANT_CLOUD_MANIFEST.json",
-      "sha256": "88c2d4b1bccfdd3944e8d4aa0ed1d5483c3bcbad2ec02ec8dc569adb00039509"
-    },
-    {
       "path": "docs/ASSISTANT_CLOUD_SETUP.bn.md",
-      "sha256": "9353734526528ec2753e82c4a06a457b78adc07e5e96d27692b741783da04735"
+      "sha256": "1a260068c9943604ef41ada507f931c3ffd6de846115b95249ffaf11965ba8d1"
     },
     {
       "path": "docs/ASSISTANT_CLOUD_TESTS.md",
-      "sha256": "cb073b24736aa2ad37aee900d18c405ddc3c391fbce97b2a49f737743556f28c"
+      "sha256": "569ae81d40b3df447fe1a2b2632f51aa1694a43ab960f105bb511d0f8c3bcef0"
     },
     {
       "path": "docs/ASSISTANT_CLOUD_VERIFICATION.json",
-      "sha256": "f81e3b59a66b4f430ebeaf348207dcd34c6b1baca81ecc4463d4cb2ad6f5413f"
+      "sha256": "64fb425d73fa698ccad8d762dc4f382f438b4f71690146ae830c61e192b53769"
     },
     {
       "path": "docs/ASSISTANT_FIX.bn.md",
       "sha256": "45aa4ea8c5fd5ff03d85ec90148f1f0c7413a26e236852495a621e4a5a0273c3"
     },
     {
-      "path": "docs/ASSISTANT_FIX_MANIFEST.json",
-      "sha256": "664dfee5fcc840213ae14cfc5d5c74da84f86a722b3c1fe141cde1e317b5478c"
-    },
-    {
       "path": "docs/ASSISTANT_FIX_TESTS.md",
       "sha256": "2eb468cbc901ce2c7b2cb298950b1264b025cdad9ea37783716acc8b9dd92e0c"
     },
     {
-      "path": "docs/ASSISTANT_QUALITY_MANIFEST.json",
-      "sha256": "680e7a1de59707a28667d0230e996669f42261f0a2d1fe059131dba5ab7d2483"
-    },
-    {
       "path": "docs/ASSISTANT_QUALITY_UPDATE.bn.md",
-      "sha256": "1397a99635fec572fdc67b3d8ca5c67214d0e8ad1bb77ee645fe00b44d7007ee"
+      "sha256": "d4e47926ec46446a3a500171e20a62ad5ba6c7492540b01649f96663ee0427c3"
     },
     {
       "path": "docs/ASSISTANT_SESSION_VALIDATION.json",
@@ -195,7 +183,7 @@
     },
     {
       "path": "docs/SECURITY.md",
-      "sha256": "76d3d06116d048c25a0e9c73bf4a2435b98f983e7c12d20f583ed19020faebe7"
+      "sha256": "ba5ff78d6adfd1543529c9e0685899204a96f6cadcc78ee2ebbb1f1ccb8bb930"
     },
     {
       "path": "docs/SECURITY_SELF_ASSESSMENT.md",
@@ -207,7 +195,7 @@
     },
     {
       "path": "docs/SESSION_FIX.bn.md",
-      "sha256": "3308809e18d1b0308ebc632fb42867eb6daad8bca5d7fdaec7d83df325409f3e"
+      "sha256": "9d6627ebdc0f0a7892c94d20b25313868eecf2e6db9e4c96864abf5c3eda60bc"
     },
     {
       "path": "frontend/nginx.conf",
@@ -223,7 +211,7 @@
     },
     {
       "path": "frontend/src/api/types.ts",
-      "sha256": "639a64b8a053d866d0504c8c1be721f603de3e82438e2a9c673b344cba620d5c"
+      "sha256": "12c011b29e580a38e5f2f857c9356724527eb240f3d4e9e5efec01597cc082cd"
     },
     {
       "path": "frontend/src/auth/AuthContext.tsx",
@@ -231,7 +219,7 @@
     },
     {
       "path": "frontend/src/components/AssistantContext.tsx",
-      "sha256": "2ba5cc85f7332ee2543d99c3ef2e1355a1e5334e8e81516e1394274e126c8bbd"
+      "sha256": "f894ac0e7da64107051b18e513c99495f741ede3694a7c4a6bb82fcfb4e2ccaa"
     },
     {
       "path": "frontend/src/components/ChatPanel.tsx",
@@ -239,7 +227,7 @@
     },
     {
       "path": "frontend/src/components/CloudSettings.tsx",
-      "sha256": "a35a63b672e14aab5765923989608c934d21f545b5be50e83127b694b1e25076"
+      "sha256": "b796a2cc1af69e76873a79f49c1fc5dea6773e9325186eeef726981517838953"
     },
     {
       "path": "frontend/src/components/Layout.tsx",
@@ -247,7 +235,7 @@
     },
     {
       "path": "frontend/src/components/cloud.test.tsx",
-      "sha256": "d0d7b0f02e2757e33d4335162699fabc4d59b112c09072dadbc7c4396f4deed6"
+      "sha256": "30c2f759de96bfb7317b0b5666f022ab4f99595afd7cd1c692b2a88e1672f510"
     },
     {
       "path": "frontend/src/components/components.test.tsx",
@@ -255,11 +243,11 @@
     },
     {
       "path": "frontend/src/components/tasks.test.tsx",
-      "sha256": "3b785eb15a34a4a640e9e479ea566c36855e4a4a0452c126197e3b8f940198eb"
+      "sha256": "37b73f4c724a721b8c483dbeea5ece4fd244e420bc497a6d290da37fd2fe93c4"
     },
     {
       "path": "web/components/assistant/assistant-context.tsx",
-      "sha256": "32b98123910204155c2405437022d2aa537e286bfb45dbc90e5c6600ef75b610"
+      "sha256": "d350a646e6321280c604bdba6bcc1b5f94b73f90c6a0f28e114755d713f8bbd6"
     },
     {
       "path": "web/components/assistant/assistant-panel.tsx",
@@ -267,15 +255,15 @@
     },
     {
       "path": "web/components/assistant/assistant.test.tsx",
-      "sha256": "d9e9fc8e5f695eb6dea527b38b9ee4b6d88ca2dd4b6d35be8386ed0607021a36"
+      "sha256": "b68ee464fe223baa4aa4808724ee80eb73c98b586d6e5e63f8dc4cf4503e9855"
     },
     {
       "path": "web/components/assistant/cloud-settings.test.tsx",
-      "sha256": "c369ed3ec929a8c38635efab6dee14c5e939a94bb4f26e4bcbdd3fe25ed8b62e"
+      "sha256": "ccb92dab2911dc66abeeaf90b4df3e2e23e046c2ce14913a2f479b93b7c38492"
     },
     {
       "path": "web/components/assistant/cloud-settings.tsx",
-      "sha256": "eb9614756d7f7d6e7e70c3bc7e6f12b9b924d4a9259f7891c9c5f38a5e47a54a"
+      "sha256": "bee4e7dad0716532c8b457799adac1e50bfa52446610d12abe20765db4bf31fb"
     },
     {
       "path": "web/components/layout/app-shell.tsx",
@@ -311,7 +299,7 @@
     },
     {
       "path": "web/e2e/mock-api.ts",
-      "sha256": "7302875f4e4efbdf5a7b1cad8ab08bd62948aca5fd98dd2c204b18720474e6eb"
+      "sha256": "91d1b9dc1e3a5623d14668bab6e79d8947dd440c9a947964d7fac05981efac3c"
     },
     {
       "path": "web/lib/api/client.test.ts",
@@ -323,11 +311,13 @@
     },
     {
       "path": "web/lib/api/types.ts",
-      "sha256": "97c57956e459a79f9d09cfce33aaf129c96c67febaeee55d58b99c9d502475b2"
+      "sha256": "dbd77321df6c3599763ad2021139aa7fd99f8a19649e5cde163f5f71d08d48bc"
     },
     {
       "path": "web/nginx.conf",
       "sha256": "8e97a7e262f37e15d5edd9330ba7f442bcdb3eb3c678e81976728c53a989b2dd"
     }
-  ]
+  ],
+  "status": "superseded cumulative layer; use SAVED_API_KEY_MANIFEST.json",
+  "current_validation": "SAVED_API_KEY_VALIDATION.json"
 }

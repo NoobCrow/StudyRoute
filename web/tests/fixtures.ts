@@ -204,6 +204,9 @@ type Handler = unknown | ((init: RequestInit | undefined) => unknown);
 export function mockApi(routes: Record<string, Handler>): Mock<typeof fetch> {
   const fn = vi.fn<typeof fetch>(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input).replace("/api/v1", "").split("?")[0] ?? "";
+    // Every signed-in assistant loads non-secret saved-connection metadata.
+    if (!(path in routes) && path === "/assistant/connection" && init?.method === "GET")
+      return new Response(JSON.stringify({ saved: false }), { status: 200 });
     if (!(path in routes))
       return new Response(JSON.stringify({ code: "NOT_MOCKED", detail: path }), { status: 500 });
     const handler = routes[path];

@@ -69,7 +69,7 @@ export function CloudSettings() {
           {connected ? (
             <div role="status" className="space-y-2">
               <p>
-                Connected to {connected.provider} / {connected.model} for this tab session.
+                Connected to {connected.provider} / {connected.model} — saved for your account.
               </p>
               <Button
                 type="button"
@@ -78,9 +78,14 @@ export function CloudSettings() {
                 disabled={busy || connecting}
                 onClick={disconnect}
               >
-                Remove key and use default provider
+                Remove saved key and use default provider
               </Button>
             </div>
+          ) : null}
+          {connected?.verified === false ? (
+            <p role="status">
+              Saved key has not passed a provider test. Quota or validity may still need attention.
+            </p>
           ) : null}
           <form onSubmit={onConnect} className="space-y-2">
             <label htmlFor="ai-provider" className="block">
@@ -123,8 +128,9 @@ export function CloudSettings() {
                 onChange={(e) => setConsent(e.target.checked)}
               />
               <span>
-                I agree to send chat context to this provider. The connection test uses a small
-                synthetic request and may consume quota.
+                I agree to store this key encrypted on the server for my account and send chat
+                context to this provider. The connection test uses a small synthetic request and may
+                consume quota.
               </span>
             </label>
             <Button
@@ -132,19 +138,22 @@ export function CloudSettings() {
               size="sm"
               disabled={busy || connecting || !consent || key.trim().length < 10}
             >
-              {connecting ? "Testing connection…" : "Test and connect"}
+              {connecting ? "Saving connection…" : "Test and save connection"}
             </Button>
           </form>
           {connectionResult?.ok ? (
             <p role="status">
-              Connection verified. Your conversation is kept; send your next question.
+              {connectionResult.verified
+                ? "Connection verified and saved. Your conversation is kept."
+                : "Key saved, but the provider test was not verified. Provider limits still apply."}
             </p>
           ) : null}
           {problem ? <WaitNotice availability={problem} /> : null}
           <p className="text-muted-foreground">
-            Your key is held only in memory, never chat history or browser storage. Reload, sign out
-            or remove the key to clear it. Use HTTPS except on localhost. Do not use a shared demo
-            account for personal credentials.
+            Your key is encrypted on the server, never returned in chat history or browser storage.
+            It survives refresh, new tabs and sign-out. Use Remove saved key to delete it. Use HTTPS
+            except on localhost. Anyone sharing this account can use its saved key and quota; do not
+            save personal keys in shared demo accounts. Keep the server encryption secret backed up.
           </p>
         </div>
       </details>

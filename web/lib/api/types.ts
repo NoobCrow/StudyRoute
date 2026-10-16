@@ -418,8 +418,17 @@ export interface CloudConnection {
   api_key: string;
   consent: true;
 }
+export interface SavedConnection {
+  saved: boolean;
+  provider?: "gemini" | "groq";
+  model?: string;
+  verified?: boolean;
+  updated_at?: string;
+}
 export interface ConnectionResult {
   ok: boolean;
+  saved?: boolean;
+  verified?: boolean;
   provider?: string;
   model?: string;
   availability?: CloudAvailability;

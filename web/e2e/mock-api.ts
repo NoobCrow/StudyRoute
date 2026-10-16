@@ -272,6 +272,7 @@ export async function mockApi(page: Page): Promise<void> {
       signedIn = false;
       return json(route, { signed_out: true });
     }
+    if (path === "/assistant/connection" && method === "GET") return json(route, { saved: false });
     if (path === "/me") return json(route, USER);
     if (path === "/corridors") return json(route, CORRIDORS);
     if (path === "/kyc/status") return json(route, KYC);

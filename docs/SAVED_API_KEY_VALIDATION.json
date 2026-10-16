@@ -1,0 +1,80 @@
+{
+  "backend_full_checkpoint": {
+    "result": "1386 passed, 2 failed, 3 errors in 448.82s",
+    "scope": "Full suite with final application code. Five scan/packaging outcomes flagged two explicitly synthetic test-only literal key assignments, not runtime application failures.",
+    "resolved": "Replaced those two test fixtures with derived synthetic constants (no scanner allowlist or production code weakening). All previously failing scan/preflight/archive checks and saved-key tests passed in the final focused rerun.",
+    "note": "The entire backend suite was not rerun after the test-only fixture adjustment; do not describe this as a single all-green final full backend run."
+  },
+  "backend_final_focused": {
+    "result": "73 passed in 14.13s",
+    "scope": [
+      "test_saved_ai_connection.py (20 tests)",
+      "test_repo_scan.py",
+      "test_preflight.py",
+      "test_make_submission.py"
+    ]
+  },
+  "next_frontend": {
+    "unit_tests": "204 passed",
+    "typecheck": "passed",
+    "production_build": "passed",
+    "changed_file_eslint": "passed"
+  },
+  "legacy_frontend": {
+    "unit_tests": "145 passed",
+    "typecheck": "passed",
+    "production_build": "passed"
+  },
+  "production_smoke": {
+    "desktop_mobile": "10 passed",
+    "api": "mocked"
+  },
+  "real_local_api_browser": {
+    "checks": [
+      "login works with HttpOnly session",
+      "explicit consent saves key and clears password input",
+      "metadata never returns the saved key",
+      "refresh restores saved provider without repasting key",
+      "new tab restores login and saved connection",
+      "chat resolves saved key server-side without resending it",
+      "API key and refresh credential absent from browser storage",
+      "logout clears signed-in UI in both tabs",
+      "saved key survives logout and later login to same account",
+      "student account does not inherit parent saved key",
+      "explicit remove deletes server setting and updates another open tab",
+      "removed key does not reappear after refresh",
+      "quota-limited key saves as unverified with honest retry notice",
+      "quota still reported after refresh; no silent default provider fallback",
+      "no uncaught browser or CSP errors"
+    ],
+    "providerHTTP": "mocked; no live provider inference"
+  },
+  "mobile_local_browser": {
+    "result": "PASS mobile: login, new tab restore, encrypted-key save and reload, blank password input, no sideways overflow, no uncaught/CSP errors",
+    "viewport": "393x851",
+    "providerHTTP": "mocked"
+  },
+  "security_contracts": [
+    "AES-256-GCM at rest; AAD user ID + provider",
+    "metadata only; no API key, ciphertext or suffix returned",
+    "no API key in browser storage, chat payload, conversation, model prompt, log/audit or URL",
+    "actual user isolation, not household ownership",
+    "delegated actor cannot manage or inherit saved key",
+    "reload/new tab/logout-login persistence",
+    "fresh application instance with same DB/server encryption secret reuses saved key",
+    "explicit delete and parent data-reset remove only own setting",
+    "invalid replacement preserves previous encrypted row",
+    "quota saves as unverified; error remains explicit with no default provider fallback",
+    "tampered ciphertext/provider or wrong master secret gives actionable 409, not fallback",
+    "stale metadata cannot override successful save; failed delete does not pretend success"
+  ],
+  "limitations": [
+    "All provider HTTP mocked: no live Gemini/Groq/Hugging Face inference or billing tested by developer.",
+    "A model label is not itself proof of live inference or model quality.",
+    "Shared demo account credentials let other sign-ins consume saved provider quota; do not store personal keys there.",
+    "Encryption is at rest, not end-to-end; server decrypts to call provider. Protect server DB and master encryption secrets.",
+    "Browser chat history remains in memory; this feature persists the provider setting, not conversation transcripts.",
+    "Targeted claim guards are not a general semantic truth verifier.",
+    "No changes installed on the user PC; merge and restart are required."
+  ]
+}

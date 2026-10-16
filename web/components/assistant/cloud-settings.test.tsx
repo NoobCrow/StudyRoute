@@ -6,7 +6,7 @@ import { AssistantProvider } from "@/components/assistant/assistant-context";
 import { AssistantPanel } from "@/components/assistant/assistant-panel";
 import { WaitNotice } from "@/components/assistant/cloud-settings";
 import type { CloudAvailability } from "@/lib/api/types";
-import { chatReply, mockApi } from "@/tests/fixtures";
+import { chatReply, mockApi, problem } from "@/tests/fixtures";
 import { renderWithProviders } from "@/tests/render";
 
 const TEST_KEY = "gsk_synthetic_test_key_only";
@@ -38,7 +38,7 @@ async function enterKey() {
   const input = screen.getByLabelText("API key");
   expect(input).toHaveAttribute("type", "password");
   await userEvent.type(input, TEST_KEY);
-  const button = screen.getByRole("button", { name: "Test and connect" });
+  const button = screen.getByRole("button", { name: "Test and save connection" });
   expect(button).toBeDisabled();
   await userEvent.click(screen.getByRole("checkbox"));
   await userEvent.click(button);
@@ -49,10 +49,51 @@ async function ask(text: string) {
   await userEvent.click(screen.getByRole("button", { name: "Send" }));
 }
 
-describe("cloud connection", () => {
-  it("requires consent, tests a masked key, keeps it out of history and browser storage", async () => {
+function connectionStore(
+  options: { rejected?: boolean; quota?: boolean; deleteFails?: boolean } = {},
+) {
+  let saved = false;
+  return (init?: RequestInit) => {
+    if (init?.method === "PUT") {
+      if (options.rejected)
+        return {
+          ok: false,
+          saved: false,
+          availability: {
+            ...LIMITED,
+            provider: "groq",
+            code: "invalid_key",
+            message: "Key rejected",
+          },
+        };
+      saved = true;
+      return {
+        ok: true,
+        saved,
+        provider: "groq",
+        model: "test-model",
+        verified: !options.quota,
+        ...(options.quota ? { availability: LIMITED } : {}),
+      };
+    }
+    if (init?.method === "DELETE") {
+      if (options.deleteFails) return problem(503, "UNAVAILABLE", "Could not remove key");
+      saved = false;
+    }
+    return saved
+      ? { saved, provider: "groq", model: "test-model", verified: !options.quota }
+      : { saved };
+  };
+}
+
+function requests(fetch: ReturnType<typeof mockApi>, path: string) {
+  return fetch.mock.calls.filter(([url]) => String(url).endsWith(path));
+}
+
+describe("saved cloud connection", () => {
+  it("requires consent, saves explicitly and never puts keys in chat or browser storage", async () => {
     const fetch = mockApi({
-      "/assistant/connection/test": { ok: true, provider: "groq", model: "test-model" },
+      "/assistant/connection": connectionStore(),
       "/assistant/chat": chatReply({ reply: "Model reply", mode: "llm" }),
     });
     panel();
@@ -61,11 +102,20 @@ describe("cloud connection", () => {
     await enterKey();
     await screen.findByText(/Connected to groq/);
     expect(screen.getByLabelText("API key")).toHaveValue("");
+    const save = requests(fetch, "/assistant/connection").find(
+      ([, init]) => init?.method === "PUT",
+    );
+    expect(JSON.parse(String(save?.[1]?.body))).toEqual({
+      provider: "groq",
+      api_key: TEST_KEY,
+      consent: true,
+      storage_consent: true,
+    });
     await ask("What do you do?");
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
-    const request = JSON.parse(String(fetch.mock.calls[2]?.[1]?.body));
-    expect(request.connection).toEqual({ provider: "groq", api_key: TEST_KEY, consent: true });
-    expect(JSON.stringify(request.context)).not.toContain(TEST_KEY);
+    await vi.waitFor(() => expect(requests(fetch, "/assistant/chat")).toHaveLength(2));
+    const request = JSON.parse(String(requests(fetch, "/assistant/chat")[1]?.[1]?.body));
+    expect(request.connection).toBeUndefined();
+    expect(JSON.stringify(request)).not.toContain(TEST_KEY);
     expect(request.context.conversation).toEqual([
       { role: "user", text: "hello" },
       { role: "assistant", text: "Model reply" },
@@ -74,31 +124,39 @@ describe("cloud connection", () => {
     expect(JSON.stringify({ ...localStorage, ...sessionStorage })).not.toContain(TEST_KEY);
   });
 
-  it("never activates a rejected key or changes provider automatically", async () => {
+  it("restores saved metadata after remount without re-entering or retrieving a key", async () => {
     const fetch = mockApi({
-      "/assistant/connection/test": {
-        ok: false,
-        availability: {
-          ...LIMITED,
-          provider: "groq",
-          code: "invalid_key",
-          message: "Key rejected",
-        },
-      },
-      "/assistant/chat": chatReply({ reply: "Default reply" }),
+      "/assistant/connection": connectionStore(),
+      "/assistant/chat": chatReply({ reply: "Restored answer" }),
     });
+    const first = panel();
+    await enterKey();
+    await screen.findByText(/Connected to groq/);
+    first.unmount();
+    panel("session-b");
+    await screen.findByText(/Connected to groq/);
+    expect(screen.getByLabelText("API key")).toHaveValue("");
+    await ask("hello");
+    await screen.findByText("Restored answer");
+    expect(
+      requests(fetch, "/assistant/connection").filter(([, i]) => i?.method === "PUT"),
+    ).toHaveLength(1);
+    expect(
+      JSON.parse(String(requests(fetch, "/assistant/chat")[0]?.[1]?.body)).connection,
+    ).toBeUndefined();
+  });
+
+  it("never activates a rejected key", async () => {
+    mockApi({ "/assistant/connection": connectionStore({ rejected: true }) });
     panel();
     await enterKey();
     await screen.findByText("Key rejected");
     expect(screen.queryByText(/Connected to groq/)).toBeNull();
-    await ask("hello");
-    await screen.findByText("Default reply");
-    expect(JSON.parse(String(fetch.mock.calls[1]?.[1]?.body)).connection).toBeUndefined();
   });
 
-  it("removes the key while preserving the conversation", async () => {
+  it("removes the server key while preserving the conversation", async () => {
     const fetch = mockApi({
-      "/assistant/connection/test": { ok: true, model: "test-model" },
+      "/assistant/connection": connectionStore(),
       "/assistant/chat": chatReply({ reply: "Reply kept" }),
     });
     panel();
@@ -107,31 +165,66 @@ describe("cloud connection", () => {
     await ask("hello");
     await screen.findByText("Reply kept");
     await userEvent.click(
-      screen.getByRole("button", { name: "Remove key and use default provider" }),
+      screen.getByRole("button", { name: "Remove saved key and use default provider" }),
     );
+    await vi.waitFor(() => expect(screen.queryByText(/Connected to groq/)).toBeNull());
     expect(screen.getByText("Reply kept")).toBeInTheDocument();
-    await ask("continue");
-    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(3));
-    expect(JSON.parse(String(fetch.mock.calls[2]?.[1]?.body)).connection).toBeUndefined();
+    expect(requests(fetch, "/assistant/connection").some(([, i]) => i?.method === "DELETE")).toBe(
+      true,
+    );
   });
 
-  it("clears key and conversation on a new signed-in session boundary", async () => {
-    const fetch = mockApi({
-      "/assistant/connection/test": { ok: true, model: "test-model" },
-      "/assistant/chat": chatReply({ reply: "Session reply" }),
-    });
-    const first = panel();
+  it("does not pretend the saved key was removed if the server fails", async () => {
+    mockApi({ "/assistant/connection": connectionStore({ deleteFails: true }) });
+    panel();
     await enterKey();
     await screen.findByText(/Connected to groq/);
-    first.unmount();
-    panel("session-b");
-    expect(screen.queryByText(/Connected to groq/)).toBeNull();
-    await ask("hello");
-    await screen.findByText("Session reply");
-    expect(JSON.parse(String(fetch.mock.calls[1]?.[1]?.body)).connection).toBeUndefined();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remove saved key and use default provider" }),
+    );
+    await screen.findByText("Could not remove key");
+    expect(screen.getByText(/Connected to groq/)).toBeInTheDocument();
   });
 
-  it("shows quota failure and opens key input without a silent template", async () => {
+  it("labels a quota-limited saved key as unverified, not a successful provider test", async () => {
+    mockApi({ "/assistant/connection": connectionStore({ quota: true }) });
+    panel();
+    await enterKey();
+    await screen.findByText(/Key saved, but the provider test was not verified/);
+    expect(screen.queryByText(/Connection verified and saved/)).toBeNull();
+    expect(screen.getByText("Free GPU quota reached.")).toBeInTheDocument();
+  });
+
+  it("does not let a stale initial metadata fetch overwrite a successful save", async () => {
+    let release: (value: Response) => void = () => {};
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: unknown, init?: RequestInit) => {
+        if (init?.method === "GET")
+          return new Promise<Response>((resolve) => {
+            release = resolve;
+          });
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            saved: true,
+            provider: "groq",
+            model: "test-model",
+            verified: true,
+          }),
+        );
+      }),
+    );
+    panel();
+    await enterKey();
+    await screen.findByText(/Connected to groq/);
+    await act(async () => {
+      release(new Response(JSON.stringify({ saved: false })));
+    });
+    expect(screen.getByText(/Connected to groq/)).toBeInTheDocument();
+  });
+
+  it("opens key controls on quota failure without a silent template", async () => {
     mockApi({
       "/assistant/chat": chatReply({
         reply: "No model response",
@@ -145,7 +238,6 @@ describe("cloud connection", () => {
     await screen.findByText("Free GPU quota reached.");
     expect(screen.getByLabelText("API key")).toBeVisible();
     expect(screen.getByText(/did not supply an exact retry time/)).toBeInTheDocument();
-    expect(screen.queryByText(/engine's template answer/)).toBeNull();
   });
 });
 

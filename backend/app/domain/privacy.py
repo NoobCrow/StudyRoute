@@ -16,6 +16,7 @@ from app.models import (
     ProviderLedger,
     Quote,
     Recipient,
+    SavedAIConnection,
 )
 
 
@@ -38,6 +39,8 @@ def reset_household_data(session: Session, audit: AuditService, actor: Actor) ->
         counts[name] = session.execute(delete(table).where(table.owner_id == owner)).rowcount
     session.execute(delete(IdempotencyKey).where(IdempotencyKey.user_id == actor.user_id))
     session.execute(delete(MfaProof).where(MfaProof.user_id == actor.user_id))
+    # A parent reset must not delete a student's separate personal provider setting.
+    session.execute(delete(SavedAIConnection).where(SavedAIConnection.user_id == actor.user_id))
     detail = ", ".join(f"{name}={count}" for name, count in counts.items())
     audit.append(
         session,

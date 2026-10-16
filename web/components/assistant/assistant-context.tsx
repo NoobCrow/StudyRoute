@@ -12,8 +12,14 @@ import {
 } from "react";
 
 import { useCurrentChatScope } from "@/hooks/use-chat-scope";
-import { post } from "@/lib/api/client";
-import type { ChatResponse, CloudConnection, ConnectionResult, PendingTask } from "@/lib/api/types";
+import { del, get, post, put } from "@/lib/api/client";
+import type {
+  ChatResponse,
+  CloudConnection,
+  ConnectionResult,
+  SavedConnection,
+  PendingTask,
+} from "@/lib/api/types";
 
 export interface Turn {
   id: number;
@@ -28,11 +34,11 @@ interface AssistantState {
   error: Error | null;
   mode: ChatResponse | null;
   ask: (message: string) => Promise<void>;
-  connected: { provider: string; model: string } | null;
+  connected: { provider: string; model: string; verified?: boolean } | null;
   connectionResult: ConnectionResult | null;
   connecting: boolean;
   connect: (connection: CloudConnection) => Promise<boolean>;
-  disconnect: () => void;
+  disconnect: () => Promise<void>;
 }
 
 const AssistantContext = createContext<AssistantState | null>(null);
@@ -47,39 +53,104 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
   const [planQuote, setPlanQuote] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingTask | null>(null);
   const counter = useRef(0);
-  const credentials = useRef<CloudConnection | null>(null);
+  const metadataRevision = useRef(0);
+  const metadataRequest = useRef<AbortController | null>(null);
+  const channel = useRef<BroadcastChannel | null>(null);
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(true);
   const locked = useRef(false);
-  const [connected, setConnected] = useState<{ provider: string; model: string } | null>(null);
+  const [connected, setConnected] = useState<{
+    provider: string;
+    model: string;
+    verified?: boolean;
+  } | null>(null);
   const [connectionResult, setConnectionResult] = useState<ConnectionResult | null>(null);
   const [connecting, setConnecting] = useState(false);
+  // Only non-secret metadata returns to the browser. Chat resolves the saved key server-side.
+  const refreshConnection = useCallback(async () => {
+    if (locked.current) return;
+    const revision = ++metadataRevision.current;
+    metadataRequest.current?.abort();
+    const request = new AbortController();
+    metadataRequest.current = request;
+    try {
+      const result = await get<SavedConnection>("/assistant/connection", {
+        signal: request.signal,
+      });
+      if (request.signal.aborted || !mounted.current || revision !== metadataRevision.current)
+        return;
+      setConnected(
+        result.saved && result.provider
+          ? {
+              provider: result.provider,
+              model: result.model ?? "configured model",
+              verified: result.verified,
+            }
+          : null,
+      );
+    } catch (e) {
+      if (!request.signal.aborted && mounted.current && revision === metadataRevision.current)
+        setError(e as Error);
+    }
+  }, []);
+
   useEffect(() => {
     mounted.current = true;
-    return () => {
-      mounted.current = false;
-      credentials.current = null;
-      controller.current?.abort();
+    let active = true;
+    queueMicrotask(() => {
+      if (active) void refreshConnection();
+    });
+    const refresh = () => {
+      if (document.visibilityState !== "hidden") void refreshConnection();
     };
-  }, []);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    if (typeof BroadcastChannel !== "undefined") {
+      channel.current = new BroadcastChannel("studyroute-ai-settings");
+      channel.current.onmessage = (event: MessageEvent) => {
+        if (event.data === "connection-changed") refresh();
+      };
+    }
+    return () => {
+      active = false;
+      mounted.current = false;
+      metadataRequest.current?.abort();
+      controller.current?.abort();
+      channel.current?.close();
+      channel.current = null;
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [refreshConnection]);
 
   const connect = useCallback(async (connection: CloudConnection) => {
     if (locked.current) return false;
     locked.current = true;
+    ++metadataRevision.current;
+    metadataRequest.current?.abort();
     setConnecting(true);
     setError(null);
     setConnectionResult(null);
     controller.current = new AbortController();
     try {
-      const result = await post<ConnectionResult>("/assistant/connection/test", connection, {
-        signal: controller.current.signal,
-      });
+      const result = await put<ConnectionResult>(
+        "/assistant/connection",
+        {
+          ...connection,
+          storage_consent: true,
+        },
+        { signal: controller.current.signal },
+      );
       if (!mounted.current) return false;
       setConnectionResult(result);
-      if (!result.ok) return false;
-      credentials.current = connection;
+      if (!result.ok || !result.saved) return false;
       setMode(null);
-      setConnected({ provider: connection.provider, model: result.model ?? "configured model" });
+      setConnected({
+        provider: connection.provider,
+        model: result.model ?? "configured model",
+        verified: result.verified,
+      });
+      channel.current?.postMessage("connection-changed");
       return true;
     } catch (e) {
       if (mounted.current) setError(e as Error);
@@ -90,12 +161,27 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
     if (locked.current) return;
-    credentials.current = null;
-    setConnected(null);
-    setConnectionResult(null);
-    setMode(null);
+    locked.current = true;
+    ++metadataRevision.current;
+    metadataRequest.current?.abort();
+    setConnecting(true);
+    setError(null);
+    controller.current = new AbortController();
+    try {
+      await del("/assistant/connection", { signal: controller.current.signal });
+      if (!mounted.current) return;
+      setConnected(null);
+      setConnectionResult(null);
+      setMode(null);
+      channel.current?.postMessage("connection-changed");
+    } catch (e) {
+      if (mounted.current) setError(e as Error);
+    } finally {
+      locked.current = false;
+      if (mounted.current) setConnecting(false);
+    }
   }, []);
 
   const ask = useCallback(
@@ -126,7 +212,6 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
           {
             message: clean,
             context,
-            ...(credentials.current ? { connection: credentials.current } : {}),
           },
           { signal: controller.current.signal },
         );

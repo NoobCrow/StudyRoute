@@ -52,5 +52,7 @@
     "real Gemini/Groq credentials and model availability",
     "LLM Bangla/Banglish answer quality",
     "production infrastructure security review"
-  ]
+  ],
+  "status": "historical initial cloud verification; memory-only behavior superseded",
+  "superseded_by": "SAVED_API_KEY_VALIDATION.json"
 }
