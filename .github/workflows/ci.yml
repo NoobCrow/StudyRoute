@@ -42,6 +42,29 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  # The Next.js UI (web/). Builds the static export, checks its Content-Security-Policy hashes through the
+  # Playwright smoke test (it serves web/out with the generated headers) and runs the unit and axe tests.
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      # Real Chrome (preinstalled on the runner) against the production build and its security headers.
+      - run: npm run e2e
+
   contracts:
     runs-on: ubuntu-latest
     defaults:
@@ -87,6 +110,8 @@ jobs:
           node-version: "22"
       - run: npm audit --omit=dev
         working-directory: frontend
+      - run: npm audit --omit=dev
+        working-directory: web
 
   docker:
     runs-on: ubuntu-latest
