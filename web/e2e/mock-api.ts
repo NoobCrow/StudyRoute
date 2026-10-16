@@ -9,6 +9,7 @@ const PERMISSIONS = [
   "payments:draft",
   "planner:read",
   "data:reset",
+  "recipients:allowlist",
 ];
 
 export const USER = {
@@ -251,6 +252,7 @@ function problem(route: Route, status: number, code: string, detail: string): Pr
 
 /** Answers every /api/v1 call the dashboard, sign-in and compare screens make. */
 export async function mockApi(page: Page): Promise<void> {
+  let allowlisted = false;
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/api/v1", "");
@@ -268,7 +270,31 @@ export async function mockApi(page: Page): Promise<void> {
     if (path === "/corridors") return json(route, CORRIDORS);
     if (path === "/kyc/status") return json(route, KYC);
     if (path === "/payments") return json(route, { items: [], next_cursor: null });
-    if (path === "/recipients") return json(route, { items: [] });
+    if (path === "/recipients") {
+      return json(route, {
+        items: [
+          {
+            recipient_id: "rcp_1",
+            type: "UNIVERSITY",
+            display_name: "University of Example (synthetic)",
+            country: "GB",
+            bic: "EXMPGB2L",
+            account_kind: "IBAN",
+            account_masked: "GB** **** 4821",
+            routing_code: null,
+            label: "University of Example (synthetic) GB** **** 4821",
+            allowlisted,
+            allowlisted_at: null,
+            created_at: "2026-10-14T12:52:00Z",
+          },
+        ],
+      });
+    }
+    if (path === "/recipients/rcp_1" && method === "PATCH") {
+      allowlisted = (request.postDataJSON() as { allowlisted: boolean }).allowlisted;
+      return json(route, { recipient_id: "rcp_1", allowlisted });
+    }
+    if (path === "/auth/mfa/verify") return json(route, { mfa_proof: "proof_e2e" });
     if (path === "/planner/deadline") return json(route, PLAN);
     if (path === "/planner/runway") return json(route, RUNWAY);
     if (path === "/planner/send-plan") return json(route, SEND_PLAN);

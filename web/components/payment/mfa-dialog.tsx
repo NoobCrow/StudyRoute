@@ -1,8 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { ErrorNotice } from "@/components/app/notice";
@@ -23,7 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { post } from "@/lib/api/client";
 
 export type MfaScope =
@@ -34,12 +35,9 @@ export type MfaScope =
   | "release_escrow"
   | "cancel_escrow";
 
+const CODE_LENGTH = 6;
 const codeSchema = z.object({
-  code: z
-    .string()
-    .trim()
-    .min(4, "Enter the code from your authenticator app.")
-    .max(12, "The code is too long."),
+  code: z.string().regex(/^[0-9]{6}$/, "Enter the 6-digit code from your authenticator app."),
 });
 type CodeValues = z.infer<typeof codeSchema>;
 
@@ -52,32 +50,52 @@ interface Props {
   onCancel: () => void;
 }
 
-/** Step-up MFA. The proof returned is bound to this user, this action and this subject. */
+/**
+ * Step-up MFA in six boxes. The proof returned is bound to this user, this action and this subject.
+ * The dialog traps focus and gives it back to the button that opened it when it closes.
+ */
 export function MfaDialog({ title, scope, subjectId, sandboxCode, onProof, onCancel }: Props) {
   const [error, setError] = useState<Error | null>(null);
+  // This dialog has no Radix trigger, so remember the button that opened it and give focus back to it.
+  const [opener] = useState(() =>
+    typeof document === "undefined" ? null : document.activeElement,
+  );
   const form = useForm<CodeValues>({
     resolver: zodResolver(codeSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
     defaultValues: { code: "" },
   });
+  const code = useWatch({ control: form.control, name: "code" });
 
   async function onSubmit(values: CodeValues) {
     setError(null);
     try {
       const result = await post<{ mfa_proof: string }>("/auth/mfa/verify", {
-        code: values.code.trim(),
+        code: values.code,
         scope,
         subject_id: subjectId,
       });
       onProof(result.mfa_proof);
     } catch (e) {
       setError(e as Error);
+      form.reset({ code: "" });
+      form.setFocus("code");
     }
   }
 
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent>
+      <DialogContent
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          if (opener instanceof HTMLElement) opener.focus();
+        }}
+        onOpenAutoFocus={(event) => {
+          // Focus the first box here, not with autoFocus: the dialog must see which button opened it.
+          event.preventDefault();
+          form.setFocus("code");
+        }}
+      >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
             <DialogHeader>
@@ -100,14 +118,20 @@ export function MfaDialog({ title, scope, subjectId, sandboxCode, onProof, onCan
                 <FormItem>
                   <FormLabel>MFA code</FormLabel>
                   <FormControl>
-                    <Input
+                    <InputOTP
+                      maxLength={CODE_LENGTH}
                       inputMode="numeric"
+                      pattern={REGEXP_ONLY_DIGITS}
                       autoComplete="one-time-code"
-                      maxLength={12}
-                      className="font-mono"
-                      autoFocus
+                      containerClassName="justify-center"
                       {...field}
-                    />
+                    >
+                      <InputOTPGroup>
+                        {Array.from({ length: CODE_LENGTH }, (_, index) => (
+                          <InputOTPSlot key={index} index={index} />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,8 +141,12 @@ export function MfaDialog({ title, scope, subjectId, sandboxCode, onProof, onCan
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
-              <Button type="submit" loading={form.formState.isSubmitting}>
-                Verify
+              <Button
+                type="submit"
+                loading={form.formState.isSubmitting}
+                disabled={code.length !== CODE_LENGTH}
+              >
+                Confirm
               </Button>
             </DialogFooter>
           </form>

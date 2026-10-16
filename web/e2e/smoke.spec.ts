@@ -86,3 +86,45 @@ test("a person who is not signed in is sent to the sign-in page", async ({ page 
   await expect(page).toHaveURL(/\/login\/?$/);
   await expect(page.getByRole("heading", { name: "Sign in to StudyRoute" })).toBeVisible();
 });
+
+test("allowlist a recipient with the six-box MFA code and remove it again", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/recipients/");
+  await expect(page.getByRole("heading", { name: "Recipients" })).toBeVisible();
+  await expect(page.getByText("1 recipient", { exact: true })).toBeVisible();
+  await expect(page.getByText("Not allowlisted")).toBeVisible();
+
+  const opener = page.getByRole("button", { name: "Allowlist with MFA" });
+  await opener.click();
+  const dialog = page.getByRole("dialog", { name: "Allowlist this recipient" });
+  await expect(dialog.getByLabel("MFA code")).toBeFocused();
+  await expect(dialog.getByRole("button", { name: "Confirm" })).toBeDisabled();
+  await page.keyboard.type("246810");
+  await dialog.getByRole("button", { name: "Confirm" }).click();
+  await expect(page.getByText("Allowlisted", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 allowlisted")).toBeVisible();
+
+  await page.getByRole("button", { name: /Remove University of Example/ }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Remove" }).click();
+  await page.getByRole("dialog", { name: "Remove from the allowlist" }).waitFor();
+  await page.keyboard.type("246810");
+  await page.getByRole("button", { name: "Confirm" }).click();
+  await expect(page.getByText("Not allowlisted")).toBeVisible();
+});
+
+test("the add form checks the IBAN's check digits and keeps Save off until it is valid", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/recipients/#add");
+  const save = page.getByRole("button", { name: "Save recipient" });
+  await expect(save).toBeDisabled();
+  await page.getByRole("button", { name: "Fill a synthetic example" }).click();
+  await expect(page.getByText("The check digits are verified (ISO 13616, mod 97).")).toBeVisible();
+  await expect(save).toBeEnabled();
+  const iban = page.getByRole("textbox", { name: "IBAN" });
+  await iban.fill("GB09EXMP12345612344821");
+  await iban.blur(); // the message appears after the field is left, then follows every change
+  await expect(page.getByText(/The check digits do not match/)).toBeVisible();
+  await expect(save).toBeDisabled();
+});

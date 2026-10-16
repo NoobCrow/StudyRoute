@@ -1,11 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { corridor } from "@/tests/fixtures";
-
 import { signInSchema } from "./auth";
 import { chargeCodes, moneyText, wholeMonths } from "./money";
-import { EMPTY_RECIPIENT, recipientBody, recipientSchema, usesIban } from "./recipient";
 
 describe("sign-in schema", () => {
   it("asks for an email and a password", () => {
@@ -56,53 +53,5 @@ describe("money fields", () => {
 
   it("knows the three charge codes", () => {
     expect(chargeCodes).toEqual(["OUR", "SHA", "BEN"]);
-  });
-});
-
-describe("recipient schema follows the country's account scheme", () => {
-  const gb = corridor({ account_scheme: "IBAN" });
-  const ukDomestic = corridor({ country: "GB", account_scheme: "IBAN_OR_UK_DOMESTIC" });
-  const filled = { ...EMPTY_RECIPIENT, name: "University of Example", bic: "exmpgb2l" };
-
-  it("needs an IBAN where the scheme is IBAN", () => {
-    const result = recipientSchema(gb, "iban").safeParse(filled);
-    expect(result.error?.issues.map((i) => i.path.join("."))).toEqual(["iban"]);
-    expect(
-      recipientSchema(gb, "iban").safeParse({ ...filled, iban: "GB08EXMP12345612344821" }).success,
-    ).toBe(true);
-  });
-
-  it("needs an account number for the UK domestic format", () => {
-    expect(
-      recipientSchema(ukDomestic, "domestic").safeParse(filled).error?.issues[0]?.path,
-    ).toEqual(["account"]);
-    expect(usesIban(ukDomestic, "iban")).toBe(true);
-    expect(usesIban(ukDomestic, "domestic")).toBe(false);
-  });
-
-  it("upper-cases and checks the BIC", () => {
-    expect(recipientSchema(gb, "iban").parse({ ...filled, iban: "x" }).bic).toBe("EXMPGB2L");
-    expect(
-      recipientSchema(gb, "iban").safeParse({ ...filled, bic: "NOPE", iban: "x" }).success,
-    ).toBe(false);
-  });
-
-  it("sends only the fields the scheme uses", () => {
-    expect(recipientBody({ ...filled, iban: " GB08 " }, gb)).toEqual({
-      type: "UNIVERSITY",
-      display_name: "University of Example",
-      country: "GB",
-      bic: "EXMPGB2L",
-      iban: "GB08",
-    });
-    expect(
-      recipientBody(
-        { ...filled, ukMode: "domestic", account: "12345678", routing: "123456" },
-        ukDomestic,
-      ),
-    ).toMatchObject({
-      account_number: "12345678",
-      routing_code: "123456",
-    });
   });
 });

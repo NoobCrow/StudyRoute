@@ -1,6 +1,6 @@
 // Automated accessibility checks (axe-core) on the main screens. jsdom cannot compute colours, so
 // the contrast rule is checked separately in a real browser (scripts/tour.mjs); everything else runs here.
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -243,15 +243,46 @@ describe("accessibility (axe)", () => {
     expect(await violations(sheet)).toEqual([]);
   });
 
-  it("the recipients screen", async () => {
+  it("the recipients screen with a list and the add form", async () => {
     mockApi({
       "/corridors": CORRIDORS,
-      "/recipients": { items: [RECIPIENT] },
+      "/recipients": {
+        items: [RECIPIENT, { ...RECIPIENT, recipient_id: "rcp_2", allowlisted: true }],
+      },
       "/health": { mode: "sandbox" },
     });
     const { container } = renderWithProviders(<RecipientsScreen />);
-    await screen.findByText("GB** **** 4821");
+    await screen.findAllByText("GB** **** 4821");
     expect(await violations(container)).toEqual([]);
+  });
+
+  it("the recipients screen with the UK account format cards and the empty list", async () => {
+    mockApi({
+      "/corridors": { items: [corridor({ account_scheme: "IBAN_OR_UK_DOMESTIC" })], providers: [] },
+      "/recipients": { items: [] },
+      "/health": { mode: "sandbox" },
+    });
+    const { container } = renderWithProviders(<RecipientsScreen />);
+    await screen.findByRole("radiogroup", { name: "Account format" });
+    await screen.findByText("No recipients yet.");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the MFA dialog with its six boxes, and the remove confirmation", async () => {
+    mockApi({
+      "/corridors": CORRIDORS,
+      "/recipients": { items: [{ ...RECIPIENT, allowlisted: true }] },
+      "/health": { mode: "sandbox", demo: { accounts: [], password: "", mfa_code: "246810" } },
+    });
+    renderWithProviders(<RecipientsScreen />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: /Remove University of Example/ }),
+    );
+    const confirm = await screen.findByRole("alertdialog");
+    expect(await violations(confirm)).toEqual([]);
+    await userEvent.click(within(confirm).getByRole("button", { name: "Remove" }));
+    const dialog = await screen.findByRole("dialog", { name: "Remove from the allowlist" });
+    expect(await violations(dialog)).toEqual([]);
   });
 
   it("a payment with its summary, blockers, preview and tracker", async () => {
