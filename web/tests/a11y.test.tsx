@@ -1,6 +1,6 @@
 // Automated accessibility checks (axe-core) on the main screens. jsdom cannot compute colours, so
 // the contrast rule is checked separately in a real browser (scripts/tour.mjs); everything else runs here.
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,6 +28,7 @@ import {
   CHAIN_STATUS,
   KYC,
   PARENT_PERMISSIONS,
+  PLAN_VIEW,
   PLAN_CARD,
   QUOTE,
   RECIPIENT,
@@ -207,18 +208,39 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 
-  it("the compare screen with results and the stress test", async () => {
+  it("the compare screen before any quote: form, charge code cards, summary and the empty quotes card", async () => {
+    mockApi({
+      "/corridors": CORRIDORS,
+      "/recipients": { items: [RECIPIENT] },
+      "/planner/deadline": PLAN_VIEW,
+    });
+    const { container } = renderWithProviders(<CompareScreen />);
+    await screen.findByText("On track");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the compare screen with results, the stress test and the breakdown sheet", async () => {
     mockApi({
       "/corridors": CORRIDORS,
       "/recipients": { items: [RECIPIENT] },
       "/quotes": QUOTE,
       "/quotes/qte_1/stress": STRESS,
+      "/planner/deadline": PLAN_VIEW,
     });
     const { container } = renderWithProviders(<CompareScreen />);
-    await userEvent.click(await screen.findByRole("button", { name: "Get quotes" }));
-    await screen.findByText("Lowest cost");
+    const button = await screen.findByRole("button", { name: "Get quotes" });
+    await waitFor(() => expect(button).toBeEnabled());
+    await userEvent.click(button);
+    await screen.findByRole("region", { name: "Provider comparison table" });
     await screen.findByText("Currency-drop stress test");
     expect(await violations(container)).toEqual([]);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Actions for Provider B (synthetic)" }),
+    );
+    await userEvent.click(await screen.findByRole("menuitem", { name: "View breakdown" }));
+    const sheet = await screen.findByRole("dialog", { name: "Provider B (synthetic)" });
+    expect(await violations(sheet)).toEqual([]);
   });
 
   it("the recipients screen", async () => {

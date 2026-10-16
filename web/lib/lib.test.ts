@@ -49,3 +49,23 @@ describe("format helpers", () => {
     expect(addDaysIso(14, new Date("2026-10-14T23:30:00Z"))).toBe("2026-10-28");
   });
 });
+
+describe("formatMinorCompact", () => {
+  it("lays out typed digits with thousands separators and keeps decimals only when they matter", async () => {
+    const { formatMinorCompact } = await import("@/lib/money");
+    expect(formatMinorCompact(1000000, 2)).toBe("10,000");
+    expect(formatMinorCompact(1000050, 2)).toBe("10,000.50");
+    expect(formatMinorCompact(5, 2)).toBe("0.05");
+    expect(formatMinorCompact(1500000, 0)).toBe("1,500,000");
+    expect(formatMinorCompact(123456789012, 2)).toBe("1,234,567,890.12");
+    expect(formatMinorCompact(1234, 3)).toBe("1.234");
+  });
+});
+
+describe("dhakaToday", () => {
+  it("uses the Dhaka calendar day, which can be a day ahead of UTC", async () => {
+    const { dhakaToday } = await import("@/lib/format");
+    expect(dhakaToday(new Date("2026-10-15T20:30:00Z"))).toBe("2026-10-16");
+    expect(dhakaToday(new Date("2026-10-15T17:59:00Z"))).toBe("2026-10-15");
+  });
+});

@@ -784,3 +784,22 @@ export const STRESS: StressTest = {
   synthetic: true,
   note: "A what-if on synthetic rates, not a forecast. Indicative. Confirm with your AD bank.",
 };
+
+import type { PlanView } from "@/lib/api/types";
+
+/** The deadline planner's answer for a due date of 30 Oct 2026 (the engine's own dates). */
+export const PLAN_VIEW: PlanView = {
+  due_date: "2026-10-30",
+  latest_send_date: "2026-10-22",
+  recommended_send_date: "2026-10-21",
+  earliest_send_date: "2026-10-19",
+  status: "ON_TRACK",
+  days_until_latest_send: 6,
+  settlement_business_days: 3,
+  buffer_days: 2,
+  bank_cutoff_local: "15:00",
+  skipped_days: [],
+  warnings: [],
+  indicative: "Indicative. Confirm with your AD bank.",
+  destination_country: "GB",
+};

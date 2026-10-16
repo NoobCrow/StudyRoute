@@ -1,4 +1,6 @@
 // Display helpers for dates and identifiers only. Money is never formatted here.
+import { TZDate } from "@date-fns/tz";
+import { format } from "date-fns";
 
 const DATE_TIME = new Intl.DateTimeFormat("en-GB", {
   day: "2-digit",
@@ -51,4 +53,9 @@ export function clock(seconds: number): string {
 export function addDaysIso(days: number, from: Date = new Date()): string {
   const d = new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate() + days));
   return d.toISOString().slice(0, 10);
+}
+
+/** Today in Dhaka as an ISO date: the bank's clock decides what "today" means. */
+export function dhakaToday(now: Date = new Date()): string {
+  return format(new TZDate(now, "Asia/Dhaka"), "yyyy-MM-dd");
 }

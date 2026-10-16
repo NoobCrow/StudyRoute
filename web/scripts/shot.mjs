@@ -1,11 +1,13 @@
 // Signs in as a demo user and screenshots a route at a given width, to compare with the design.
-//   node scripts/shot.mjs http://localhost:3000 out.png [width] [route] [who]
+//   node scripts/shot.mjs http://localhost:3000 out.png [width] [route] [who] [theme] [action]
+//   action "quotes": on /compare/, press Get quotes and wait for the results before the screenshot.
 import { createRequire } from "node:module";
 
 const require = createRequire(new URL("../../frontend/package.json", import.meta.url));
 const puppeteer = require("puppeteer-core");
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
-const [base, out, widthArg, route = "/", who = "parent", theme = "light"] = process.argv.slice(2);
+const [base, out, widthArg, route = "/", who = "parent", theme = "light", action = ""] =
+  process.argv.slice(2);
 const width = Number(widthArg ?? 1440);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -27,10 +29,25 @@ await page.type('input[type="password"]', "Sandbox#2026");
 await page.click('button[type="submit"]');
 await page.waitForSelector("main#main", { timeout: 20000 });
 if (route !== "/") {
-  await page.evaluate((r) => document.querySelector(`a[href="${r}"]`)?.click(), route);
-  await sleep(500);
+  // On a narrow screen the menu is closed and its links are not in the page: load the route instead.
+  const clicked = await page.evaluate((r) => {
+    const link = document.querySelector(`a[href="${r}"]`);
+    link?.click();
+    return Boolean(link);
+  }, route);
+  if (clicked) await sleep(500);
+  else await page.goto(`${base}${route}`, { waitUntil: "networkidle0" });
 }
 await sleep(2500);
+if (action === "quotes") {
+  await page.evaluate(() =>
+    [...document.querySelectorAll("button")]
+      .find((b) => b.textContent.trim() === "Get quotes")
+      ?.click(),
+  );
+  await page.waitForSelector('[aria-label="Provider comparison table"]', { timeout: 20000 });
+  await sleep(1500);
+}
 await page.screenshot({ path: out, fullPage: true });
 console.log("saved", out, "errors:", errors.length);
 for (const e of errors.slice(0, 8)) console.log("  ", e.slice(0, 220));

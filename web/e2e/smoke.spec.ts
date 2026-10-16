@@ -42,14 +42,28 @@ test("sign in, read the dashboard, compare providers and see the shortfall", asy
   await page.getByRole("link", { name: "Compare providers" }).first().click();
   // Next's client router may drop the trailing slash of an exported page; the server serves both.
   await expect(page).toHaveURL(/\/compare\/?$/);
+  // The request card and its live summary come first; the quotes card is empty until asked.
+  const summary = page.getByRole("region", { name: "Your request" });
+  await expect(summary).toContainText("GBP 10,000");
+  await expect(page.getByText(/No quotes yet\. Press Get quotes/)).toBeVisible();
+  await page.getByRole("radio", { name: /SHA/ }).check();
+  await expect(summary).toContainText("SHA (shared)");
+  await page.getByRole("radio", { name: /OUR/ }).check();
   await page.getByRole("button", { name: "Get quotes" }).click();
 
-  const table = page.getByRole("table").first();
-  await expect(table).toContainText("Provider B (synthetic)");
-  await expect(page.getByText("Lowest cost").first()).toBeVisible();
+  const quotes = page.getByRole("region", { name: "Provider comparison table" });
+  await expect(quotes).toContainText("Provider B (synthetic)");
+  await expect(quotes.getByText("Best", { exact: true })).toBeVisible();
   await expect(page.getByText("Short by GBP 35.00")).toBeVisible();
   await expect(page.getByText("Currency-drop stress test")).toBeVisible();
   await expect(page.getByText("BDT 1,625,300.00").first()).toBeVisible();
+
+  // The breakdown opens from the row menu and shows the engine's lines.
+  await page.getByRole("button", { name: "Actions for Provider B (synthetic)" }).click();
+  await page.getByRole("menuitem", { name: "View breakdown" }).click();
+  const sheet = page.getByRole("dialog", { name: "Provider B (synthetic)" });
+  await expect(sheet).toContainText("True total cost");
+  await expect(sheet).toContainText("Indicative. Confirm with your AD bank.");
 });
 
 test("the session survives a reload without asking for the password again", async ({ page }) => {
