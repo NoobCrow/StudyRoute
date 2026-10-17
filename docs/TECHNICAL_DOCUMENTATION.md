@@ -43,14 +43,14 @@ logged. Each part below exists to make one of those four statements true and tes
 
 | Layer | Folder | Responsibility | I/O |
 |-------|--------|----------------|-----|
-| Engine | `backend/app/engine/` | Every number: costs, ranking, deadline, runway, and the journals of a bank transfer (`interbank.py`) | None (pure) |
-| Domain | `backend/app/domain/` | State machine, guards, RBAC, KYC, limits, config, the ledger and the bank network | Database via a passed-in session |
+| Engine | `backend/app/engine/` | Every number: costs, ranking, deadline, runway, the student budget (`student_budget.py`), and the journals of a bank transfer (`interbank.py`) | None (pure) |
+| Domain | `backend/app/domain/` | State machine, guards, RBAC, KYC, limits, config, the ledger, the bank network and the student guide (`student_guide.py`) | Database via a passed-in session |
 | API | `backend/app/api/` | Routes, authentication, idempotency, rate limits, errors | HTTP |
 | Audit | `backend/app/audit/` | Hash chain and verification | Database |
 | Chain | `backend/app/chain/`, `contracts/` | Compiled contracts, ABI codec and the in-memory EVM (`py-evm`) | None (memory) |
 | Providers | `backend/app/providers/` | Mock providers, simulator, webhook signing | HTTP (webhooks) |
 | AI | `backend/app/ai/` | Orchestrator, masking, number guard, tools, templates | Optional network call to a model |
-| Web | `web/` | Dashboard, compare, payments, recipients, documents, audit, rules, bank network, smart escrow, sandbox, assistant | HTTP |
+| Web | `web/` | Dashboard, compare, payments, recipients, documents, student guide, audit, rules, bank network, smart escrow, sandbox, assistant | HTTP |
 
 The engine has no database, clock or network access, so it is fully unit-testable and its output
 can be trusted as the single source of numbers.

@@ -10,7 +10,7 @@ no flaw exists, and an independent penetration test has not been done.
 |------|-----|--------|
 | **Everything the suites cover** | `pytest` (backend), `vitest` and Playwright (web UI), `ruff`, `tsc`, ESLint, production build | All pass |
 | **Known vulnerable dependencies** | `pip-audit` on the pinned backend lock; `npm audit` on the web UI (production) and on `contracts/` | 0 vulnerabilities in all three |
-| **Anonymous access** | Every one of the 70 routes from the API's own OpenAPI document called with no token | All refused; no server error |
+| **Anonymous access** | Every route from the API's own OpenAPI document (the student budget and arrival guide included) called with no token | All refused; no server error |
 | **Token forgery** | `alg=none`, HS256 signed with the public key (algorithm confusion), ES256 with an attacker's key, cut and flipped signatures, expired, refresh token used as access token, empty and garbage bearers, token in the URL | All refused (401) |
 | **One family reading another's data** | A second, unrelated household (parent and student) against payments, quotes, trackers, compliance reports, instruction previews, escrows, bank transfers and statements, recipients, documents, audit events and every list | All 403 or 404; nothing of household 1 appears anywhere in household 2's responses |
 | **One family changing another's data** | Rename, cancel, request approval, abandon, confirm, delete, with and without borrowed MFA proofs | All refused; nothing changed |

@@ -443,6 +443,33 @@ Check for C: fx_cost = 2.00 x 10,000 = 20,000. Shortfall = 35 x 160 = 5,600. Tot
 > It is a what-if on synthetic rates, not a forecast. The assistant answers "what if the taka
 > drops 10%?" from these figures (a rule picks the intent; the trained reader cannot override it).
 
+6.8 Student guide and fewer clicks to a payment (added 17 October 2026)
+
+> Student budget (engine/student_budget.py, domain/student_guide.py, pure engine). For each city
+> the config (student_costs.<country>) holds whole-unit monthly figures in the country's own
+> currency: rent in a shared flat, rent in a studio, food, transport, bills, phone and internet, and
+> other costs. A month is the sum of the lines for the chosen housing. It is converted to taka with
+> the synthetic mid-market rate and rounded UP. match_cities orders cities by the month in taka (ties
+> by country, then city) and, when a monthly budget in taka is given, marks each city fits or not
+> (a month equal to the budget fits) with the taka to spare or short. GET /planner/student-budget
+> (budget_bdt_minor, housing, country). Read-only: no audit event. The figures are invented for the
+> sandbox, marked verified: false with a source to replace, and always shown with "Indicative.
+> Confirm with your AD bank." and "not a survey".
+>
+> Arrival guide (domain/student_guide.py). Per country the config (arrival_guide.<country>, with a
+> GENERIC list for the rest) names the steps for three stages: before you fly, in your first week, in
+> your first month; arrival_labels holds the label and hint of each step. GET /planner/arrival-guide
+> (country). Read-only. Ticks are kept in the browser only (localStorage), never sent to the server.
+>
+> Assistant. The questions "what is the rent in Manchester?", "which city fits BDT 130,000 a month?"
+> and "what should I do when I arrive?" are picked by rules (the trained reader cannot override
+> them); an explicit payment or send-plan request always wins. Every figure reaches the reply through
+> facts and the number guard.
+>
+> Fewer clicks. The draft form preselects a recipient only when exactly one can be chosen or exactly one
+> is allowlisted, and offers "Create draft and request approval": the draft, then the approval request
+> if the API says it can be requested. Approving stays a separate human step with a fresh MFA proof.
+
 7\. System architecture \[DESIGN\]
 
 > +-------------+ HTTPS +---------------------------------------------+

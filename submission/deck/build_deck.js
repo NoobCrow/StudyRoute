@@ -251,7 +251,7 @@ slides.push({
     "plus a shortfall when fees are deducted from the amount. We rank by that percentage. In our synthetic example, Provider B is first at 1.58 percent, " +
     "Provider C looks cheap but it is quoted as SHA, so the university would receive 35 pounds less, and Provider A is third at 2.16 percent. " +
     "On the right is where Provider B's 25,300 taka goes: most of it is the margin. " +
-    "The same engine powers the smart send plan, names the cheapest provider that arrives before the due date, and can stress-test a quote if the taka weakens. It does not predict exchange rates, and says so.",
+    "The same engine powers the smart send plan, names the cheapest provider that arrives before the due date, and can stress-test a quote if the taka weakens. A student guide shows which student cities a monthly budget covers, with invented figures marked not verified. It does not predict exchange rates, and says so.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,

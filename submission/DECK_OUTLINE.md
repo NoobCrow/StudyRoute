@@ -41,6 +41,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Worked example (synthetic, GBP 10,000, mid rate 160.00): B 1.58%, C 1.63% with a GBP 35 shortfall, A 2.16%.
 - Integer minor units and `Decimal` rates; no floats.
 - Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once, because fixed fees are paid on every transfer.
+- Student guide: which of 20 student cities a monthly budget in taka covers, and the steps for the first weeks abroad. Invented figures, marked not verified. One-click "create draft and request approval"; approval still needs MFA.
 - Deadline fit: the cheapest provider that ARRIVES before the due date (both countries' working days); if the cheapest would be late, the plan says so. Currency-drop stress test: the same quote priced again if the taka weakens 5, 10, 15 or 20%, a what-if on synthetic rates and not a forecast.
 
 ## 7. Smart escrow for living costs

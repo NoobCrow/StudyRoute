@@ -41,6 +41,8 @@ None of these may be presented as a legal limit. They are placeholders for the A
 | `checklists.*_TUITION`, `checklists.*_LIVING` and `checklist_labels` | Indicative document lists per corridor | Each university and bank has its own list |
 | `checklists.GENERIC_TUITION`, `checklists.GENERIC_LIVING` | The general list shown for every country without its own | Country-specific documents (like a CAS or an I-20) are only loaded for the six hand-written corridors |
 | `countries.directory` | Name, currency and weekend for all 198 destination countries | Taken from Unicode CLDR (through Babel), not checked against each country's banks. No public holidays are loaded for these countries |
+| `student_costs.GB`, `.US`, `.DE`, `.AU`, `.CA`, `.MY` | Monthly rent, food, transport, bills, phone and other costs for 20 student cities | Invented for the sandbox, not a survey. Replace with a university's own estimate or a published cost-of-living source before anyone relies on them |
+| `arrival_guide.*`, `arrival_labels` | The first-weeks steps for each country, and the label and hint of each step | Indicative advice. Visa, work and registration rules differ by country and change; confirm with the university and the official government page |
 | `countries.restricted` | Destinations the sandbox lists but will not quote (CU, IR, KP, SY) | A placeholder from public sanctions news, not legal advice. Which destinations a Bangladeshi AD bank refuses must come from Bangladesh Bank and the bank itself |
 
 Every one of these can be changed by an admin in the **Rules** screen without a code change; the

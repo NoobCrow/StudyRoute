@@ -49,6 +49,9 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F18 | **Reinforcement learning**: a small policy, trained by Double DQN against simulated parents, decides whether the assistant asks for a missing amount, date or period, reads the values back for a "yes", or plans. Plain code limits which choices are legal; it never approves or moves money. Measured against the old behaviour and a hand-written rule in [docs/AI_RL_EVALUATION.md](docs/AI_RL_EVALUATION.md) | Chat |
 | F19 | **Deadline-aware choice**: the quote names the cheapest provider that arrives before the university's due date, counting only days both countries work. If the cheapest would be late, Compare and the chat say so and propose the next one; if nobody can arrive in time, they say that too | Compare, Chat |
 | F20 | **Currency-drop stress test**: the quote priced again by the same engine if the taka weakens (5, 10, 15 and 20% by default). A what-if on synthetic rates, not a forecast; read-only | Compare, Chat |
+| F21 | **Student budget**: invented monthly costs (rent in a shared flat or a studio, food, transport, bills, phone, other) for 20 student cities in the six main countries. The engine adds a month up, converts it to taka (rounded up, so it never promises too little) and shows which cities fit your monthly budget, with the rent share and how much is spare or short. Marked not verified; compare with the university's own estimate | Student guide, Chat |
+| F22 | **Arrival guide**: what to do before you fly, in your first week and in your first month, for each of the six countries and a general list for any other, with a hint on every step and ticks saved in your browser. Indicative; visa, work and registration rules change | Student guide, Chat |
+| F23 | **Fewer clicks to a payment**: the one recipient you have already allowlisted is chosen for you, and **Create draft and request approval** does both steps at once. Approving still needs you and a fresh MFA code | Compare |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
 ## Quick start (one command)
@@ -270,6 +273,9 @@ falls back to fixed rules, so nothing depends on it:
   lists what you would pay and how much more, from the engine. It is a what-if, not a forecast.
 - *"How often should I send GBP 800 a month for 9 months?"*: it compares sending monthly, every three
   months, every six months and all at once, because fixed fees are paid on every transfer.
+- *"What is the rent in Manchester?"* or *"Which city fits BDT 130,000 a month?"*: it gives a month's costs in
+  a student city, or the cities that fit your budget, from the invented figures in the rules (not verified).
+- *"What should I do when I arrive in Germany?"*: it lists the steps for before you fly and your first weeks.
 
 It also follows a conversation: if it asks for the amount, your next message ("GBP 10,000 by 28
 October") finishes the same task. Open **How I read this** under any reply to see what it understood.
@@ -443,6 +449,19 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 <tr>
 <td valign="top" width="50%"><a href="submission/screenshots/24-bank-international-settled.png"><img src="submission/screenshots/24-bank-international-settled.png" alt="A settled international transfer with messages and ledger" width="100%"></a><br><b>Hop by hop</b><br><sub>Originating bank, correspondent, beneficiary bank, with the MT103 and the journals.</sub></td>
 <td valign="top" width="50%"><a href="submission/screenshots/25-bank-returned.png"><img src="submission/screenshots/25-bank-returned.png" alt="A returned transfer" width="100%"></a><br><b>A rejected transfer</b><br><sub>A beneficiary named FAIL_TEST rejects it: every journal is reversed and the books still balance.</sub></td>
+</tr>
+</table>
+
+### Student guide
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/35-student-budget.png"><img src="submission/screenshots/35-student-budget.png" alt="The student guide: which cities fit a monthly budget" width="100%"></a><br><b>Which city fits my budget?</b><br><sub>A monthly budget in taka, set against 20 student cities, cheapest first. Rent, a month in local money and in taka, and whether it fits.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/36-city-details.png"><img src="submission/screenshots/36-city-details.png" alt="One city's month line by line" width="100%"></a><br><b>A month in one city</b><br><sub>Every line as the engine added it up, the synthetic rate used, and the figures labelled invented and not verified.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/37-arrival-checklist.png"><img src="submission/screenshots/37-arrival-checklist.png" alt="The arrival checklist for Germany" width="100%"></a><br><b>Before you fly, and your first weeks</b><br><sub>Steps for the country, with a hint on each and ticks kept in your browser.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/38-chat-rent.png"><img src="submission/screenshots/38-chat-rent.png" alt="The assistant answering what the rent is in a city" width="100%"></a><br><b>Ask the assistant</b><br><sub>&quot;What is the rent in Manchester?&quot; is answered from the same engine figures, with the number guard on.</sub></td>
 </tr>
 </table>
 

@@ -21,6 +21,12 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       Provider B (synthetic) is cheaper than Provider A (synthetic). Its true total cost is 1.58% of the amount, against 2.16%, a gap of 0.58 percentage points. The m
       OK   the currency-drop stress test costs more for a bigger drop
       OK   the assistant answers the what-if with the engine's numbers
+      OK   the student budget lists 20 cities from the cheapest month in taka
+      OK   its figures are labelled invented and not verified
+      OK   the arrival guide has three stages and says it is not verified
+      OK   the assistant answers the rent in a city from the engine's figures
+      OK   the assistant answers which cities fit from the engine's figures
+      OK   the assistant answers what to do on arrival from the engine's figures
 
 [4] Agent tasks: one sentence becomes a plan, and the human still decides
       OK   a payment plan was prepared from one sentence
@@ -63,13 +69,13 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [10] Tracker: the simulated provider submits and settles
       OK   payment reaches SETTLED (simulated)
-      OK   UETR assigned: 6b23ce2b-f681-462f-ac4f-36fe264befda
+      OK   UETR assigned: 13282d4c-1d95-40d2-9101-a6c07b9d0462
       Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
 
 [11] Compliance report: evidence for the payment, sealed with a hash
       OK   all 10 controls pass with evidence
       OK   the report hash matches the report
-      Report hash sha256:0de98b6a5a164cd5b2706ae4e842008b77ec29164d7a2fc279aa7a0f1f3a2c42
+      Report hash sha256:d6635594c94bd08fc9b6f374e09b8902831f49c5f877df7955d971002fcb5266
 
 [12] Bank network: money moves between invented banks, at home and abroad
       OK   the books balance and every nostro agrees with its mirror account
@@ -95,8 +101,8 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [14] Audit log: verify the hash chain
       OK   the blocked AI attempt is in the audit log
-      OK   chain verifies: PASS (69 events)
-      Head hash e00ccef6da5274fc157035b176b5db862f73bd2b5e600ed9fd13be18dadde2df
+      OK   chain verifies: PASS (72 events)
+      Head hash 6bed28a319afca0ff2efa0f7b34abc97e769be4e69f0868d1f38394af09e6fe4
 
 To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
 Undo it with:        python -m app.scripts.tamper_audit --restore

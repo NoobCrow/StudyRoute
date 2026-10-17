@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1135 tests** in 83 files. Last run: `1135 passed in 271.14s (0:04:31)`.
-- Frontend: **360 tests** in 29 files (Vitest).
+- Backend: **1223 tests** in 86 files. Last run: `1223 passed in 187.02s (0:03:07)`.
+- Frontend: **406 tests** in 33 files (Vitest).
 
 ```bash
 cd backend && pytest -q
@@ -62,6 +62,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_ai_redteam.py` | 5 | T19: the blueprint 14.6 red-team prompts. No state change, no invented numbers, and an audit event for every blocked attempt. |
 | `tests/test_ai_request_parser.py` | 7 | Reading "I need to pay GBP 10,000 by 28 October" without a model: exact, never a float. |
 | `tests/test_ai_stress.py` | 8 | The assistant answers "what if the taka drops?" from the engine's stress test. It is a question (a what-if on a quote that is already open), not a task: it creates nothing, every figure comes from the fee engine, and the number guard checks the answer like any other. |
+| `tests/test_ai_student_guide.py` | 24 | The assistant answers student questions: the rent in a city, which city fits a budget, and what to do on arrival. Both are questions, not tasks: they create nothing, every figure comes from the engine through the same facts as any other answer, and the number guard checks the reply like any other. |
 | `tests/test_ai_task_intents.py` | 5 | When the assistant starts a task (plan a payment, plan a send schedule) and when it must not. |
 | `tests/test_ai_tasks.py` | 14 | Agent tasks: one sentence becomes a quote, a ranking, a deadline and a draft PROPOSAL. The assistant may create a quote (the RBAC matrix allows it). It still cannot create a payment, approve, submit or cancel: the human confirms the draft and approves with MFA. |
 | `tests/test_ai_tools.py` | 6 |  |
@@ -83,6 +84,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_api_smoke.py` | 2 |  |
 | `tests/test_api_stress.py` | 9 | Currency-drop stress test: the same quote priced again if the taka weakens. A what-if on synthetic rates. It uses the fee engine (no separate maths), keeps the same provider, changes nothing and writes no audit event. |
 | `tests/test_api_stretch.py` | 6 | Stretch features: F9 runway, F10 rate hint and F11 multi-corridor. |
+| `tests/test_api_student_guide.py` | 17 | GET /planner/student-budget and /planner/arrival-guide: the student help over the API. |
 | `tests/test_api_validation.py` | 15 | Input validation and the RFC 7807 error format (T02, T03). |
 | `tests/test_api_webhooks.py` | 10 | Signed provider webhooks: T12 (bad signature), T13 (replay window), T14 (duplicates). |
 | `tests/test_audit.py` | 12 | Audit log: append-only, hash-chained, tamper-evident (blueprint 15, test T16). |
@@ -107,6 +109,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_engine_planner.py` | 12 | Deadline planner (blueprint 6.6). T21 covers weekends and holidays in both countries. |
 | `tests/test_engine_quote.py` | 14 | Fee engine. T01 reproduces the blueprint 6.3 worked example exactly. |
 | `tests/test_engine_runway_rates.py` | 8 | F9 living-cost runway and F10 synthetic rate history / best-day hint (pure engine). |
+| `tests/test_engine_student_budget.py` | 12 | F21 student budget (pure engine): the cost of a month in a city and which cities fit a budget. |
 | `tests/test_engine_validators.py` | 13 | IBAN mod-97, BIC, UK sort code and account, US ABA and UETR validators (blueprint 5.2). |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
 | `tests/test_gallery.py` | 5 | app/scripts/gallery.py: the parts that are plain logic (the photographs need a browser). |
@@ -141,8 +144,10 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/components/assistant/assistant.test.tsx` | 12 |
 | `web/components/compare/compare-components.test.tsx` | 24 |
 | `web/components/compare/compare-screen.test.tsx` | 20 |
+| `web/components/compare/draft-form.test.tsx` | 13 |
 | `web/components/dashboard/dashboard-cards.test.tsx` | 25 |
 | `web/components/documents/documents-screen.test.tsx` | 17 |
+| `web/components/guide/guide-screen.test.tsx` | 16 |
 | `web/components/layout/nav.test.ts` | 4 |
 | `web/components/payment/mfa-dialog.test.tsx` | 10 |
 | `web/components/payment/payment-screen.test.tsx` | 6 |
@@ -153,6 +158,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/lib/api/client.test.ts` | 6 |
 | `web/lib/canonical.test.ts` | 4 |
 | `web/lib/corridors.test.ts` | 8 |
+| `web/lib/domain/arrival-ticks.test.ts` | 6 |
 | `web/lib/domain/calendar-strip.test.ts` | 6 |
 | `web/lib/domain/charge-code.test.ts` | 6 |
 | `web/lib/domain/documents.test.ts` | 7 |
@@ -161,7 +167,8 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/lib/lib.test.ts` | 23 |
 | `web/lib/links.test.ts` | 5 |
 | `web/lib/schemas/compare.test.ts` | 13 |
+| `web/lib/schemas/guide-params.test.ts` | 8 |
 | `web/lib/schemas/payments-params.test.ts` | 8 |
 | `web/lib/schemas/recipient.test.ts` | 7 |
 | `web/lib/schemas/schemas.test.ts` | 8 |
-| `web/tests/a11y.test.tsx` | 21 |
+| `web/tests/a11y.test.tsx` | 24 |
