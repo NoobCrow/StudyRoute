@@ -262,7 +262,7 @@ describe("compare screen: the quotes", () => {
     expect(within(request).getByRole("combobox", { name: /^Recipient/ })).toHaveTextContent(
       "Choose later",
     );
-    expect(screen.getByRole("button", { name: /Create draft/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Create draft with/ })).toBeDisabled();
   });
 
   it("preselects the only recipient in the draft form when there is exactly one", async () => {

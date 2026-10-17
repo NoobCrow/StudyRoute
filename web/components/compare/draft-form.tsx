@@ -3,8 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { ErrorNotice, Notice } from "@/components/app/notice";
@@ -52,22 +53,53 @@ interface Props {
 export function DraftForm({ quote, providerId, recipients, initialRecipient }: Props) {
   const router = useRouter();
   const matching = recipients.filter((r) => r.country === quote.destination_country);
-  // Never guess who gets the money: preselect only when there is exactly one choice.
-  const only = matching.length === 1 ? (matching[0]?.recipient_id ?? "") : "";
+  // Never guess who gets the money: preselect only when there is exactly one choice, or exactly one
+  // recipient that can be paid at all (one the parent has already allowlisted with MFA).
+  const allowlisted = matching.filter((r) => r.allowlisted);
+  const only =
+    (matching.length === 1 ? matching[0] : allowlisted.length === 1 ? allowlisted[0] : undefined)
+      ?.recipient_id ?? "";
   const [error, setError] = useState<Error | null>(null);
+  const [busy, setBusy] = useState<"draft" | "approval" | null>(null);
   const form = useForm<DraftValues>({
     resolver: zodResolver(draftSchema),
     mode: "onBlur",
     defaultValues: { recipientId: initialRecipient || only, reference: "" },
   });
+  // The recipients may arrive after the form first shows. When the one to choose becomes clear and the
+  // person has not chosen yet, choose it; never replace a choice they made.
+  useEffect(() => {
+    if (only && !form.getValues("recipientId")) form.setValue("recipientId", only);
+  }, [only, form]);
   const recipientId = useWatch({ control: form.control, name: "recipientId" });
   const reference = useWatch({ control: form.control, name: "reference" });
-  const key = useIdempotencyKey(`${quote.quote_id}|${providerId}|${recipientId}|${reference}`);
+  const fingerprint = `${quote.quote_id}|${providerId}|${recipientId}|${reference}`;
+  const key = useIdempotencyKey(fingerprint);
+  const approvalKey = useIdempotencyKey(`approval|${fingerprint}`);
   const provider =
     quote.results.find((r) => r.provider_id === providerId)?.provider_name ?? providerId;
 
-  async function onSubmit(values: DraftValues) {
+  /** Asks for approval right after the draft, when the API says it can be asked for. MFA stays a separate step. */
+  async function askForApproval(created: Payment) {
+    if (!created.readiness.can_request_approval) {
+      toast.info("Draft created. Approval cannot be requested yet.", {
+        description: created.readiness.blockers[0]?.message ?? "Something is still missing.",
+      });
+      return;
+    }
+    await post(
+      `/payments/${created.payment_id}/request-approval`,
+      {},
+      { idempotencyKey: approvalKey },
+    );
+    toast.success("Approval requested", {
+      description: "Check the summary, then approve with MFA.",
+    });
+  }
+
+  async function create(values: DraftValues, requestApproval: boolean) {
     setError(null);
+    setBusy(requestApproval ? "approval" : "draft");
     try {
       const created = await post<Payment>(
         "/payments",
@@ -80,9 +112,12 @@ export function DraftForm({ quote, providerId, recipients, initialRecipient }: P
         },
         { idempotencyKey: key },
       );
+      if (requestApproval) await askForApproval(created);
       router.push(`/payments/view/?id=${encodeURIComponent(created.payment_id)}`);
     } catch (e) {
       setError(e as Error);
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -99,7 +134,11 @@ export function DraftForm({ quote, providerId, recipients, initialRecipient }: P
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          <form
+            onSubmit={form.handleSubmit((values) => create(values, false))}
+            className="space-y-4"
+            noValidate
+          >
             <ErrorNotice error={error} />
             {matching.length === 0 ? (
               <Notice tone="warn">
@@ -152,13 +191,24 @@ export function DraftForm({ quote, providerId, recipients, initialRecipient }: P
                 )}
               />
             </div>
-            <Button
-              type="submit"
-              loading={form.formState.isSubmitting}
-              disabled={!recipientId || !reference.trim()}
-            >
-              Create draft with {provider}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                loading={busy === "approval"}
+                disabled={!recipientId || !reference.trim() || busy !== null}
+                onClick={() => void form.handleSubmit((values) => create(values, true))()}
+              >
+                Create draft and request approval
+              </Button>
+              <Button
+                type="submit"
+                variant="outline"
+                loading={busy === "draft"}
+                disabled={!recipientId || !reference.trim() || busy !== null}
+              >
+                Create draft with {provider}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
