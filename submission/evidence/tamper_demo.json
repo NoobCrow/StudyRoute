@@ -10,7 +10,7 @@
     "reason": "HASH_MISMATCH",
     "head": {
       "seq": 69,
-      "hash": "c7d4a107fe3dd8f4e43032c2fd2f2f015d48df53dd9bb3d5c3201de01a970664"
+      "hash": "f4fa4c7d39c27d52c163d25108f4cf858b28885ee0c252db8cbc0fdb034029ab"
     }
   },
   "verify_after_restore": {
@@ -20,7 +20,7 @@
     "reason": null,
     "head": {
       "seq": 69,
-      "hash": "c7d4a107fe3dd8f4e43032c2fd2f2f015d48df53dd9bb3d5c3201de01a970664"
+      "hash": "f4fa4c7d39c27d52c163d25108f4cf858b28885ee0c252db8cbc0fdb034029ab"
     }
   }
 }

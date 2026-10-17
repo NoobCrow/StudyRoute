@@ -3,16 +3,16 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   every API response carries X-Sandbox: true
       OK   GET /sandbox lists the simulated parts and the test scenarios
 
-[1] Dashboard: tuition GBP 10,000 due 2026-10-29
+[1] Dashboard: tuition GBP 10,000 due 2026-10-31
       OK   deadline planner answers
-      Latest send date 2026-10-21, status ON_TRACK
+      Latest send date 2026-10-22, status ON_TRACK
 
 [2] Compare: three providers ranked by true total cost
       OK   quote created (synthetic rates)
       OK   ranking is B 1.58%, C 1.63%, A 2.16% (got [('prov_b', '1.58'), ('prov_c', '1.63'), ('prov_a', '2.16')])
       OK   provider C carries a shortfall warning
       OK   the quote names the cheapest provider that arrives before the due date
-      Cheapest overall prov_b, cheapest in time prov_b (send 2026-10-19, due 2026-10-29)
+      Cheapest overall prov_b, cheapest in time prov_b (send 2026-10-19, due 2026-10-31)
 
 [3] Assistant: "Why is Provider B cheaper than A?"
       OK   assistant answers
@@ -63,13 +63,13 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 
 [10] Tracker: the simulated provider submits and settles
       OK   payment reaches SETTLED (simulated)
-      OK   UETR assigned: 02582bb5-51aa-434b-8087-0dd0081a0f66
+      OK   UETR assigned: 06093a5f-2887-455a-ae4b-54527798f3bb
       Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
 
 [11] Compliance report: evidence for the payment, sealed with a hash
       OK   all 10 controls pass with evidence
       OK   the report hash matches the report
-      Report hash sha256:df4b7dda750105654475fdbb536bbb18d0f4c11a72bdaa0708f493a77fb67637
+      Report hash sha256:9f17770b640f1449f1a2202bf71c374243e4811ba0036245a1b05d06edd1ee0b
 
 [12] Bank network: money moves between invented banks, at home and abroad
       OK   the books balance and every nostro agrees with its mirror account
@@ -88,7 +88,6 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
       OK   the first tranche is due today, so the schedule pays it by itself
       OK   the bank's reviewer freezes it; even the parent cannot move funds while frozen
       OK   the reviewer unfreezes it
-      (rate limit: waiting 11 s as the server asks)
       OK   the parent pays the second tranche early (a human decision, so MFA)
       OK   cancelling takes back only the tranche that was not yet due
       OK   the audit log's head hash is anchored on the chain and the database matches it
@@ -97,7 +96,7 @@ Banner: Sandbox - synthetic data - no real money moves (AI mode: template)
 [14] Audit log: verify the hash chain
       OK   the blocked AI attempt is in the audit log
       OK   chain verifies: PASS (69 events)
-      Head hash c7d4a107fe3dd8f4e43032c2fd2f2f015d48df53dd9bb3d5c3201de01a970664
+      Head hash f4fa4c7d39c27d52c163d25108f4cf858b28885ee0c252db8cbc0fdb034029ab
 
 To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
 Undo it with:        python -m app.scripts.tamper_audit --restore

@@ -157,6 +157,19 @@ Both containers became healthy; inside the backend container the policy loaded
 finishing the task. The policy is NumPy only and opens no connection, but **the packet capture
 and the browser audit were not repeated for this build**.
 
+**Run again on the final archive (17 October).** The archive built from commit `47aa067` was
+unzipped in an empty directory in the same VM. Plain `docker compose up --build`, the smoke script,
+the 14-step demo (59 OK lines), the real-Chrome browser audit (40 of 40) and the hardened overlay
+all passed, and the audit chain still verified after `down` and `up`. This time the packet capture
+was repeated too, through a backend restart, the browser audit and a real prediction by the trained
+reader: no packet left the compose network except replies to the host. The demo script now stops
+with a clear "start from clean demo data" message when it is run a second time on the same data.
+The Next.js UI in `web/` was built and run the same way through a temporary override file (it is
+not what `docker-compose.yml` ships) and passed the same checks. The whole backend suite and both
+UIs' test suites also passed on Linux inside containers. Two problems of the VM, not of the
+application (a forwarded port that refused bursts of connections, and one guest kernel panic after
+about 40 minutes of builds), are written down in `submission/evidence/docker_run.txt`.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs

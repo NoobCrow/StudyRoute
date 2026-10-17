@@ -26,3 +26,15 @@ export function parseMajorToMinor(input: string, exponent = 2): ParsedMoney {
   if (minor > MAX_MINOR) return { ok: false, error: "That amount is too large for the sandbox." };
   return { ok: true, minor };
 }
+
+/**
+ * Echoes an amount the person typed, with thousands separators ("10,000", "10,000.50"). It only lays
+ * out digits that were already there; the whole part and the decimals are cut from the integer text.
+ */
+export function formatMinorCompact(minor: number, exponent = 2): string {
+  const digits = String(Math.max(0, Math.trunc(minor))).padStart(exponent + 1, "0");
+  const whole = digits.slice(0, digits.length - exponent);
+  const fraction = exponent > 0 ? digits.slice(-exponent) : "";
+  const grouped = whole.replace(/\B(?=([0-9]{3})+(?![0-9]))/g, ",");
+  return /^0*$/.test(fraction) ? grouped : `${grouped}.${fraction}`;
+}

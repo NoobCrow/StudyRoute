@@ -9,6 +9,8 @@ const PERMISSIONS = [
   "payments:draft",
   "planner:read",
   "data:reset",
+  "recipients:allowlist",
+  "payments:cancel",
 ];
 
 export const USER = {
@@ -249,8 +251,66 @@ function problem(route: Route, status: number, code: string, detail: string): Pr
   );
 }
 
+const CHECKLIST = {
+  country: "GB",
+  purpose: "TUITION",
+  items: [
+    {
+      key: "offer_letter",
+      label: "Offer or admission letter",
+      hint: "From the university, showing the course and start date.",
+      provided: true,
+    },
+    {
+      key: "passport",
+      label: "Student passport (bio page)",
+      hint: "Use a mock file in this sandbox. Never upload a real passport.",
+      provided: false,
+    },
+  ],
+  verified: false,
+  source_url: "https://example.org/replace-with-ad-bank-checklist",
+  last_checked: "2026-10-13",
+  note: null,
+  indicative: "Indicative. Confirm with your AD bank.",
+};
+
+/** A file name with no spaces, as long as the form allows: the page must still fit the screen. */
+const LONG_NAMED_DOCUMENT = {
+  document_id: "doc_1",
+  kind: "offer_letter",
+  filename: `offer-letter-${"x".repeat(100)}.txt`,
+  payment_id: null,
+  size_bytes: 42,
+  has_content: true,
+  content_preview: "y".repeat(120),
+  created_at: "2026-10-14T09:00:00Z",
+  mock: true,
+};
+
+function payments(cancelled: boolean) {
+  const created = new Date(Date.now() - 2 * 86_400_000).toISOString();
+  const base = {
+    target: { amount_minor: 1000000, currency: "GBP", formatted: "GBP 10,000.00" },
+    provider_id: "prov_b",
+    provider_name: "Provider B (synthetic)",
+    recipient_label: "University of Example (synthetic) GB** **** 4821",
+    due_date: "2026-10-30",
+    uetr: null,
+    parent_pays: "BDT 1,625,300.00",
+    created_at: created,
+    updated_at: created,
+  };
+  return [
+    { ...base, payment_id: "pay_1", reference: "INV-1", state: cancelled ? "CANCELLED" : "QUOTED" },
+    { ...base, payment_id: "pay_2", reference: "FEES-2", state: "SETTLED" },
+  ];
+}
+
 /** Answers every /api/v1 call the dashboard, sign-in and compare screens make. */
 export async function mockApi(page: Page): Promise<void> {
+  let allowlisted = false;
+  let cancelled = false;
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/api/v1", "");
@@ -267,14 +327,46 @@ export async function mockApi(page: Page): Promise<void> {
     if (path === "/me") return json(route, USER);
     if (path === "/corridors") return json(route, CORRIDORS);
     if (path === "/kyc/status") return json(route, KYC);
-    if (path === "/payments") return json(route, { items: [], next_cursor: null });
-    if (path === "/recipients") return json(route, { items: [] });
+    if (path === "/payments") {
+      return json(route, { items: payments(cancelled), next_cursor: null });
+    }
+    if (path === "/payments/pay_1/cancel" && method === "POST") {
+      cancelled = true;
+      return json(route, { payment_id: "pay_1", state: "CANCELLED" });
+    }
+    if (path === "/recipients") {
+      return json(route, {
+        items: [
+          {
+            recipient_id: "rcp_1",
+            type: "UNIVERSITY",
+            display_name: "University of Example (synthetic)",
+            country: "GB",
+            bic: "EXMPGB2L",
+            account_kind: "IBAN",
+            account_masked: "GB** **** 4821",
+            routing_code: null,
+            label: "University of Example (synthetic) GB** **** 4821",
+            allowlisted,
+            allowlisted_at: null,
+            created_at: "2026-10-14T12:52:00Z",
+          },
+        ],
+      });
+    }
+    if (path === "/recipients/rcp_1" && method === "PATCH") {
+      allowlisted = (request.postDataJSON() as { allowlisted: boolean }).allowlisted;
+      return json(route, { recipient_id: "rcp_1", allowlisted });
+    }
+    if (path === "/auth/mfa/verify") return json(route, { mfa_proof: "proof_e2e" });
     if (path === "/planner/deadline") return json(route, PLAN);
     if (path === "/planner/runway") return json(route, RUNWAY);
     if (path === "/planner/send-plan") return json(route, SEND_PLAN);
     if (path === "/rates/history") return json(route, RATES);
     if (path === "/quotes" && method === "POST") return json(route, QUOTE, 201);
     if (path === "/quotes/qte_1/stress") return json(route, STRESS);
+    if (path === "/checklist") return json(route, CHECKLIST);
+    if (path === "/documents") return json(route, { items: [LONG_NAMED_DOCUMENT] });
     return problem(route, 500, "NOT_MOCKED", `${method} ${path} is not mocked.`);
   });
 }

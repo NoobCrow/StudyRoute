@@ -34,6 +34,8 @@ if (!window.matchMedia) {
   })) as unknown as typeof window.matchMedia;
 }
 Element.prototype.scrollIntoView ??= () => undefined;
+// input-otp asks which element is under the pointer to place its caret.
+document.elementFromPoint ??= () => null;
 Element.prototype.hasPointerCapture ??= () => false;
 Element.prototype.setPointerCapture ??= () => undefined;
 Element.prototype.releasePointerCapture ??= () => undefined;

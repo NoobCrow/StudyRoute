@@ -1,7 +1,5 @@
 "use client";
 
-import { TZDate } from "@date-fns/tz";
-import { format } from "date-fns";
 import { ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -10,22 +8,16 @@ import { DatePicker } from "@/components/app/date-picker";
 import { Field } from "@/components/app/field";
 import { Notice, ErrorNotice } from "@/components/app/notice";
 import { CardSkeleton } from "@/components/app/skeletons";
-import { Chip, type Tone } from "@/components/app/status";
+import { Chip } from "@/components/app/status";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Corridor, PlanView } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { MARKER_LABEL, buildStrip, describeDay, type Marker } from "@/lib/domain/calendar-strip";
-import { addDaysIso, formatDate } from "@/lib/format";
+import { PLAN_STATUS } from "@/lib/domain/plan-status";
+import { addDaysIso, dhakaToday, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const STATUS: Record<PlanView["status"], { tone: Tone; text: string }> = {
-  ON_TRACK: { tone: "ok", text: "On track" },
-  TIGHT: { tone: "warn", text: "Tight" },
-  AT_RISK: { tone: "warn", text: "At risk" },
-  LATE: { tone: "danger", text: "Too late for normal settlement" },
-};
 
 const DAY_STYLE: Record<Marker, string> = {
   today: "border-foreground",
@@ -44,11 +36,6 @@ const SWATCH: [Marker, string][] = [
   ["latest", "border border-warning-soft-foreground/40 bg-warning-soft"],
   ["due", "bg-foreground"],
 ];
-
-/** Today in Dhaka as an ISO date: the bank's clock decides what "today" means. */
-export function dhakaToday(now: Date = new Date()): string {
-  return format(new TZDate(now, "Asia/Dhaka"), "yyyy-MM-dd");
-}
 
 function CalendarStrip({ plan }: { plan: PlanView }) {
   const days = useMemo(
@@ -125,7 +112,7 @@ export function PlannerCard({ corridors }: { corridors: Corridor[] }) {
     due ? `/planner/deadline?due_date=${due}&country=${country}` : null,
   );
   const data = plan.data;
-  const badge = data ? STATUS[data.status] : null;
+  const badge = data ? PLAN_STATUS[data.status] : null;
 
   return (
     <Card aria-labelledby="planner-title">

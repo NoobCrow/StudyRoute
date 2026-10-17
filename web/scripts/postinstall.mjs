@@ -9,6 +9,8 @@
 //   react-style-singleton   (used by Radix to lock page scroll while a dialog or select is open) added a
 //                           <style> element. It now adopts a constructable stylesheet, which the policy
 //                           does not restrict, and falls back to doing nothing where that is unsupported.
+//   input-otp              (the one-time-code boxes) creates a <style id="input-otp-style"> element and inserts
+//                           five rules into it. The element is not created; the rules are in app/globals.css.
 //   @radix-ui/react-select  renders a <style> element in every open select to hide the scrollbar. The
 //                           element is removed and the same two rules are in app/globals.css.
 import fs from "node:fs";
@@ -148,4 +150,19 @@ for (const name of ["index.mjs", "index.js"]) {
     "utf8",
   );
   console.log(`@radix-ui/react-select ${name}: inline style element removed`);
+}
+
+// --- input-otp ---------------------------------------------------------------------------------
+const OTP_GUARD = '!document.getElementById("input-otp-style")){';
+const OTP_OFF = "!1/* StudyRoute: no inline <style> (CSP); the rules are in globals.css */){";
+
+for (const name of ["index.mjs", "index.js"]) {
+  const file = path.join(MODULES, "input-otp", "dist", name);
+  if (!fs.existsSync(file)) continue;
+  const source = fs.readFileSync(file, "utf8");
+  if (source.includes(OTP_OFF)) continue;
+  if (!source.includes(OTP_GUARD))
+    throw new Error(`input-otp ${name} changed: update scripts/postinstall.mjs`);
+  fs.writeFileSync(file, source.replace(OTP_GUARD, OTP_OFF), "utf8");
+  console.log(`input-otp ${name}: inline style injection disabled`);
 }
