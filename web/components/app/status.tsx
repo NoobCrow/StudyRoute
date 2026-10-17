@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import type { KycStatusName, PaymentState } from "@/lib/api/types";
 
 export type Tone = "ok" | "warn" | "danger" | "info" | "neutral";
@@ -17,10 +18,11 @@ const VARIANT = {
 export function Chip({
   tone = "neutral",
   children,
+  className,
   ...props
 }: { tone?: Tone } & Omit<ComponentProps<typeof Badge>, "variant">) {
   return (
-    <Badge variant={VARIANT[tone]} {...props}>
+    <Badge variant={VARIANT[tone]} className={cn("animate-pop", className)} {...props}>
       {children}
     </Badge>
   );

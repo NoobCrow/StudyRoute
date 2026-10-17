@@ -20,7 +20,12 @@ export function PaymentStatusBadge({ state }: { state: PaymentState }) {
   const { variant, icon: Icon } = LOOK[status];
   return (
     <Badge variant={variant} className="gap-1.5">
-      <Icon aria-hidden="true" />
+      <Icon
+        aria-hidden="true"
+        className={
+          status === "in_progress" ? "motion-safe:animate-[spin_8s_linear_infinite]" : undefined
+        }
+      />
       {STATUS_LABEL[status]}
     </Badge>
   );

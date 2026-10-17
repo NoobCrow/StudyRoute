@@ -8,6 +8,35 @@ Re-run on 17 October 2026 after the cloud-assistant and cookie-session branch wa
 attack probe defended **122 of 122** (17 of them new, on the browser sessions) and the real-Chrome
 audit under the production CSP passed **42 of 42**.
 
+## Full pass of 17 October 2026 (after merging the cloud assistant and cookie sessions)
+
+Everything below ran against the final code in throwaway lab databases (never the dev data).
+
+| Area | Tool | Result |
+|------|------|--------|
+| Every route, forgery, cross-household access, injection, hostile input, CORS, webhooks, browser (cookie) sessions, leakage, headers | `attack_probe.py` | **122 of 122** defended |
+| Login and MFA brute force, lockout, rate limits, `X-Forwarded-For` spoofing, user enumeration by answer and by timing | `brute_probe.py` | **8 of 8** defended |
+| Data theft at rest and in logs: 14 planted canaries searched for in the database file and its log, the server log, the audit log and the responses | `leak_scan.py` | **All clear** (50 checks). Found and fixed: document text was plain in the database (see below) |
+| Man in the middle: a changed approval hash, a redirected approval, a stripped or swapped MFA proof, a stolen token, replayed approvals, forged, stale, cross-provider and replayed webhooks | `mitm_probe.py` | **14 defended, 0 failed** (plus 4 informational) |
+| TLS: versions, HSTS, `Secure` cookie, plain HTTP on the TLS port | `tls_probe.py` | **8 of 8** (TLS 1.0 and 1.1 refused, 1.2 and 1.3 accepted) |
+| The assistant as an attack target: 20 hostile prompts as parent and as student | `assistant_probe.py` | **42 of 42** defended |
+| Real Chrome through every screen under the production CSP (XSS in stored data, injected scripts and styles, framing, third parties, cookies, storage, source maps) | `browser_audit.mjs`, `csp-interact.mjs` | **42 of 42**, 0 problems |
+| Network egress of the API process during the full 14-step demo (265 samples over 150 s) | connection sampling | **No outbound connection** to a non-loopback address |
+| Secrets in the whole git history (71 commits, every branch) and sensitive file names | pattern scan | **None** (one fake JWT in a masking test) |
+| Known vulnerable dependencies | `pip-audit`, `npm audit`, `npm audit` (contracts) | **0** in the Python lock, the web production tree and contracts. 9 "high" advisories in dev-only tooling (see below) |
+| Bandit-style code rules (`ruff --select S`) | ruff | **No findings** |
+| The trained reader against attacks | `ml/evaluate.py` | Unchanged: attacks blocked 85 to 93% depending on the set (docs/AI_EVALUATION.md) |
+| All suites | pytest, vitest, Playwright | See `docs/TEST_CASES.md` |
+
+**What a man in the middle can still do on plain HTTP** (reported by `mitm_probe.py` as informational, risk R4): read the
+sign-in password and every bearer token, read the family's payments with a captured token until it expires (15 minutes), and cancel a
+pending draft. They cannot approve, allowlist or de-list anything without a fresh MFA proof, cannot change what the person approves
+(the summary hash and the proof are bound to it), and cannot replay a recorded approval. TLS in front of the stack closes the reading.
+
+**What this pass did not cover:** a real language model (none is connected, so prompt-injection results are for the shipped
+assistant only); a packet capture of the Docker container (no Docker here; the earlier capture is in `submission/evidence/`);
+nginx's own TLS configuration (the probe used the application's TLS); an independent penetration test.
+
 ## What was tested
 
 | Area | How | Result |
@@ -53,6 +82,26 @@ audit under the production CSP passed **42 of 42**.
    lookup mentioned Microsoft. Evidence: `submission/evidence/docker_telemetry_capture.txt`.
 3. **A real accessibility bug in the MFA dialog** (`role="dialog"` on a `<form>`), found when the
    dialog was first checked while open. Fixed.
+
+5. **Uploaded document text sat in the database in plain text** (found by `leak_scan.py` on 17 October: a passport number
+   pasted into a document could be read from a copy of the database file, while IBANs were already encrypted). The text is now
+   AES-256-GCM encrypted, bound to its own row so a ciphertext cannot be moved to another document; older plain rows are still read.
+   Tests: `test_documents_at_rest.py` (6). File names and recipient display names stay plain on purpose: they are listed on screen.
+6. **9 "high" npm advisories in development tools** (the `shadcn` command-line tool and `eslint-config-next`, through `braces`,
+   `micromatch` and `fast-glob`: a pattern-matching denial of service). None is in the production tree (`npm audit --omit=dev` finds 0),
+   which is what CI checks. Not fixed: the fix is a major upgrade of a build-time tool. Recorded as R50.
+
+The probes above are run by hand against a lab. Their key checks are also in the normal test suites, so a regression fails `pytest` or
+`npm test` (and CI) without anyone remembering to run a script:
+
+| Test file | What it keeps true |
+|-----------|--------------------|
+| `backend/tests/test_security_leaks.py` (28) | 12 planted secrets (password, a wrong password, tokens, the session cookie, an MFA proof, a full IBAN, chat e-mail, phone and passport, document text) are not in the database file, the audit log or the logs; responses never repeat a typed password or a full IBAN; a positive control proves the database and the logs are really being read |
+| `backend/tests/test_security_thief.py` (4) | a captured bearer token alone cannot approve, allowlist or de-list; a payment to a recipient the thief added cannot be put up for approval; replaying a recorded approval makes one approval |
+| `backend/tests/test_documents_at_rest.py` (6) | document text is encrypted, bound to its row, and older plain rows still read |
+| `backend/tests/test_ai_hostile_prompts.py` (2) | 20 hostile prompts as parent and as student: no secret, no key, no instructions repeated, no forbidden action proposed, no payment changed |
+| `web/components/guide/guide-slider.test.tsx` (5), `web/components/compare/cost-bars.test.tsx` (4), `web/components/layout/theme-menu.test.tsx` (1), `web/tests/motion-css.test.ts` (5), `web/components/app/copy-button.test.tsx` (2) | the budget slider and the typed amount drive each other and the request; cost bars are proportional, coloured by meaning and decorative only; the theme fade starts and stops; the stylesheet has every keyframe, removes motion for people who ask, and loads nothing from another site |
+| `web/e2e/smoke.spec.ts` (2 new) | in a real browser the slider changes the cities that fit, and with reduced motion entrance animations have no duration or delay |
 
 New regression tests so none of it can quietly come back: `test_security_households.py` (a second
 household cannot read, change or borrow anything of the first), the uniform-lockout tests, and the

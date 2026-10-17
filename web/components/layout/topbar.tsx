@@ -51,8 +51,16 @@ export function Topbar({ onAskAssistant }: { onAskAssistant: () => void }) {
       </Breadcrumb>
       <CommandMenu onAskAssistant={onAskAssistant} />
       {user && user.role !== "admin" ? (
-        <Button type="button" variant="outline" className="bg-card gap-2" onClick={onAskAssistant}>
-          <Sparkles aria-hidden="true" />
+        <Button
+          type="button"
+          variant="outline"
+          className="bg-card group gap-2"
+          onClick={onAskAssistant}
+        >
+          <Sparkles
+            aria-hidden="true"
+            className="transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12"
+          />
           <span className="hidden sm:inline">Ask the assistant</span>
           <span className="sr-only sm:hidden">Ask the assistant</span>
         </Button>

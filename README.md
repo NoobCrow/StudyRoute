@@ -503,6 +503,9 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 | 05 Security self-assessment (permission tiers, known risks) | [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
 | 06 Execution evidence (sandbox operation logs) | [submission/evidence/](submission/evidence/) |
 
+The official rules and our check against them: [docs/COMPETITION_RULES.md](docs/COMPETITION_RULES.md). The
+registration record: [submission/REGISTRATION.md](submission/REGISTRATION.md).
+
 Step by step: [submission/CHECKLIST.md](submission/CHECKLIST.md). Regenerate the evidence with
 `python -m app.scripts.export_evidence --tamper` against a running API with fresh demo data.
 

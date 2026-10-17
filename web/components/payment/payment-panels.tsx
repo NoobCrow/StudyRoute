@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/app/copy-button";
 import { Chip, StateBadge } from "@/components/app/status";
 import { Notice } from "@/components/app/notice";
 import { Countdown } from "@/components/compare/countdown";
@@ -152,21 +153,28 @@ export function TrackerCard({ tracker }: { tracker: Tracker }) {
       <CardContent className="space-y-4">
         <dl>
           <Row label="UETR">
-            <span className="font-mono text-xs break-all">
-              {tracker.uetr ?? "Assigned when the payment is submitted"}
+            <span className="flex items-center gap-1">
+              <span className="font-mono text-xs break-all">
+                {tracker.uetr ?? "Assigned when the payment is submitted"}
+              </span>
+              {tracker.uetr ? <CopyButton value={tracker.uetr} label="UETR" /> : null}
             </span>
           </Row>
           <Row label="Host-country rail">{tracker.host_rail}</Row>
         </dl>
-        <ol className="relative space-y-4 border-l pl-5" aria-label="Payment timeline">
+        <ol className="stagger relative space-y-4 border-l pl-5" aria-label="Payment timeline">
           {tracker.timeline.map((step, index) => (
-            <li key={`${step.state}-${index}`} className="relative">
+            <li key={`${step.state}-${index}`} className="animate-rise relative">
               <span
                 className={cn(
                   "border-card absolute top-1.5 -left-[1.6rem] size-2.5 rounded-full border-2",
                   step.state === "FAILED" || step.state === "REJECTED"
                     ? "bg-destructive"
                     : "bg-primary",
+                  step.state === "SETTLED" && "animate-pop",
+                  index === tracker.timeline.length - 1 &&
+                    !["SETTLED", "CANCELLED", "REJECTED", "FAILED"].includes(step.state) &&
+                    "animate-ring-pulse",
                 )}
                 aria-hidden="true"
               />

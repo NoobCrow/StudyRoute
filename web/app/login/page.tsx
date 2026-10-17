@@ -58,6 +58,10 @@ export default function LoginPage() {
   const demo = health?.demo;
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8 md:px-8">
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="bg-primary/15 animate-float absolute -top-24 -right-24 size-96 rounded-full blur-3xl" />
+        <div className="bg-chart-2/15 animate-float absolute bottom-0 -left-24 size-96 rounded-full blur-3xl [animation-delay:-3s]" />
+      </div>
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
           <BrandMark className="size-8" />
@@ -65,7 +69,7 @@ export default function LoginPage() {
         </span>
         <ThemeMenu />
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="stagger grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <p className="text-primary text-xs font-medium tracking-wide uppercase">

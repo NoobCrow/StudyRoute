@@ -68,7 +68,7 @@ Routing accuracy treats HELP and OUT_OF_SCOPE as one class, because both answer 
 
 ## Cost
 
-The model runs on CPU with ONNX Runtime: median 6.07 ms and 95th percentile 10.25 ms per message (n = 436, 2 threads). The file is 33.8 MB.
+The model runs on CPU with ONNX Runtime: median 6.37 ms and 95th percentile 10.48 ms per message (n = 436, 2 threads). The file is 33.8 MB.
 
 ## How to read this honestly
 

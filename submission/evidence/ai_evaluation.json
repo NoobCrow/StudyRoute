@@ -11,9 +11,9 @@
     "val": 2279
   },
   "latency_cpu": {
-    "median_ms": 6.07,
+    "median_ms": 6.37,
     "n": 436,
-    "p95_ms": 10.25
+    "p95_ms": 10.48
   },
   "model": {
     "base_model": "BAAI/bge-small-en-v1.5",

@@ -68,6 +68,33 @@ each inline script that Next exports, and `style-src 'self'`. To make that possi
 If you change the build, restart anything that caches `security_headers.conf` (the lab server in
 `scripts/security/prod_like_server.mjs` reads it once at start).
 
+## Motion and interaction
+
+The interface moves, and every piece of it is a stylesheet rule, so the strict policy above is untouched.
+
+| What                                         | Where                             | How                                                                                                                                                    |
+| -------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Entrances (cards rise, rows fade, chips pop) | `Card`, `Chip`, table bodies      | `animate-rise`, `animate-fade`, `animate-pop` (tokens in `app/globals.css`)                                                                            |
+| One after another                            | any list with the `stagger` class | `:nth-child` delays in the stylesheet, never an inline delay                                                                                           |
+| Screen change                                | `app/(app)/template.tsx`          | a template is rebuilt on each navigation, so the screen eases in                                                                                       |
+| Loading                                      | `Skeleton`                        | a light sweep (`skeleton-shimmer`) instead of a pulse                                                                                                  |
+| Press and hover                              | `Button`, `Card`, sidebar         | scale on press, shadow and border on hover, icon nudges                                                                                                |
+| Theme change                                 | `ThemeMenu`                       | colours cross-fade for 450 ms through `html.theme-fade`                                                                                                |
+| Live budget                                  | Student guide                     | a range slider and the typed amount drive each other; the list refetches 300 ms after the last change, fitting cities are tinted and the count flashes |
+| Cost bars                                    | Compare                           | a bar per provider, green for the best and red for a shortfall; only the bar length is worked out in the browser, every amount is the engine's string  |
+| Copy                                         | `CopyButton`                      | copies a reference, turns into a tick for two seconds, and claims nothing if the browser refuses                                                       |
+| Assistant                                    | chat panel                        | messages rise, three dots show while the engine works                                                                                                  |
+
+Rules to keep:
+
+- **No inline styles in anything that is built into the page.** A value that depends on data (a bar width, the
+  slider fill) may be set with a `style` prop only in a component that is drawn after the data has loaded. The
+  strict-policy checks (`scripts/security/browser_audit.mjs`, `scripts/csp-interact.mjs`) fail on a violation.
+- **Reduced motion is respected.** The global rule in `app/globals.css` cuts every duration and delay to nothing;
+  a browser test (`with reduced motion`) checks it. Do not add an animation that carries meaning only in motion.
+- **Animations never change a number.** Nothing counts up through invented amounts; a changed figure is shown with
+  a flash, not by animating its digits.
+
 ## Folder map
 
 ```
@@ -86,7 +113,7 @@ tests/               Vitest setup, fixtures, accessibility tests
 
 ## Tests
 
-`npm test` runs about 190 tests. They cover the API client (refresh, idempotency, errors), the money and
+`npm test` runs about 440 tests. They cover the API client (refresh, idempotency, errors), the money and
 date helpers, every screen's main behaviour (including the safety rules: a student cannot approve,
 a script tag in a name is shown as text, a payment needs MFA, a tampered compliance report is flagged),
 and axe-core accessibility checks of each screen. Colour contrast is checked in a real browser by

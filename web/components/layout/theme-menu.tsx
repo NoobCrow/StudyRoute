@@ -19,6 +19,13 @@ export function ThemeMenu() {
   const { theme = "system", setTheme } = useTheme();
   const key = theme === "light" || theme === "dark" ? theme : "system";
   const Icon = key === "dark" ? Moon : key === "light" ? Sun : Monitor;
+  /** Colours cross-fade for a moment instead of snapping. */
+  function change(next: string) {
+    const root = document.documentElement;
+    root.classList.add("theme-fade");
+    setTheme(next);
+    window.setTimeout(() => root.classList.remove("theme-fade"), 450);
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,7 +35,7 @@ export function ThemeMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-40">
-        <DropdownMenuRadioGroup value={key} onValueChange={setTheme}>
+        <DropdownMenuRadioGroup value={key} onValueChange={change}>
           <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>

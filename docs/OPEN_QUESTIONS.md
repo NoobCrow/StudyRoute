@@ -5,7 +5,8 @@ Rule of the project: when a rule or number is uncertain it goes into `config/rul
 `verified: false` and appears here. The app shows a yellow **Not verified** badge on each of them
 and says "Indicative. Confirm with your AD bank."
 
-## A. Competition facts (checked against the official rules on 14 Oct 2026)
+## A. Competition facts (checked against the official rules on 14 Oct 2026, and again against the
+full PDF supplied by the team on 17 Oct 2026: see `docs/COMPETITION_RULES.md`)
 
 Source: "PBCSF Appendix 2: Problem Description and Competition Rules for International Track" and
 the CMU Thailand announcement. Re-check https://fintechathon.g-ican.com/#/en once before sending.
@@ -20,10 +21,11 @@ the CMU Thailand announcement. Re-check https://fintechathon.g-ican.com/#/en onc
 | 6 | Demo video required? | Item 03 says optional, but item 06 asks for sandbox operation logs **and** a demo video | **Record it** |
 | 7 | Finals | At least one member of each finalist team must attend in person in Shenzhen, otherwise awards are forfeited | **Confirmed** |
 | 8 | Originality | Independent work, no plagiarism; third-party and open-source parts must be licensed; IP stays with the contestants, hosts may use entries for non-commercial promotion | **Confirmed**; see `docs/THIRD_PARTY.md` |
-| 9 | Exact subject line of the registration e-mail | Not stated in the rules or the announcement | **Open**: use the format printed on the registration form |
-| 10 | How the 60% rule is counted (headcount or otherwise) | The rules say "60% non-Chinese nationals, major, or year of study", which can be read more than one way | **Open**: assume headcount of nationalities; ask the organiser (draft 3 in `submission/EMAIL_TEMPLATES.md`) |
+| 9 | Exact subject line of the registration e-mail | Not stated in the rules. The team sent: "International Track Registration – TeamEkxin – Farhan Labib" (no country), on 15 Oct 2026 | **Sent**; see `submission/REGISTRATION.md`. Whether the organiser accepts that subject is not known |
+| 10 | How the 60% rule is counted (headcount or otherwise) | The rules say "with 60% non-Chinese nationals, major, or year of study" under who may enter, and "at least 60% of a team's members should be non-Chinese nationals" in the note. The first can be read more than one way; the note is clear | **Open**: assume headcount of nationalities; ask the organiser (draft 3 in `submission/EMAIL_TEMPLATES.md`) |
 | 11 | Which countries can enter | The official rules name only the exclusions (Mainland China, Hong Kong SAR, Macao SAR, Chinese Taipei). One secondary page (IEEE R10 chapter) was reported to say "21 APEC economies" and a different theme; the official PDF says neither | **Open**: confirm with the organiser before registering (same e-mail) |
 | 12 | Visa for the Shenzhen final | Finalists are announced 31 Oct and check in on 20 Nov; invitation letters come with the announcement (blueprint) | **Open**: find out the Chinese visa lead time for the member who would travel, now |
+| 13 | The organiser's confirmation of the slot | The registration e-mail asked for it; no reply was in the thread supplied on 17 Oct | **Open**: write again by the evening of 18 Oct if nothing has arrived |
 
 ## B. Regulatory values kept as `verified: false`
 
@@ -135,7 +137,8 @@ change is written to the audit log with who, what and why.
 
 - A team of **at least two** eligible students (see section A, row 5). The team reported on 17 Oct
   2026 that it has registered; this repository cannot check that. Still open: the organiser's answers
-  to section A rows 10 and 11 if the registration reply did not settle them, and row 12 (visa).
+  to section A rows 10 and 11 if the registration reply did not settle them, row 12 (visa) and row 13
+  (the organiser's confirmation of the slot).
 - Answers, in the team's own words, to the questions in `submission/QA_PREP.md` that say so (who built
   what, which tools were used).
 - The registration form and passport bio pages (never put these in the repository).

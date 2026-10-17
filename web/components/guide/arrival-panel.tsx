@@ -76,12 +76,12 @@ export function ArrivalPanel({
             </CardTitle>
             <CardAction className="flex items-center gap-2">
               {view.verified ? <Chip tone="ok">Verified</Chip> : <NotVerifiedBadge />}
-              <Chip tone={total > 0 && done === total ? "ok" : "info"}>
+              <Chip key={done} tone={total > 0 && done === total ? "ok" : "info"}>
                 {done} of {total} done
               </Chip>
             </CardAction>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="stagger space-y-6">
             <div className="flex items-center gap-3">
               <Progress
                 value={percent}
@@ -100,7 +100,11 @@ export function ArrivalPanel({
               </Notice>
             ) : null}
             {view.stages.map((stage) => (
-              <section key={stage.key} aria-labelledby={`stage-${stage.key}`} className="space-y-3">
+              <section
+                key={stage.key}
+                aria-labelledby={`stage-${stage.key}`}
+                className="animate-rise space-y-3"
+              >
                 <h2 id={`stage-${stage.key}`} className="text-sm font-semibold">
                   {stage.label}
                 </h2>
@@ -108,7 +112,13 @@ export function ArrivalPanel({
                   {stage.items.map((step) => {
                     const checked = ticks.includes(step.key);
                     return (
-                      <li key={step.key} className="flex items-start gap-3 px-4 py-3">
+                      <li
+                        key={step.key}
+                        className={cn(
+                          "hover:bg-muted/50 flex items-start gap-3 px-4 py-3 transition-colors duration-300",
+                          checked && "bg-success-soft/30",
+                        )}
+                      >
                         <Checkbox
                           id={`step-${step.key}`}
                           className="mt-0.5"
@@ -119,7 +129,10 @@ export function ArrivalPanel({
                         <div className="min-w-0 space-y-0.5">
                           <Label
                             htmlFor={`step-${step.key}`}
-                            className={cn("font-medium", checked && "text-muted-foreground")}
+                            className={cn(
+                              "font-medium transition-colors duration-300",
+                              checked && "text-muted-foreground decoration-primary/60 line-through",
+                            )}
                           >
                             {step.label}
                           </Label>

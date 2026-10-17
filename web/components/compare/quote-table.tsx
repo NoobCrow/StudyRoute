@@ -111,6 +111,9 @@ export function QuoteTable({ quote, selected, onStart }: Props) {
   const fit = quote.deadline_fit ?? null;
   const arrival = new Map((fit?.providers ?? []).map((p) => [p.provider_id, p]));
   const highlighted = (r: QuoteResult) => (fit ? fit.best_in_time === r.provider_id : r.rank === 1);
+  // Only the length of a decorative bar is worked out here (this cost against the dearest one). Every
+  // amount on the screen is the engine's own string.
+  const dearest = Math.max(1, ...quote.results.map((r) => r.total_cost_bdt_minor));
 
   return (
     <div className="space-y-3">
@@ -124,7 +127,7 @@ export function QuoteTable({ quote, selected, onStart }: Props) {
         <Table>
           <TableCaption className="sr-only">Providers ranked by true total cost</TableCaption>
           <QuoteHead currency={quote.target.currency} />
-          <TableBody>
+          <TableBody className="stagger">
             {quote.results.map((r) => {
               const arrives = arrival.get(r.provider_id);
               const best = highlighted(r);
@@ -133,6 +136,7 @@ export function QuoteTable({ quote, selected, onStart }: Props) {
                   key={r.provider_id}
                   data-best={best || undefined}
                   className={cn(
+                    "animate-fade transition-colors duration-300",
                     best && "bg-success-soft/70 hover:bg-success-soft/70",
                     !best &&
                       r.shortfall_foreign_minor > 0 &&
@@ -149,7 +153,11 @@ export function QuoteTable({ quote, selected, onStart }: Props) {
                       <div className="min-w-0 space-y-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           <strong className="font-medium">{r.provider_name}</strong>
-                          {r.rank === 1 && best ? <Chip tone="ok">Best</Chip> : null}
+                          {r.rank === 1 && best ? (
+                            <Chip tone="ok" className="animate-ring-pulse">
+                              Best
+                            </Chip>
+                          ) : null}
                           {r.rank === 1 && !best ? <Chip tone="neutral">Lowest cost</Chip> : null}
                           {fit && fit.best_in_time === r.provider_id && r.rank !== 1 ? (
                             <Chip tone="ok">Best in time</Chip>
@@ -202,10 +210,28 @@ export function QuoteTable({ quote, selected, onStart }: Props) {
                       {r.display.cost_pct} · you pay {r.display.parent_pays}
                     </div>
                     {r.shortfall_foreign_minor > 0 ? (
-                      <Chip tone="danger" role="alert" className="mt-1">
+                      <Chip tone="danger" role="alert" className="animate-shake mt-1">
                         Short by {r.display.shortfall}
                       </Chip>
                     ) : null}
+                    <div
+                      aria-hidden="true"
+                      className="bg-muted mt-2 ml-auto h-1.5 w-28 overflow-hidden rounded-full"
+                    >
+                      <div
+                        className={cn(
+                          "animate-grow-x h-full origin-left rounded-full",
+                          best
+                            ? "bg-primary"
+                            : r.shortfall_foreign_minor > 0
+                              ? "bg-destructive"
+                              : "bg-primary/45",
+                        )}
+                        style={{
+                          width: `${Math.max(6, Math.round((r.total_cost_bdt_minor / dearest) * 100))}%`,
+                        }}
+                      />
+                    </div>
                   </TableCell>
                   <TableCell className="align-top">
                     <DropdownMenu>

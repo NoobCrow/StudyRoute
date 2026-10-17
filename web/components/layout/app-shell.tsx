@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           Skip to content
         </a>
         <AppSidebar />
-        <SidebarInset className="bg-background min-w-0">
+        <SidebarInset className="app-glow min-w-0">
           <Topbar onAskAssistant={() => setAssistantOpen(true)} />
           <main
             id="main"

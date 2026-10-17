@@ -11,13 +11,15 @@ from sqlalchemy.orm import Session
 from app.audit.service import AuditService
 from app.core import errors
 from app.core.clock import Clock, iso_utc
-from app.core.crypto import sha256_hex
+from app.core.crypto import DecryptionError, FieldCipher, sha256_hex
 from app.core.ids import new_id
 from app.domain.rbac import Actor, Perm, authorize
 from app.domain.rules import Rules
 from app.models import Document, Payment
 
 MAX_CONTENT_CHARS = 20_000
+# Stored text that starts with this is AES-256-GCM ciphertext; anything else is an older plain row.
+SEALED = "enc$"
 _CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 
@@ -30,11 +32,27 @@ def clean_filename(raw: str) -> str:
 
 
 class DocumentService:
-    def __init__(self, clock: Clock, audit: AuditService) -> None:
+    def __init__(self, clock: Clock, audit: AuditService, cipher: FieldCipher) -> None:
         self._clock = clock
         self._audit = audit
+        self._cipher = cipher
+
+    @staticmethod
+    def _context(doc_id: str) -> str:
+        return f"documents.content|{doc_id}"  # binds the ciphertext to its own row
+
+    def text_of(self, doc: Document) -> str:
+        """The text. New text is stored encrypted; an older plain-text row is read as it is."""
+        stored = doc.content_text or ""
+        if not stored.startswith(SEALED):
+            return stored
+        try:
+            return self._cipher.decrypt(stored[len(SEALED) :], context=self._context(doc.id))
+        except DecryptionError:
+            return ""  # moved, damaged or encrypted under another key: show nothing
 
     def view(self, doc: Document) -> dict[str, Any]:
+        text = self.text_of(doc)
         return {
             "document_id": doc.id,
             "kind": doc.kind,
@@ -42,7 +60,7 @@ class DocumentService:
             "payment_id": doc.payment_id,
             "size_bytes": doc.size_bytes,
             "has_content": bool(doc.content_text),
-            "content_preview": (doc.content_text or "")[:160],
+            "content_preview": text[:160],
             "sha256": doc.sha256,
             "created_at": iso_utc(doc.created_at),
             "mock": True,
@@ -74,14 +92,19 @@ class DocumentService:
                 raise errors.NotFound("Payment not found.")
         name = clean_filename(filename)
         body = content_text or ""
+        doc_id = new_id("doc")
         doc = Document(
-            id=new_id("doc"),
+            id=doc_id,
             owner_id=actor.owner_id,
             created_by=actor.user_id,
             payment_id=payment_id,
             kind=kind,
             filename=name,
-            content_text=content_text or None,
+            content_text=(
+                SEALED + self._cipher.encrypt(content_text, context=self._context(doc_id))
+                if content_text
+                else None
+            ),
             sha256=sha256_hex(body or f"{kind}:{name}"),
             size_bytes=len(body.encode("utf-8")),
             created_at=self._clock.now(),

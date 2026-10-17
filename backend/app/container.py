@@ -81,7 +81,7 @@ def build_context(
         quotes=quotes,
         payments=payments,
         kyc=kyc,
-        documents=DocumentService(clock, audit),
+        documents=DocumentService(clock, audit, cipher),
         config=ConfigService(clock, audit),
     )
     ctx.worker = BackgroundWorker(ctx)

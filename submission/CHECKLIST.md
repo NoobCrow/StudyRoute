@@ -1,8 +1,8 @@
 # Submission checklist
 
 Source: the official rules, "PBCSF Appendix 2: Problem Description and Competition Rules for
-International Track" (read on 14 Oct 2026; a public copy is on the ITS Indonesia site), and the
-CMU Thailand announcement. Check the official site once more for changes:
+International Track" (the full PDF is reproduced, with our check against it, in
+`docs/COMPETITION_RULES.md`), and the CMU Thailand announcement. Check the official site once more for changes:
 https://fintechathon.g-ican.com/#/en
 
 **Deadline: 20 Oct 2026, 23:59 Beijing time = 21:59 in Dhaka (15:59 UTC).** Registration and
@@ -36,16 +36,19 @@ after it. Keep a copy of every e-mail you send and any reply.
 
 ## 1. Register (do this first; the deadline is the same)
 
-The team reported on 17 Oct 2026 that it has **already registered**. The three steps below are
-therefore ticked; nothing in this repository can confirm them.
+The team **registered by e-mail on 15 Oct 2026 at 21:25** as TeamEkxin (leader Farhan Labib; members
+Md Redwan Hossen, Alim Bin Yeasin and Kalvin Chakma; Ahsanullah University of Science and Technology,
+Bangladesh). The message is recorded in `REGISTRATION.md`. The three steps below are therefore ticked;
+nothing in this repository can confirm what the organisers received.
 
 - [x] Download the registration form (link in the CMU announcement).
 - [x] Fill it in. Attach **each member's passport bio page**. Never put these in the repository,
       the archive or any chat.
 - [x] E-mail the form and passport pages to **wangyr@pbcsf.tsinghua.edu.cn** (draft in
       `EMAIL_TEMPLATES.md`). Use the subject format printed on the form.
-- [ ] Keep the confirmation, and check that the organiser's reply (if any) did not raise a problem
-      with the team's nationality mix or universities. Registration is free: anyone asking for
+- [ ] **The organiser's confirmation has not been seen** (none was in the thread supplied on 17 Oct).
+      If nothing has arrived by the evening of 18 Oct, write again. Keep every reply, and check that
+      it did not raise a problem with the team's nationality mix or universities. Registration is free: anyone asking for
       money is not the organiser.
 
 ## 2. The six deliverables (official list)
@@ -85,7 +88,7 @@ judges access; put the link in the submission e-mail.
       (also with `docker-compose.hardened.yml`).
 - [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
 - [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1223 passed on Windows and on Linux in a container; ruff clean)
-- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026: 406 unit and accessibility tests, 20 browser tests; the unit tests also on Linux in a container)
+- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026, final: 439 unit and accessibility tests, 24 browser tests; the unit tests ran on Linux in a container earlier, when there were 406)
 - [ ] CI is green on the pushed commit (backend, web, contracts, secret scan, dependency audit, docker).
 - [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.
 - [ ] Every screen shows the sandbox banner (sign-in page included).

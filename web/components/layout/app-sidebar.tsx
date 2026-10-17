@@ -68,14 +68,14 @@ export function AppSidebar() {
         <nav aria-label="Main">
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="stagger">
                 {items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
+                  <SidebarMenuItem key={item.href} className="animate-rise">
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(pathname, item.href)}
                       tooltip={item.label}
-                      className="data-[active=true]:bg-card h-9 data-[active=true]:border data-[active=true]:shadow-xs"
+                      className="data-[active=true]:bg-card before:bg-primary data-[active=true]:[&>svg]:text-primary relative h-9 transition-all duration-200 hover:translate-x-0.5 data-[active=true]:border data-[active=true]:shadow-xs data-[active=true]:before:absolute data-[active=true]:before:top-1.5 data-[active=true]:before:bottom-1.5 data-[active=true]:before:left-0 data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-full [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-110"
                     >
                       <Link
                         href={item.href}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, CircleAlert } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 
 import { Field } from "@/components/app/field";
 import { ErrorNotice } from "@/components/app/notice";
@@ -30,8 +30,12 @@ import type { BudgetCity, Housing, StudentBudget } from "@/lib/api/types";
 import { useApi } from "@/lib/api/use-api";
 import { parseMajorToMinor } from "@/lib/money";
 import type { GuideParams } from "@/lib/schemas/guide-params";
+import { cn } from "@/lib/utils";
 
 const ALL = "__all__";
+/** The slider covers 0 to 400,000 taka in steps of 5,000: a handle for the typed amount, nothing more. */
+const SLIDER_MAX = 400_000;
+const SLIDER_STEP = 5_000;
 const HOUSING: Record<Housing, string> = {
   shared: "A room in a shared flat",
   studio: "Your own studio",
@@ -87,6 +91,8 @@ export function BudgetPanel({
   const budgetError = typed && !typed.ok ? typed.error : null;
   const view = answer.data;
   const judged = view?.budget != null;
+  const sliderValue = Math.min(SLIDER_MAX, Math.max(0, Math.round(Number(cleaned) || 0)));
+  const sliderStyle = { "--fill": `${(sliderValue / SLIDER_MAX) * 100}%` } as CSSProperties;
 
   return (
     <div className="space-y-6">
@@ -117,6 +123,25 @@ export function BudgetPanel({
                   onChange={(event) => setText(event.target.value.replace(/[^0-9.,\s]/g, ""))}
                 />
               </InputGroup>
+              <input
+                type="range"
+                min={0}
+                max={SLIDER_MAX}
+                step={SLIDER_STEP}
+                value={sliderValue}
+                aria-label="Budget slider, 0 to 400,000 taka"
+                className="range mt-3"
+                style={sliderStyle}
+                onChange={(event) => setText(event.target.value === "0" ? "" : event.target.value)}
+              />
+              <div
+                aria-hidden="true"
+                className="text-muted-foreground flex justify-between text-[11px]"
+              >
+                <span>0</span>
+                <span>200,000</span>
+                <span>400,000</span>
+              </div>
             </Field>
             <Field label="Where you would live" htmlFor="g-housing">
               <Select
@@ -160,7 +185,14 @@ export function BudgetPanel({
       <ErrorNotice error={answer.error} onRetry={answer.reload} />
       {!view && answer.loading ? <CardSkeleton lines={6} label="Loading the cities" /> : null}
       {view ? (
-        <Card aria-labelledby="budget-results-title" aria-busy={answer.loading}>
+        <Card
+          aria-labelledby="budget-results-title"
+          aria-busy={answer.loading}
+          className={cn(
+            "transition-[box-shadow,border-color,opacity] duration-300",
+            answer.loading && "opacity-60",
+          )}
+        >
           <CardHeader>
             <CardTitle id="budget-results-title" className="text-base">
               {view.housing_label}, a month
@@ -174,7 +206,7 @@ export function BudgetPanel({
             <p role="status" aria-live="polite" className="text-sm">
               {judged ? (
                 <>
-                  <strong>
+                  <strong key={view.summary.fitting} className="animate-flash rounded px-0.5">
                     {view.summary.fitting} of {view.summary.cities} cities
                   </strong>{" "}
                   fit {view.budget?.formatted} a month.{" "}
@@ -206,9 +238,16 @@ export function BudgetPanel({
                   </TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="stagger">
                 {view.items.map((row) => (
-                  <TableRow key={`${row.country}-${row.city}`}>
+                  <TableRow
+                    key={`${row.country}-${row.city}`}
+                    className={cn(
+                      "animate-fade transition-colors duration-500",
+                      row.fits === true && "bg-success-soft/40 hover:bg-success-soft/60",
+                      row.fits === false && "text-muted-foreground",
+                    )}
+                  >
                     <TableCell>
                       <span className="font-medium">{row.city}</span>
                       <div className="text-muted-foreground text-xs">{row.country_name}</div>

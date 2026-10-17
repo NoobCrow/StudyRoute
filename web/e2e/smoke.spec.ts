@@ -189,3 +189,40 @@ test("student guide: find a city that fits a budget, then tick off the arrival s
   await expect(page.getByLabel("Open a student bank account")).toBeChecked();
   expect(await scrollsSideways(page)).toBe(false);
 });
+
+test("student guide: dragging the budget slider changes the cities that fit", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/guide/");
+  await expect(page.getByText("2 of 3 cities")).toBeVisible();
+
+  const slider = page.getByRole("slider", { name: /Budget slider/ });
+  await slider.fill("260000");
+  await expect(page.getByText("3 of 3 cities")).toBeVisible();
+  await expect(page.getByLabel("Monthly budget")).toHaveValue("260000");
+  await expect(page).toHaveURL(/budget=260000/);
+
+  // Back down again: the typed amount and the list follow the slider both ways.
+  await slider.fill("100000");
+  await expect(page.getByText("1 of 3 cities")).toBeVisible();
+});
+
+test.describe("with reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("entrance animations are over at once, with no delay", async ({ page }) => {
+    await signIn(page);
+    const timing = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-slot="card"], nav[aria-label="Main"] li')].map(
+        (element) => {
+          const style = getComputedStyle(element);
+          return [parseFloat(style.animationDuration), parseFloat(style.animationDelay)];
+        },
+      ),
+    );
+    expect(timing.length).toBeGreaterThan(2);
+    for (const [duration, delay] of timing) {
+      expect(duration).toBeLessThanOrEqual(0.001);
+      expect(delay).toBeLessThanOrEqual(0.001);
+    }
+  });
+});

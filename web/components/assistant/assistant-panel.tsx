@@ -270,7 +270,7 @@ export function AssistantPanel() {
             key={turn.id}
             ref={index === turns.length - 1 && turn.role === "bot" ? newest : undefined}
             className={cn(
-              "max-w-[92%] rounded-xl px-3 py-2 text-sm",
+              "animate-rise max-w-[92%] rounded-xl px-3 py-2 text-sm",
               turn.role === "me"
                 ? "bg-success-soft text-success-soft-foreground ml-auto"
                 : "bg-muted",
@@ -288,14 +288,14 @@ export function AssistantPanel() {
           </div>
         ))}
         {turns.length === 0 ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="stagger flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
               <Button
                 key={s}
                 type="button"
                 variant="outline"
                 size="sm"
-                className="bg-card h-auto py-1.5 text-left whitespace-normal"
+                className="bg-card animate-rise h-auto py-1.5 text-left whitespace-normal"
                 onClick={() => void ask(s)}
               >
                 {s}
@@ -304,7 +304,12 @@ export function AssistantPanel() {
           </div>
         ) : null}
         {busy ? (
-          <p className="text-muted-foreground text-xs" role="status">
+          <p className="text-muted-foreground flex items-center gap-2 text-xs" role="status">
+            <span aria-hidden="true" className="flex gap-1">
+              <span className="bg-primary animate-typing-dot size-1.5 rounded-full" />
+              <span className="bg-primary animate-typing-dot size-1.5 rounded-full [animation-delay:0.15s]" />
+              <span className="bg-primary animate-typing-dot size-1.5 rounded-full [animation-delay:0.3s]" />
+            </span>
             Thinking with the engine&apos;s numbers...
           </p>
         ) : null}
@@ -321,8 +326,17 @@ export function AssistantPanel() {
           autoComplete="off"
           {...form.register("message")}
         />
-        <Button type="submit" size="icon" disabled={busy || connecting} aria-label="Send">
-          <Send aria-hidden="true" />
+        <Button
+          type="submit"
+          size="icon"
+          className="group"
+          disabled={busy || connecting}
+          aria-label="Send"
+        >
+          <Send
+            aria-hidden="true"
+            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
         </Button>
       </form>
     </div>

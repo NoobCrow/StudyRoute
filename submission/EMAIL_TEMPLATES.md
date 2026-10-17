@@ -1,36 +1,39 @@
-# E-mail drafts (for you to send)
+# E-mail drafts
 
-Nothing here has been sent. Review each draft, fill in the brackets, and send from your own
-account. Check the address and the subject format on the official site and the registration form
+**Draft 1 (registration) was sent on 15 October 2026, 21:25.** It is kept below exactly as sent, and
+recorded in `REGISTRATION.md`. Drafts 1b and 2 have **not** been sent: review each one, fill in the
+brackets, and send from your own account. Check the address and the subject on the official site
 before sending anything that contains passport pages.
 
-## 1. Registration
+## 1. Registration (SENT, 15 October 2026)
 
-**To:** wangyr@pbcsf.tsinghua.edu.cn
-**Subject:** use the format printed on the registration form. The format other sources report is
-`International Track Registration - [Country] - TeamEkxin - [Team leader's full name]`.
-**Attach:** the completed registration form, and one passport bio page for each team member.
+**To:** the organiser's registration contact (see `docs/COMPETITION_RULES.md`)
+**Subject:** International Track Registration – TeamEkxin – Farhan Labib
+**Attached:** the completed registration form, the passport bio pages of all four members, and proof of
+enrolment (studentship certificates and student cards)
 
 ```
 Dear Ms. WANG Yiran,
 
-We would like to register for the 2026 Shenzhen International FinTech Competition
-(FinTechathon), International Track, Topic C: Cross-border and Student Finance Assistant.
+We would like to register for the 2026 Shenzhen International FinTech Competition – International Track.
 
 Team name: TeamEkxin
-Team leader: [full name], [university], [country], [nationality]
-Members: [name, university, country, nationality, one per line]
+Topic: C (Cross-border & Student Finance Assistant)
+Entry title: StudyRoute
+Team leader: Farhan Labib
+Members: Md Redwan Hossen, Alim Bin Yeasin, Kalvin Chakma
+University: Ahsanullah University of Science and Technology, Bangladesh
 
-Attached are our completed registration form and the passport bio pages of all team members.
-All members are full-time students at institutions outside Mainland China, Hong Kong SAR, Macao SAR
-and Chinese Taipei, and at least 60% of the team are non-Chinese nationals.
+Attached are the completed registration form, the passport bio pages of all four members, and proof of enrollment (studentship certificates and student cards).
 
-Please confirm that our slot is allocated.
+Please confirm receipt and our slot allocation. We look forward to your reply.
 
-Kind regards,
-[team leader's full name]
-TeamEkxin
+Best regards,
+Farhan Labib
 ```
+
+If no confirmation has arrived by the evening of 18 October, write again (draft 1b is a good base) and
+ask for the slot to be confirmed.
 
 ## 1b. Eligibility question (send before registering if any of it is unclear)
 

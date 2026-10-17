@@ -10,6 +10,8 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
       role={named ? "region" : undefined}
       className={cn(
         "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        "animate-rise transition-[box-shadow,border-color] duration-300",
+        "hover:border-primary/30 hover:shadow-md",
         className,
       )}
       {...props}

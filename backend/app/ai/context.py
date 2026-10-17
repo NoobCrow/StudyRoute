@@ -110,9 +110,10 @@ def gather_context(
 
 def _collect_documents(ctx: AppContext, session: Session, ai: Actor, chat: ChatContext) -> None:
     for doc in ctx.documents.list(session, ai, chat.payment_id)[:MAX_DOCUMENTS]:
-        if not doc.content_text:
+        text = ctx.documents.text_of(doc)
+        if not text:
             continue
-        if check_text(doc.content_text).blocked:
+        if check_text(text).blocked:
             chat.ignored_documents.append(doc.kind)  # looks like instructions: never forwarded
         else:
-            chat.excerpts.append(f"{doc.kind}: {doc.content_text[:EXCERPT_CHARS]}")
+            chat.excerpts.append(f"{doc.kind}: {text[:EXCERPT_CHARS]}")
