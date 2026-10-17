@@ -37,6 +37,24 @@ def test_the_demo_script_passes_every_check(world: World) -> None:
     assert "anchored on the chain and the database matches it" in transcript
 
 
+def test_a_second_run_on_the_same_data_says_to_reset_instead_of_failing_halfway(
+    world: World,
+) -> None:
+    def wait(seconds: float) -> None:
+        world.clock.advance(seconds)
+        world.ctx.worker.tick()
+
+    first = DemoFlow(
+        world.client, password=PASSWORD, mfa_code=MFA_CODE, wait=wait, say=lambda _: None
+    )
+    assert first.run() == []
+    second = DemoFlow(
+        world.client, password=PASSWORD, mfa_code=MFA_CODE, wait=wait, say=lambda _: None
+    )
+    with pytest.raises(RuntimeError, match="seed --reset"):
+        second.run()
+
+
 def test_the_demo_passes_with_the_real_rate_limits_switched_on(tmp_path: Path) -> None:
     """A real server allows 10 sign-in and MFA requests a minute per address. The demo makes more
     than that, so it must wait as the server asks. (Tests usually switch the limits off, which hid

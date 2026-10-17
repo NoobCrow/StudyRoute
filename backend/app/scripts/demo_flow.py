@@ -150,6 +150,7 @@ class DemoFlow:
         for who, email in (("parent", PARENT_EMAIL), ("student", STUDENT_EMAIL)):
             self._login(who, email)
         self._login("admin", ADMIN_EMAIL)
+        self._require_fresh_demo_data()
         today = date.fromisoformat(str(health["time"])[:10])
         due = (today + timedelta(days=14)).isoformat()
 
@@ -168,6 +169,17 @@ class DemoFlow:
         self._smart_escrow(today.isoformat())
         self._audit()
         return self.failures
+
+    def _require_fresh_demo_data(self) -> None:
+        """The demo shows KYC blocking an approval, which only happens before KYC is verified. A
+        second run on the same data would fail halfway, so say so up front."""
+        status = self._call("GET", "/kyc/status", "parent").json()["status"]
+        if status == "VERIFIED":
+            raise RuntimeError(
+                "this household's KYC is already verified, so an earlier demo run used this data. "
+                "Start from clean demo data: `python -m app.scripts.seed --reset`, or with Docker "
+                "`docker compose down -v && docker compose up --build`."
+            )
 
     def _plan(self, due: str) -> None:
         self._step(1, f"Dashboard: tuition GBP 10,000 due {due}")
