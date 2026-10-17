@@ -242,6 +242,8 @@ for payload in SQLI:
     watch(p1.call("POST", "/documents", json_body={"kind": "passport", "filename": payload, "content_text": payload}))
     watch(p1.call("POST", "/auth/mfa/verify", json_body={"code": payload, "scope": "confirm_escrow", "subject_id": payload}))
     watch(client.post(f"{API}/auth/login", json={"email": payload, "password": payload}))
+    watch(p1.call("GET", "/planner/student-budget", params={"country": payload, "housing": payload, "budget_bdt_minor": payload}))
+    watch(p1.call("GET", "/planner/arrival-guide", params={"country": payload}))
 rec("5.1 SQL-injection strings cause no server error", all(s < 500 for s in statuses), f"{len(statuses)} requests, worst {max(statuses)}")
 rec("5.2 no database error, path or stack trace appears in any response", not error_text, "; ".join(error_text[:2]))
 still_ok = client.post(f"{API}/auth/login", json={"email": "parent@demo.studyroute.test", "password": PASSWORD}).status_code == 200 and len(p1.call("GET", "/recipients").json()["items"]) >= 1

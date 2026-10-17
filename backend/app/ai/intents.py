@@ -55,27 +55,48 @@ def stress_drops(message: str) -> tuple[Decimal, ...]:
 
 
 _COSTS = re.compile(
-    r"\brents?\b.{0,30}\b(?:in|for|at|near)\b|\b(?:the|average|typical|monthly|student)\s+rents?\b"
-    r"|how\s+much\s+(?:is|are|does|do)\b.{0,30}\b(?:rent|accommodation|housing|living)"
-    r"|cost\s+of\s+living|living\s+(?:costs?|expenses?)\s+(?:in|for|at)\b"
+    r"cost\s+of\s+living|\bliving\s+(?:costs?|expenses?)\s+(?:in|for|at)\s+[a-z]"
     r"|\bcosts?\s+(?:to|of)\s+(?:live|living|study|studying)\b"
-    r"|\bwhich\s+(?:city|cities|towns?|countr(?:y|ies)|places?)\b|\bafford\b"
-    r"|student\s+budget|monthly\s+budget|\bcheapest\s+(?:city|cities|countr(?:y|ies)|places?)\b",
+    r"|\b(?:what|how\s+much)\s+(?:is|are|does|do)\s+(?:the\s+|an?\s+|average\s+|typical\s+|monthly\s+)*(?:rents?|accommodation|housing)\b"
+    r"|\b(?:is|are)\s+(?:the\s+)?rents?\s+(?:in|at|near|for)\b|\b(?:average|typical)\s+rents?\b"
+    r"|\brent\s+(?:prices?|costs?|levels?)\b"
+    r"|\bwhich\s+(?:city|cities|towns?|countr(?:y|ies)|places?)\b.{0,60}"
+    r"\b(?:fits?|afford\w*|cheap\w*|budget|costs?|rent|live|study|studying)\b"
+    r"|\b(?:cheap\w*|afford\w*|budget)\b.{0,40}\b(?:city|cities|countr(?:y|ies)|towns?|places?)\b"
+    r"|\bcan\s+i\s+afford\b|\bstudent\s+budget\b",
     re.I,
 )
 _ARRIVAL = re.compile(
     r"when\s+i\s+(?:arrive|land|get\s+there|reach|get\s+to)\b|(?:after|once)\s+(?:i\s+)?(?:arrive|land)\b"
-    r"|\bjust\s+arrived\b|first\s+(?:weeks?|months?|few\s+days|days)\b.{0,20}\b(?:abroad|there|in|overseas)\b"
+    r"|\bjust\s+arrived\s+(?:abroad|in\s+the\s+(?:uk|usa|country|city))\b"
+    r"|first\s+(?:weeks?|months?|few\s+days|days)\b.{0,20}\b(?:abroad|there|in|overseas)\b"
     r"|settl(?:e|ing)\s+in\b|before\s+(?:i|we|you)\s+(?:fly|leave|travel|go\s+abroad|depart)\b"
-    r"|arrival\s+(?:guide|checklist|steps|help|tips|list)\b|student\s+bank\s+account|local\s+sim\b"
+    r"|arrival\s+(?:guide|checklist|steps|help|tips|list)\b|\bopen\s+(?:a\s+)?student\s+bank\s+account\b|local\s+sim\b"
     r"|moving\s+abroad|new\s+(?:to|in)\s+(?:the\s+)?(?:country|city|uk|usa)\b",
     re.I,
 )
+# A message that asks to pay, send, settle or plan money is a payment request, whatever else it says
+# ("settle the rent bill" is not a question about rent), so it is never a student question.
+_PAYING = re.compile(
+    r"\b(?:pay|paying|paid|payments?|send|sending|transfers?|transferring|settle(?!\s+in\b)|remit\w*|bills?|invoices?"
+    r"|quotes?|plan|planning|due|instal+ments?|lump\s+sum)\b",
+    re.I,
+)
+
+
+def student_question(message: str) -> Intent | None:
+    """ARRIVAL or COSTS when the message is a question about a student's life abroad, else None."""
+    if _PAYING.search(message):
+        return None
+    if _ARRIVAL.search(message):
+        return Intent.ARRIVAL
+    if _COSTS.search(message):
+        return Intent.COSTS
+    return None
+
 
 _RULES: list[tuple[Intent, re.Pattern[str]]] = [
     (Intent.STRESS, _STRESS),
-    (Intent.ARRIVAL, _ARRIVAL),
-    (Intent.COSTS, _COSTS),
     (
         Intent.DRAFT,
         re.compile(
@@ -137,6 +158,10 @@ _PROVIDER = re.compile(r"\bprov_([a-z])\b|\bprovider\s+([a-z])\b|(?<!^)(?<![.!?]
 
 
 def classify(message: str) -> Intent:
+    if _STRESS.search(message):
+        return Intent.STRESS
+    if (student := student_question(message)) is not None:
+        return student
     for intent, pattern in _RULES:
         if pattern.search(message):
             return intent
@@ -188,11 +213,8 @@ def choose_intent(message: str, parsed: ParsedRequest, *, has_context: bool) -> 
     """
     if _STRESS.search(message):
         return Intent.STRESS  # a what-if about the rate never starts a new quote
-    if not (_PLAN_ANY.search(message) or _CADENCE_WORDS.search(message)):
-        if _ARRIVAL.search(message):
-            return Intent.ARRIVAL  # a student question, even with a number in it
-        if _COSTS.search(message):
-            return Intent.COSTS  # "which city fits BDT 200,000" is not a send plan
+    if (student := student_question(message)) is not None:
+        return student  # "which city fits BDT 200,000" is a question, not a send plan
     if _NOT_A_PLAN.search(message):
         return classify(message)
     if parsed.has_amount:

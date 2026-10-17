@@ -244,6 +244,7 @@ class DemoFlow:
         self._check(len(body["facts_used"]) > 0, f"facts_used listed ({len(body['facts_used'])})")
         self._say(f"      {body['reply'][:160]}")
         self._stress_test(quote)
+        self._student_help()
 
     def _stress_test(self, quote: dict[str, Any]) -> None:
         """What if the taka weakens: the same quote priced again by the engine, read-only."""
@@ -270,6 +271,46 @@ class DemoFlow:
             and body["guard"]["status"] == "passed",
             "the assistant answers the what-if with the engine's numbers",
         )
+
+    def _student_help(self) -> None:
+        """The student budget and the arrival guide: read-only, from config marked not verified."""
+        budget = self._call(
+            "GET", "/planner/student-budget?budget_bdt_minor=20000000", "parent"
+        ).json()
+        totals = [row["total_bdt"]["amount_minor"] for row in budget.get("items", [])]
+        self._check(
+            len(totals) == budget["summary"]["cities"] > 0 and totals == sorted(totals),
+            f"the student budget lists {len(totals)} cities from the cheapest month in taka",
+        )
+        self._check(
+            budget["source"]["verified"] is False and "not a survey" in budget["disclaimer"],
+            "its figures are labelled invented and not verified",
+        )
+        guide = self._call("GET", "/planner/arrival-guide?country=DE", "parent").json()
+        self._check(
+            [s["key"] for s in guide["stages"]] == ["before", "first_week", "first_month"]
+            and guide["verified"] is False,
+            "the arrival guide has three stages and says it is not verified",
+        )
+        for message, expected, label in (
+            ("What is the rent in Manchester?", "rent GBP 600.00", "the rent in a city"),
+            (
+                "Which city fits a budget of BDT 130,000 a month?",
+                "4 of 20 cities",
+                "which cities fit",
+            ),
+            ("What should I do when I arrive in Germany?", "Anmeldung", "what to do on arrival"),
+        ):
+            reply = self._call(
+                "POST", "/assistant/chat", "parent", json={"message": message, "context": {}}
+            )
+            body = reply.json()
+            self._check(
+                reply.status_code == 200
+                and expected in body["reply"]
+                and body["guard"]["status"] == "passed",
+                f"the assistant answers {label} from the engine's figures",
+            )
 
     def _draft(self, quote: dict[str, Any]) -> str:
         self._step(5, "Create a draft (Idempotency-Key makes the retry safe)")

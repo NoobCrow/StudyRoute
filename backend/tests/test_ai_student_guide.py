@@ -7,6 +7,8 @@ same facts as any other answer, and the number guard checks the reply like any o
 
 from __future__ import annotations
 
+import gzip
+import json
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -275,3 +277,46 @@ def test_the_trained_reader_cannot_turn_these_into_something_else(tmp_path: Path
         assert "Anmeldung" in arrival["reply"]
     finally:
         world.close()
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "I want to settle the rent bill (AUD 9800) for my niece before tomorrow!",
+        "Hi StudyRoute, I have to pay food and rent by 15 December thanks in advance.",
+        "plan my food and rent transfers: $900 per month for two months",
+        "is it cheaper to send my daughter's rent monthly or in one go?",
+        "we have to pay usd 22,750 rent for the semester starting 23 october 2026 please help.",
+        "What documents are needed for a rent payment?",
+        "In which countries can I get a card?",
+        "Which student bank account has the best interest rate in Canada?",
+        "Sir, my landlord is raising my rent, can I refuse? thanks in advance.",
+    ],
+)
+def test_a_payment_request_or_other_question_that_mentions_rent_is_not_a_student_question(
+    message: str,
+) -> None:
+    """These words are common in real payment requests, so they must never start a student answer."""
+    assert intent_of(message) not in (Intent.COSTS, Intent.ARRIVAL)
+    assert intent_of(message, has_context=True) not in (Intent.COSTS, Intent.ARRIVAL)
+
+
+def test_no_example_the_assistant_was_trained_and_measured_on_is_taken_for_a_student_question() -> (
+    None
+):
+    """The labelled sets (payment requests, send plans, attacks, out-of-scope text) hold no student
+    questions, so none of them may be routed to the student answers: that would change the measured
+    behaviour of the assistant (docs/AI_EVALUATION.md)."""
+    root = Path(__file__).resolve().parents[2] / "ml" / "data" / "generated"
+    sets = sorted(root.glob("*.jsonl.gz"))
+    if not sets:
+        pytest.skip("the generated datasets are not in this checkout")
+    caught: list[str] = []
+    for path in sets:
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            for line in handle:
+                text = json.loads(line)["text"]
+                parsed = parse_request(text, ["GBP", "USD", "EUR", "AUD", "CAD", "MYR"], TODAY)
+                if choose_intent(text, parsed, has_context=False) in (Intent.COSTS, Intent.ARRIVAL):
+                    caught.append(f"{path.stem}: {text[:90]}")
+    assert caught == []

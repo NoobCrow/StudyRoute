@@ -460,7 +460,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole GBP for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented GBP figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
   US:
     value:
       currency: USD
@@ -473,7 +473,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole USD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented USD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
   DE:
     value:
       currency: EUR
@@ -485,7 +485,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole EUR for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented EUR figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
   AU:
     value:
       currency: AUD
@@ -497,7 +497,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole AUD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented AUD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
   CA:
     value:
       currency: CAD
@@ -509,7 +509,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole CAD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented CAD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
   MY:
     value:
       currency: MYR
@@ -521,7 +521,7 @@ student_costs:
     verified: false
     source_url: "https://example.org/replace-with-cost-of-living-source"
     last_checked: "2026-10-17"
-    note: "Invented monthly figures in whole MYR for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+    note: "Invented MYR figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
 
 arrival_labels:
   value:
@@ -554,7 +554,7 @@ arrival_labels:
   verified: false
   source_url: "https://example.org/replace-with-official-student-guidance"
   last_checked: "2026-10-17"
-  note: "Indicative first-weeks advice. Rules for visas, work and registration differ and change: check your university's international office and the official government page."
+  note: "Indicative first-weeks advice. Visa and work rules change: check the official page."
 
 arrival_guide:
   GENERIC:
@@ -566,7 +566,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "A general list for countries without their own. Indicative. Confirm with your university and the official government page."
+    note: "A general list for countries without their own. Indicative."
   GB:
     value:
       before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
@@ -576,7 +576,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
   US:
     value:
       before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, us_i20]
@@ -586,7 +586,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
   DE:
     value:
       before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, de_blocked_account]
@@ -596,7 +596,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
   AU:
     value:
       before: [accommodation, arrival_money, travel_documents, bank_letter, au_oshc]
@@ -606,7 +606,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
   CA:
     value:
       before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, ca_study_permit]
@@ -616,7 +616,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
   MY:
     value:
       before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
@@ -626,7 +626,7 @@ arrival_guide:
     verified: false
     source_url: "https://example.org/replace-with-official-student-guidance"
     last_checked: "2026-10-17"
-    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+    note: "Indicative. Confirm with your university and the official government page."
 
 # --- generated by scripts/gen_countries.py: do not edit by hand, run the script ---
 countries:

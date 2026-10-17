@@ -58,7 +58,7 @@ async function signIn(email) {
   await Promise.all([page.waitForSelector(SIGNED_IN), page.click('button[type="submit"]')]);
   await sleep(900);
 }
-const screens = ["/", "/compare", "/payments", "/recipients", "/documents", "/audit", "/rules", "/bank", "/escrow", "/sandbox"];
+const screens = ["/", "/compare", "/payments", "/recipients", "/documents", "/guide", "/audit", "/rules", "/bank", "/escrow", "/sandbox"];
 async function tour(label) {
   for (const href of screens) {
     const link = await page.$(navLink(href));

@@ -162,6 +162,7 @@ class Gallery(DemoFlow):
     def run(self) -> list[str]:
         failures = super().run()
         self._pages()
+        self._student_guide()
         self._bank()
         self._escrow_shots()
         self._assistant()
@@ -184,6 +185,32 @@ class Gallery(DemoFlow):
         self._shot("13-admin-dashboard.png", "/", who="admin")
         self._shot("14-student-dashboard.png", "/", who="student")
         self._shot("15-sandbox-admin.png", "/sandbox/", who="admin")
+
+    def _student_guide(self) -> None:
+        self._say("\n[gallery] the student guide")
+        self._shot("35-student-budget.png", "/guide/", height=1200)
+        self._shot(
+            "36-city-details.png",
+            "/guide/",
+            steps=[{"clickRow": {"row": "Manchester", "text": "Details"}}, {"wait": 700}],
+        )
+        self._shot(
+            "37-arrival-checklist.png",
+            "/guide/?tab=arrival&arrival=DE",
+            height=1500,
+            steps=[
+                {"click": "Book a place to live before you fly"},
+                {"click": "Check the blocked-account step for your visa"},
+                {"click": "Open a student bank account"},
+                {"wait": 400},
+            ],
+        )
+        self._shot(
+            "38-chat-rent.png",
+            "/",
+            **ASSISTANT,
+            steps=[*OPEN_ASSISTANT, *say("What is the rent in Manchester?", 1)],
+        )
 
     def _bank(self) -> None:
         self._say("\n[gallery] bank network")
@@ -316,13 +343,19 @@ class Gallery(DemoFlow):
         self._shot(
             "18-plan-to-draft.png",
             "/",
-            height=1300,
+            height=1600,
             steps=[
                 *OPEN_ASSISTANT,
                 *say(plan, 1),
                 {"click": "Review and create the draft"},
                 {"press": "Escape"},
                 {"waitText": "Create draft with"},
+                {
+                    "type": {
+                        "selector": "input[placeholder^='INV-']",
+                        "text": "INV-2026-4471 / STU-883201",
+                    }
+                },
                 {"scrollTo": "Create a draft payment", "offset": 110},
             ],
         )
