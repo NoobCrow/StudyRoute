@@ -69,7 +69,9 @@ TeamEkxin
 **To:** wangyr@pbcsf.tsinghua.edu.cn
 **Subject:** `TeamEkxin - International Track - Topic C - Final submission` (use the organisers'
 format if the rules or the form give one).
-**Attach or link:** the six items below. Link anything over the attachment limit.
+**Attach:** the two mandatory items (the PDF and the deck, about 2 MB together). **Link:** the optional ones
+(the archive is 81 MB: send the GitHub link instead). The organiser's e-mail of 15 October asks for submissions as soon as
+possible, so do not wait for the deadline.
 
 ```
 Dear Ms. WANG Yiran,
@@ -79,15 +81,20 @@ Cross-border and Student Finance Assistant. The project is StudyRoute, a sandbox
 helps a parent in Bangladesh pay a student's tuition and living costs abroad. All data is
 synthetic and no real money moves.
 
-1. Technical documentation (architecture, core algorithms, security design): [file or link]
-2. Presentation deck (10 minutes): [file or link]
+Mandatory, attached:
+1. Technical documentation (architecture, core algorithms, security design):
+   StudyRoute_Technical_Documentation.pdf
+2. Presentation deck (10 minutes): StudyRoute_Deck.pptx
+
+Optional:
 3. Demo video (under 5 minutes): [link]
 4. Source code with README, deployment instructions and test cases:
-   GitHub: https://github.com/redwan786/StudyRoute    Archive: [file or link]
+   GitHub: https://github.com/NoobCrow/StudyRoute
    Start: docker compose up --build, then http://localhost:8080
-5. Security self-assessment report (permission tiers and known-risk list): [file or link]
+5. Security self-assessment report (permission tiers and known-risk list):
+   docs/SECURITY_SELF_ASSESSMENT.md in the repository, or [file or link]
 6. Execution evidence (sandbox operation logs, audit log and verification, demo video):
-   in the repository under submission/evidence/ and in the archive.
+   in the repository under submission/evidence/.
 
 Demo accounts and the one-command start are described in the README.
 

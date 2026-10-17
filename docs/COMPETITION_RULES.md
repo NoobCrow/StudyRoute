@@ -82,6 +82,14 @@ that is 15:59 UTC, 17:00 London (BST), 09:00 US Pacific (PDT), 01:00 Tokyo (Oct 
 Submissions may be updated any time before the deadline; the latest version received prevails. No
 changes are accepted after the deadline.
 
+**The organiser's e-mail of 15 October 2026** (22:12, to all participants; the team pasted it here on 18
+October) lists the deliverables as: technical documentation (**mandatory**), presentation deck of 10
+minutes (**mandatory**), demo video of 5 minutes (optional), source code with README and GitHub link
+(optional), security self-assessment report (optional), execution evidence (optional). It asks teams to
+submit "as soon as possible"; the deadline is still 20 October, Beijing time. The PDF above does not mark
+any item optional, so where the two differ the e-mail wins for what *must* be sent. The optional items
+are still the evidence behind the task-completion and security scores, so send them too.
+
 ### Review and Grand Final
 
 | Date | Step |
@@ -138,12 +146,12 @@ Website: fintechathon.g-ican.com. E-mail: wangyr@pbcsf.tsinghua.edu.cn
 
 | # | Deliverable | Status | Where |
 |---|-------------|--------|-------|
-| 01 | Technical documentation | Done | `docs/TECHNICAL_DOCUMENTATION.md` (architecture, algorithms, security design) |
-| 02 | Presentation deck, 10 minutes at most | Done | `submission/StudyRoute_Deck.pptx`: 12 slides, speaker notes of about 8.9 minutes. Rehearse it |
-| 03 | Demo video, 5 minutes at most | Recorded repair demo | `submission/StudyRoute_Demo.mp4`, actual local synthetic UI/API with English subtitles; no voiceover or live bank quote. Review before submitting. `submission/VIDEO_SCRIPT.md` remains the fuller narration guide |
-| 04 | Source code, README, GitHub link, deployment instructions, test cases | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` and `submission/evidence/release/VERIFICATION.md` (current counts, results and mocked/unmocked scope; 1,677 backend (1 skipped on Windows), 463 web and 24 browser tests in the last full run of 18 Oct 2026). **The GitHub repository is private**: judges cannot open the link until it is made public or shared. Pushed up to `58750e5`; later commits are local until pushed |
-| 05 | Security self-assessment, permission tiers and known risks | Done | `docs/SECURITY_SELF_ASSESSMENT.md` (risks R1 to R55) and `docs/SECURITY_TESTING.md` (re-run on 18 Oct 2026: 146 of 146 attacks defended, 48 of 48 browser checks; raw output in `submission/evidence/security_2026-10-18/`) |
-| 06 | Execution evidence: sandbox logs and demo video | Logs done, video not done | `submission/evidence/` (operation log, audit log and its verification, payments, tamper demo, security probes) |
+| 01 | Technical documentation (**mandatory**) | Done | `submission/StudyRoute_Technical_Documentation.pdf` (12 pages, one file, with the diagrams; made from `docs/TECHNICAL_DOCUMENTATION.md`: architecture, algorithms, security design) |
+| 02 | Presentation deck, 10 minutes at most (**mandatory**) | Done | `submission/StudyRoute_Deck.pptx`: 12 slides, speaker notes of about 8.9 minutes. Rehearse it |
+| 03 | Demo video, 5 minutes at most (optional) | Recorded repair demo | `submission/StudyRoute_Demo.mp4`, actual local synthetic UI/API with English subtitles; no voiceover or live bank quote. Review before submitting. `submission/VIDEO_SCRIPT.md` remains the fuller narration guide |
+| 04 | Source code, README, GitHub link, deployment instructions, test cases (optional) | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` and `submission/evidence/release/VERIFICATION.md` (current counts, results and mocked/unmocked scope; 1,677 backend (1 skipped on Windows), 463 web and 24 browser tests in the last full run of 18 Oct 2026). **The GitHub repository is private**: judges cannot open the link until it is made public or shared. Pushed up to `58750e5`; later commits are local until pushed |
+| 05 | Security self-assessment, permission tiers and known risks (optional) | Done | `docs/SECURITY_SELF_ASSESSMENT.md` (risks R1 to R55) and `docs/SECURITY_TESTING.md` (re-run on 18 Oct 2026: 146 of 146 attacks defended, 48 of 48 browser checks; raw output in `submission/evidence/security_2026-10-18/`) |
+| 06 | Execution evidence: sandbox logs and demo video (optional) | Logs done, video not done | `submission/evidence/` (operation log, audit log and its verification, payments, tamper demo, security probes) |
 
 ### What each scoring criterion rests on
 

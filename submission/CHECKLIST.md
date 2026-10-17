@@ -55,14 +55,18 @@ nothing in this repository can confirm what the organisers received.
 
 ## 2. The six deliverables (official list)
 
+The organiser's e-mail of 15 October 2026 says **items 01 and 02 are mandatory and items 03 to 06 are optional**,
+and asks teams to submit as soon as possible (deadline unchanged: 20 October, Beijing time). Send all six anyway:
+the optional ones are the evidence behind the scores.
+
 | # | Deliverable | Required | Where it is in this repository | Still yours |
 |---|-------------|----------|--------------------------------|-------------|
-| 01 | **Technical documentation**: system architecture, core algorithm description, security design | Yes | `docs/TECHNICAL_DOCUMENTATION.md` (links `docs/SECURITY.md`) | Export to PDF if you want one file |
-| 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Confirm the retained original team attribution and private-fork link; rehearse to 10 minutes |
-| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | `submission/StudyRoute_Demo.mp4` and captions (actual repaired local UI/API, about 95 seconds); script in `submission/VIDEO_SCRIPT.md` | Watch it; add narration or a longer financial workflow if useful |
-| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Safely update the existing fork** using `GITHUB_PUSH_BN.md`; add the accessible link to the e-mail |
-| 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Yes | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
-| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | Watch the included demo (03); verify the evidence scope |
+| 01 | **Technical documentation**: system architecture, core algorithm description, security design | **Yes (mandatory)** | **`submission/StudyRoute_Technical_Documentation.pdf`** (12 pages, one file, made from `docs/TECHNICAL_DOCUMENTATION.md`) | Open it once and read it; attach it |
+| 02 | **Presentation deck**, final presentation no longer than 10 minutes | **Yes (mandatory)** | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Confirm the retained original team attribution and private-fork link; rehearse to 10 minutes |
+| 03 | **Demo video**, no longer than 5 minutes | Optional (the evidence item asks for it) | `submission/StudyRoute_Demo.mp4` and captions (actual repaired local UI/API, about 95 seconds); script in `submission/VIDEO_SCRIPT.md` | Watch it; add narration or a longer financial workflow if useful |
+| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Optional | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Safely update the existing fork** using `GITHUB_PUSH_BN.md`; add the accessible link to the e-mail |
+| 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Optional | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
+| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Optional | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | Watch the included demo (03); verify the evidence scope |
 
 Scoring (all topics): **task completion 40%, security and compliance 30%, innovation and
 interaction 30%**. Topic C is described as real financial pain points of international students and
