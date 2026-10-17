@@ -251,6 +251,43 @@ function problem(route: Route, status: number, code: string, detail: string): Pr
   );
 }
 
+const CHECKLIST = {
+  country: "GB",
+  purpose: "TUITION",
+  items: [
+    {
+      key: "offer_letter",
+      label: "Offer or admission letter",
+      hint: "From the university, showing the course and start date.",
+      provided: true,
+    },
+    {
+      key: "passport",
+      label: "Student passport (bio page)",
+      hint: "Use a mock file in this sandbox. Never upload a real passport.",
+      provided: false,
+    },
+  ],
+  verified: false,
+  source_url: "https://example.org/replace-with-ad-bank-checklist",
+  last_checked: "2026-10-13",
+  note: null,
+  indicative: "Indicative. Confirm with your AD bank.",
+};
+
+/** A file name with no spaces, as long as the form allows: the page must still fit the screen. */
+const LONG_NAMED_DOCUMENT = {
+  document_id: "doc_1",
+  kind: "offer_letter",
+  filename: `offer-letter-${"x".repeat(100)}.txt`,
+  payment_id: null,
+  size_bytes: 42,
+  has_content: true,
+  content_preview: "y".repeat(120),
+  created_at: "2026-10-14T09:00:00Z",
+  mock: true,
+};
+
 function payments(cancelled: boolean) {
   const created = new Date(Date.now() - 2 * 86_400_000).toISOString();
   const base = {
@@ -328,6 +365,8 @@ export async function mockApi(page: Page): Promise<void> {
     if (path === "/rates/history") return json(route, RATES);
     if (path === "/quotes" && method === "POST") return json(route, QUOTE, 201);
     if (path === "/quotes/qte_1/stress") return json(route, STRESS);
+    if (path === "/checklist") return json(route, CHECKLIST);
+    if (path === "/documents") return json(route, { items: [LONG_NAMED_DOCUMENT] });
     return problem(route, 500, "NOT_MOCKED", `${method} ${path} is not mocked.`);
   });
 }

@@ -72,13 +72,28 @@ test("the session survives a reload without asking for the password again", asyn
   await expect(page.getByRole("heading", { name: "Hello, Demo Parent" })).toBeVisible();
 });
 
+// Measured against the device width, not window.innerWidth: a phone zooms out to fit wide content,
+// which makes innerWidth grow with the page and hides the very problem this looks for.
+async function scrollsSideways(page: import("@playwright/test").Page): Promise<boolean> {
+  const width = page.viewportSize()?.width ?? 0;
+  const content = await page.evaluate(() => document.documentElement.scrollWidth);
+  return content > width + 1;
+}
+
 test("the page never scrolls sideways", async ({ page }) => {
   await signIn(page);
   await expect(page.getByRole("region", { name: "Living-cost runway" })).toBeVisible();
-  const sideways = await page.evaluate(
-    () => document.documentElement.scrollWidth > window.innerWidth + 1,
-  );
-  expect(sideways).toBe(false);
+  // The recent-payments table has loaded, so it is part of what is measured.
+  await expect(page.getByRole("cell", { name: /INV-1/ })).toBeVisible();
+  expect(await scrollsSideways(page)).toBe(false);
+});
+
+test("documents: a long file name wraps instead of widening the page", async ({ page }) => {
+  await signIn(page);
+  await page.goto("/documents/");
+  await expect(page.getByRole("heading", { name: "Documents" })).toBeVisible();
+  await expect(page.getByText(/^offer-letter-x{100}\.txt$/)).toBeVisible();
+  expect(await scrollsSideways(page)).toBe(false);
 });
 
 test("a person who is not signed in is sent to the sign-in page", async ({ page }) => {

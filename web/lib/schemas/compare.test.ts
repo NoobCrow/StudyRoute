@@ -60,7 +60,7 @@ describe("quoteRequestSchema", () => {
 
   it("rejects a purpose, charge code or country it does not know", () => {
     expect(problems({ purpose: "GIFT" as never }).length).toBeGreaterThan(0);
-    expect(problems({ charge: "XXX" as never }).length).toBeGreaterThan(0);
+    expect(problems({ charge: "ABC" as never }).length).toBeGreaterThan(0);
     expect(problems({ country: "gb" })[0]).toBe("Choose a destination country.");
   });
 });
