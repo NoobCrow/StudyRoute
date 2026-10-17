@@ -69,8 +69,9 @@ TeamEkxin
 **To:** wangyr@pbcsf.tsinghua.edu.cn
 **Subject:** `TeamEkxin - International Track - Topic C - Final submission` (use the organisers'
 format if the rules or the form give one).
-**Attach:** the two mandatory items (the PDF and the deck, about 2 MB together). **Link:** the optional ones
-(the archive is 81 MB: send the GitHub link instead). The organiser's e-mail of 15 October asks for submissions as soon as
+**Attach:** the two mandatory items and the small optional ones: the files in `dist/send/` (about 3 MB in all;
+rebuild them as `submission/README_SEND.md` says). **Link:** the demo video and the source (the archive is 82 MB:
+send the GitHub link instead). The organiser's e-mail of 15 October asks for submissions as soon as
 possible, so do not wait for the deadline.
 
 ```
@@ -92,9 +93,10 @@ Optional:
    GitHub: https://github.com/NoobCrow/StudyRoute
    Start: docker compose up --build, then http://localhost:8080
 5. Security self-assessment report (permission tiers and known-risk list):
-   docs/SECURITY_SELF_ASSESSMENT.md in the repository, or [file or link]
-6. Execution evidence (sandbox operation logs, audit log and verification, demo video):
-   in the repository under submission/evidence/.
+   StudyRoute_Security_Self_Assessment.pdf (attached)
+6. Execution evidence (sandbox operation logs, audit log and verification, security test results,
+   Docker run): StudyRoute_Execution_Evidence_Summary.pdf and StudyRoute_Execution_Evidence.zip (attached);
+   also in the repository under submission/evidence/.
 
 Demo accounts and the one-command start are described in the README.
 
