@@ -329,6 +329,11 @@ class Orchestrator:
         template = responder.answer(intent)
         if self._llm is None:
             return self._from_template(template, chat, "passed", None, 0, flags)
+        task = responder.task
+        if getattr(self._llm, "wants_draft", False) and task is not None and task.status != "ready":
+            # A question or a read-back is shown word for word: the person answers exactly what was
+            # asked, and the explainer was trained on answers, not on questions.
+            return self._from_template(template, chat, "passed", None, 0, flags)
         failure, retries = "", 0
         if getattr(self._llm, "wants_draft", False):
             # A model that rewrites the engine's answer is handed that answer, masked like the rest.

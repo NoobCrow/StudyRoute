@@ -172,3 +172,13 @@ def test_a_draft_too_long_for_the_model_is_not_run_at_all() -> None:
         client.complete(system="", user=prompt_with(long_draft))
     assert caught.value.code == "REWRITE_REJECTED" and "DRAFT_TOO_LONG" in caught.value.detail
     assert model.calls == 0  # the engine's own answer is shown at once
+
+
+def test_a_question_to_the_person_is_shown_word_for_word(world: World) -> None:
+    """Found by the Docker run: the explainer turned the send-plan read-back into nonsense."""
+    model = attach(world, "faithful")
+    body = ask(world, "I need to pay tuition")
+    assert body["task"]["status"] == "needs_input"
+    assert model.calls == 0, "the explainer is not asked to reword a question"
+    assert body["mode"] == "template" and body["guard"]["status"] == "passed"
+    assert not body["reply"].startswith("Here is the short answer.")

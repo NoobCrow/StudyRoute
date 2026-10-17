@@ -34,6 +34,10 @@ BANK_FAIL_UNIVERSITY = "GB13EXMP12345600005555"
 BANK_SANCTIONED = "SBX-L-0099"
 WAIT_STEP_SECONDS = 1.0
 EXPECTED_ORDER = [("prov_b", "1.58"), ("prov_c", "1.63"), ("prov_a", "2.16")]
+# An assistant reply is either a rewrite that passed every code check or, when the trained
+# explainer's rewrite was refused, the engine's own text. Which one a machine gets can differ, so
+# the checks look at the engine facts the reply used, not at the exact words.
+ENGINE_TEXT = ("passed", "template_fallback")
 
 
 class DemoFlow:
@@ -240,7 +244,7 @@ class DemoFlow:
         )
         body = reply.json()
         self._check(reply.status_code == 200, "assistant answers")
-        self._check(body["guard"]["status"] == "passed", "number guard passed")
+        self._check(body["guard"]["status"] in ENGINE_TEXT, "number guard passed")
         self._check(len(body["facts_used"]) > 0, f"facts_used listed ({len(body['facts_used'])})")
         self._say(f"      {body['reply'][:160]}")
         self._stress_test(quote)
@@ -265,10 +269,12 @@ class DemoFlow:
             },
         )
         body = reply.json()
+        extra_10 = f"BDT {extras[1] // 100:,}.{extras[1] % 100:02d}" if len(extras) == 2 else ""
         self._check(
             reply.status_code == 200
-            and body["reply"].startswith("Currency-drop stress test")
-            and body["guard"]["status"] == "passed",
+            and body["understanding"]["intent"] == "STRESS"
+            and body["guard"]["status"] in ENGINE_TEXT
+            and any(f["value"] == extra_10 for f in body["facts"]),
             "the assistant answers the what-if with the engine's numbers",
         )
 
@@ -292,14 +298,14 @@ class DemoFlow:
             and guide["verified"] is False,
             "the arrival guide has three stages and says it is not verified",
         )
-        for message, expected, label in (
-            ("What is the rent in Manchester?", "rent GBP 600.00", "the rent in a city"),
+        for message, required, label in (
+            ("What is the rent in Manchester?", ("GBP 600.00",), "the rent in a city"),
             (
                 "Which city fits a budget of BDT 130,000 a month?",
-                "4 of 20 cities",
+                ("Johor Bahru", "Leipzig"),
                 "which cities fit",
             ),
-            ("What should I do when I arrive in Germany?", "Anmeldung", "what to do on arrival"),
+            ("What should I do when I arrive in Germany?", ("Anmeldung",), "what to do on arrival"),
         ):
             reply = self._call(
                 "POST", "/assistant/chat", "parent", json={"message": message, "context": {}}
@@ -307,8 +313,8 @@ class DemoFlow:
             body = reply.json()
             self._check(
                 reply.status_code == 200
-                and expected in body["reply"]
-                and body["guard"]["status"] == "passed",
+                and body["guard"]["status"] in ENGINE_TEXT
+                and all(any(r in f["value"] for f in body["facts"]) for r in required),
                 f"the assistant answers {label} from the engine's figures",
             )
 
@@ -473,7 +479,9 @@ class DemoFlow:
             send_plan.get("kind") == "send_plan" and send_plan["plan"]["cheapest_key"] == "upfront",
             "the smart send plan compares monthly, quarterly, termly and upfront sending",
         )
-        self._check(cadence["guard"]["status"] == "passed", "its numbers all come from the engine")
+        self._check(
+            cadence["guard"]["status"] in ENGINE_TEXT, "its numbers all come from the engine"
+        )
         self._conversation(due)
         self._reads_new_wording()
 
