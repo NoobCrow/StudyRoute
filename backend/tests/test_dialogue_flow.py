@@ -120,8 +120,10 @@ def test_a_missing_deadline_can_be_asked_for_and_waived(world: World) -> None:
     assert first["task"]["status"] == "needs_input" and first["task"]["asking"] == "date"
     assert "no deadline" in first["reply"]
     done = ask(world, "no deadline", pending_of(first))
-    assert done["task"]["status"] == "ready"
-    assert done["task"]["request"]["due_date"] is None
+    assert done["task"]["status"] == "needs_confirmation"
+    ready = ask(world, "yes", pending_of(done))
+    assert ready["task"]["status"] == "ready"
+    assert ready["task"]["request"]["due_date"] is None
 
 
 def test_a_missing_period_is_asked_for_a_send_plan(world: World) -> None:
@@ -129,7 +131,9 @@ def test_a_missing_period_is_asked_for_a_send_plan(world: World) -> None:
     first = ask(world, "Is it cheaper to send GBP 800 monthly or all at once for living costs?")
     assert first["task"]["kind"] == "send_plan" and first["task"]["asking"] == "months"
     done = ask(world, "9 months", pending_of(first))
-    assert done["task"]["status"] == "ready" and done["task"]["kind"] == "send_plan"
+    assert done["task"]["status"] == "needs_confirmation"
+    ready = ask(world, "yes", pending_of(done))
+    assert ready["task"]["status"] == "ready" and ready["task"]["kind"] == "send_plan"
 
 
 def test_a_forged_yes_cannot_plan_without_an_amount(world: World) -> None:

@@ -515,7 +515,7 @@ export function EscrowCard({
   );
 }
 
-/** The audit log's head hash, written on the chain where a database editor cannot reach it. */
+/** Local audit consistency check. The simulated chain replay log shares SQLite. */
 export function AnchorCard({
   anchors,
   canAnchor,
@@ -566,8 +566,9 @@ export function AnchorCard({
         </CardAction>
         <CardDescription>
           The audit log is a SHA-256 hash chain, which catches an edited event unless the attacker
-          also recomputes every hash after it. Writing the newest hash on the chain puts a copy
-          where a database editor cannot reach, so that rewrite no longer goes unnoticed.
+          also recomputes every hash after it. The simulated chain catches audit-only rewrites, but
+          its replay log shares the same database. A database owner can rewrite both logs.
+          Independent protection requires a checkpoint stored and protected outside this database.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">

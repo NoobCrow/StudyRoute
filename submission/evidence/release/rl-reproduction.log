@@ -1,0 +1,6 @@
+random legal action                                        +1.236  wrong 2.2%  turns 1.07
+before: plan as soon as the amount is known                +1.164  wrong 2.8%  turns 0.44
+confirm every time (skip the optional date)                +1.178  wrong 1.4%  turns 1.01
+ask for everything, confirm every time                     +1.343  wrong 0.0%  turns 1.97
+best hand-written rule (tau 0.999, ask date True, extra-am +1.343  wrong 0.0%  turns 1.97
+RL model (raw, before runtime review)                      +1.358  wrong 0.8%  turns 1.17

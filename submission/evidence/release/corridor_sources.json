@@ -1,0 +1,34 @@
+{
+  "review_date": "2026-10-17",
+  "corridor": "BDT -> GBP tuition",
+  "status": "partial_documentary_validation_only",
+  "sources": [
+    {
+      "url": "https://www.mmu.ac.uk/student-life/finance/paying-university-fees",
+      "institution": "Manchester Metropolitan University",
+      "facts": [
+        "Only use the official Flywire payment method",
+        "Direct bank transfers no longer accepted"
+      ],
+      "runtime_enforcement": false
+    },
+    {
+      "url": "https://www.islamibankbd.com/upload_dir/charges/Comprehensive%20Schedule%20of%20Charge.pdf",
+      "rows": {
+        "student_file_opening_BDT": 3000,
+        "subsequent_transaction_BDT": 2000,
+        "noc_study_other_BDT": 500
+      },
+      "effective_date_verified": false,
+      "current_binding_quote": false,
+      "additional_remittance_charges": true
+    }
+  ],
+  "missing": [
+    "live timestamped FX quote",
+    "bank confirmation of applicable fees and VAT",
+    "MMU country-of-payer availability",
+    "institution route enforcement in product",
+    "real student usability validation"
+  ]
+}

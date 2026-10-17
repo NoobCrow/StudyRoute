@@ -16,7 +16,11 @@ with the help text), which is the kindest reading for the baseline.
 
 from __future__ import annotations
 
+import hashlib
 import json
+import platform
+from datetime import UTC, datetime
+from importlib.metadata import version
 import math
 import statistics
 import sys
@@ -210,6 +214,21 @@ def main() -> None:
               "model_sha256": manifest["files"]["model.onnx"],
               "latency_cpu": timing, "results": results,
               "data": {k: v["examples"] for k, v in manifest["dataset"]["splits"].items()}}  # fmt: skip
+    report["reproduction"] = {
+        "generated_utc": datetime.now(UTC).isoformat(),
+        "python": platform.python_version(),
+        "onnxruntime": version("onnxruntime"),
+        "numpy": version("numpy"),
+        "reference_date": TODAY.isoformat(),
+        "command": "python ml/evaluate.py",
+        "scope": "NLU routing and slot extraction, not end-to-end dialogue or financial authorization",
+        "source_sha256": {str(f.relative_to(ROOT)): hashlib.sha256(f.read_bytes()).hexdigest()
+            for f in sorted((ROOT / "backend/app/ai").rglob("*.py"))},
+        "dataset_sha256": {name: hashlib.sha256((ROOT / "ml/data/generated" / (name + ".jsonl.gz")).read_bytes()).hexdigest()
+            for name in SETS},
+        "evaluation_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "blind_status": "Frozen development holdout, now reproduced multiple times; NOT a new independent blind study.",
+    }
     evidence = ROOT / "submission" / "evidence"
     evidence.mkdir(exist_ok=True)
     (evidence / "ai_evaluation.json").write_text(
@@ -245,7 +264,7 @@ def render(report: dict, data: dict) -> str:
         "Every number below is measured on data the model never trained on and no threshold was "
         "tuned on, with one labelled exception: the hard set guided error analysis during "
         "development, so it is a diagnostic. The blind set was written after the model was frozen "
-        "and evaluated once. See [AI_AGENT.md](AI_AGENT.md) for the design, the dataset card and "
+        "and has now been re-evaluated for reproduction. It is not a fresh independent blind test. See [AI_AGENT.md](AI_AGENT.md) for the design, the dataset card and "
         "the limits.",
         "",
         "Systems: **rules** is the assistant's original regex reader plus its policy filter. "
@@ -259,7 +278,7 @@ def render(report: dict, data: dict) -> str:
     labels = {
         "test": "Test: new values in the training templates (easy, a sanity check)",
         "test_heldout": "Held-out templates: wording the model never saw",
-        "blind": "Blind set: hand-written after the model was frozen, evaluated once",
+        "blind": "Frozen hand-written holdout, now reproduced (not a new blind study)",
         "hard": "Hard set: hand-written, used for error analysis during development (a diagnostic)",
         "natural": "Natural questions: Banking77 test messages mapped to StudyRoute intents",
         "oos_public": "Out of scope: Banking77 test questions (card, ATM and account admin)",

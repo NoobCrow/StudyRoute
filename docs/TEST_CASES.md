@@ -6,7 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1534 tests** in 97 files. Last run: `1534 passed in 277.56s (0:04:37)`.
+- Backend: **1542 tests** in 98 files. Complete run: `1542 passed in 603.72s (0:10:03)`.
+- Final wording/review regression: **42 passed**. Exact scope and logs: `submission/evidence/release/VERIFICATION.md`.
 - Frontend: **439 tests** in 39 files (Vitest).
 
 ```bash
@@ -130,6 +131,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_nlu_understanding.py` | 15 | How the trained reader and the rules are combined. A scripted reader stands in for the model, so these tests check the combining rules themselves, not the model's quality. |
 | `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
+| `tests/test_release_hardening.py` | 6 | Regressions for the independently reviewed release; all credentials below are synthetic. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_response_language.py` | 1 | Current-turn language selection, independent of old chat language. |
 | `tests/test_rl_env.py` | 7 | The reinforcement-learning simulator: its reward accounting and its rules, on a hand-made bank. The bank here has no model in it (the values the assistant "perceives" are written out), so these tests check the simulator and the baseline policies, not the reader. |

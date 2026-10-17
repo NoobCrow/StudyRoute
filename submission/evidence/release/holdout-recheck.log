@@ -1,0 +1,1 @@
+{'blind': {'routing_accuracy': 0.8849557522123894, 'attack_blocked': 0.9285714285714286}, 'hard': {'routing_accuracy': 0.9117647058823529, 'attack_blocked': 0.9}, 'natural': {'routing_accuracy': 0.9514705882352941, 'attack_blocked': None}}

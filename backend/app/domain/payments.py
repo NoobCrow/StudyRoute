@@ -19,7 +19,7 @@ from app.core import errors
 from app.core.clock import Clock, iso_utc
 from app.core.crypto import hash_object
 from app.core.ids import new_id
-from app.domain import auth
+from app.domain import auth, institution_routes
 from app.domain.compliance import is_sanctions_hit, scenario_for
 from app.domain.constants import Decision, PaymentState
 from app.domain.kyc import KycService
@@ -177,7 +177,14 @@ class PaymentService:
             (not ctx.sanctions_clear, "SANCTIONS_HIT", "Recipient matched mock screening."),
             (ctx.limit_error is not None, "LIMIT_EXCEEDED", LIMIT_BLOCKER),
         ]  # fmt: skip
-        return [{"code": code, "message": msg} for failed, code, msg in checks if failed]
+        result = [{"code": code, "message": msg} for failed, code, msg in checks if failed]
+        quote = session.get(Quote, payment.quote_id)
+        recipient = session.get(Recipient, payment.recipient_id)
+        if quote and recipient and institution_routes.is_blocked(session, recipient, quote.purpose):
+            result.append(
+                {"code": "INSTITUTION_ROUTE_UNSUPPORTED", "message": institution_routes.MESSAGE}
+            )
+        return result
 
     # --- the one place a state changes ----------------------------------------------------
     def _apply(
@@ -289,6 +296,7 @@ class PaymentService:
             raise errors.ValidationFailed("The recipient is in a different country than the quote.")
         if quote.recipient_id and quote.recipient_id != recipient.id:
             raise errors.ValidationFailed("The quote was requested for a different recipient.")
+        self._recipients.enforce_route(session, actor, recipient, quote.purpose)
         reference = reference.strip()
         if not is_valid_swift_reference(reference):
             raise errors.ValidationFailed(
@@ -395,6 +403,11 @@ class PaymentService:
     def _run_guards(
         self, session: Session, payment: Payment, actor: Actor, event: Event, ctx: GuardContext
     ) -> None:
+        quote = session.get(Quote, payment.quote_id)
+        recipient = session.get(Recipient, payment.recipient_id)
+        if quote is None or recipient is None:
+            raise errors.InvalidState("The payment references missing data.")
+        self._recipients.enforce_route(session, actor, recipient, quote.purpose)
         try:
             check_guards(event, ctx)
         except errors.QuoteExpired:
@@ -570,6 +583,7 @@ class PaymentService:
         recipient = session.get(Recipient, payment.recipient_id)
         if quote is None or recipient is None:
             raise errors.InvalidState("The payment references missing data.")
+        self._recipients.enforce_route(session, SYSTEM_ACTOR, recipient, quote.purpose)
         now = self._clock.now()
         uetr = new_uetr()
         result = self.result_for(quote, payment.provider_id)

@@ -57,9 +57,10 @@ def test_a_question_about_one_provider_gives_its_breakdown(world: World) -> None
     assert "GBP 35.00" in body["reply"]
 
 
-def test_charge_codes_are_explained_and_our_is_recommended_for_tuition(world: World) -> None:
+def test_charge_codes_are_explained_without_guaranteeing_full_arrival(world: World) -> None:
     body = ask(world, "What do OUR, SHA and BEN mean?").json()
-    assert "recommend OUR" in body["reply"]
+    assert "For a tuition route that accepts it, consider OUR" in body["reply"]
+    assert "full arrival is not guaranteed" in body["reply"]
     assert body["guard"]["status"] == "passed"
 
 

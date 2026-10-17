@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(import.meta.dirname) } },
   test: {
     environment: "jsdom",
+    // Axe on the full dashboard can exceed five seconds on shared 2-core CI runners.
+    testTimeout: 15000,
+    maxWorkers: 2,
     globals: true,
     setupFiles: ["./tests/setup.ts"],
     css: false,

@@ -72,6 +72,7 @@ class QuoteService:
             recipient = self._recipients.get_owned(session, actor, req.recipient_id)
             if recipient.country != corridor.country:
                 raise errors.ValidationFailed("The recipient is in a different country.")
+            self._recipients.enforce_route(session, actor, recipient, req.purpose)
         now = self._clock.now()
         if req.due_date and not date(2000, 1, 1) < req.due_date < now.date() + timedelta(days=800):
             raise errors.ValidationFailed("The due date is out of range.")

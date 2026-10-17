@@ -136,7 +136,7 @@ read as a value is dropped, so the labels are never ahead of what the code can u
 | natural | 680 | real Banking77 test questions mapped to StudyRoute intents |
 | oos_public | 698 | real Banking77 test questions that are out of scope |
 | hard | 136 | hand-written; **used for error analysis during development**, so it is a diagnostic, not a clean test |
-| blind | 113 | hand-written **after the model, data and thresholds were frozen**; evaluated once |
+| blind | 113 | hand-written **after the model, data and thresholds were frozen**; now re-evaluated (not a new blind study) |
 
 A test checks that no test message is in the training data and that the shipped model records the
 hash of the exact data it was trained on (`backend/tests/test_ml_dataset.py`). One leak was found
@@ -152,7 +152,7 @@ The complete, generated report is [AI_EVALUATION.md](AI_EVALUATION.md); every nu
 **rules** (the old regular-expression reader plus the policy filter), **reader** (the model alone) and
 **agent** (what the product runs: the model, the deterministic checks, the thresholds and the filter).
 
-On the **blind set** (113 messages, evaluated once; at this size a result is good to about plus or
+On the **blind set** (113 messages, now re-evaluated (not a new blind study); at this size a result is good to about plus or
 minus 7 points):
 
 | | Rules | Agent |

@@ -57,7 +57,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 
 ## 9. A trained agent, measured
 - A small language model (bge-small-en-v1.5, fine-tuned on a GPU in a few minutes) reads what a parent types: the intent and the exact words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates.
-- On 113 messages written by hand after the model was frozen (scored once): right intent 88.5% against 61.1% for the old rules, a plan request read completely and exactly 100% against 57.6%, attacks blocked 92.9% against 28.6%. On real bank questions: 95% against 40%.
+- On 113 messages written by hand after the model was frozen (now reproduced; not a new blind study): right intent 88.5% against 61.1% for the old rules, a plan request read completely and exactly 100% against 57.6%, attacks blocked 92.9% against 28.6%. On real bank questions: 95% against 40%.
 - Reinforcement learning: a small policy trained with Double DQN decides when to ask, read back or plan. On simulated parents, wrong plans 0.8% against 2.8% for the old behaviour, 1.17 questions against 0.44. Plain code limits its legal moves; it never approves or moves money.
 - Honest limits on the slide: synthetic data, English, no real users, about plus or minus 7 points, about 1 attack in 14 still slips past it, and the simulated parents and rewards are our assumptions.
 - Numbers come from `ml/evaluate.py` (`docs/AI_EVALUATION.md`) and `ml/rl/evaluate_rl.py` (`docs/AI_RL_EVALUATION.md`); the designs are in `docs/AI_AGENT.md` and `docs/AI_RL.md`.

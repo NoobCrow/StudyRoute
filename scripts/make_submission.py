@@ -11,6 +11,7 @@ inside a Linux container.
 
 from __future__ import annotations
 
+import hashlib
 import sys
 import zipfile
 from pathlib import Path
@@ -32,9 +33,10 @@ def archive_members() -> list[Path]:
     files = []
     for path in scan_repo.tracked_files():
         relative = path.relative_to(ROOT)
-        if not path.is_file() or relative.parts[0] == "dist":
+        if not path.is_file() or scan_repo.excluded(path) or relative.parts[0] == "dist" or path.name == "RELEASE_MANIFEST.sha256":
             continue
-        if path.name in NEVER or path.suffix in {".db", ".pem", ".key"}:
+        if (path.name in NEVER or (path.name.startswith(".env.") and path.name != ".env.example")
+                or path.suffix.lower() in {".db", ".sqlite", ".sqlite3", ".pem", ".key", ".p12", ".pfx"}):
             continue
         files.append(path)
     return sorted(files)
@@ -71,8 +73,15 @@ def main(out: Path = OUT) -> int:
     members = archive_members()
     out.parent.mkdir(exist_ok=True)
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as archive:
+        checksums = []
         for path in members:
-            archive.writestr(member_info(path), archive_bytes(path))
+            data = archive_bytes(path)
+            archive.writestr(member_info(path), data)
+            checksums.append(f"{hashlib.sha256(data).hexdigest()}  {path.relative_to(ROOT).as_posix()}")
+        manifest = zipfile.ZipInfo(f"{TOP}/RELEASE_MANIFEST.sha256")
+        manifest.external_attr = MODE << 16
+        manifest.compress_type = zipfile.ZIP_DEFLATED
+        archive.writestr(manifest, "\n".join(checksums) + "\n")
     size_kb = out.stat().st_size // 1024
     shown = out.relative_to(ROOT) if out.is_relative_to(ROOT) else out
     print(f"Wrote {shown}: {len(members)} files, {size_kb} KB. Scan clean.")

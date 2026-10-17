@@ -1,0 +1,19 @@
+1
+00:00:00,000 --> 00:00:13,000
+Synthetic sandbox sign-in. No real money or real accounts.
+
+2
+00:00:13,000 --> 00:00:40,000
+Synthetic fee comparison. Verify university payment routes before costs.
+
+3
+00:00:40,000 --> 00:01:05,000
+The assistant reads back values. Human confirmation is required before planning.
+
+4
+00:01:05,000 --> 00:01:16,000
+An adversarial approval instruction is blocked by the actual API.
+
+5
+00:01:16,000 --> 00:01:35,000
+Local audit anchors share SQLite. A DB owner can rewrite both logs.

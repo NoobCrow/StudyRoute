@@ -18,7 +18,7 @@ from app.ai.arithmetic import calculate
 from app.ai.context import ChatContext, gather_context
 from app.ai.conversation import Route, route_message
 from app.ai.dialogue.bridge import build_state
-from app.ai.dialogue.policy import Choice, DialoguePolicy
+from app.ai.dialogue.policy import Choice, DialoguePolicy, reviewed_action
 from app.ai.dialogue.state import Action
 from app.ai.guards import GuardFailure, parse_llm_json, validate_llm_output
 from app.ai.intents import Intent, stress_drops
@@ -287,8 +287,8 @@ class Orchestrator:
     ) -> tuple[TaskResult, Choice | None]:
         """One assistant turn on a payment request: ask, read back, or plan.
 
-        With the dialogue policy the choice among those is learned (see docs/AI_RL.md); without it
-        the assistant plans as soon as the amount is known. Either way a plan is only a quote card:
+        With the dialogue policy choices are learned under a mandatory read-back safety envelope.
+        Without it the assistant plans as soon as the amount is known. A plan is only a quote card:
         the person creates the draft and a human approves it.
         """
         intent, parsed = understanding.intent, understanding.parsed
@@ -301,6 +301,9 @@ class Orchestrator:
         if understanding.rejected:
             return self._tasks.ask_change(intent, parsed, progress), None
         choice = self._policy.choose(state)
+        safe = reviewed_action(state, choice.action)
+        if safe != choice.action:
+            choice = Choice(safe, choice.q_values, choice.policy_id + "+review-v1", choice.sha256)
         if choice.action == Action.RUN:
             return self._tasks.run(ai, intent, parsed), choice
         if choice.action == Action.CONFIRM:

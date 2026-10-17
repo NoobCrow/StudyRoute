@@ -16,7 +16,9 @@ A parent paying tuition has three practical problems that a contract solves bett
 
 It also fixes a weakness in the audit log. A SHA-256 hash chain catches an edited event unless an
 attacker recomputes every later hash. The **AuditAnchor** contract keeps a copy of the newest hash
-outside the database, so that rewrite is caught.
+in the simulated EVM. Its replay history lives in the SAME SQLite database, so only an
+audit-only rewrite is caught; a coordinated rewrite of both logs can pass after restart.
+See [AUDIT_TRUST_BOUNDARY.md](AUDIT_TRUST_BOUNDARY.md) for the independently protected checkpoint workflow.
 
 ## 2. The pieces
 
@@ -97,7 +99,8 @@ The date passing does not matter; unfreezing lets the schedule catch up.
 /chain/verify` then compares the database with every anchor. It reports `MATCH`, `MISMATCH` or
 `MISSING_EVENT` for each, and `PASS`, `FAIL` or `NO_ANCHOR` overall. A test performs the attack
 that the hash chain alone cannot see (edit an event, recompute every hash after it): the chain check
-passes, the anchor check fails.
+passes, the anchor check fails. This assumes the attacker has NOT also rewritten `chain_log`.
+The coordinated-rewrite regression in `test_release_hardening.py` demonstrates this limitation.
 
 ## 5. How the in-memory chain stays correct
 

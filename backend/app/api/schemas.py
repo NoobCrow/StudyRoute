@@ -51,6 +51,7 @@ class RecipientIn(Strict):
     iban: StrictStr | None = Field(default=None, max_length=60)
     account_number: StrictStr | None = Field(default=None, max_length=60)
     routing_code: StrictStr | None = Field(default=None, max_length=20)
+    institution_id: StrictStr | None = Field(default=None, max_length=80)
 
 
 class RecipientPatchIn(Strict):

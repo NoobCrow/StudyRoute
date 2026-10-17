@@ -4,13 +4,17 @@
 
 All numbers are on the TEST goals of the simulator (goals never used for training or to pick a
 run). The shipped policy is the exported JSON, run through the same NumPy code the API uses, so
-what is measured is what ships. The simulator is an assumption, not a user study: read
+the raw model is measured separately from the mandatory runtime read-back envelope.
+These simulator metrics do not measure that envelope or real users. The simulator is an assumption, not a user study: read
 docs/AI_RL.md before trusting a number.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import platform
+from datetime import UTC, datetime
 import random
 import sys
 from collections import Counter, defaultdict
@@ -21,11 +25,9 @@ RUNS = ROOT / "ml" / "runs" / "rl"
 sys.path[:0] = [str(ROOT / "ml" / "rl"), str(ROOT / "backend")]
 
 import policies as P  # noqa: E402
-import torch  # noqa: E402
 from app.ai.dialogue.policy import DialoguePolicy  # noqa: E402
 from app.ai.dialogue.state import legal_actions  # noqa: E402
 from env import DialogueEnv, Rewards, load_bank, split_bank  # noqa: E402
-from train_dqn import build_net, greedy  # noqa: E402
 
 
 def shipped(policy: DialoguePolicy) -> P.Policy:
@@ -33,6 +35,9 @@ def shipped(policy: DialoguePolicy) -> P.Policy:
 
 
 def net_policy(name: str) -> P.Policy:
+    import torch
+    from train_dqn import build_net, greedy
+
     net = build_net()
     net.load_state_dict(torch.load(RUNS / name / "best.pt", map_location="cpu"))
     return greedy(net, torch.device("cpu"))
@@ -100,7 +105,7 @@ def main() -> None:
         "confirm every time (skip the optional date)": P.confirm_always,
         "ask for everything, confirm every time": P.ask_everything,
         f"best hand-written rule ({rule_name})": rule,
-        "RL policy (shipped)": shipped(policy_file),
+        "RL model (raw, before runtime review)": shipped(policy_file),
     }
     results = {
         name: P.evaluate(pol, test, rewards, episodes, seed=21) for name, pol in candidates.items()
@@ -129,6 +134,13 @@ def main() -> None:
     curves = {n: json.loads((RUNS / n / "curve.json").read_text("utf-8")) for n in seeds}
 
     report = {
+        "reproduction": {
+            "generated_utc": datetime.now(UTC).isoformat(), "python": platform.python_version(),
+            "command": "python ml/rl/evaluate_rl.py", "seed": 21,
+            "scope": "Raw learned policy in synthetic simulator; excludes API mandatory read-back envelope.",
+            "bank_sha256": hashlib.sha256((ROOT / "ml/rl/bank/bank.jsonl.gz").read_bytes()).hexdigest(),
+            "evaluation_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        },
         "policy_id": policy_file.policy_id,
         "policy_sha256": policy_file.sha256,
         "episodes_per_policy": episodes,
@@ -184,6 +196,9 @@ def main() -> None:
         "personalities each). Return = the reward the policy was trained on: +1 for a correct plan, "
         "+0.5 for a correct deadline or period, -2 for a wrong amount, -1 for a wrong deadline or period, "
         "-0.05 for every question asked, -0.5 if the parent gives up. 95% bootstrap intervals.",
+        "",
+        "The table measures the raw learned model, NOT the API mandatory read-back safety envelope.",
+        "No real-user study has measured that envelope.",
         "",
         "## Policies compared",
         "",

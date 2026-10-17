@@ -1,0 +1,488 @@
+
+> studyroute-web version 1.0.0 test
+> vitest run
+
+
+ RUN  v5.0.3 /data/StudyRoute-release/web
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the signed-in frame: skip link, sidebar, top bar and page
+An update to ForwardRef(LinkComponent) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | tests/a11y.test.tsx > accessibility (axe) > the dashboard with every card
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+ ✓ components/payment/payments-list.test.tsx (26 tests) 11343ms
+   ✓ payments list: states (5)
+     ✓ shows the empty state with the design's words, zero counts and a disabled Export 743ms
+     ✓ shows a different empty state, with Clear filters, when nothing matches 1407ms
+   ✓ payments list: rows and counts (9)
+     ✓ uses the default Last 30 days, so a payment from August is not listed 400ms
+     ✓ switches tabs, keeps the count words and writes the status into the address 324ms
+     ✓ searches reference and recipient after a short pause 1189ms
+     ✓ includes older payments when the range is All time 630ms
+     ✓ narrows to the last 7 days 472ms
+   ✓ payments list: sorting and pages (2)
+     ✓ sorts by a column, says so with aria-sort, and reverses on a second press 598ms
+     ✓ pages through a long list ten at a time, and writes the page into the address 638ms
+   ✓ payments list: opening one (3)
+     ✓ opens the detail sheet from a click and from Enter, and links to the full page 561ms
+   ✓ cancelling a payment (5)
+     ✓ asks first, cancels with an Idempotency-Key, and the counts update 450ms
+     ✓ lets the person keep the payment 540ms
+     ✓ shows the server's reason inside the dialog when the payment cannot be cancelled 400ms
+     ✓ offers Cancel only where the server allows it 475ms
+   ✓ export (2)
+     ✓ downloads the rows on screen as CSV, nothing more 328ms
+ ✓ tests/a11y.test.tsx (24 tests) 18061ms
+   ✓ accessibility (axe) (15)
+     ✓ the signed-in frame: skip link, sidebar, top bar and page 690ms
+     ✓ the dashboard with every card 4671ms
+     ✓ the compare screen before any quote: form, charge code cards, summary and the empty quotes card 773ms
+     ✓ the due date calendar opened from the compare form 709ms
+     ✓ the compare screen with results, the stress test and the breakdown sheet 1053ms
+     ✓ the recipients screen with a list and the add form 473ms
+     ✓ the MFA dialog with its six boxes, and the remove confirmation 481ms
+     ✓ the compliance report 338ms
+     ✓ the assistant chat showing a plan card 405ms
+   ✓ accessibility (axe): bank network (1)
+     ✓ the bank network screen with accounts, a form, an open transfer and the books 647ms
+   ✓ accessibility (axe): smart escrow (2)
+     ✓ the escrow screen with a plan form, a live escrow, a frozen one, anchors and the chain 663ms
+     ✓ the reviewer's view with the freeze form, the clock and the verdict 402ms
+   ✓ accessibility (axe): payments list (3)
+     ✓ the empty list with its tabs, filters, pager and the three steps 371ms
+     ✓ a list with rows, then the detail sheet, the cancel dialog and the date range menu 2491ms
+     ✓ the no-match state 1062ms
+   ✓ accessibility (axe): student guide (3)
+     ✓ the budget tab with the form, the table, the fit badges and the city sheet 580ms
+     ✓ the budget tab with no budget, and with an invalid one 559ms
+     ✓ the arrival checklist with ticked steps and the general-list notice 384ms
+ ✓ components/recipients/recipients-screen.test.tsx (25 tests) 8535ms
+   ✓ recipients list (8)
+     ✓ T23: a script tag in a recipient name is shown as plain text and never runs 688ms
+     ✓ shows the counts, the masked account and the allowlist state as the design has them 385ms
+   ✓ allowlist with MFA (5)
+     ✓ asks for the six-digit code first, then allowlists with the proof, and the badge changes in place 405ms
+     ✓ does not allowlist when the code is wrong 546ms
+     ✓ gives focus back to the Allowlist button when the dialog is cancelled 377ms
+     ✓ removes a recipient from the allowlist only after a confirmation and an MFA code 368ms
+   ✓ add a recipient (9)
+     ✓ keeps Save disabled until every field is valid 618ms
+     ✓ requires the IBAN, and checks its digits as the person types 830ms
+     ✓ sends the BIC upper-cased and the IBAN without spaces, then confirms and reloads the list 690ms
+     ✓ shows the server's reason and keeps what was typed when saving fails 554ms
+     ✓ never writes an account number to storage or the address 535ms
+   ✓ account format (3)
+     ✓ sends the sort code as the routing code, digits only 482ms
+ ✓ components/compare/compare-screen.test.tsx (20 tests) 6466ms
+   ✓ compare screen: the request (8)
+     ✓ is laid out as the design: form, charge code cards, summary and an empty quotes card 570ms
+     ✓ refuses characters that cannot be part of an amount 540ms
+     ✓ explains a bad amount on blur, keeps Get quotes disabled and sends nothing 475ms
+     ✓ updates the summary as the form changes, and takes the send date from the engine 558ms
+   ✓ compare screen: the address (3)
+     ✓ writes the form into the address once the person changes it, so it can be shared 315ms
+   ✓ compare screen: the quotes (9)
+     ✓ moves focus to the results heading 336ms
+     ✓ lets a student compare and read the breakdown but not start a payment 411ms
+     ✓ starts a payment from a row: that provider is chosen for the draft 486ms
+stderr | components/assistant/assistant.test.tsx > assistant chat > offers the what-if question among the suggestions
+An update to AssistantProvider inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ components/assistant/assistant.test.tsx (14 tests) 2759ms
+   ✓ assistant chat (11)
+     ✓ sends bounded previous user questions for contextual follow-ups, not assistant answers 1156ms
+stderr | components/dashboard/dashboard-cards.test.tsx > SendPlanCard > asks the engine in minor units with the charge code
+An update to SendPlanCard inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > shows the hint in words with the numbers behind it, and says it is synthetic
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > puts the values in a table for anyone who cannot read the chart
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > raises an alert when today's rate is at or below the target, and remembers it in this browser
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > brings back a saved alert for that currency
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+stderr | components/dashboard/dashboard-cards.test.tsx > RateCard > rejects a target that is not a number
+The width(0) and height(0) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width.
+
+ ✓ components/dashboard/dashboard-cards.test.tsx (25 tests) 2630ms
+   ✓ PlannerCard (deadline) (5)
+     ✓ shows the engine's dates and the status, and does not work out a date itself 439ms
+ ✓ components/assistant/cloud-settings.test.tsx (10 tests) 2455ms
+   ✓ saved cloud connection (8)
+     ✓ requires consent, saves explicitly and never puts keys in chat or browser storage 786ms
+     ✓ restores saved metadata after remount without re-entering or retrieving a key 343ms
+     ✓ removes the server key while preserving the conversation 356ms
+ ✓ components/guide/guide-screen.test.tsx (16 tests) 4326ms
+   ✓ student guide: the budget (11)
+     ✓ asks for every city with the default budget and lists them cheapest first 410ms
+     ✓ asks again, in taka, 300 ms after the budget is typed 587ms
+     ✓ refuses a budget with too many decimals instead of asking for it 674ms
+     ✓ lists every city without judging them when the budget is cleared 441ms
+     ✓ asks for a studio when the kind of housing is changed 321ms
+stderr | components/compare/compare-components.test.tsx > ChargeCodeCards > chooses a card by click and by the arrow keys
+An update to ForwardRef(RovingFocusGroupImpl) inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ components/compare/compare-components.test.tsx (24 tests) 1558ms
+ ✓ components/guide/guide-slider.test.tsx (5 tests) 2359ms
+   ✓ student guide: the budget slider (5)
+     ✓ has a name for screen readers and starts at the typed budget 584ms
+     ✓ moves with the amount that is typed 463ms
+     ✓ fills the amount box when dragged and asks for that budget in taka 448ms
+     ✓ clears the budget at the left end, so every city is listed without judging 467ms
+     ✓ stays at its end when the typed budget is bigger than it can show 380ms
+ ✓ components/documents/documents-screen.test.tsx (17 tests) 3931ms
+   ✓ documents: the checklist (8)
+     ✓ shows what the bank may ask for, with the badges, the percentage and the nine rows 562ms
+     ✓ shows the indicative line once, and the rule's own note only when it says something else 306ms
+   ✓ documents: adding and listing (9)
+     ✓ adds a document with its text, then shows it in the list and reloads the checklist 581ms
+     ✓ explains an empty file name on blur and sends nothing 305ms
+ ✓ components/compare/draft-form.test.tsx (13 tests) 2662ms
+   ✓ the draft form: choosing who gets the money (5)
+     ✓ preselects the one recipient that can be paid when the others are not allowlisted yet 343ms
+     ✓ never replaces a recipient the person chose themselves 417ms
+ ✓ components/payment/mfa-dialog.test.tsx (10 tests) 1335ms
+ ✓ app/login/login-page.test.tsx (7 tests) 1199ms
+   ✓ sign-in page (7)
+     ✓ signs in and goes to the dashboard 348ms
+ ✓ components/payment/payment-screen.test.tsx (6 tests) 1056ms
+   ✓ payment screen (6)
+     ✓ T07: Request approval is disabled and explains why while KYC is not verified 497ms
+ ✓ components/payment/report-screen.test.tsx (6 tests) 702ms
+   ✓ compliance report screen (6)
+     ✓ shows the parties, the controls with their results and the audit trail 348ms
+ ✓ components/providers/auth-provider.test.tsx (8 tests) 404ms
+ ✓ components/layout/theme-menu.test.tsx (1 test) 411ms
+   ✓ ThemeMenu (1)
+     ✓ cross-fades the colours for a moment when the theme changes, then stops 408ms
+ ✓ components/app/app-basics.test.tsx (12 tests) 288ms
+ ✓ components/app/copy-button.test.tsx (2 tests) 289ms
+ ✓ components/compare/cost-bars.test.tsx (4 tests) 259ms
+ ✓ lib/lib.test.ts (23 tests) 32ms
+ ✓ lib/api/client.test.ts (9 tests) 75ms
+ ✓ lib/canonical.test.ts (4 tests) 9ms
+ ✓ lib/domain/payments.test.ts (24 tests) 130ms
+ ✓ lib/schemas/recipient.test.ts (7 tests) 19ms
+ ✓ lib/schemas/compare.test.ts (13 tests) 22ms
+ ✓ lib/domain/calendar-strip.test.ts (6 tests) 22ms
+ ✓ lib/schemas/schemas.test.ts (8 tests) 14ms
+ ✓ lib/corridors.test.ts (8 tests) 22ms
+ ✓ lib/domain/documents.test.ts (7 tests) 10ms
+ ✓ lib/domain/arrival-ticks.test.ts (6 tests) 12ms
+ ✓ components/layout/nav.test.ts (4 tests) 9ms
+ ✓ lib/schemas/payments-params.test.ts (8 tests) 14ms
+ ✓ tests/motion-css.test.ts (5 tests) 10ms
+ ✓ lib/domain/charge-code.test.ts (6 tests) 9ms
+ ✓ lib/domain/recipient-validation.test.ts (13 tests) 22ms
+ ✓ lib/schemas/guide-params.test.ts (8 tests) 14ms
+ ✓ lib/links.test.ts (5 tests) 8ms
+
+ Test Files  39 passed (39)
+      Tests  439 passed (439)
+   Start at  18:17:48
+   Duration  85.87s (tests 45%, import 26%, environment 23%, setup 3%, transform 2%)
+
+     Import  198 modules were evaluated 740 times · 43.13s total, 26% of tracked time
+             ~12.07s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+

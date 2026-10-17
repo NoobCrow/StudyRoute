@@ -284,13 +284,13 @@ slides.push({
 const proven = [
   `Every number comes from one engine, in integer money. ${F.backendTests} backend tests cover all ${F.scenarios} scenarios.`,
   "Only a human with a fresh MFA code can approve. The AI has no such permission, and a test enforces the table.",
-  "Edit one audit row and Verify fails at that event. A rewritten chain is caught by the anchor.",
-  "The whole stack starts from the zipped archive with docker compose, run for real on 15 and 17 October.",
+  "Edit one audit row and Verify fails at that event. Audit-only rewrites are detected; both logs share SQLite, so a DB owner can rewrite both.",
+  "Fresh local API/UI checks are in release evidence; Docker logs are inherited, not rerun for this repair.",
 ];
 const notProven = [
   "Rates, fees and city costs are invented. We have not compared them with real quotes yet.",
   "No real parent has used it. The trained models saw synthetic data.",
-  "No outside security review or penetration test.",
+  "Local code review and regression tests; no external penetration test.",
   "Bangladesh Bank limits are placeholders, marked Not verified.",
 ];
 slides.push({
@@ -299,7 +299,7 @@ slides.push({
     "Before the details, here is what we have shown and what we have not. " +
     `What we have shown: every number comes from one deterministic engine, with ${F.backendTests} backend tests covering all ${F.scenarios} scenarios. Only a human with a fresh MFA code can approve, and the AI has no such permission. ` +
     "Change one audit row and Verify fails at that event. And the stack starts from the zipped archive with one command. " +
-    "What we have not shown: the rates, fees and city costs are invented, and we have not yet compared them with real quotes. No real parent has used it. No outsider has reviewed its security. The Bangladesh Bank limits are placeholders, marked Not verified. " +
+    "What we have not shown: the rates, fees and city costs are invented, and we have not yet compared them with real quotes. No real parent has used it. A local review found trust-boundary limits; no external penetration test was run. The Bangladesh Bank limits are placeholders, marked Not verified. " +
     "Both lists are in the repository, because we would rather you hear the limits from us.",
   elements: [
     card(0.5, 1.35, 4.4, 3.45),
@@ -358,10 +358,10 @@ slides.push({
 const blind = { rules: AI.results.rules.blind, agent: AI.results.agent.blind };
 const pc = (v) => `${(100 * v).toFixed(1).replace(/\.0$/, "")}%`;
 const rlBefore = RL.results["before: plan as soon as the amount is known"];
-const rlLearned = RL.results["RL policy (shipped)"];
+const rlLearned = RL.results["RL model (raw, before runtime review)"];
 const trained = [
   ["What it does", `Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates. A GPU run of a few minutes on ${AI.data.train.toLocaleString("en-US")} messages; ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
-  ["Reinforcement learning", `A policy trained by Double DQN decides when to ask, read back or plan. On simulated parents: wrong plans ${pc(rlLearned.wrong_plan)} against ${pc(rlBefore.wrong_plan)}, ${rlLearned.turns.toFixed(2)} questions against ${rlBefore.turns.toFixed(2)}. Code limits its legal moves.`],
+  ["Reinforcement learning", `A policy trained by Double DQN decides when to ask, read back or plan. On simulated parents: wrong plans ${pc(rlLearned.wrong_plan)} against ${pc(rlBefore.wrong_plan)}, ${rlLearned.turns.toFixed(2)} questions against ${rlBefore.turns.toFixed(2)}. Raw simulator only; the API now adds mandatory clarification and read-back.`],
   ["Honest limits", "Synthetic data, English, no real users yet. The simulated parents and rewards are our assumptions. About 1 attack in 14 still slips past; permissions and MFA remain the real defence."],
 ];
 slides.push({
@@ -370,12 +370,12 @@ slides.push({
     "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values, and when the old rules and the model disagree, the assistant asks. " +
     `On messages we wrote by hand after the model was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, ` +
     `read a plan request exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
-    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. Plain code limits its legal moves, and the parents are our assumption.`,
+    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. The API adds mandatory review not measured here; the simulated parents are assumptions.`,
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,
       rows: [
-        ["On 113 new messages", "Rules", "Agent"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" })),
+        ["On 113 frozen messages", "Rules", "Agent"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" })),
         [{ text: "Right intent", fill: "background2" }, { text: pc(blind.rules.routing_accuracy), fill: "background2" }, { text: pc(blind.agent.routing_accuracy), bold: true, color: "accent1", fill: "background2" }],
         [{ text: "Plan read exactly" }, { text: pc(blind.rules.task_success) }, { text: pc(blind.agent.task_success), bold: true, color: "accent1" }],
         [{ text: "Attacks blocked", fill: "background2" }, { text: pc(blind.rules.attack_blocked), fill: "background2" }, { text: pc(blind.agent.attack_blocked), bold: true, color: "accent1", fill: "background2" }],
@@ -383,7 +383,7 @@ slides.push({
       ],
     },
     text(0.5, 4.3, 4.4, 0.9,
-      `Written by hand after the model was frozen, scored once. A small sample: about plus or minus 7 points. Real bank questions: rules ${pc(AI.results.rules.natural.routing_accuracy)}, agent ${pc(AI.results.agent.natural.routing_accuracy)}.`,
+      `Written by hand after the model was frozen, now reproduced; not a new blind study. A small sample: about plus or minus 7 points. Real bank questions: rules ${pc(AI.results.rules.natural.routing_accuracy)}, agent ${pc(AI.results.agent.natural.routing_accuracy)}.`,
       { size: 12, color: "text2" }),
     ...trained.flatMap(([head, body], i) => {
       const y = 1.4 + i * 1.25;
@@ -482,7 +482,7 @@ slides.push({
         text(x + 0.2, y + 0.5, 4.0, 0.7, body, { size: 14, color: "background2" }),
       ];
     }),
-    text(0.5, 4.25, 9, 0.55, "Clear, cheap and safe.", { size: 24, bold: true, font: "+mj-lt", color: "accent2", valign: "middle" }),
+    text(0.5, 4.25, 9, 0.55, "Clear costs. Human control.", { size: 24, bold: true, font: "+mj-lt", color: "accent2", valign: "middle" }),
     text(0.5, 4.85, 9, 0.35, `${TEAM}  ·  ${REPO}  ·  Sandbox: no real money moves`, { size: 12, color: "accent5" }),
   ],
 });

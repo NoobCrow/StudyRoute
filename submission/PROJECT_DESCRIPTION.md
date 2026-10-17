@@ -73,8 +73,8 @@ StudyRoute is an AI agent that completes this task safely, from first quote to s
    inside the sandbox; planning locks nothing, locking needs a fresh MFA proof bound to that escrow,
    and a bank reviewer can freeze an escrow with a reason but can never move the funds. Only
    amounts, dates and hashes go on the chain, never a name or an account number. The head of the
-   audit hash chain is also anchored on the chain, so rewriting history leaves a trace a database
-   editor cannot reach. The AI has no permission here. The tokens are not money.
+   audit hash chain is also checked against the simulated chain. Both histories share SQLite;
+   this is a consistency check, not protection against a database owner rewriting both logs. The AI has no permission here. The tokens are not money.
 
 ## Security and compliance in the demo
 

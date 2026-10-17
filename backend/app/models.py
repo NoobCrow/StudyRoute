@@ -94,6 +94,18 @@ class Recipient(Base):
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime)
 
 
+class RecipientInstitution(Base):
+    """Declared institution binding; API renames must never clear it."""
+
+    __tablename__ = "recipient_institutions"
+
+    recipient_id: Mapped[str] = mapped_column(
+        ForeignKey("recipients.id", ondelete="CASCADE"), primary_key=True
+    )
+    institution_id: Mapped[str] = mapped_column(String(80))
+    bound_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
 class Quote(Base):
     __tablename__ = "quotes"
 

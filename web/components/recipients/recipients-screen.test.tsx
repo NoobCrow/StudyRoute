@@ -418,3 +418,21 @@ describe("account format", () => {
     });
   });
 });
+
+describe("institution route declaration", () => {
+  it("submits the explicit institution binding and resets it after save", async () => {
+    const fetchMock = mockApi(routes([], { "POST /recipients": RECIPIENT }));
+    renderWithProviders(<RecipientsScreen />);
+    await fillValid("Synthetic fee office");
+    const selector = screen.getByLabelText("University payment-route policy");
+    await userEvent.selectOptions(selector, "gb-manchester-metropolitan");
+    await userEvent.click(save());
+    await waitFor(() => expect(methods(fetchMock, "POST")).toHaveLength(1));
+    const [, init] = methods(fetchMock, "POST")[0]!;
+    expect(JSON.parse((init as RequestInit).body as string).institution_id).toBe(
+      "gb-manchester-metropolitan",
+    );
+    await waitFor(() => expect(selector).toHaveValue(""));
+    expect(screen.getByText(/Declaration is not identity verification/)).toBeInTheDocument();
+  });
+});

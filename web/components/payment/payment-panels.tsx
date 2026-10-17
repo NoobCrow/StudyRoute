@@ -49,7 +49,8 @@ export function SummaryCard({ payment }: { payment: Payment }) {
         {summary.shortfall_foreign_minor > 0 ? (
           <Notice tone="danger" title="Shortfall risk">
             Fees will be taken from the amount, so the university may receive less than the invoice.
-            A charge code of OUR avoids this.
+            OUR avoids this modelled deduction, not every real-world shortfall. Confirm the accepted
+            route and charges.
           </Notice>
         ) : null}
         <dl>

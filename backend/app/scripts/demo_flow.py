@@ -521,6 +521,10 @@ class DemoFlow:
             "POST", "/assistant/chat", "parent",
             json={"message": f"GBP 10,000 by {due}", "context": {"pending": pending}},
         ).json()  # fmt: skip
+        if (second["task"] or {}).get("status") == "needs_confirmation":
+            readback = second["task"]
+            self._check(True, "the completed values require read-back confirmation before planning")
+            second = self._chat("yes", {"kind": readback["kind"], **readback.get("collected", {})})
         self._check(
             (second["task"] or {}).get("status") == "ready",
             "the next message finishes the same task (it remembers what it asked)",
@@ -735,7 +739,10 @@ class DemoFlow:
             anchored.status_code == 201 and verdict["status"] == "PASS",
             "the audit log's head hash is anchored on the chain and the database matches it",
         )
-        self._say("      After tamper_audit, /chain/verify fails even if every hash is rebuilt.")
+        self._say(
+            "      Audit-only rewrite/rehash is detected; rewriting BOTH SQLite logs "
+            "can pass after restart."
+        )
 
     def _audit(self) -> None:
         self._step(14, "Audit log: verify the hash chain")

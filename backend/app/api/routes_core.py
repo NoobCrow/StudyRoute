@@ -21,7 +21,7 @@ from app.api.schemas import (
     RecipientPatchIn,
 )
 from app.core import errors
-from app.domain import privacy
+from app.domain import institution_routes, privacy
 from app.domain.limits import usd_equivalent_minor
 from app.domain.quotes import QuoteRequest
 from app.domain.rbac import Actor, Perm
@@ -93,6 +93,22 @@ def list_quotes(
 ) -> dict[str, Any]:
     with ctx.db.read() as session:
         return {"items": ctx.quotes.list(session, actor, limit)}
+
+
+@router.get("/institutions")
+def list_institutions(actor: Actor = Depends(require(Perm.RECIPIENT_READ))) -> dict[str, Any]:
+    return {"items": [institution_routes.POLICY], "unknown_status": "UNVERIFIED"}
+
+
+@router.get("/recipients/{recipient_id}/route-policy")
+def recipient_route_policy(
+    recipient_id: str,
+    actor: Actor = Depends(require(Perm.RECIPIENT_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    with ctx.db.read() as session:
+        row = ctx.recipients.get_owned(session, actor, recipient_id)
+        return institution_routes.status(session, row)
 
 
 # --- recipients ---------------------------------------------------------------------------

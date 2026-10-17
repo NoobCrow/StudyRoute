@@ -27,7 +27,7 @@ const WHO: Record<ChargeCode, string> = {
 };
 
 const EXPLANATION: Record<ChargeCode, string> = {
-  OUR: "You pay every fee. The university should receive the full invoice amount. Best for tuition.",
+  OUR: "Sender pays the modelled fees. Full arrival is not guaranteed: confirm the accepted payment route and charges.",
   SHA: "You pay your bank. Correspondent and receiving fees are taken from the amount, so the university may receive less.",
   BEN: "The beneficiary pays everything. This has the highest risk of a short payment.",
 };
