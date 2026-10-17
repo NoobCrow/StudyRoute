@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import shutil
 import sys
 import zipfile
 from datetime import UTC, datetime
@@ -203,10 +202,24 @@ def test_the_exit_code_only_blocks_on_broken_things_unless_strict(
 # --- personalize ---------------------------------------------------------------------------------
 
 
+TEMPLATES = {
+    "submission/PROJECT_DESCRIPTION.md": (
+        "Team: [team name]. Members: [names and universities]. Code: [repository link]\n"
+    ),
+    "submission/DECK_OUTLINE.md": "Cover slide. Team: [Team name]. Code: [repository link]\n",
+    "submission/EMAIL_TEMPLATES.md": (
+        "Subject: [Country] - [Team name]\nGitHub: [repository link]\nArchive: [link]\n"
+        "Kind regards, [team name]\n"
+    ),
+}
+
+
 @pytest.fixture
 def docs(tmp_path: Path) -> Path:
-    for relative in personalize.FILES:
-        shutil.copy(ROOT / relative, write(tmp_path, relative, "").resolve())
+    """Unpersonalised copies of the three documents, so the tests do not depend on the repository
+    still holding placeholders (running `scripts/personalize.py` on the real files must not break them)."""
+    for relative, text in TEMPLATES.items():
+        write(tmp_path, relative, text)
     return tmp_path
 
 

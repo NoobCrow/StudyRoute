@@ -1,7 +1,7 @@
 # Deck outline (blueprint 19.2) as slide text
 
 Twelve slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
-rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.7
+rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.9
 minutes** of speech at a brisk 160 words a minute (a calmer 140 is just under 10), so keep any
 live demo to **1 minute** or none and point to the recorded video (`VIDEO_SCRIPT.md` is its scene
 list, 4:50). Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
@@ -9,7 +9,7 @@ in `submission/screenshots/`, or take fresh ones after `docker compose up --buil
 Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
 
 ## 1. StudyRoute
-- Cross-border and Student Finance Assistant (Topic C). Team: [team name].
+- Cross-border and Student Finance Assistant (Topic C). Team: TeamEkxin.
 - "The engine calculates, the AI explains, the human approves, and every step is logged."
 - Sandbox: synthetic data, no real money moves.
 
@@ -44,11 +44,11 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Student guide: which of 20 student cities a monthly budget in taka covers, and the steps for the first weeks abroad. Invented figures, marked not verified. One-click "create draft and request approval"; approval still needs MFA.
 - Deadline fit: the cheapest provider that ARRIVES before the due date (both countries' working days); if the cheapest would be late, the plan says so. Currency-drop stress test: the same quote priced again if the taka weakens 5, 10, 15 or 20%, a what-if on synthetic rates and not a forecast.
 
-## 7. Smart escrow for living costs
-- The parent locks money in a smart contract that pays on dates they choose; tuition is one payment, living costs one a month.
-- Plan first (nothing locked), then lock with a fresh MFA proof. A reviewer can freeze with a reason but never move funds. The AI has no permission here.
-- Only amounts, dates and hashes go on the chain. The chain is simulated (in-memory EVM, real Solidity); the tokens are not money. The head of the audit log is anchored on it.
-- Screenshot: an escrow with its on-chain proof (`29-escrow-schedule.png`); the whole page is `27-smart-escrow.png`.
+## 7. Proven, and not proven yet
+- Proven by tests and logs: every number comes from one engine in integer money (all 24 scenarios mapped to tests); only a human with a fresh MFA code can approve, and the AI has no such permission; edit one audit row and Verify fails at that event; the stack starts from the zipped archive with docker compose (run for real on 15 and 17 October).
+- Not proven, and said so: rates, fees and city costs are invented and not yet compared with real quotes; no real parent has used it and the trained models saw synthetic data; no outside security review; Bangladesh Bank limits are placeholders marked Not verified.
+- Both lists are in the repository: `docs/OPEN_QUESTIONS.md` and `docs/SECURITY_SELF_ASSESSMENT.md`.
+- Smart escrow and the bank network are extras beyond Topic C. They are not slides; they get one sentence on slide 12 and a few seconds in the video. Screenshots stay in `submission/screenshots/` (`27-smart-escrow.png`, `29-escrow-schedule.png`).
 
 ## 8. AI that cannot cheat
 - Pipeline: policy check, facts from the engine, masking, model (optional), number guard, tool guard, audit.
@@ -75,7 +75,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 ## 12. Impact and next steps
 - More corridors and a verified rule set; moon-dependent holidays.
 - A real AD bank partnership for quotes and KYC.
-- The escrow contracts on a permissioned chain with a bank-issued deposit token.
+- Escrow already runs in the sandbox; next, a permissioned chain with a bank-issued deposit token.
 - Regulator reporting built on the compliance report. Credit building (named in Topic C, not built).
 
 ## Demo order (3 to 5 minutes)

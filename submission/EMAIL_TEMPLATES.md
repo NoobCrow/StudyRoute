@@ -8,7 +8,7 @@ before sending anything that contains passport pages.
 
 **To:** wangyr@pbcsf.tsinghua.edu.cn
 **Subject:** use the format printed on the registration form. The format other sources report is
-`International Track Registration - [Country] - [Team name] - [Team leader's full name]`.
+`International Track Registration - [Country] - TeamEkxin - [Team leader's full name]`.
 **Attach:** the completed registration form, and one passport bio page for each team member.
 
 ```
@@ -17,7 +17,7 @@ Dear Ms. WANG Yiran,
 We would like to register for the 2026 Shenzhen International FinTech Competition
 (FinTechathon), International Track, Topic C: Cross-border and Student Finance Assistant.
 
-Team name: [team name]
+Team name: TeamEkxin
 Team leader: [full name], [university], [country], [nationality]
 Members: [name, university, country, nationality, one per line]
 
@@ -29,20 +29,49 @@ Please confirm that our slot is allocated.
 
 Kind regards,
 [team leader's full name]
-[team name]
+TeamEkxin
+```
+
+## 1b. Eligibility question (send before registering if any of it is unclear)
+
+Send this first if the team is unsure about the 60% rule or whether its universities qualify. It
+contains no passport pages. Do not wait for the answer to prepare everything else; the deadline is
+the same for registration and submission.
+
+**To:** wangyr@pbcsf.tsinghua.edu.cn
+**Subject:** International Track eligibility question - [Country] - [Team leader's full name]
+
+```
+Dear Ms. WANG Yiran,
+
+We are preparing an entry for the International Track (Topic C) and would like to confirm two
+points in the rules before we register.
+
+1. The rules say the team needs "60% non-Chinese nationals, major, or year of study". Is the 60%
+   counted by nationality of the team members? Our team has [number] members, [number] of them
+   non-Chinese nationals.
+2. All of our members are full-time students at [university, country]. Is a university in
+   [country] eligible? We could not find a list of eligible countries, only the exclusions
+   (Mainland China, Hong Kong SAR, Macao SAR and Chinese Taipei).
+
+Thank you for your help.
+
+Kind regards,
+[team leader's full name]
+TeamEkxin
 ```
 
 ## 2. Final submission
 
 **To:** wangyr@pbcsf.tsinghua.edu.cn
-**Subject:** `[Team name] - International Track - Topic C - Final submission` (use the organisers'
+**Subject:** `TeamEkxin - International Track - Topic C - Final submission` (use the organisers'
 format if the rules or the form give one).
 **Attach or link:** the six items below. Link anything over the attachment limit.
 
 ```
 Dear Ms. WANG Yiran,
 
-Please find the final submission of team [team name] for the International Track, Topic C:
+Please find the final submission of team TeamEkxin for the International Track, Topic C:
 Cross-border and Student Finance Assistant. The project is StudyRoute, a sandbox AI agent that
 helps a parent in Bangladesh pay a student's tuition and living costs abroad. All data is
 synthetic and no real money moves.
@@ -51,7 +80,7 @@ synthetic and no real money moves.
 2. Presentation deck (10 minutes): [file or link]
 3. Demo video (under 5 minutes): [link]
 4. Source code with README, deployment instructions and test cases:
-   GitHub: [repository link]    Archive: [file or link]
+   GitHub: https://github.com/NoobCrow/StudyRoute    Archive: [file or link]
    Start: docker compose up --build, then http://localhost:8080
 5. Security self-assessment report (permission tiers and known-risk list): [file or link]
 6. Execution evidence (sandbox operation logs, audit log and verification, demo video):
@@ -61,5 +90,5 @@ Demo accounts and the one-command start are described in the README.
 
 Kind regards,
 [team leader's full name]
-[team name]
+TeamEkxin
 ```

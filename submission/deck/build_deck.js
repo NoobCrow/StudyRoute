@@ -281,31 +281,41 @@ slides.push({
 });
 
 // 7 ---------------------------------------------------------------------------------------------
-const escrowSteps = [
-  ["Plan", "The schedule is shown first. Nothing is locked."],
-  ["Lock", "A fresh MFA proof from the parent. The funds wait in the contract."],
-  ["Release", "On the dates chosen. A reviewer can freeze it with a reason, never move the funds."],
-  ["Privacy", "Only amounts, dates and hashes go on the chain. The AI has no access."],
+const proven = [
+  `Every number comes from one engine, in integer money. ${F.backendTests} backend tests cover all ${F.scenarios} scenarios.`,
+  "Only a human with a fresh MFA code can approve. The AI has no such permission, and a test enforces the table.",
+  "Edit one audit row and Verify fails at that event. A rewritten chain is caught by the anchor.",
+  "The whole stack starts from the zipped archive with docker compose, run for real on 15 and 17 October.",
+];
+const notProven = [
+  "Rates, fees and city costs are invented. We have not compared them with real quotes yet.",
+  "No real parent has used it. The trained models saw synthetic data.",
+  "No outside security review or penetration test.",
+  "Bangladesh Bank limits are placeholders, marked Not verified.",
 ];
 slides.push({
-  layout: "content", section: "The solution", title: "Smart escrow for living costs",
+  layout: "content", section: "Trust", title: "Proven, and not proven yet",
   notes:
-    "Living costs are different from tuition: they are a payment every month. Smart escrow lets the parent lock the money in a smart contract that pays on the dates they choose. " +
-    "Planning locks nothing, the schedule is shown first. Locking needs a fresh MFA proof from the parent, and then each payment is released on its date. " +
-    "A bank reviewer can freeze an escrow with a written reason but can never move the funds. Only amounts, dates and hashes go on the chain, never a name or an account number, and the AI has no permission here at all. " +
-    "The chain is simulated: an in-memory EVM running real Solidity contracts, and the tokens are not money. " +
-    "We also anchor the head of the audit log on it, so rewriting history leaves a trace that someone editing the database cannot reach.",
+    "Before the details, here is what we have shown and what we have not. " +
+    `What we have shown: every number comes from one deterministic engine, with ${F.backendTests} backend tests covering all ${F.scenarios} scenarios. Only a human with a fresh MFA code can approve, and the AI has no such permission. ` +
+    "Change one audit row and Verify fails at that event. And the stack starts from the zipped archive with one command. " +
+    "What we have not shown: the rates, fees and city costs are invented, and we have not yet compared them with real quotes. No real parent has used it. No outsider has reviewed its security. The Bangladesh Bank limits are placeholders, marked Not verified. " +
+    "Both lists are in the repository, because we would rather you hear the limits from us.",
   elements: [
-    ...shot("29-escrow-schedule.png", 0.58, 1.43, 5.0, 3.36, "An escrow with three monthly payments and its on-chain proof"),
-    text(0.5, 4.95, 5.2, 0.3, "Simulated chain: the tokens are not money. Synthetic data.", { size: 11, color: "text2" }),
-    ...escrowSteps.flatMap(([head, body], i) => {
-      const y = 1.4 + i * 0.9;
-      return [
-        card(6.0, y, 3.5, 0.8),
-        text(6.15, y + 0.04, 3.2, 0.28, head, { size: 14, bold: true, color: "accent1" }),
-        text(6.15, y + 0.32, 3.25, 0.46, body, { size: 11, color: "text1" }),
-      ];
-    }),
+    card(0.5, 1.35, 4.4, 3.45),
+    rect(0.7, 1.5, 0.12, 0.4, "accent1"),
+    text(0.92, 1.45, 3.8, 0.5, "Proven by tests and logs", { size: 18, bold: true, color: "accent1", valign: "middle" }),
+    text(0.7, 2.1, 4.0, 2.6,
+      proven.map((t, i) => ({ text: t, bullet: true, breakLine: i < proven.length - 1 })),
+      { size: 12, color: "text1", paraAfter: 6 }),
+    card(5.1, 1.35, 4.4, 3.45),
+    rect(5.3, 1.5, 0.12, 0.4, "accent3"),
+    text(5.52, 1.45, 3.8, 0.5, "Not proven, and we say so", { size: 18, bold: true, color: "accent3", valign: "middle" }),
+    text(5.3, 2.1, 4.0, 2.6,
+      notProven.map((t, i) => ({ text: t, bullet: true, breakLine: i < notProven.length - 1 })),
+      { size: 12, color: "text1", paraAfter: 6 }),
+    text(0.5, 4.95, 9, 0.35, "Both lists are in the repository: docs/OPEN_QUESTIONS.md and docs/SECURITY_SELF_ASSESSMENT.md",
+      { size: 12, color: "text2" }),
   ],
 });
 
@@ -452,14 +462,14 @@ const next = [
   ["Verified rules", "Replace each placeholder rule with an official Bangladesh Bank source."],
   ["A real AD bank partner", "Real quotes, real KYC, and regulator-ready reports from the audit log."],
   ["Credit building", "Topic C scope we have not built: help a student build a credit history abroad."],
-  ["A real chain", "Run the escrow contracts on a permissioned chain with a bank-issued deposit token."],
+  ["A real chain", "Escrow already runs in the sandbox. Next: a permissioned chain and a bank-issued token."],
 ];
 slides.push({
   layout: "closing", section: "Close", title: "What comes next",
   notes:
     "Next steps. First, replace every placeholder rule with an official Bangladesh Bank source and add the moon-dependent holidays. " +
     "Second, a partnership with an authorised dealer bank for real quotes and real KYC, and regulator-ready reports from the audit log. " +
-    "Third, the escrow contracts would move from our simulated chain to a permissioned one with a deposit token issued by a bank. " +
+    "Third, beyond tuition, the sandbox already has a smart escrow for living costs and a bank-network simulation; the escrow contracts would move from our simulated chain to a permissioned one with a deposit token issued by a bank. " +
     "Topic C also mentions credit building. We have not built it, and we would rather say so than pretend. We do show a household's money in every currency, but those are simulated accounts, not real ones. " +
     "To close: StudyRoute is clear, cheap and safe, because the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
   elements: [

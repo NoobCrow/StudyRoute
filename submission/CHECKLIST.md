@@ -12,8 +12,8 @@ after it. Keep a copy of every e-mail you send and any reply.
 
 ## 0. Can you enter? (rules, "Eligibility and Teaming")
 
-- [ ] **A team has 2 to 5 students.** A one-person entry is not allowed: find at least one
-      teammate before registering.
+- [x] **A team has 2 to 5 students.** A one-person entry is not allowed. The team reported on
+      17 Oct 2026 that it has registered as a team.
 - [ ] Every member is a full-time student (undergraduate, master's or PhD) at a university or
       research institution **outside** Mainland China, Hong Kong SAR, Macao SAR and Chinese Taipei.
 - [ ] **At least 60% of the team are non-Chinese nationals.** In practice: 2 members need 2
@@ -24,16 +24,29 @@ after it. Keep a copy of every e-mail you send and any reply.
 - [ ] The work is the team's own. Third-party code and open-source parts are licensed (see
       `docs/THIRD_PARTY.md`).
 - [ ] At least one member can **attend the final in person** if invited (Shenzhen, 20 to 23 Nov).
-      A finalist team that is absent without valid justification loses its awards.
+      A finalist team that is absent without valid justification loses its awards. Finalists are
+      announced on 31 Oct and check in on 20 Nov, so find out the Chinese visa lead time for that
+      member now.
+- [ ] Only if the registration reply left it unclear: confirm how the 60% is counted, and whether
+      your universities' country is eligible (one secondary page mentions "21 APEC economies"; the
+      official PDF does not). Draft 1b in `EMAIL_TEMPLATES.md`; keep the reply.
+- [ ] You can say, in your own words, who built which part and which tools you used (including any
+      AI coding assistant), and you can explain every module. The rules require independent work.
+      `QA_PREP.md` question 10 is where to write it down.
 
 ## 1. Register (do this first; the deadline is the same)
 
-- [ ] Download the registration form (link in the CMU announcement).
-- [ ] Fill it in. Attach **each member's passport bio page**. Never put these in the repository,
+The team reported on 17 Oct 2026 that it has **already registered**. The three steps below are
+therefore ticked; nothing in this repository can confirm them.
+
+- [x] Download the registration form (link in the CMU announcement).
+- [x] Fill it in. Attach **each member's passport bio page**. Never put these in the repository,
       the archive or any chat.
-- [ ] E-mail the form and passport pages to **wangyr@pbcsf.tsinghua.edu.cn** (draft in
+- [x] E-mail the form and passport pages to **wangyr@pbcsf.tsinghua.edu.cn** (draft in
       `EMAIL_TEMPLATES.md`). Use the subject format printed on the form.
-- [ ] Keep the confirmation. Registration is free: anyone asking for money is not the organiser.
+- [ ] Keep the confirmation, and check that the organiser's reply (if any) did not raise a problem
+      with the team's nationality mix or universities. Registration is free: anyone asking for
+      money is not the organiser.
 
 ## 2. The six deliverables (official list)
 
@@ -41,7 +54,7 @@ after it. Keep a copy of every e-mail you send and any reply.
 |---|-------------|----------|--------------------------------|-------------|
 | 01 | **Technical documentation**: system architecture, core algorithm description, security design | Yes | `docs/TECHNICAL_DOCUMENTATION.md` (links `docs/SECURITY.md`) | Export to PDF if you want one file |
 | 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Replace `[Team name]` and `[repository link]` on slides 1 and 12, then rehearse to 10 minutes |
-| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | Shot-by-shot script in `submission/VIDEO_SCRIPT.md` | Record it |
+| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | Shot-by-shot script in `submission/VIDEO_SCRIPT.md` (about 4:25) | Record it |
 | 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Create the GitHub repository and push** (see below); add its link to the e-mail |
 | 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Yes | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
 | 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | The demo video (see 03) |
@@ -97,6 +110,8 @@ judges access; put the link in the submission e-mail.
       the documentation, the deck, the video link or file, the GitHub link plus the archive, the
       self-assessment and the evidence (draft in `EMAIL_TEMPLATES.md`). Check the attachment size
       limit; link large files instead.
+- [ ] Read `submission/QA_PREP.md` out loud once with the whole team. The online review and the
+      final both ask these questions, and several answers are yours to write.
 - [ ] Keep the sent e-mail and a backup copy of everything sent. An organiser reminder arrives 24
       hours before the deadline: do not wait for it.
 

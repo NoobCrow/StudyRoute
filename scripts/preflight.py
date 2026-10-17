@@ -147,7 +147,7 @@ def deck_check(root: Path) -> Check:
         return Check(
             FAIL, "deck", f"{len(slides)} slides and {len(notes)} notes, expected 12 and 12"
         )
-    return Check(OK, "deck", "12 slides with speaker notes (about 8.7 minutes of speech)")
+    return Check(OK, "deck", "12 slides with speaker notes (about 8.9 minutes of speech)")
 
 
 def find_placeholders(root: Path) -> dict[str, list[str]]:

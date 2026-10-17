@@ -21,7 +21,9 @@ the CMU Thailand announcement. Re-check https://fintechathon.g-ican.com/#/en onc
 | 7 | Finals | At least one member of each finalist team must attend in person in Shenzhen, otherwise awards are forfeited | **Confirmed** |
 | 8 | Originality | Independent work, no plagiarism; third-party and open-source parts must be licensed; IP stays with the contestants, hosts may use entries for non-commercial promotion | **Confirmed**; see `docs/THIRD_PARTY.md` |
 | 9 | Exact subject line of the registration e-mail | Not stated in the rules or the announcement | **Open**: use the format printed on the registration form |
-| 10 | How the 60% rule is counted (headcount or otherwise) | Not stated | **Open**: assume headcount |
+| 10 | How the 60% rule is counted (headcount or otherwise) | The rules say "60% non-Chinese nationals, major, or year of study", which can be read more than one way | **Open**: assume headcount of nationalities; ask the organiser (draft 3 in `submission/EMAIL_TEMPLATES.md`) |
+| 11 | Which countries can enter | The official rules name only the exclusions (Mainland China, Hong Kong SAR, Macao SAR, Chinese Taipei). One secondary page (IEEE R10 chapter) was reported to say "21 APEC economies" and a different theme; the official PDF says neither | **Open**: confirm with the organiser before registering (same e-mail) |
+| 12 | Visa for the Shenzhen final | Finalists are announced 31 Oct and check in on 20 Nov; invitation letters come with the announcement (blueprint) | **Open**: find out the Chinese visa lead time for the member who would travel, now |
 
 ## B. Regulatory values kept as `verified: false`
 
@@ -52,6 +54,13 @@ change is written to the audit log with who, what and why.
 
 - **Everything is simulated.** Providers, FX rates, KYC, SWIFT messages and settlement are
   synthetic. No bank, FX feed or identity service is contacted, and the UI says so.
+- **No real-world calibration, no real users, no outside review.** The provider fees, spreads and
+  the 20 cities' costs are invented, so "Provider B is cheapest at 1.58%" shows how the engine
+  ranks, not what a real provider would charge. The engine has not been checked against a real
+  published quote, no real parent or student has tried the app, and nobody outside the project
+  has tested its security. The way to close the first gap is to take a few dated public quotes
+  for one corridor, enter the same inputs, and publish the difference; the way to close the
+  second is to time five outsiders on the same task against a spreadsheet. Neither was done.
 - **Sandbox MFA code.** In sandbox mode a documented fixed code (`SANDBOX_MFA_CODE`) is accepted
   next to real TOTP so judges need no authenticator app. Production mode ignores it.
 - **Authentication.** Login is password plus short-lived JWT with refresh rotation, not a full
@@ -124,7 +133,11 @@ change is written to the audit log with who, what and why.
 
 ## D. Things only a person can supply
 
-- A team of **at least two** eligible students (see section A, row 5).
+- A team of **at least two** eligible students (see section A, row 5). The team reported on 17 Oct
+  2026 that it has registered; this repository cannot check that. Still open: the organiser's answers
+  to section A rows 10 and 11 if the registration reply did not settle them, and row 12 (visa).
+- Answers, in the team's own words, to the questions in `submission/QA_PREP.md` that say so (who built
+  what, which tools were used).
 - The registration form and passport bio pages (never put these in the repository).
 - The GitHub repository and its link (deliverable 04).
 - The demo video (under 5 minutes, English; script in `submission/VIDEO_SCRIPT.md`).

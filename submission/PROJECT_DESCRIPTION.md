@@ -1,7 +1,7 @@
 # StudyRoute: project description
 
 **FinTechathon 2026, International Track. Topic C: Cross-border and Student Finance Assistant.**
-Team: [team name]. Members: [names and universities]. Contact: the e-mail this was sent with.
+Team: TeamEkxin. Members: Farhan Labib, Md Redwan Hossen, Alim Bin Yeasin and Kalvin Chakma (Ahsanullah University of Science and Technology, Bangladesh). Contact: the e-mail this was sent with.
 
 > StudyRoute is a sandbox. No real money moves, all data is synthetic and every screen says so.
 > Guidance is indicative only: confirm with your Authorised Dealer (AD) bank.
