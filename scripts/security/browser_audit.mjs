@@ -33,6 +33,22 @@ for (const [i, p] of PAYLOADS.entries()) {
 }
 check("planted stored-XSS payloads in recipient names, document names and rule reasons", planted >= 5, `${planted} accepted`);
 
+// The bank review desk shows text one side typed to the other side: a recipient name, the reviewer's note and
+// the parent's reply. Plant markup in all three on a payment that waits for the reviewer.
+const sign = async (email) => (await api("POST", "/auth/login", null, { email, password: "Sandbox#2026" })).body;
+const mfa = async (token, scope, subject) => (await api("POST", "/auth/mfa/verify", token, { code: "246810", scope, subject_id: subject })).body.mfa_proof;
+const idem = () => ({ "Idempotency-Key": crypto.randomUUID() });
+const HOSTILE = '<img src=x onerror="window.__xss=9">';
+await api("PUT", "/kyc/mock-review", admin, { user_id: (await sign("parent@demo.studyroute.test")).user.user_id, status: "VERIFIED" });
+const reviewRecipient = (await api("POST", "/recipients", parent, { type: "UNIVERSITY", display_name: `REVIEW_TEST ${HOSTILE}`.slice(0, 120), country: "GB", bic: "EXMPGB2L", iban: "GB82WEST12345698765432" })).body.recipient_id;
+await api("PATCH", `/recipients/${reviewRecipient}`, parent, { allowlisted: true }, { "X-MFA-Proof": await mfa(parent, "allowlist_recipient", reviewRecipient) });
+const reviewQuote = (await api("POST", "/quotes", parent, { target: { amount_minor: 1_000_000, currency: "GBP" }, purpose: "TUITION", destination_country: "GB", charge_code: "OUR" })).body.quote_id;
+const reviewPid = (await api("POST", "/payments", parent, { quote_id: reviewQuote, provider_id: "prov_b", recipient_id: reviewRecipient, reference: "INV-2026-4471 / STU-883201" }, idem())).body.payment_id;
+const requested = await api("POST", `/payments/${reviewPid}/request-approval`, parent, {}, idem());
+const asked = await api("POST", `/payments/${reviewPid}/bank-review/decision`, admin, { decision: "ASK_INFO", reason_code: "DOCUMENTS_MISSING", note: `Please send the fee note ${HOSTILE}` }, { ...idem(), "X-MFA-Proof": await mfa(admin, "review_payment", reviewPid) });
+const replied = await api("POST", `/payments/${reviewPid}/bank-review/reply`, parent, { message: `Here is the fee note ${HOSTILE}` }, idem());
+check("a payment with hostile text in its review is waiting at the bank desk (note and reply accepted or cleanly refused)", requested.status === 200 && [200, 422].includes(asked.status) && [200, 409, 422].includes(replied.status), `request ${requested.status}, ask ${asked.status}, reply ${replied.status}`);
+
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--no-sandbox"] });
 const page = await browser.newPage();
 await page.setViewport({ width: 1366, height: 900 });
@@ -61,7 +77,13 @@ async function signIn(email) {
   await Promise.all([page.waitForSelector(SIGNED_IN), page.click('button[type="submit"]')]);
   await sleep(900);
 }
-const screens = ["/", "/compare", "/payments", "/recipients", "/documents", "/guide", "/audit", "/rules", "/bank", "/escrow", "/sandbox"];
+const screens = ["/", "/compare", "/payments", "/recipients", "/documents", "/guide", "/audit", "/rules", "/bank", "/escrow", "/sandbox", "/bank-review"];
+async function reviewPage(label) {
+  await page.goto(`${APP}/payments/view/?id=${reviewPid}`, { waitUntil: "networkidle0" }); await sleep(1200);
+  const text = await page.$eval("main", (el) => el.innerText).catch(() => "");
+  check(`${label}: the bank review page ran no injected script`, (await page.evaluate(() => window.__xss)) === undefined, String(await page.evaluate(() => window.__xss)));
+  check(`${label}: the review page shows the planted markup as literal text`, /<img src=x onerror/.test(text), text.slice(0, 80).replace(/\n/g, " "));
+}
 async function tour(label) {
   for (const href of screens) {
     const link = await page.$(navLink(href));
@@ -72,11 +94,13 @@ async function tour(label) {
 }
 await signIn("parent@demo.studyroute.test");
 await tour("parent");
+await reviewPage("parent");
 const shown = await (async () => { await page.click(navLink("/recipients")); await sleep(900); return page.$eval("main", (el) => el.innerText); })();
 check("the planted markup is shown as literal text, not interpreted", /<img src=x onerror/.test(shown), shown.slice(0, 80).replace(/\n/g, " "));
 await signOut(); await sleep(600);
 await signIn("admin@demo.studyroute.test");
 await tour("admin");
+await reviewPage("admin");
 
 // reflected: a hostile path and query string
 for (const hostile of ["/payments/%3Cimg%20src=x%20onerror=window.__xss=6%3E", "/?q=%3Cscript%3Ewindow.__xss=7%3C/script%3E", "/escrow#%3Csvg%20onload=window.__xss=8%3E"]) {

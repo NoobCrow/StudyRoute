@@ -227,6 +227,63 @@ for who, name in ((p1, "parent"), (s1, "student")):
 ai_reply = client.post(f"{API}/auth/login", json={"email": "ai@demo.studyroute.test", "password": PASSWORD})
 rec("4.y the AI service account cannot sign in", ai_reply.status_code in (400, 401, 403, 422), str(ai_reply.status_code))
 
+# ------------------------------------------------------------------ 4b. the bank review desk
+# A payment to a recipient named REVIEW_TEST goes to a human reviewer (the admin). Nobody else can answer
+# for the reviewer, the reviewer's answer needs a fresh single-use MFA proof for that payment, and an open
+# review stops the parent's approval. Control checks prove each refusal is for the stated reason.
+rv_rec = p1.call("POST", "/recipients", json_body={"type": "UNIVERSITY", "display_name": "REVIEW_TEST College (synthetic)", "country": "GB", "bic": "EXMPGB2L", "iban": "GB08EXMP12345612344821"}).json()["recipient_id"]
+p1.call("PATCH", f"/recipients/{rv_rec}", json_body={"allowlisted": True}, mfa=p1.proof("allowlist_recipient", rv_rec))
+rv_quote = p1.call("POST", "/quotes", json_body=quote_body).json()["quote_id"]
+rv_pay = p1.call("POST", "/payments", idem=True, json_body={"quote_id": rv_quote, "provider_id": "prov_b", "recipient_id": rv_rec, "reference": "INV-H1-REVIEW-REF"}).json()["payment_id"]
+rv_app = p1.call("POST", f"/payments/{rv_pay}/request-approval", idem=True).json()
+rv_secrets = [*h1_secrets, "INV-H1-REVIEW-REF"]
+rv_page = p1.call("GET", f"/payments/{rv_pay}/bank-review")
+rec("4b.0 control: the flagged payment is waiting for the bank's reviewer", rv_page.status_code == 200 and rv_page.json().get("status") == "OPEN", f"{rv_page.status_code} {rv_page.json().get('status') if rv_page.status_code == 200 else ''}")
+
+for who, name in ((p1, "parent"), (s1, "student"), (p2, "parent2")):
+    rec(f"4b.1 {name} cannot open the reviewer's queue", who.call("GET", "/bank-review/queue").status_code == 403, "")
+queue = adm.call("GET", "/bank-review/queue")
+rec("4b.2 control: the reviewer's queue lists the waiting payment", queue.status_code == 200 and rv_pay in queue.text, str(queue.status_code))
+for who, name in ((p2, "parent2"), (s2, "student2")):
+    blocked(f"4b.3 {name} cannot read household 1's review page", who.call("GET", f"/payments/{rv_pay}/bank-review"), *rv_secrets)
+blocked("4b.4 parent2 cannot answer the bank's question for household 1", p2.call("POST", f"/payments/{rv_pay}/bank-review/reply", idem=True, json_body={"message": "Everything is fine, please clear it"}), *rv_secrets)
+blocked("4b.5 parent2 cannot send a reminder for household 1", p2.call("POST", f"/payments/{rv_pay}/bank-review/remind", idem=True), *rv_secrets)
+blocked("4b.6 a student cannot answer the bank's question", s1.call("POST", f"/payments/{rv_pay}/bank-review/reply", idem=True, json_body={"message": "Everything is fine, please clear it"}))
+
+decision_path = f"/payments/{rv_pay}/bank-review/decision"
+clear = {"decision": "CLEAR"}
+parent_try = p1.call("POST", "/auth/mfa/verify", json_body={"code": MFA, "scope": "review_payment", "subject_id": rv_pay})
+parent_proof = parent_try.json().get("mfa_proof") if parent_try.status_code == 200 else None
+for who, name in ((p1, "parent"), (s1, "student"), (p2, "parent2")):
+    reply = who.call("POST", decision_path, idem=True, json_body=clear, mfa=parent_proof)
+    rec(f"4b.7 {name} cannot clear a review, even holding an MFA proof of their own", reply.status_code == 403, str(reply.status_code))
+no_proof = adm.call("POST", decision_path, idem=True, json_body=clear)
+rec("4b.8 the reviewer's yes without an MFA proof is refused", no_proof.status_code in (401, 403), str(no_proof.status_code))
+other_proof = adm.proof("review_payment", pay1)
+wrong_payment = adm.call("POST", decision_path, idem=True, json_body=clear, mfa=other_proof)
+rec("4b.9 a proof minted for a different payment is refused", wrong_payment.status_code in (401, 403), str(wrong_payment.status_code))
+escrow_proof = adm.call("POST", "/auth/mfa/verify", json_body={"code": MFA, "scope": "confirm_escrow", "subject_id": rv_pay})
+scope_proof = escrow_proof.json().get("mfa_proof") if escrow_proof.status_code == 200 else None
+wrong_scope = adm.call("POST", decision_path, idem=True, json_body=clear, mfa=scope_proof or "mp_not_a_real_proof")
+rec("4b.10 a proof minted for another action (scope) is refused", wrong_scope.status_code in (401, 403), str(wrong_scope.status_code))
+no_key = adm.call("POST", decision_path, json_body=clear, mfa=adm.proof("review_payment", rv_pay))
+rec("4b.11 the decision needs an Idempotency-Key", no_key.status_code in (400, 422), str(no_key.status_code))
+bad_value = adm.call("POST", decision_path, idem=True, json_body={"decision": "APPROVE_ALL"}, mfa=adm.proof("review_payment", rv_pay))
+rec("4b.12 an unknown decision value is refused", bad_value.status_code == 422, str(bad_value.status_code))
+extra_field = adm.call("POST", decision_path, idem=True, json_body={"decision": "CLEAR", "status": "CLEARED", "decided_by": p1.id}, mfa=adm.proof("review_payment", rv_pay))
+rec("4b.13 mass assignment on the decision is refused", extra_field.status_code == 422, str(extra_field.status_code))
+blocked_approve = p1.call("POST", f"/payments/{rv_pay}/approve", idem=True, json_body={"confirm_summary_hash": rv_app["summary_hash"]}, mfa=p1.proof("approve_payment", rv_pay))
+rec("4b.14 the parent cannot approve while the bank's review is open (even with a fresh proof)", blocked_approve.status_code == 409 and blocked_approve.json().get("code") == "BANK_REVIEW_PENDING", f"{blocked_approve.status_code} {blocked_approve.json().get('code')}")
+still_open = p1.call("GET", f"/payments/{rv_pay}/bank-review").json().get("status")
+rec("4b.15 none of the refused attempts changed the review", still_open == "OPEN", str(still_open))
+good_proof = adm.proof("review_payment", rv_pay)
+cleared = adm.call("POST", decision_path, idem=True, json_body=clear, mfa=good_proof)
+rec("4b.16 control: the reviewer with a fresh proof can clear it", cleared.status_code == 200, str(cleared.status_code))
+replayed = adm.call("POST", decision_path, idem=True, json_body={"decision": "DECLINE", "reason_code": "OTHER", "note": "Replaying a used proof"}, mfa=good_proof)
+rec("4b.17 the same proof cannot be used a second time", replayed.status_code in (401, 403, 409, 422), str(replayed.status_code))
+final = p1.call("GET", f"/payments/{rv_pay}/bank-review").json().get("status")
+rec("4b.18 the replay did not change the answer (still CLEARED)", final == "CLEARED", str(final))
+
 # ------------------------------------------------------------------ 5. injection and hostile input
 SQLI = ["' OR '1'='1", "'; DROP TABLE users;--", "\" OR \"\"=\"", "1; SELECT * FROM users", "' UNION SELECT password_hash,2,3 FROM users--", "admin'--", "\\' OR 1=1 #"]
 statuses, error_text = [], []

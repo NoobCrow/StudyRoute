@@ -1,0 +1,9 @@
+PASS  1 unknown user and wrong password return the same status and message
+PASS  2 response time does not reveal whether an account exists
+PASS  3 a burst of logins gets 429, and forging X-Forwarded-For does not bypass it
+PASS  3b the 429 carries Retry-After and a problem body
+PASS  4 after repeated wrong passwords even the right password is refused (account locked)
+PASS  4b a locked REAL account and a made-up address give the identical answer (no way to discover accounts)
+PASS  5 repeated wrong MFA codes lock MFA, so the right code is then refused
+PASS  6 a flood of quote requests is throttled (429)
+8/8 defended

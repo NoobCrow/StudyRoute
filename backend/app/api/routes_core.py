@@ -369,7 +369,10 @@ def runway(
     living = rules.record("bangladesh_rules.living_expense_usd_per_month")
     body["monthly_cost_usd_equivalent"] = Money(monthly_usd, "USD").format()
     body["reference"] = {
-        "label": "Indicative living-expense figure per month (secondary source)",
+        "label": (
+            "Indicative living-expense figure per month "
+            "(secondary source, not in the official circular)"
+        ),
         "value": Money.from_major(living.value, "USD").format(),
         "verified": living.verified,
         "badge": None if living.verified else "NOT_VERIFIED",

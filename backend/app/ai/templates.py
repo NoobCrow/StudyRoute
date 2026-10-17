@@ -381,9 +381,12 @@ class Responder:
         text = (
             f"The sandbox applies its own caps: {self.v('limit.per_transaction')} per transaction and "
             f"{self.v('limit.daily')} per day. These are our choices for the demo, not legal limits. "
-            f"The only Bangladesh figure I hold is {self.v('bd.living_expense')} a month for living costs, "
-            f"with {self.v('bd.living_uplift')} more for high-cost places. It comes from a secondary source "
-            f"and is NOT verified. {INDICATIVE}"
+            "Bangladesh Bank's study-abroad rules (checked in its latest foreign exchange circular) "
+            "say the AD bank releases what the university's own estimate states, one academic year "
+            "at a time, through one bank branch for the whole course. "
+            f"I also hold {self.v('bd.living_expense')} a month for living costs, "
+            f"with {self.v('bd.living_uplift')} more for high-cost places, but that comes from a "
+            f"secondary source, is not in that circular, and is NOT verified. {INDICATIVE}"
         )
         return self._finish(" ".join(text.split()))
 

@@ -8,6 +8,44 @@ Re-run on 17 October 2026 after the cloud-assistant and cookie-session branch wa
 attack probe defended **122 of 122** (17 of them new, on the browser sessions) and the real-Chrome
 audit under the production CSP passed **42 of 42**.
 
+## Re-run of 18 October 2026 (after the AI risk score, the bank review desk and the trained explainer)
+
+Same tools, throwaway lab databases (never the dev data), current code. The raw output of each tool is
+in [`submission/evidence/security_2026-10-18/`](../submission/evidence/security_2026-10-18/).
+
+| Area | Tool | Result |
+|------|------|--------|
+| Every route, forgery, cross-household access, injection, hostile input, CORS, webhooks, browser sessions, leakage, headers, **and the new bank review desk** | `attack_probe.py` | **146 of 146** defended (24 new: section 4b) |
+| Login and MFA brute force, lockout, rate limits, user enumeration | `brute_probe.py` | **8 of 8** defended |
+| Canary secrets in the database file, logs, audit log and responses | `leak_scan.py` | **All clear** (50 checks) |
+| Man in the middle | `mitm_probe.py` | **14 defended, 0 failed** (plus 4 informational) |
+| The assistant as an attack target | `assistant_probe.py` | **42 of 42** defended |
+| Real Chrome under the production CSP, **now also the Bank review screen and a payment page with markup planted in the recipient name, the reviewer's note and the parent's reply** | `browser_audit.mjs` | **48 of 48** |
+
+What the 24 new bank-review checks (section 4b of `attack_probe.py`) show:
+
+- The reviewer's queue is closed to parents, students and another household (403).
+- Another household cannot read, answer or remind a review (no data returned).
+- A parent, a student or another parent cannot clear a review, **even holding an MFA proof of their own**.
+- The reviewer's yes is refused without an MFA proof, with a proof minted for a different payment, with a
+  proof minted for a different action, without an Idempotency-Key, with an unknown decision value, and with
+  extra fields (mass assignment).
+- While a review is open the parent cannot approve the payment, even with a fresh proof
+  (`BANK_REVIEW_PENDING`), and none of the refused attempts changed the review.
+- Controls: the reviewer with a fresh proof can clear it, and the same proof cannot be used a second time.
+
+**A finding from this pass, in the probe and not in the app.** The first run of `mitm_probe.py` showed
+5 failures. The lab household had made many payments, so the AI risk score sent the probe's payment to
+the bank's reviewer, and the approval answered 409 `BANK_REVIEW_PENDING` instead of the 403 the probe
+expected for a missing MFA proof. That is the review gate working, but it also meant the probe was no
+longer testing the approval step. The probe now clears the review the way a reviewer would (a person
+with a fresh `review_payment` proof) before it attacks the approval, and then passes 14 of 14. The order
+of the two checks (review gate first, MFA second) is by design and both must pass for an approval.
+
+**Still not covered by this pass:** a real language model; the TLS probe and the Docker packet capture
+(not re-run, no change to either); an independent penetration test. These probes were written by the
+same team that wrote the app, so they find what the team thought to try.
+
 ## Full pass of 17 October 2026 (after merging the cloud assistant and cookie sessions)
 
 Everything below ran against the final code in throwaway lab databases (never the dev data).

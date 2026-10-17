@@ -34,7 +34,11 @@ def build_rule_facts(facts: FactSet, rules: Rules) -> None:
     facts.add("limit.daily", "Sandbox daily cap (our own choice, not a legal limit)", daily)
     living = rules.record("bangladesh_rules.living_expense_usd_per_month")
     uplift = rules.record("bangladesh_rules.living_expense_high_cost_uplift_pct")
-    status = "verified" if living.verified else "NOT verified, secondary source only"
+    status = (
+        "verified"
+        if living.verified
+        else "NOT verified, secondary source only, not in the official circular"
+    )
     facts.add(
         "bd.living_expense",
         f"Indicative Bangladesh living-expense figure per month ({status})",

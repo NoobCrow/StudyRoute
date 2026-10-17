@@ -46,14 +46,35 @@ def test_every_regulatory_rule_is_unverified_or_has_a_source() -> None:
             assert rule.get("source_url"), key
 
 
-def test_bangladesh_bank_figures_are_not_verified_and_have_a_placeholder_source() -> None:
+def test_living_expense_figures_stay_unverified_because_the_circular_does_not_state_them() -> None:
     flat = flatten_rules(RULES_FILE)
     for key in (
         "bangladesh_rules.living_expense_usd_per_month",
-        "bangladesh_rules.single_ad_branch_rule",
+        "bangladesh_rules.living_expense_high_cost_uplift_pct",
     ):
         assert flat[key]["verified"] is False
         assert flat[key]["source_url"]
+        assert "NOT in the official text" in flat[key]["note"]
+
+
+def test_bangladesh_rules_marked_verified_point_at_the_official_circular() -> None:
+    flat = flatten_rules(RULES_FILE)
+    official = "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    verified = {
+        key: rule
+        for key, rule in flat.items()
+        if key.startswith("bangladesh_rules.") and rule.get("verified")
+    }
+    assert {
+        "bangladesh_rules.single_ad_branch_rule",
+        "bangladesh_rules.release_period_limit",
+        "bangladesh_rules.release_basis",
+        "bangladesh_rules.international_card_for_education",
+    } <= set(verified)
+    for key, rule in verified.items():
+        assert rule["source_url"] == official, key
+        assert rule["last_checked"] == "2026-10-18", key
+        assert "onfirm with your AD bank" in rule["note"], key
 
 
 def test_sync_inserts_once_and_never_overwrites_admin_edits(seeded: Database) -> None:

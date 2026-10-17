@@ -1,0 +1,20 @@
+INFO  a passive listener on plain HTTP reads the sign-in password and every bearer token  -> 1 login(s) and 9 authorised request(s) were readable
+INFO  TLS is what closes this (risk R4); the checks below show what still holds WITHOUT it
+PASS  M1 a changed approval hash (what the person saw is not what is approved) is refused
+PASS  M2 an approval redirected to another payment (proof and hash were for the first) is refused
+PASS  M3 an approval whose MFA proof was stripped in transit is refused
+PASS  M4 an approval with another action's MFA proof swapped in is refused
+PASS  M5 a stolen bearer token cannot approve a payment without an MFA proof
+PASS  M6 a stolen bearer token cannot de-list or allowlist a recipient without an MFA proof
+PASS  M7 a payment to the thief's own recipient cannot even be put up for approval (not allowlisted)
+INFO  a thief holding a captured token can READ the family's payments until the token expires (15 minutes)  -> GET /payments -> 200; this is why TLS matters
+INFO  a thief holding a captured token can cancel a pending draft (no money moves)  -> POST cancel -> 200
+PASS  M8 the genuine approval (control) succeeds
+PASS  M9 replaying the recorded approval exactly (same key, same proof) makes no second approval
+PASS  M10 replaying it with a new Idempotency-Key is refused (the MFA proof is single-use)
+PASS  M11 a webhook whose body was changed after signing is refused
+PASS  M12 a correctly signed but old webhook (replayed an hour later) is refused
+PASS  M13 a webhook signed by a different provider cannot change this provider's payment
+PASS  M14 replaying a genuine webhook (same event id) has no second effect
+
+14 defended, 0 failed, 4 informational

@@ -128,7 +128,21 @@ def pending_payment(reference: str) -> tuple[str, str]:
     pid = created.json()["payment_id"]
     requested = victim.post(f"{V}/payments/{pid}/request-approval", headers={**auth, **idem()}, json={})
     assert requested.status_code == 200, requested.text
+    clear_bank_review(pid)
     return pid, requested.json()["summary_hash"]
+
+
+def clear_bank_review(pid: str) -> None:
+    """The AI risk score may send a payment to the bank's reviewer first (a busy lab household looks
+    unusual). The reviewer is a person: the admin clears it with a fresh MFA proof. The attacks below
+    are about the approval step, so the review must not be what stops them."""
+    page = attacker.get(f"{API}/payments/{pid}/bank-review", headers=admin_auth).json()
+    if page.get("status") not in ("OPEN", "INFO_REQUESTED"):
+        return
+    minted = attacker.post(f"{API}/auth/mfa/verify", headers=admin_auth, json={"code": MFA, "scope": "review_payment", "subject_id": pid})
+    assert minted.status_code == 200, minted.text
+    cleared = attacker.post(f"{API}/payments/{pid}/bank-review/decision", headers={**admin_auth, **idem(), "X-MFA-Proof": minted.json()["mfa_proof"]}, json={"decision": "CLEAR"})
+    assert cleared.status_code == 200, cleared.text
 
 
 def state(pid: str) -> str:

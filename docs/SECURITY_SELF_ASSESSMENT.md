@@ -4,6 +4,10 @@ International Track deliverable 05: **permission-tier implementation and known-r
 StudyRoute is a sandbox with synthetic data; this report says what is enforced, where, how it is
 tested, and what is *not* solved. The control-by-control threat matrix is in
 [SECURITY.md](SECURITY.md); the design is in [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md).
+The attack tools were re-run on the final code on 18 October 2026, including against the bank review
+desk (146 of 146 attacks defended, 48 of 48 browser checks); the raw output is in
+`submission/evidence/security_2026-10-18/` and the reading of it in [SECURITY_TESTING.md](SECURITY_TESTING.md).
+They were written by the team that wrote the app; no outside penetration test has been done.
 
 ## 1. Permission tiers
 

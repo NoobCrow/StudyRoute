@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1676 tests** in 109 files. Last run: `1675 passed, 1 skipped in 497.89s (0:08:17)`.
+- Backend: **1677 tests** in 109 files. Last run: `1676 passed, 1 skipped in 295.35s (0:04:55)`.
 - Frontend: **463 tests** in 41 files (Vitest).
 
 ```bash
@@ -146,7 +146,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_risk_signals.py` | 10 | The review signals are plain rules: same facts in, same signals out, and never a verdict. |
 | `tests/test_rl_env.py` | 7 | The reinforcement-learning simulator: its reward accounting and its rules, on a hand-made bank. The bank here has no model in it (the values the assistant "perceives" are written out), so these tests check the simulator and the baseline policies, not the reader. |
 | `tests/test_rl_quality.py` | 4 | A quality floor for the shipped dialogue policy, and a guard against a stale report. The simulator is an assumption (see docs/AI_RL.md), so this only checks what the training claims: on goals the policy never trained on, it beats the old behaviour (plan as soon as the amount is known) by a clear margin, and the report and manifest describe the policy that is shipped. |
-| `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
+| `tests/test_rules.py` | 11 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
 | `tests/test_saved_ai_connection.py` | 11 | Encrypted per-person BYOK persistence; all provider HTTP is mocked. |
 | `tests/test_security.py` | 12 | Headers, CORS, body limits, XSS handling (T23) and log privacy (T24). |
 | `tests/test_security_households.py` | 6 | Two unrelated households: nothing crosses between them. The household is the security boundary of the product. A second family signs in and tries to read, change or borrow the first family's records, MFA proofs and idempotency keys. Everything must answer 403 or 404 and reveal nothing. |

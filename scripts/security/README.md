@@ -7,7 +7,7 @@ about. Results and what they found: [docs/SECURITY_TESTING.md](../../docs/SECURI
 | Script | What it does |
 |--------|--------------|
 | `lab_setup.py` | Seeds the demo household **and a second, unrelated household** in a throwaway database, so cross-household attacks can be tried. |
-| `attack_probe.py` | About 100 attacks: anonymous access to every route, forged tokens (`alg=none`, algorithm confusion, wrong key, expired, refresh-as-access), one household reading or changing another's data, privilege escalation, SQL injection, XSS text, oversized and malformed bodies, CORS, webhook forgery, borrowed MFA proofs and Idempotency-Keys. Then scans every response for leaked secrets and checks the headers. |
+| `attack_probe.py` | About 150 attacks, including the bank review desk (who may open the queue, who may clear a review, MFA proofs for the wrong payment or action, replay of a used proof): anonymous access to every route, forged tokens (`alg=none`, algorithm confusion, wrong key, expired, refresh-as-access), one household reading or changing another's data, privilege escalation, SQL injection, XSS text, oversized and malformed bodies, CORS, webhook forgery, borrowed MFA proofs and Idempotency-Keys. Then scans every response for leaked secrets and checks the headers. |
 | `brute_probe.py` | Login and MFA brute force, account lockout, rate limits, `X-Forwarded-For` spoofing, user enumeration by answer and by timing. Takes about six minutes. |
 | `leak_scan.py` | Plants canary secrets through the API (passwords, tokens, the session cookie, an MFA proof, an IBAN, chat PII, a passport number in a document) and looks for each one in the database file and its log, the server log, the audit log and the responses. |
 | `mitm_probe.py` | A man in the middle: an intercepting proxy between a genuine client and the API changes requests in flight (approval hash, payment id, MFA proof) and replays recorded ones; a thief uses a captured token; forged, stale and replayed provider webhooks. |
@@ -30,6 +30,8 @@ python ../scripts/security/attack_probe.py http://127.0.0.1:8002 /tmp/lab
 
 # 3. the browser audit under the production CSP
 (cd ../web && npm ci && npm run build)
+#    (the API must trust the audit's origin: start it with CORS_ORIGINS=http://127.0.0.1:8090,
+#     or the browser sign-in is refused with 403)
 node ../scripts/security/prod_like_server.mjs 8090 8002 &
 node ../scripts/security/browser_audit.mjs http://127.0.0.1:8090
 

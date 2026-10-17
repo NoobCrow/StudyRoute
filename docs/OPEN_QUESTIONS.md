@@ -33,11 +33,28 @@ None of these may be presented as a legal limit. They are placeholders for the A
 
 | Config key | What it holds | Why it is unverified |
 |------------|---------------|----------------------|
-| `bangladesh_rules.living_expense_usd_per_month` | USD 2,000 a month | Secondary source only (LegalSeba, 2025) |
-| `bangladesh_rules.living_expense_high_cost_uplift_pct` | Up to 50% more with proof | Secondary source only |
-| `bangladesh_rules.single_ad_branch_rule` | `unknown` | An older circular; may be outdated |
-| `bangladesh_rules.education_remittance_circular_2026_09_30` | Circular of 30 Sep 2026 | Only fragments seen. Read it in full before quoting any limit |
-| `bangladesh_rules.international_card_for_education` | International cards for education spend | News report (Aug 2026) only |
+| `bangladesh_rules.living_expense_usd_per_month` | USD 2,000 a month | Secondary source only (LegalSeba, 2025). **Searched for in the official circular on 18 Oct 2026 and not found**: section 10 of FEPD-1 Circular No. 40 has no monthly USD figure. It says the AD bank releases what the institution's own estimate states. Kept as a labelled, unverified comparison figure only |
+| `bangladesh_rules.living_expense_high_cost_uplift_pct` | Up to 50% more with proof | Same: secondary source, not in the official text |
+
+Read in the official PDF on 18 Oct 2026 and now marked **verified** (FEPD-1 Circular No. 40, 30 Sep
+2026, https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf, section 10). A circular
+can be replaced, so each still carries "Confirm with your AD bank."
+
+| Config key | What the circular says | Section |
+|------------|------------------------|---------|
+| `bangladesh_rules.single_ad_branch_rule` | All purchases of foreign exchange for a course come from one AD bank branch; a change moves the file branch to branch | 10(1)(b)(viii) |
+| `bangladesh_rules.release_period_limit` | Not more than one academic year at a time; later releases consider the progress report and the current estimate | 10(1)(b)(vi), (vii) |
+| `bangladesh_rules.release_basis` | Issued as per the institution's estimate (I-20 or equivalent), in favour of the institution; board, lodging and incidentals may go to the student as an international card | 10(1)(a)(iii), (b)(i), (iv) |
+| `bangladesh_rules.international_card_for_education` | A designated debit, prepaid or credit card for education payments only, after KYC and AML checks, outside the travel quota (it cites FEPD-1 Circular No. 29 of 10 Aug 2026) | 10(4) |
+| `bangladesh_rules.education_remittance_circular_2026_09_30` | The circular itself, read for section 10 | 10 |
+
+What this does **not** settle: the PDF was read once, through text extraction, by the developer; no
+lawyer or AD bank officer has checked the reading. The engine does not enforce "one academic year at a
+time" or "one branch": they are shown as information, and the app still says "Indicative. Confirm
+with your AD bank."
+
+| Config key | What it holds | Why it is unverified |
+|------------|---------------|----------------------|
 | `bangladesh_rules.iso_purpose_code` | Purpose code in the instruction preview | Not stated until checked against the ISO 20022 external code list. The MT103 preview says so |
 | `engine.bank_cutoff_local` | 15:00 Dhaka cut-off | Assumed. Each AD bank sets its own |
 | `kyc.required_documents` | Mock KYC checklist | Real banks decide their own list |
