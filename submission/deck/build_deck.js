@@ -466,7 +466,7 @@ const next = [
   ["Verified rules", "Replace each placeholder rule with an official Bangladesh Bank source."],
   ["A real AD bank partner", "Real quotes, real KYC, and regulator-ready reports from the audit log."],
   ["Credit building", "Topic C scope we have not built: help a student build a credit history abroad."],
-  ["A real chain", "Escrow already runs in the sandbox. Next: a permissioned chain and a bank-issued token."],
+  ["A real chain", "Today the escrow runs on a simulated chain inside the app, with no network. Next: a permissioned chain and a bank-issued token."],
 ];
 slides.push({
   layout: "closing", section: "Close", title: "What comes next",
