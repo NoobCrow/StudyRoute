@@ -258,3 +258,30 @@ Two problems of the test rig, not of the application, so they are written down:
    fault; the emulated CPU is a bare qemu64 under Windows hypervisor acceleration). The VM was
    powered off by force and started again. Both containers came back on their own and the audit
    chain still verified (109 events), which doubles as a crash-recovery check.
+
+---- Fourth run, 17 October 2026: the final archive with the Next.js UI as the only UI (commit f69cfba) ----
+Recorded by hand. Source: dist/studyroute-submission.zip (sha256 953a4a98ac88..., 35,194,396 bytes) built
+from that commit, copied into the same Ubuntu 24.04 VM and unzipped in an empty directory. The old Vite
+UI (frontend/) is gone; docker-compose.yml builds web/.
+
+$ docker compose up --build -d --wait               backend and web: Healthy (web image 78 MB)
+$ python scripts/docker_smoke.py                    All smoke checks passed.
+$ docker compose exec backend python -m app.scripts.demo_flow
+59 OK lines, 0 failed, "All demo checks passed."
+$ node scripts/security/browser_audit.mjs           40 of 40 checks passed (427 requests, none to a tracker)
+csp-check.mjs: 11 of 11 pages under the generated CSP. csp-interact.mjs: 11 of 11 interactions.
+tour.mjs: the 10 screens at 1440 (10 of 10) and at 390 (10 of 10). overflow.mjs: no route scrolls
+sideways at 390.
+Packet capture of everything the containers send outside their own network, across a backend restart,
+a real prediction by the trained reader, the 390 tour and the overflow sweep: 0 packets.
+Hardened overlay from an empty volume: ReadonlyRootfs=true, CapDrop=[ALL], no-new-privileges, users
+10001 and 101, a write to /srv refused. Smoke passed, demo 59 OK lines, 0 failed; after docker compose
+down and up the audit chain still verified (70 events).
+Linux, from the unzipped archive: the whole backend suite (python:3.12-slim) 1135 passed in 5 min 31 s;
+web/ (node:22-alpine) typecheck, ESLint, Prettier clean and 360 of 360 tests (29 files).
+
+Test-rig notes, not application findings: the VM stalled once after about 40 minutes of load (SSH
+banner timeouts; no panic text in the console this time). It was powered off by force and started
+again; both containers returned on their own and the audit chain still verified (96 events). The
+browser scripts went through an SSH tunnel because QEMU's forwarded port refuses bursts of
+connections; one 390 tour crashed when the tunnel died with the stalled VM and passed when repeated.

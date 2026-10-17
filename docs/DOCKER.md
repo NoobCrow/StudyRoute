@@ -170,6 +170,16 @@ UIs' test suites also passed on Linux inside containers. Two problems of the VM,
 application (a forwarded port that refused bursts of connections, and one guest kernel panic after
 about 40 minutes of builds), are written down in `submission/evidence/docker_run.txt`.
 
+**Run again with the Next.js UI as the only UI (17 October).** After `frontend/` was removed and
+`docker-compose.yml` switched to `web/`, the archive built from commit `f69cfba` was unzipped in an
+empty directory in the same VM. `docker compose up --build` built the Next.js image (78 MB) and both
+containers became healthy; the smoke script, the 14-step demo (59 OK lines), the real-Chrome browser
+audit (40 of 40, 427 requests, none to a tracker), the CSP page and interaction checks, both screen
+tours and the hardened overlay all passed; a packet capture across a restart, the trained reader and
+the tours showed 0 packets leaving the compose network; and the whole backend suite (1135 tests) and
+the web UI's 360 tests passed on Linux inside containers. Details, and the two test-rig problems of
+the VM, are in `submission/evidence/docker_run.txt`.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs
