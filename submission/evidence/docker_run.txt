@@ -317,3 +317,45 @@ verified (93 events). The first runs of the new widget step in csp-interact.mjs 
 script clicked while Radix was still closing a sheet or a select; it now waits for each to close, and passed.
 The trained reader labels "What is the rent in Manchester?" out of scope, as expected (it never saw such
 questions); a rule decides these intents and the demo and the tests prove the answers.
+
+----------------------------------------------------------------------------------------------------
+18 October 2026: run with the trained explainer, the AI risk score and the bank review desk
+----------------------------------------------------------------------------------------------------
+Recorded by hand; the raw outputs are in submission/evidence/docker_2026-10-18/. Source: dist/studyroute-
+submission.zip built from commit 8d91cc8 (818 files, 81 MB), copied into the same Ubuntu 24.04 VM (Docker
+29.1.3, Compose 2.40.3) and unzipped in an empty directory. sha256sum -c RELEASE_MANIFEST.sha256 inside the
+VM: every file matched.
+
+$ docker compose up --build -d --wait               backend and web: Healthy
+$ python scripts/docker_smoke.py                    All smoke checks passed.
+$ docker compose exec backend python -m app.scripts.demo_flow
+FINDING: 3 checks failed (demo_flow_before_fix_3_failures.txt), and the GitHub Actions docker job failed 4
+on the same step. The trained explainer is on by default in the container (it was off in every earlier run).
+(a) It rewrote the assistant's questions and read-backs: the send-plan read-back came back as "Before
+    sending, please check if you're sending GBP 1,000 per month for 12 months. Then, if not, ask again."
+(b) The demo's checks assumed a rewrite is always accepted. On long answers (what-if, arrival guide) the
+    code checks refuse the rewrite and the engine's own text is shown (guard status "template_fallback"),
+    which is the safe path; whether a rewrite is accepted can differ from machine to machine (CI also
+    failed the rent answer, this VM did not).
+FIX (commit c9d044b): a question or a read-back is shown word for word (new test), and the demo's assistant
+checks look at the engine's figures among the facts used, for either outcome. Only the two changed backend
+files were copied into the unzipped tree before this re-run; the data volume was reset (down -v) and the
+stack rebuilt.
+After the fix: demo 66 OK lines, 0 failed, "All demo checks passed." (demo_flow_after_fix.txt).
+$ docker compose exec backend python -m app.scripts.review_demo
+All steps OK: the AI scored six payments and warned on one, a person decided it, the parent authorized it
+with MFA (review_demo.txt).
+$ node scripts/security/browser_audit.mjs http://127.0.0.1:8080   (real Chrome, host to the forwarded port)
+48 of 48 checks passed, including the Bank review screen and markup planted in the recipient name, the
+reviewer's note and the parent's reply. Test-rig note: the first run failed 3 of its own setup checks with
+HTTP 429, because the real stack allows 10 payment writes a minute and the demos had just used them; the
+audit's helper now waits and retries on 429, and the run above is the second one.
+Restart with the data kept (docker compose down, then up -d --wait): the audit chain verified before (188
+events) and after (189, the extra one is the sign-in of the check itself).
+Hardened overlay from an empty volume (docker-compose.yml + docker-compose.hardened.yml): backend and web
+ReadonlyRootfs=true, CapDrop=[ALL], users studyroute and 101, both healthy; smoke passed; demo 66 OK lines,
+0 failed (hardened_up.txt, hardened_smoke.txt, hardened_demo.txt).
+
+Not repeated in this run: the packet capture, the CSP page and widget checks, the screen tours, the backend
+and web test suites inside containers (the backend suite ran on Windows: see docs/TEST_CASES.md). The GitHub
+Actions docker job re-runs on the push of c9d044b; its result is for the team to read.

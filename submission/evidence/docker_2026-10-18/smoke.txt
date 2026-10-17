@@ -1,0 +1,32 @@
+StudyRoute smoke test against http://localhost:8080
+The web server
+  OK   GET / answers 200
+  OK   the page is served as HTML
+  OK   the app shell is present
+  OK   CSP: default-src 'self', no framing, no inline script or style
+  OK   X-Content-Type-Options: nosniff
+  OK   Referrer-Policy: no-referrer
+  OK   X-Frame-Options: DENY
+  OK   HSTS is sent
+  OK   Permissions-Policy is sent
+  OK   the server does not reveal its version
+  OK   a deep link falls back to the app
+  OK   the page references a built JavaScript asset
+  OK   the JavaScript asset is served
+  OK   assets are cached as immutable
+  OK   assets carry the security headers too
+The API through the web server
+The API
+  OK   GET /health answers 200
+  OK   health says status ok
+  OK   the stack runs in sandbox mode
+  OK   every response carries X-Sandbox: true
+  OK   GET /api/v1/sandbox lists the test scenarios
+  OK   an unauthenticated request is refused with 401
+  OK   errors use RFC 7807 problem+json
+  OK   every response carries an X-Request-Id
+  OK   API responses carry a locked-down CSP
+  OK   each API security header is sent once, not twice
+  OK   an oversized request body is refused with 413
+
+All smoke checks passed.

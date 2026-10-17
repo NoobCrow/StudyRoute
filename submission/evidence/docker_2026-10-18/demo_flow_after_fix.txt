@@ -1,0 +1,112 @@
+StudyRoute demo - sandbox, synthetic data, no real money moves.
+Banner: Sandbox - synthetic data - no real money moves (AI mode: llm)
+      OK   every API response carries X-Sandbox: true
+      OK   GET /sandbox lists the simulated parts and the test scenarios
+
+[1] Dashboard: tuition GBP 10,000 due 2026-10-31
+      OK   deadline planner answers
+      Latest send date 2026-10-22, status ON_TRACK
+
+[2] Compare: three providers ranked by true total cost
+      OK   quote created (synthetic rates)
+      OK   ranking is B 1.58%, C 1.63%, A 2.16% (got [('prov_b', '1.58'), ('prov_c', '1.63'), ('prov_a', '2.16')])
+      OK   provider C carries a shortfall warning
+      OK   the quote names the cheapest provider that arrives before the due date
+      Cheapest overall prov_b, cheapest in time prov_b (send 2026-10-19, due 2026-10-31)
+
+[3] Assistant: "Why is Provider B cheaper than A?"
+      OK   assistant answers
+      OK   number guard passed
+      OK   facts_used listed (14)
+      Provider B (synthetic) is cheaper than Provider A (synthetic). Its true total cost is 1.58% of the amount, against 2.16% for Provider A (synthetic), a gap of 0.
+      OK   the currency-drop stress test costs more for a bigger drop
+      OK   the assistant answers the what-if with the engine's numbers
+      OK   the student budget lists 20 cities from the cheapest month in taka
+      OK   its figures are labelled invented and not verified
+      OK   the arrival guide has three stages and says it is not verified
+      OK   the assistant answers the rent in a city from the engine's figures
+      OK   the assistant answers which cities fit from the engine's figures
+      OK   the assistant answers what to do on arrival from the engine's figures
+
+[4] Agent tasks: one sentence becomes a plan, and the human still decides
+      (it asked 1 question(s) first; its dialogue policy decides)
+      OK   a payment plan was prepared from one sentence
+      OK   the plan ranks Provider B first
+      OK   the assistant only PROPOSES the draft (a human must confirm)
+      OK   no payment was created by the assistant
+      OK   the smart send plan compares monthly, quarterly, termly and upfront sending
+      OK   its numbers all come from the engine
+      OK   with no amount it asks a question
+      OK   the completed values require read-back confirmation before planning
+      OK   the next message finishes the same task (it remembers what it asked)
+      OK   the trained reader read 'ten thousand pounds' and 'end of November'
+      Reader studyroute-nlu-v1: PLAN (99% sure); marked: ten thousand = amount, pounds = currency, tuition = purpose, end of November = date
+
+[5] Create a draft (Idempotency-Key makes the retry safe)
+      OK   draft created in state QUOTED
+      OK   retrying with the same key returns the same payment (no duplicate)
+
+[6] KYC not verified blocks the request (the approval button is disabled)
+      KYC status (simulated): NEEDS_DOCUMENTS
+      OK   request-approval refused with KYC_NOT_VERIFIED
+
+[7] Submit mock KYC, wait for the simulated review, allowlist the recipient
+      OK   KYC becomes PENDING (simulated review)
+      OK   KYC becomes VERIFIED
+      OK   recipient allowlisted with a fresh MFA proof
+      OK   approval requested: PENDING_APPROVAL
+      Beneficiary gets GBP 10,000.00, you pay BDT 1,625,300.00 (cost 1.58%)
+      OK   MT103 preview shows travel-rule fields
+
+[8] Approve: only a human parent with a fresh MFA proof can
+      OK   approve without MFA -> 403 MFA_REQUIRED
+      OK   the student cannot approve -> 403 FORBIDDEN
+      OK   approved with MFA
+      OK   replaying the same request is a replay: no second approval
+
+[9] Security moment: forged webhook and a prompt injection
+      OK   bad webhook signature -> 401
+      OK   chat injection is refused (policy_blocked)
+      OK   the approval is still the human's
+
+[10] Tracker: the simulated provider submits and settles
+      OK   payment reaches SETTLED (simulated)
+      OK   UETR assigned: 36789a1b-5fe3-4fba-bf5b-2f5a43ac76b1
+      Timeline: DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
+
+[11] Compliance report: evidence for the payment, sealed with a hash
+      OK   all 10 controls pass with evidence
+      OK   the report hash matches the report
+      Report hash sha256:8fb1547c357f205460e2b38f5ef1b07f761e2838d3ff4b79c6fe68fadf185422
+
+[12] Bank network: money moves between invented banks, at home and abroad
+      OK   the books balance and every nostro agrees with its mirror account
+      OK   national: BDT 1,000.00 over the instant rail settles through the clearing house
+      OK   the payer lost the amount plus the BDT 5.00 fee and the receiver gained the amount
+      OK   international: BDT to GBP through the correspondent in 3 hops
+      OK   OUR: the university receives the full GBP 1,000.00 and the parent paid BDT 165,700.00
+      OK   a rejecting beneficiary bank returns the money in full, fees included
+      OK   mock sanctions screening blocks a transfer before any money moves
+      OK   after all of it the books still balance and every mirror agrees
+
+[13] Smart escrow: living costs locked in a contract on a simulated chain
+      OK   the plan splits GBP 900.00 into three monthly tranches and locks nothing yet
+      OK   locking the funds without MFA is refused
+      OK   with a fresh MFA proof the funds are locked in the escrow contract (3 transactions)
+      OK   the first tranche is due today, so the schedule pays it by itself
+      OK   the bank's reviewer freezes it; even the parent cannot move funds while frozen
+      OK   the reviewer unfreezes it
+      OK   the parent pays the second tranche early (a human decision, so MFA)
+      OK   cancelling takes back only the tranche that was not yet due
+      OK   the audit log's head hash is anchored on the chain and the database matches it
+      Audit-only rewrite/rehash is detected; rewriting BOTH SQLite logs can pass after restart.
+
+[14] Audit log: verify the hash chain
+      OK   the blocked AI attempt is in the audit log
+      OK   chain verifies: PASS (76 events)
+      Head hash b7ff4f73400bc3904605c036b575f6035f24402adb49b0eb77465dd9ace3d418
+
+To show Verify FAIL: python -m app.scripts.tamper_audit   (then verify again)
+Undo it with:        python -m app.scripts.tamper_audit --restore
+
+All demo checks passed.

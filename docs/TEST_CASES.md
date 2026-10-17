@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1677 tests** in 109 files. Last run: `1676 passed, 1 skipped in 295.35s (0:04:55)`.
+- Backend: **1678 tests** in 109 files. Last run: `1677 passed, 1 skipped in 292.37s (0:04:52)`.
 - Frontend: **463 tests** in 41 files (Vitest).
 
 ```bash
@@ -121,7 +121,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_engine_runway_rates.py` | 8 | F9 living-cost runway and F10 synthetic rate history / best-day hint (pure engine). |
 | `tests/test_engine_student_budget.py` | 12 | F21 student budget (pure engine): the cost of a month in a city and which cities fit a budget. |
 | `tests/test_engine_validators.py` | 13 | IBAN mod-97, BIC, UK sort code and account, US ABA and UETR validators (blueprint 5.2). |
-| `tests/test_explainer_integration.py` | 13 | The small explainer inside the assistant, with a stand-in model (no model files needed). What is tested is the arrangement around the model: the engine drafts, the model may only rewrite, and anything unfaithful is replaced by the engine's own answer. The real model's quality is measured by `ml/explainer/evaluate.py` and `tests/test_explainer_model.py`. |
+| `tests/test_explainer_integration.py` | 14 | The small explainer inside the assistant, with a stand-in model (no model files needed). What is tested is the arrangement around the model: the engine drafts, the model may only rewrite, and anything unfaithful is replaced by the engine's own answer. The real model's quality is measured by `ml/explainer/evaluate.py` and `tests/test_explainer_model.py`. |
 | `tests/test_explainer_model.py` | 7 | The shipped explainer, for real: its files, its answers, and a quality floor. The fixture `tests/data/explainer_cases.json` holds synthetic held-out questions with the engine's own drafts (the test split, which the model never trained on). The full evaluation (700 answers, with the untrained baseline) is `ml/explainer/evaluate.py`, written to docs/AI_EXPLAINER.md. This file guards against a regression: a worse model, a broken export or a changed check would fail here. |
 | `tests/test_explainer_verify.py` | 12 | The checks that decide whether a rewrite of the engine's draft may be used. These are the checks that keep the small model honest: it may make an answer clearer, never different. |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |

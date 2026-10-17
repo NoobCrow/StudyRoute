@@ -189,6 +189,20 @@ passed; a packet capture across a restart, the trained reader, the widgets and t
 compose network; and the whole backend suite (1223 tests) and the web UI's 406 tests passed on Linux in containers.
 The VM stalled once and was restarted; see `submission/evidence/docker_run.txt`.
 
+**Run again with the trained explainer, the AI risk score and the bank review desk (18 October).** The archive of
+commit `8d91cc8` was unzipped in an empty directory in the same VM (its manifest matched file by file) and
+`docker compose up --build` made both containers healthy. **The demo found a real problem:** the trained
+explainer is on by default in the container and had never run in a container before; it reworded the
+assistant's questions and read-backs, and the demo's checks assumed a rewrite is always accepted, so 3 checks
+failed here and 4 failed in the GitHub Actions docker job. The fix (commit `c9d044b`: questions and read-backs are
+shown word for word; the demo checks the engine's figures, not the exact words) was copied into the unzipped
+tree and the stack rebuilt from an empty volume. Then: the 14-step demo 66 OK lines, the AI risk and bank review
+demo, the real-Chrome browser audit 48 of 48 (now including the Bank review screen), the audit chain verified
+across a restart with the data kept, and the hardened overlay (read-only filesystem, all capabilities dropped,
+smoke and demo 66 OK lines) all passed. The packet capture, the CSP page checks, the tours and the in-container test
+suites were **not** repeated. Raw outputs: `submission/evidence/docker_2026-10-18/`; the record is in
+`submission/evidence/docker_run.txt`.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs

@@ -147,8 +147,10 @@ change is written to the audit log with who, what and why.
   built and started healthy; `scripts/docker_smoke.py`, the 14-step demo and the 40-check
   real-Chrome audit under the strict CSP passed, data survived `down` and `up`, and
   `docker-compose.hardened.yml` (read-only filesystem, dropped capabilities) started and passed too.
-  **Still open:** Docker Desktop on Windows or macOS, `arm64`, and the GitHub Actions `docker` job
-  (it runs when the repository is pushed). See `docs/DOCKER.md`.
+  It was run again on 18 October 2026 with the trained explainer and the bank review desk: the demo found
+  that the explainer reworded questions (fixed in `c9d044b`), and after the fix the demo, the browser audit
+  (48 of 48) and the hardened overlay passed. **Still open:** Docker Desktop on Windows or macOS, `arm64`,
+  and the GitHub Actions `docker` job result after that fix. See `docs/DOCKER.md`.
 
 ## D. Things only a person can supply
 

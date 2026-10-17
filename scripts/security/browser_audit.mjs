@@ -17,8 +17,12 @@ const check = (name, ok, detail = "") => results.push({ name, ok: Boolean(ok), d
 
 // ---- plant hostile data through the API before the browser looks at it
 async function api(method, path, token, body, extra = {}) {
-  const r = await fetch(`${API}${path}`, { method, headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined });
-  return { status: r.status, body: await r.json().catch(() => ({})) };
+  // The real stack limits writes per minute (429 with Retry-After). Wait and try again instead of planting nothing.
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(`${API}${path}`, { method, headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...extra }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 429 && attempt < 6) { await sleep((Number(r.headers.get("retry-after")) || 20) * 1000); continue; }
+    return { status: r.status, body: await r.json().catch(() => ({})) };
+  }
 }
 const login = async (email) => (await api("POST", "/auth/login", null, { email, password: "Sandbox#2026" })).body.access_token;
 const parent = await login("parent@demo.studyroute.test");
