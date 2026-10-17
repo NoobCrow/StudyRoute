@@ -204,7 +204,8 @@ def _warnings(
             QuoteWarning(
                 "SHORTFALL_RISK",
                 f"The university may receive {amount} less than the invoice, because charges "
-                "are deducted from the amount. OUR avoids this.",
+                "are deducted from the amount. OUR avoids this modelled deduction; "
+                "confirm the accepted route and charges with the university and your AD bank.",
             )
         )
     return tuple(found)

@@ -1,5 +1,7 @@
 # Submission checklist
 
+Repair-release status: see `evidence/release/VERIFICATION.md`. Historical Docker/Windows runs below are not fresh validation of this repaired tree. Confirm registration, team provenance, judge access and credential revocation yourself.
+
 Source: the official rules, "PBCSF Appendix 2: Problem Description and Competition Rules for
 International Track" (the full PDF is reproduced, with our check against it, in
 `docs/COMPETITION_RULES.md`), and the CMU Thailand announcement. Check the official site once more for changes:
@@ -56,11 +58,11 @@ nothing in this repository can confirm what the organisers received.
 | # | Deliverable | Required | Where it is in this repository | Still yours |
 |---|-------------|----------|--------------------------------|-------------|
 | 01 | **Technical documentation**: system architecture, core algorithm description, security design | Yes | `docs/TECHNICAL_DOCUMENTATION.md` (links `docs/SECURITY.md`) | Export to PDF if you want one file |
-| 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Replace `[Team name]` and `[repository link]` on slides 1 and 12, then rehearse to 10 minutes |
-| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | Shot-by-shot script in `submission/VIDEO_SCRIPT.md` (about 4:25) | Record it |
-| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Create the GitHub repository and push** (see below); add its link to the e-mail |
+| 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Confirm the retained original team attribution and private-fork link; rehearse to 10 minutes |
+| 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | `submission/StudyRoute_Demo.mp4` and captions (actual repaired local UI/API, about 95 seconds); script in `submission/VIDEO_SCRIPT.md` | Watch it; add narration or a longer financial workflow if useful |
+| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Safely update the existing fork** using `GITHUB_PUSH_BN.md`; add the accessible link to the e-mail |
 | 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Yes | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
-| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | The demo video (see 03) |
+| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | Watch the included demo (03); verify the evidence scope |
 
 Scoring (all topics): **task completion 40%, security and compliance 30%, innovation and
 interaction 30%**. Topic C is described as real financial pain points of international students and
@@ -70,25 +72,21 @@ multi-currency management are listed as next steps, not built.
 
 ### Putting the code on GitHub (deliverable 04)
 
-```bash
-git remote add origin https://github.com/<you>/<repo>.git     # create the empty repository first
-git push -u origin main
-```
-
-Run `python scripts/scan_repo.py` first (it must be clean). Make the repository public or give the
-judges access; put the link in the submission e-mail.
+Use `GITHUB_PUSH_BN.md` for the existing `redwan786/StudyRoute` fork. Do not add another
+remote blindly or overwrite teammates' uncommitted work. Revoke exposed credentials first,
+scan before committing and give judges access to a private repository. Do not force-push.
 
 ## 3. Technical gate (all must pass before you send)
 
-- [x] From a clean clone on a machine with Docker: `docker compose up --build`, open
-      http://localhost:8080, sign in with a demo account. Done on 15 Oct 2026 and again on 17 Oct 2026 from the unzipped
+- [ ] Re-test this repair from a clean clone on a machine with Docker: `docker compose up --build`, open
+      http://localhost:8080, sign in with a demo account. Inherited evidence reports runs on 15 and 17 Oct 2026 from the unzipped
       archive in a Linux VM (Docker 29.1.3, Compose 2.40.3); details in `docs/DOCKER.md`. Repeat it
       on your own machine if you can (Docker Desktop on Windows was not tried).
-- [x] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
+- [ ] Re-run `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
       (also with `docker-compose.hardened.yml`).
-- [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
-- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1223 passed on Windows and on Linux in a container; ruff clean)
-- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026, final: 439 unit and accessibility tests, 24 browser tests; the unit tests ran on Linux in a container earlier, when there were 406)
+- [ ] Re-run `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
+- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (current repair: use the exact local results in `evidence/release/VERIFICATION.md`; not a new Windows/container claim)
+- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (current repair: 439 Vitest tests and 24 desktop/mobile production-CSP browser tests; browser API fixtures are mocked, while the recorded demo uses the actual local API)
 - [ ] CI is green on the pushed commit (backend, web, contracts, secret scan, dependency audit, docker).
 - [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.
 - [ ] Every screen shows the sandbox banner (sign-in page included).
@@ -97,14 +95,12 @@ judges access; put the link in the submission e-mail.
       "Model: ..." badge in the chat. Otherwise say "template mode".
 - [x] Regenerate the evidence if the code changed: `python -m app.scripts.export_evidence --tamper` (done 17 Oct 2026 against the final code)
       (needs a running API with fresh demo data).
-- [ ] Fill in the placeholders in `PROJECT_DESCRIPTION.md` and `DECK_OUTLINE.md` (team name,
-      members, contact).
+- [ ] Confirm the retained team name, members, contact, registration and ownership in `PROJECT_DESCRIPTION.md`, `REGISTRATION.md` and `DECK_OUTLINE.md`; a private fork does not transfer authorship.
 - [ ] Freeze the code. Commit. Tag the commit you submit.
 
 ## 4. Build and send
 
-- [ ] `python scripts/personalize.py --team "..." --repo "https://github.com/..."` fills the team name
-      and repository link into the documents and the deck (add `--members "A (University), B (University)"`).
+- [ ] Review attribution and repository link in the included deck. Do not run personalization with invented team details.
 - [ ] `python scripts/preflight.py` prints OK, FAIL and OPEN lines. Fix every FAIL; every OPEN line
       is something only a person can do (team, registration, GitHub, Docker, video, the e-mail).
 - [ ] `python scripts/make_submission.py` writes `dist/studyroute-submission.zip` (refuses to build

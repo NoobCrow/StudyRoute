@@ -1,4 +1,12 @@
+> **Hardening v2:** See [verified changes and limitations](docs/HARDENING_V2.md).
+> The university-route catalogue is deliberately narrow; unknown routes are not verified.
+
 > **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
+
+> **Reviewed repair release (17 Oct 2026).** Read [release fixes and limits](docs/RELEASE_FIXES.md),
+> [current verification evidence](submission/evidence/release/VERIFICATION.md), and
+> [নিরাপদ GitHub push নির্দেশনা](GITHUB_PUSH_BN.md) before uploading. Previously exposed credentials
+> still require owner-side revocation. No competition score is guaranteed.
 > Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
 > the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
 
@@ -180,15 +188,15 @@ The whole app runs in `APP_ENV=sandbox` by default. In that mode:
 The **Smart escrow** screen puts tuition or living costs into a real Solidity contract that pays on the
 dates you choose. The parent decides (with MFA), the contract enforces, the bank's reviewer can
 freeze an escrow but can never move its funds, and the AI has no access. A second contract anchors
-the audit log's head hash outside the database, so an attacker who rewrites the log and recomputes
-every hash is still caught. It all runs on an **in-memory EVM** inside the backend: no network, no real
+the audit log's head hash in a simulated chain whose replay log is stored in the same SQLite database.
+This detects an audit-only rewrite, NOT a coordinated rewrite of both logs by a database owner. It all runs on an **in-memory EVM** inside the backend: no network, no real
 tokens, nothing is money. Only amounts, dates and hashes go on the chain, never a name or account number.
 Design, flows, API, tests and honest limits: [docs/SMART_ESCROW.md](docs/SMART_ESCROW.md).
 
 <table>
 <tr>
 <td valign="top" width="50%"><a href="submission/screenshots/27-smart-escrow.png"><img src="submission/screenshots/27-smart-escrow.png" alt="The Smart escrow screen: a live escrow with its tranches, the on-chain proof and a plan waiting for MFA" width="100%"></a><br><b>Smart escrow</b><br><sub>A live escrow pays on its dates; the proof lists the contract, wallets and transactions, never a name or account number.</sub></td>
-<td valign="top" width="50%"><a href="submission/screenshots/28-audit-anchor.png"><img src="submission/screenshots/28-audit-anchor.png" alt="The audit anchor card after anchoring and verifying" width="100%"></a><br><b>Audit anchor</b><br><sub>The audit log's head hash is written on the chain, where a database editor cannot reach it.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/28-audit-anchor.png"><img src="submission/screenshots/28-audit-anchor.png" alt="The audit anchor card after anchoring and verifying" width="100%"></a><br><b>Audit anchor</b><br><sub>Local consistency check only: a database owner can rewrite both the audit and chain replay logs.</sub></td>
 </tr>
 </table>
 
@@ -311,7 +319,7 @@ NVIDIA RTX 5060 Ti with 35,588 messages: generated ones, plus real bank-customer
 Banking77 (CC BY 4.0). It is **not** trusted with anything: it only proposes, and the engine, the
 deterministic parser and the human approval stay in charge.
 
-Measured on 113 messages written by hand after the model was frozen (evaluated once, so treat it as
+Measured on 113 messages written by hand after the model was frozen (now reproduced, not a new blind study, so treat it as
 a small sample): the right intent 88.5% of the time against 61.1% for the old rules, a plan request
 read completely and exactly 100% against 57.6%, and attacks blocked 92.9% against 28.6%. Full tables,
 the dataset card, the limits and how to retrain: [docs/AI_AGENT.md](docs/AI_AGENT.md) and
@@ -330,12 +338,12 @@ date is settled), and the network only ranks the legal ones, so a corrupted or b
 cannot make the assistant plan without an amount. The weights are JSON, checked against a SHA-256
 manifest and run in NumPy; the audit event records the policy, its hash and the action.
 
-On 6,000 simulated test conversations: return +1.358 against +1.164 for the old behaviour, wrong
+For the **raw learned policy, before the mandatory runtime read-back envelope**, on 6,000 simulated test conversations: return +1.358 against +1.164 for the old behaviour, wrong
 plans 0.8% against 2.8%, 1.17 questions a conversation against 0.44. The best hand-written rule
-reaches +1.343 with 1.97 questions and no wrong plans, so this is a trade-off, not a free lunch. The
+reaches +1.343 with 1.97 questions and 1 wrong plan in 6,000 (0.017%), so this is a trade-off, not a free lunch. The
 parents and the rewards are my assumptions and the policy has not met a real person; the limits are
 listed in [docs/AI_RL.md](docs/AI_RL.md) and the tables in [docs/AI_RL_EVALUATION.md](docs/AI_RL_EVALUATION.md).
-Set `DIALOGUE_MODE=off` to plan as soon as the amount is known.
+The API now requires clarification and read-back confirmation in trained-dialogue mode; simulator numbers above do not measure that extra safety layer. `DIALOGUE_MODE=off` explicitly selects the legacy plan-as-soon-as-known path, not the reviewed default.
 
 ### Adding the AI
 

@@ -11,9 +11,9 @@
     "val": 2279
   },
   "latency_cpu": {
-    "median_ms": 6.37,
+    "median_ms": 18.02,
     "n": 436,
-    "p95_ms": 10.48
+    "p95_ms": 57.28
   },
   "model": {
     "base_model": "BAAI/bge-small-en-v1.5",
@@ -44,6 +44,62 @@
   },
   "model_bytes": 33826615,
   "model_sha256": "94146e8c4b7292a1ac79365028c7765692a0f8a0aaedd01b85769c82f7fa69c8",
+  "reproduction": {
+    "blind_status": "Frozen development holdout, now reproduced multiple times; NOT a new independent blind study.",
+    "command": "python ml/evaluate.py",
+    "dataset_sha256": {
+      "blind": "ed6b4f24b5ed274cf3f8d071915a956036b012b7659aad7a9b6d7597587394b5",
+      "hard": "0ab7372f4103ffcb4615ea2ba4d6888d6d4eaa47e943626098c952f7b232347a",
+      "natural": "e9fea242102a802034e76fd73d584c043fcb5033b8df3df8109a45c5b4d48e7f",
+      "oos_public": "d62e49bba40a31fbae93696ab7666de131abd07a7e62b528b7419d5e6ef1c177",
+      "test": "dec18d394bf87be0d92d7d7cff6705992609fa4f46d64510c283f6dd0aa382b5",
+      "test_heldout": "8aa98c1d4b013118fd3803b47ce2b6c1dedde6277c3a72503b757bddcefe6989"
+    },
+    "evaluation_script_sha256": "3128ce7e7159a7077285b43bdc571404e09a019605a1d92676ba186874820e84",
+    "generated_utc": "2026-10-17T17:46:25.245522+00:00",
+    "numpy": "2.5.4",
+    "onnxruntime": "1.31.0",
+    "python": "3.13.14",
+    "reference_date": "2026-10-15",
+    "scope": "NLU routing and slot extraction, not end-to-end dialogue or financial authorization",
+    "source_sha256": {
+      "backend/app/ai/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "backend/app/ai/arithmetic.py": "5d949db12bea23e7d8f0119f6d0098cf9dea9a613a07451af10ee4d8c333fb28",
+      "backend/app/ai/claim_checks.py": "a93a6393bbfc73678a133d3b848b0e36c2edcfc7f4f60f7617f902b2f481a953",
+      "backend/app/ai/cloud.py": "d291971ab420238c22f3bc70c300d8a7605d0684c774b35b33f09fe616c8a4ec",
+      "backend/app/ai/context.py": "708c3f570374077c442e04989080b530166374a72c63f90c1e8f452bc3d8e328",
+      "backend/app/ai/conversation.py": "168b316db98d0f778e1ae6001d40155f272a4bb33c4cbedfbd2c5ae146dad8c6",
+      "backend/app/ai/dialogue/__init__.py": "1e1c91682bf044581833ce07dfd0d9f6f13a02744d01f15340016a686c0a08ae",
+      "backend/app/ai/dialogue/bridge.py": "ffa92e1727d8b7fbff2d617cb7f972c726366f15feb12b66bdb36f9cb758c412",
+      "backend/app/ai/dialogue/policy.py": "bde1abd3f911478fc9da139db0ba30d61cfde75a8c3546ed718202a4ff6921ec",
+      "backend/app/ai/dialogue/state.py": "f968f34ac55a14312350ea05af7cbb85687b930b779b26541a3e25ee95b2df57",
+      "backend/app/ai/facts.py": "987a46cbd984033153c4008d52581951ad279ddcce6460ef211dd94d7adc1536",
+      "backend/app/ai/facts_builder.py": "acc4bf1f458c291113fc97e88cb5a6f4a8dc106f14b934990222eacffd403706",
+      "backend/app/ai/guards.py": "561287e3551b131e48061e7b82adc370defde7a985d0ba56f508cabc450b3ee1",
+      "backend/app/ai/intents.py": "9bd5558741e1db3ed032d8f39beda8d39c843d6a463dcbd9d8584c23abf84a15",
+      "backend/app/ai/llm.py": "2af8d3027d9617f4d6478688e78594a246c42afaeb3af312d6b485db74a0eddc",
+      "backend/app/ai/llm_anthropic.py": "002e0e11132917005047bc5c37da10ac8551a48536eb3f889619a5966872032b",
+      "backend/app/ai/llm_openai.py": "a5092c55df8d96a127ba138cfd74cc091b1036f151cd6e45abac8d4e790b244b",
+      "backend/app/ai/masking.py": "1931fa8a082d3e57f9e2151cac7c300aa6bb5bfa7add371f6569294814868b35",
+      "backend/app/ai/nlu/__init__.py": "e788580eec460af70f474d8e15173123c410a304d5cf4b5410674ec51d846342",
+      "backend/app/ai/nlu/normalize.py": "a343e44754eb84e606eb981fd87608ad48df2d48d971c3ee8f2b0b223979465c",
+      "backend/app/ai/nlu/runtime.py": "1011f443bb0281becfd6392deb2847ffbe9d2192d850e091b19add1cae84f6b1",
+      "backend/app/ai/nlu/schema.py": "c86de6242ef4d11f782e6783c5ac9e904bafc1e23c455875849fd1a48f53499b",
+      "backend/app/ai/nlu/slots.py": "e371252f92599ee1d7ef5ee7513509e7af9a53ae5c4459efe2844efd65262a28",
+      "backend/app/ai/nlu/tokenizer.py": "907b94fd7804cc78f82073dd8f409652e39bc0365256227a05fd1380e2f4d4b9",
+      "backend/app/ai/nlu/understanding.py": "fb0f3c251d1db18635d5a4155422165bd6819121fca8f1507789ad42ecb82e7a",
+      "backend/app/ai/number_guard.py": "3675230a3230072c54cc591526ab701464be1af1e2c2be036a9435db08a9d1f9",
+      "backend/app/ai/orchestrator.py": "b5570e200c6ca305232d68014824946cc2caef7b1c74f15fa3d202245cbdc421",
+      "backend/app/ai/policy.py": "d9d8aa498e18681a0fc285fdc1a33053f91c2ae0145b9c0ed1b6977c8348bea9",
+      "backend/app/ai/prompt.py": "b003d4449473491b9bccf28f1ad312636788702f6ba409ebf13366b2c9452ea3",
+      "backend/app/ai/relevance.py": "268856943d05032e8e0ae6ce640b04ae68ef0616d5c5bdb38af7e6039e519ca0",
+      "backend/app/ai/request_parser.py": "7a6e758743867724b5415baaad43ada7ae9d8a6a27679f7ce76a83e97809ab8d",
+      "backend/app/ai/student_topic.py": "61fd3d19d95ee8b56e7d3077931c28414202bb688b345092591fbc2b90a938f3",
+      "backend/app/ai/tasks.py": "3a457061222579d43d9e43e07760ea270bf99369a2bc14b28ab0f4f36b764a2c",
+      "backend/app/ai/templates.py": "7ff98b07bc2d19baa95c02d5a7ade7f4d5b8552e419c2986ee7b97494cbd9710",
+      "backend/app/ai/tools.py": "16728f159bc8c5bd909c3ce8db6a2fada695880f1a6bd42e0c65d1beaf057814"
+    }
+  },
   "results": {
     "agent": {
       "blind": {
@@ -529,12 +585,12 @@
         "attack_n": 1821,
         "benign_blocked": 0.005227049983665469,
         "by_group": {},
-        "macro_f1": 0.8644563632711171,
+        "macro_f1": 0.8645610331662823,
         "n": 11004,
-        "routing_accuracy": 0.886223191566703,
+        "routing_accuracy": 0.8863140676117776,
         "routing_ci95": [
           0.8802,
-          0.892
+          0.8921
         ],
         "slots": {
           "amount": {

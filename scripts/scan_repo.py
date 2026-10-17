@@ -9,13 +9,14 @@ Synthetic data is expected: the .test domain and the documented example IBAN are
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKIP_SUFFIXES = {".png", ".docx", ".ico", ".svg", ".lock", ".json"}
+SKIP_SUFFIXES = {".png", ".docx", ".ico", ".svg", ".lock", ".onnx", ".gz", ".pptx", ".mp4", ".webm"}
 SKIP_FILES = {
     "scripts/scan_repo.py",  # defines the patterns
     "backend/tests/test_repo_scan.py",  # plants fake secrets to prove the scanner catches them
@@ -27,6 +28,8 @@ ALLOWED_EMAIL_DOMAINS = (".test", "example.org", "example.com")
 
 # Exact (file, rule) pairs that are deliberate: synthetic fixtures and documentation text.
 ALLOWED: dict[str, set[str]] = {
+    "backend/tests/test_ai_cloud.py": {"secret assigned a literal value"},  # synthetic test key
+    "backend/tests/test_saved_ai_connection.py": {"secret assigned a literal value"},  # synthetic test key
     "CLAUDE.md": {"TODO marker"},  # the rule "no TODO left silently"
     "docs/BLUEPRINT.md": {"TODO marker", EMAIL_LABEL},  # organiser contact is public
     "docs/COMPETITION_RULES.md": {EMAIL_LABEL},  # the organiser's public contact, as printed in the rules
@@ -43,13 +46,14 @@ ALLOWED: dict[str, set[str]] = {
 RULES: list[tuple[str, re.Pattern[str]]] = [
     ("private key block", re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----")),
     ("Anthropic or OpenAI style API key", re.compile(r"\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}")),
+    ("Hugging Face token", re.compile(r"\bhf_[A-Za-z0-9]{20,}\b")),
     ("AWS access key id", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("GitHub token", re.compile(r"\bgh[pousr]_[A-Za-z0-9]{30,}\b")),
     ("JWT", re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}")),
     (
         "secret assigned a literal value",
         re.compile(
-            r"(?i)\b(?:api[_-]?key|secret|passwd|password|token)\b\s*[=:]\s*[\"'][A-Za-z0-9+/_=-]{24,}[\"']"
+            r"(?i)\b(?:api[_-]?key|[a-z0-9_-]*secret|jwt[_-]?signing[_-]?key|encryption[_-]?key|passwd|password|token)\b[\"\']?\s*[=:]\s*[\"'][A-Za-z0-9+/_=-]{24,}[\"']"
         ),
     ),
     ("passport-like number", re.compile(r"(?i)\bpassport\b[^\n]{0,20}\b[A-Z]{1,2}\d{7,8}\b")),
@@ -61,25 +65,45 @@ EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+)")
 IGNORED_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__", "dist", "data",
     ".pytest_cache", ".ruff_cache", "htmlcov", "coverage",
+    ".next", "out", "test-results", "playwright-report", ".shots", ".cache",
 }  # fmt: skip
 
 
+GENERATED_FILES = {"next-env.d.ts", "security_headers.conf"}
+
+
+def excluded(path: Path) -> bool:
+    """Generated artifacts and dependency trees, never source, even if accidentally tracked."""
+    relative = path.relative_to(ROOT)
+    # ml/data is versioned benchmark input, unlike the runtime's data directory.
+    parts = relative.parts
+    ignored = any(part in IGNORED_DIRS - {"data"} for part in parts)
+    runtime_data = "data" in parts and not (len(parts) > 1 and parts[:2] == ("ml", "data"))
+    return (ignored or runtime_data or path.is_symlink() or path.name in GENERATED_FILES
+            or path.name.endswith(".tsbuildinfo"))
+
+
 def _walk() -> list[Path]:
-    """Fallback for an unzipped archive (no .git): everything except what .gitignore hides."""
+    """Pruned fallback for source ZIPs: do not recurse into dependency/build trees.
+
+    Private environment files are deliberately NOT ignored: scanning must fail if one is present.
+    """
     found = []
-    for path in ROOT.rglob("*"):
-        relative = path.relative_to(ROOT)
-        if any(part in IGNORED_DIRS for part in relative.parts) or not path.is_file():
-            continue
-        if path.name == ".env" or (path.name.startswith(".env.") and path.name != ".env.example"):
-            continue
-        found.append(path)
+    for base, dirs, names in os.walk(ROOT, followlinks=False):
+        dirs[:] = [d for d in dirs if not excluded(Path(base) / d)]
+        found.extend(Path(base) / name for name in names if not excluded(Path(base) / name))
     return found
 
 
 def tracked_files() -> list[Path]:
     """Files git tracks (plus new, unignored ones); the plain file tree when git is unavailable."""
     try:
+        top = subprocess.run(
+            ["git", "rev-parse", "--show-toplevel"], cwd=ROOT,
+            capture_output=True, check=True,
+        ).stdout.decode().strip()
+        if Path(top).resolve() != ROOT.resolve():
+            return _walk()
         out = subprocess.run(
             ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],  # noqa: S607
             cwd=ROOT,
@@ -88,7 +112,7 @@ def tracked_files() -> list[Path]:
         ).stdout.decode()
     except (FileNotFoundError, subprocess.CalledProcessError):
         return _walk()
-    return [ROOT / name for name in out.split("\0") if name]
+    return [ROOT / name for name in out.split("\0") if name and not excluded(ROOT / name)]
 
 
 def scan_text(relative: str, text: str) -> list[str]:
@@ -97,7 +121,9 @@ def scan_text(relative: str, text: str) -> list[str]:
     hits: list[str] = []
     for number, line in enumerate(text.splitlines(), start=1):
         for label, pattern in RULES:
-            if pattern.search(line) and label not in allowed:
+            if (pattern.search(line) and label not in allowed
+                    and not (label == "secret assigned a literal value"
+                             and re.search(r'"token"\s*:\s*"0x[0-9a-fA-F]{40}"', line))):
                 hits.append(f"{relative}:{number}: {label}")
         for match in EMAIL.finditer(line):
             domain = match.group(1).lower()
@@ -108,6 +134,10 @@ def scan_text(relative: str, text: str) -> list[str]:
 
 def scan_file(path: Path) -> list[str]:
     relative = path.relative_to(ROOT).as_posix()
+    if path.name == "dev_secrets.json" or path.name == ".env" or (
+        path.name.startswith(".env.") and path.name != ".env.example"
+    ) or path.suffix.lower() in {".pem", ".key", ".p12", ".pfx"}:
+        return [f"{relative}: private credential file"]
     if relative in SKIP_FILES or path.suffix.lower() in SKIP_SUFFIXES or not path.is_file():
         return []
     try:

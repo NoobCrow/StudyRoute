@@ -184,7 +184,7 @@ A parent in Bangladesh paying a student's tuition and living costs abroad faces 
 | F9     | Living-cost runway           | Shows how many months the sent amount covers given monthly costs.                                                      | Stretch      |
 | F10    | Rate alert and best-day hint | Shows quote history and suggests waiting or sending now. Must be labelled as indicative.                               | Stretch      |
 | F11    | Multi-corridor               | UK, US, Australia, Canada, Germany, Malaysia, with different checklists and rails. Every other country is also a destination, on generated defaults (13.1). | Stretch      |
-| F16    | Smart escrow and audit anchor | Tuition and living costs locked in Solidity contracts on a simulated chain and paid on their dates; MFA to lock, pay early or cancel; reviewer freeze only; audit head hashes anchored outside the database. See docs/SMART_ESCROW.md. | Stretch      |
+| F16    | Smart escrow and audit anchor | Tuition and living costs locked in Solidity contracts on a simulated chain and paid on their dates; MFA to lock, pay early or cancel; reviewer freeze only; audit head hashes checked against a simulated chain sharing the database (not an external trust root). See docs/SMART_ESCROW.md. | Stretch      |
 
 2.4 Non-goals
 

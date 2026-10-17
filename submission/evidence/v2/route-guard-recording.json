@@ -1,0 +1,20 @@
+{
+  "started_utc": "2026-10-17T18:56:46.186Z",
+  "finished_utc": "2026-10-17T18:57:24.900Z",
+  "events": [
+    {
+      "step": "Real sandbox sign-in",
+      "status": "PASS"
+    },
+    {
+      "step": "Explicit institution declaration saved through actual UI/API",
+      "status": "PASS"
+    },
+    {
+      "step": "Direct-bank tuition quote blocked by source-backed server response",
+      "status": "PASS"
+    }
+  ],
+  "page_errors": [],
+  "scope": "Actual local UI and API with production CSP. Synthetic recipient/account. No mocked API, no real bank/Flywire integration, no real money."
+}

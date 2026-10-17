@@ -1,5 +1,9 @@
 # Reinforcement learning: when to ask, when to confirm, when to plan
 
+> Repair-release scope: these figures describe the raw model in the synthetic simulator. The API
+> now enforces clarification and read-back before planning; its user cost and accuracy have NOT
+> been measured in a real-user study. Do not claim these raw-model figures measure the safety envelope.
+
 The trained reader ([AI_AGENT.md](AI_AGENT.md)) tells the assistant what a parent wants and which
 words carry an amount, a date or a period. What it should do next is a separate question, and it is
 a sequential decision with a real trade-off: every question costs the parent time, but a wrong
@@ -102,12 +106,12 @@ On 6,000 simulated test conversations (95% intervals in the generated report):
 |---|---:|---:|---:|
 | before: plan as soon as the amount is known | +1.164 | 2.8% | 0.44 |
 | best hand-written rule (found by search on validation goals) | +1.343 | 0.0% | 1.97 |
-| **RL policy (shipped)** | **+1.358** | **0.8%** | **1.17** |
+| **Raw RL model (before API review)** | **+1.358** | **0.8%** | **1.17** |
 
 * The learned policy is clearly better than the old behaviour (+0.19) and matches or slightly
   beats the best hand-written policy while asking **40% fewer questions**, by accepting a
   small rate of wrong plans. It is a different trade-off, not a free lunch: the hand-written policy
-  has no wrong plans.
+  has 1 wrong plan in 6,000 (0.017%, hidden by one-decimal rounding).
 * What it learned, by what it does first: ask for the amount when it is missing (100%), ask for the
   date when only the date is missing (80%), and plan straight away when both readers agree on
   everything (95%). Over whole conversations it reads values back in about a quarter of them.

@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1652 tests** in 107 files. Last run: `1652 passed in 413.09s (0:06:53)`.
-- Frontend: **462 tests** in 41 files (Vitest).
+- Backend: **1676 tests** in 109 files. Last run: `1675 passed, 1 skipped in 497.89s (0:08:17)`.
+- Frontend: **463 tests** in 41 files (Vitest).
 
 ```bash
 cd backend && pytest -q
@@ -126,6 +126,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_explainer_verify.py` | 12 | The checks that decide whether a rewrite of the engine's draft may be used. These are the checks that keep the small model honest: it may make an answer clearer, never different. |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
 | `tests/test_gallery.py` | 5 | app/scripts/gallery.py: the parts that are plain logic (the photographs need a browser). |
+| `tests/test_institution_routes.py` | 12 | Synthetic institution-policy regressions; no account identity or bank validation. |
 | `tests/test_ledger.py` | 12 | The ledger: normal-side balances, overdraft refusal, reversals, integrity checks, append-only. |
 | `tests/test_make_submission.py` | 5 | scripts/make_submission.py: the archive a judge unzips must build in a Linux container. |
 | `tests/test_ml_dataset.py` | 8 | The training data and the model that was trained on it are consistent, and nothing leaks. The data lives in ml/data/generated (built by ml/data/build_dataset.py). The test sets must never share a message with the training data, and the shipped model must record the exact data it was trained on. |
@@ -136,6 +137,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_nlu_understanding.py` | 15 | How the trained reader and the rules are combined. A scripted reader stands in for the model, so these tests check the combining rules themselves, not the model's quality. |
 | `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
+| `tests/test_release_hardening.py` | 6 | Regressions for the independently reviewed release; all credentials below are synthetic. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_response_language.py` | 1 | Current-turn language selection, independent of old chat language. |
 | `tests/test_risk_history.py` | 7 | The two ways of counting earlier payments agree: the fast one used in training and a plain loop. Training counts millions of rows with a sort and a search (``ml/aml/history.py``). The live app asks the database the same question for one payment. If the fast way ever disagreed with the plain meaning ("earlier rows of the same key within the window"), the model would be trained on numbers it never sees in use. This test checks the fast way against a brute-force loop on random data. |
@@ -181,7 +183,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/components/payment/payments-list.test.tsx` | 26 |
 | `web/components/payment/report-screen.test.tsx` | 6 |
 | `web/components/providers/auth-provider.test.tsx` | 8 |
-| `web/components/recipients/recipients-screen.test.tsx` | 25 |
+| `web/components/recipients/recipients-screen.test.tsx` | 26 |
 | `web/components/review/review.test.tsx` | 16 |
 | `web/lib/api/client.test.ts` | 9 |
 | `web/lib/canonical.test.ts` | 4 |

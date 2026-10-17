@@ -10,7 +10,8 @@ how the assistant should proceed with a payment request that may be incomplete o
 None of these moves money. RUN only builds a quote and a plan card; the person still creates the
 draft and a human still approves with MFA. And the network is never trusted with the rules: the
 legal actions are computed here, by plain code, from the state. The network can only rank them.
-Training and the API both import this file, so they cannot disagree about the state or the rules.
+Training and the API share these baseline rules. The API adds a stricter mandatory read-back
+envelope (reviewed_action); historical raw-policy simulator metrics do not include that envelope.
 """
 
 from __future__ import annotations

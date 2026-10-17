@@ -15,6 +15,9 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${PORT}`,
     channel: "chrome",
     trace: "retain-on-failure",
+    launchOptions: process.env.CHROME_PATH
+      ? { executablePath: process.env.CHROME_PATH }
+      : undefined,
   },
   projects: [
     {

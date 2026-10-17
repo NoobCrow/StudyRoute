@@ -14,7 +14,7 @@ from app.core import errors
 from app.core.clock import Clock, iso_utc
 from app.core.crypto import FieldCipher, sha256_ref
 from app.core.ids import new_id
-from app.domain import auth
+from app.domain import auth, institution_routes
 from app.domain.compliance import is_sanctions_hit
 from app.domain.constants import Decision, RecipientType
 from app.domain.rbac import Actor, Perm, authorize
@@ -36,6 +36,7 @@ class RecipientCreate:
     iban: str | None = None
     account_number: str | None = None
     routing_code: str | None = None
+    institution_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -141,6 +142,25 @@ class RecipientService:
             "created_at": iso_utc(row.created_at),
         }
 
+    def enforce_route(self, session: Session, actor: Actor, row: Recipient, purpose: str) -> None:
+        if not institution_routes.is_blocked(session, row, purpose):
+            return
+        self._audit.append(
+            session,
+            actor_type=actor.audit_type,
+            actor_id=actor.user_id,
+            action="institution.route_blocked",
+            recipient_id=row.id,
+            decision=Decision.BLOCKED,
+            reason_code="INSTITUTION_ROUTE_UNSUPPORTED",
+            detail="MMU self-funded tuition requires official Flywire route; no integration.",
+        )
+        raise errors.RouteNotSupported(
+            institution_routes.MESSAGE,
+            persist=True,
+            extra={"institution_policy": institution_routes.POLICY},
+        )
+
     # --- writing ----------------------------------------------------------------------
     def block_if_sanctioned(
         self, session: Session, actor: Actor, rules: Rules, name: str, recipient_id: str | None
@@ -169,6 +189,9 @@ class RecipientService:
             raise errors.Forbidden("Recipients belong to a paying parent.")
         if payload.type not in {t.value for t in RecipientType}:
             raise errors.ValidationFailed("Recipient type must be UNIVERSITY or STUDENT.")
+        institution_routes.validate_declaration(
+            payload.institution_id, payload.country, payload.type
+        )
         corridor = rules.open_corridor(payload.country)
         name = clean_name(payload.display_name)
         self.block_if_sanctioned(session, actor, rules, name, None)
@@ -196,6 +219,7 @@ class RecipientService:
         )
         session.add(row)
         session.flush()
+        institution_routes.bind(session, row, payload.institution_id, now)
         self._audit.append(
             session,
             actor_type=actor.audit_type,
@@ -243,6 +267,8 @@ class RecipientService:
             )
         if display_name is None and allowlisted is None:
             raise errors.ValidationFailed("Nothing to change: send display_name or allowlisted.")
+        # Preserve a legacy name-derived binding BEFORE the name can be changed.
+        institution_routes.bind(session, row, None, now)
         changes: list[str] = []
         if display_name is not None:
             name = clean_name(display_name)
@@ -258,6 +284,7 @@ class RecipientService:
             row.allowlisted_by = actor.user_id if allowlisted else None
             row.allowlisted_at = now if allowlisted else None
             changes.append("allowlisted" if allowlisted else "removed from allowlist")
+        institution_routes.bind(session, row, None, now)
         row.updated_at = now
         proof.used_at = now
         self._audit.append(

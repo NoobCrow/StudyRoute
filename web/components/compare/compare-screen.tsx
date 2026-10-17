@@ -200,6 +200,22 @@ export function CompareScreen() {
         Rank providers by the true total cost, including the hidden exchange-rate margin and the
         fees taken on the way.
       </PageHead>
+      <Notice tone="warn">
+        These are synthetic comparisons, not accepted university payment instructions. Verify the
+        institution&apos;s official route before comparing costs. For example, Manchester
+        Metropolitan University says it no longer accepts direct bank transfers and directs students
+        to Flywire. The server blocks direct-bank tuition for declared or name-recognised MMU
+        recipients. Other institutions remain unverified. No Flywire integration or live bank
+        quotes.{" "}
+        <a
+          className="underline"
+          href="https://www.mmu.ac.uk/student-life/finance/paying-university-fees"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Official MMU guidance
+        </a>
+      </Notice>
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_21.25rem]">
         <Card aria-labelledby="quote-title">
           <CardHeader>

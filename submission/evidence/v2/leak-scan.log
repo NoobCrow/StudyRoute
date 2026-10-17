@@ -1,0 +1,56 @@
+sinks: database 3,733,848 bytes, log 73,071 bytes, audit 41 events, 13 responses
+
+PASS  the real password is not in the database
+PASS  the real password is not in the server log
+PASS  the real password is not in the audit log
+PASS  a wrong password someone typed is not in the database
+PASS  a wrong password someone typed is not in the server log
+PASS  a wrong password someone typed is not in the audit log
+PASS  a wrong password someone typed is not in the responses
+PASS  the access token is not in the database
+PASS  the access token is not in the server log
+PASS  the access token is not in the audit log
+PASS  the refresh token is not in the database
+PASS  the refresh token is not in the server log
+PASS  the refresh token is not in the audit log
+PASS  the browser session cookie is not in the database
+PASS  the browser session cookie is not in the server log
+PASS  the browser session cookie is not in the audit log
+PASS  a one-time MFA proof is not in the database
+PASS  a one-time MFA proof is not in the server log
+PASS  a one-time MFA proof is not in the audit log
+PASS  the MFA code is not in the database
+PASS  the MFA code is not in the server log
+PASS  the MFA code is not in the audit log
+PASS  a full IBAN is not in the database
+PASS  a full IBAN is not in the server log
+PASS  a full IBAN is not in the audit log
+PASS  a full IBAN is not in the responses
+PASS  an e-mail typed into the chat is not in the database
+PASS  an e-mail typed into the chat is not in the server log
+PASS  an e-mail typed into the chat is not in the audit log
+PASS  a phone number typed into the chat is not in the database
+PASS  a phone number typed into the chat is not in the server log
+PASS  a phone number typed into the chat is not in the audit log
+PASS  a passport number typed into the chat is not in the database
+PASS  a passport number typed into the chat is not in the server log
+PASS  a passport number typed into the chat is not in the audit log
+PASS  a recipient's display name is not in the server log
+PASS  a recipient's display name is not in the audit log
+INFO  a recipient's display name is stored in plain text in the database
+PASS  an uploaded document's text is not in the database
+PASS  an uploaded document's text is not in the server log
+PASS  an uploaded document's text is not in the audit log
+PASS  an uploaded document's file name is not in the server log
+PASS  an uploaded document's file name is not in the audit log
+INFO  an uploaded document's file name is stored in plain text in the database
+PASS  a passport number inside an uploaded document is not in the database
+PASS  a passport number inside an uploaded document is not in the server log
+PASS  a passport number inside an uploaded document is not in the audit log
+PASS  the server log holds no a JWT-shaped token
+PASS  the server log holds no an Authorization header value
+PASS  the server log holds no a private key
+PASS  the server log holds no a password hash
+PASS  the server log holds no a cookie value
+
+ALL CLEAR

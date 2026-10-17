@@ -9,7 +9,7 @@ describe("chargeCodeAdvice", () => {
     expect(advice.risk).toBe("low");
     expect(advice.badge).toBe("Recommended for tuition");
     expect(advice.explanation).toBe(
-      "You pay every fee. The university should receive the full invoice amount. Best for tuition.",
+      "Sender pays the modelled fees. Full arrival is not guaranteed: confirm the accepted payment route and charges.",
     );
   });
 

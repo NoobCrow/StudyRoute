@@ -1,0 +1,35 @@
+{
+  "started_utc": "2026-10-17T18:14:24.020Z",
+  "finished_utc": "2026-10-17T18:16:00.917Z",
+  "base": "loopback sandbox",
+  "video_filename": "StudyRoute_Demo.webm",
+  "events": [
+    {
+      "step": "Actual sandbox sign-in",
+      "seconds": 13,
+      "status": "PASS"
+    },
+    {
+      "step": "Real UI: synthetic fee comparison and route warning",
+      "seconds": 40,
+      "status": "PASS"
+    },
+    {
+      "step": "Mandatory read-back before preparing an AI plan",
+      "seconds": 65,
+      "status": "PASS"
+    },
+    {
+      "step": "Adversarial instruction blocked by actual API",
+      "seconds": 76,
+      "status": "PASS"
+    },
+    {
+      "step": "Actual audit screen and honest local-anchor boundary",
+      "seconds": 95,
+      "status": "PASS"
+    }
+  ],
+  "page_errors": [],
+  "scope": "Actual unmocked local UI/API; synthetic data; no real money; no voiceover; no live bank/FX or cloud model verification"
+}

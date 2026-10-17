@@ -78,3 +78,22 @@ def load_policy(mode: str = "auto", directory: Path = POLICY_DIR) -> DialoguePol
             "dialogue policy not used (%s); the assistant runs plans as soon as it can", exc
         )
         return None
+
+
+def reviewed_action(state: DialogueState, proposed: Action) -> Action:
+    """Runtime safety envelope, not a learned improvement or transaction authorization.
+
+    Do not silently drop a missing deadline at the model's turn limit. A user may explicitly
+    choose no deadline. Every complete plan gets a read-back, even if the model wants RUN.
+    Conflict clarification takes priority; turn budgets never authorize skipping review.
+    """
+    if not state.amount.present or state.amount.conflict:
+        return Action.ASK_AMOUNT
+    if state.task == "CADENCE":
+        if not state.months.present or state.months.conflict:
+            return Action.ASK_MONTHS
+    elif state.date.conflict or (not state.date.present and not state.date_skipped):
+        return Action.ASK_DATE
+    if not state.confirmed:
+        return Action.CONFIRM
+    return proposed

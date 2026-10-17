@@ -69,6 +69,7 @@ export function RecipientForm({
 }) {
   const [error, setError] = useState<Error | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [institutionId, setInstitutionId] = useState("");
   const resolver: Resolver<RecipientValues> = (values, context, options) => {
     const corridor = corridors.find((c) => c.country === values.country);
     return zodResolver(recipientSchema(corridor, values.ukMode))(
@@ -95,7 +96,11 @@ export function RecipientForm({
   async function onSubmit(values: RecipientValues) {
     setError(null);
     try {
-      await post("/recipients", recipientBody(values, corridor));
+      await post("/recipients", {
+        ...recipientBody(values, corridor),
+        ...(institutionId ? { institution_id: institutionId } : {}),
+      });
+      setInstitutionId("");
       form.reset({ ...EMPTY_RECIPIENT, country: values.country });
       const name = values.name.trim();
       setSaved(`${name} was saved. It is not allowlisted yet.`);
@@ -135,6 +140,25 @@ export function RecipientForm({
             noValidate
           >
             <ErrorNotice error={error} />
+            <FormItem>
+              <FormLabel htmlFor="r-institution">University payment-route policy</FormLabel>
+              <select
+                id="r-institution"
+                value={institutionId}
+                onChange={(event) => setInstitutionId(event.target.value)}
+                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+              >
+                <option value="">Not in the reviewed catalogue — unverified, sandbox only</option>
+                <option value="gb-manchester-metropolitan">
+                  Manchester Metropolitan University — Flywire required for tuition
+                </option>
+              </select>
+              <FormDescription>
+                Declaration is not identity verification. The server blocks direct-bank tuition
+                quotes and payments for the configured university, even after renaming. No Flywire
+                integration or live bank quote is provided.
+              </FormDescription>
+            </FormItem>
             <div className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <FormField
                 control={form.control}

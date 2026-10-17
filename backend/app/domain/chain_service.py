@@ -433,7 +433,7 @@ class ChainService:
 
     # --- anchoring the audit log -----------------------------------------------------------------
     def anchor_audit(self, session: Session, actor_id: str) -> dict[str, Any]:
-        """Write the audit log's newest hash onto the chain, outside the database."""
+        """Write the audit head to the simulated EVM; its replay log shares the database."""
         self.ready(session)
         head = self._audit.ensure_head(session)
         if head.seq == 0:
@@ -469,8 +469,8 @@ class ChainService:
             return found
 
     def verify_anchors(self, session: Session) -> dict[str, Any]:
-        """Compare every anchored hash with the database. An attacker who rewrites the audit
-        log AND recomputes its hashes still cannot change what is written on the chain."""
+        """Compare anchors with the audit log. Detects audit-only rewriting, not a coordinated
+        rewrite of audit_events and chain_log followed by restart; both persist in SQLite."""
         verdict = self._audit.verify(session)
         results = []
         for anchor in self.anchors(session):

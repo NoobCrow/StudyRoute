@@ -137,7 +137,16 @@ class Responder:
             for p in pids
             if self._has_shortfall(p)
         ]
-        return " ".join(notes + (["OUR avoids that for tuition."] if notes else []))
+        return " ".join(
+            notes
+            + (
+                [
+                    "OUR avoids that modelled deduction; confirm the university's accepted payment route and all charges with your AD bank."
+                ]
+                if notes
+                else []
+            )
+        )
 
     def _finish(self, text: str) -> Answer:
         if self.legal:
@@ -332,10 +341,10 @@ class Responder:
 
     def charges(self) -> Answer:
         text = (
-            "OUR means the sender pays all charges, so the university should receive the full amount. "
+            "OUR means the sender pays the modelled charges; full arrival is not guaranteed. "
             "SHA shares them: you pay your bank and the university bears the receiving and intermediary "
             "charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short "
-            "payment. For tuition I recommend OUR, because a short payment can mean a late fee or an "
+            "payment. For a tuition route that accepts it, consider OUR: a short payment can mean a late fee or an "
             "invoice that cannot be matched. Check the university's own payment instructions."
         )
         if self._have_quote():

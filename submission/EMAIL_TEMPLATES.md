@@ -83,7 +83,7 @@ synthetic and no real money moves.
 2. Presentation deck (10 minutes): [file or link]
 3. Demo video (under 5 minutes): [link]
 4. Source code with README, deployment instructions and test cases:
-   GitHub: https://github.com/NoobCrow/StudyRoute    Archive: [file or link]
+   GitHub: https://github.com/redwan786/StudyRoute    Archive: [file or link]
    Start: docker compose up --build, then http://localhost:8080
 5. Security self-assessment report (permission tiers and known-risk list): [file or link]
 6. Execution evidence (sandbox operation logs, audit log and verification, demo video):
