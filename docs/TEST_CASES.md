@@ -6,12 +6,12 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1130 tests** in 82 files. Last run: `1130 passed in 163.03s (0:02:43)`.
-- Frontend: **139 tests** in 18 files (Vitest).
+- Backend: **1135 tests** in 83 files. Last run: `1135 passed in 271.14s (0:04:31)`.
+- Frontend: **360 tests** in 29 files (Vitest).
 
 ```bash
-cd backend  && pytest -q
-cd frontend && npm test
+cd backend && pytest -q
+cd web     && npm test
 python -m app.scripts.demo_flow   # end-to-end demo against a running API
 ```
 
@@ -109,6 +109,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_engine_runway_rates.py` | 8 | F9 living-cost runway and F10 synthetic rate history / best-day hint (pure engine). |
 | `tests/test_engine_validators.py` | 13 | IBAN mod-97, BIC, UK sort code and account, US ABA and UETR validators (blueprint 5.2). |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
+| `tests/test_gallery.py` | 5 | app/scripts/gallery.py: the parts that are plain logic (the photographs need a browser). |
 | `tests/test_ledger.py` | 12 | The ledger: normal-side balances, overdraft refusal, reversals, integrity checks, append-only. |
 | `tests/test_make_submission.py` | 5 | scripts/make_submission.py: the archive a judge unzips must build in a Linux container. |
 | `tests/test_ml_dataset.py` | 8 | The training data and the model that was trained on it are consistent, and nothing leaks. The data lives in ml/data/generated (built by ml/data/build_dataset.py). The test sets must never share a message with the training data, and the shipped model must record the exact data it was trained on. |
@@ -135,21 +136,32 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 
 | File | Tests |
 |------|-------|
-| `frontend/src/a11y.test.tsx` | 11 |
-| `frontend/src/api/client.test.ts` | 6 |
-| `frontend/src/components/CountryOptions.test.tsx` | 4 |
-| `frontend/src/components/components.test.tsx` | 8 |
-| `frontend/src/components/deadlineFit.test.tsx` | 6 |
-| `frontend/src/components/stress.test.tsx` | 3 |
-| `frontend/src/components/tasks.test.tsx` | 11 |
-| `frontend/src/lib/canonical.test.ts` | 4 |
-| `frontend/src/lib/corridors.test.ts` | 8 |
-| `frontend/src/lib/lib.test.ts` | 21 |
-| `frontend/src/screens/Bank.test.tsx` | 17 |
-| `frontend/src/screens/Compare.test.tsx` | 7 |
-| `frontend/src/screens/Escrow.test.tsx` | 13 |
-| `frontend/src/screens/Payment.test.tsx` | 5 |
-| `frontend/src/screens/Recipients.test.tsx` | 3 |
-| `frontend/src/screens/Report.test.tsx` | 4 |
-| `frontend/src/screens/Sandbox.test.tsx` | 4 |
-| `frontend/src/theme.test.tsx` | 4 |
+| `web/app/login/login-page.test.tsx` | 7 |
+| `web/components/app/app-basics.test.tsx` | 12 |
+| `web/components/assistant/assistant.test.tsx` | 12 |
+| `web/components/compare/compare-components.test.tsx` | 24 |
+| `web/components/compare/compare-screen.test.tsx` | 20 |
+| `web/components/dashboard/dashboard-cards.test.tsx` | 25 |
+| `web/components/documents/documents-screen.test.tsx` | 17 |
+| `web/components/layout/nav.test.ts` | 4 |
+| `web/components/payment/mfa-dialog.test.tsx` | 10 |
+| `web/components/payment/payment-screen.test.tsx` | 6 |
+| `web/components/payment/payments-list.test.tsx` | 26 |
+| `web/components/payment/report-screen.test.tsx` | 6 |
+| `web/components/providers/auth-provider.test.tsx` | 7 |
+| `web/components/recipients/recipients-screen.test.tsx` | 25 |
+| `web/lib/api/client.test.ts` | 6 |
+| `web/lib/canonical.test.ts` | 4 |
+| `web/lib/corridors.test.ts` | 8 |
+| `web/lib/domain/calendar-strip.test.ts` | 6 |
+| `web/lib/domain/charge-code.test.ts` | 6 |
+| `web/lib/domain/documents.test.ts` | 7 |
+| `web/lib/domain/payments.test.ts` | 24 |
+| `web/lib/domain/recipient-validation.test.ts` | 13 |
+| `web/lib/lib.test.ts` | 23 |
+| `web/lib/links.test.ts` | 5 |
+| `web/lib/schemas/compare.test.ts` | 13 |
+| `web/lib/schemas/payments-params.test.ts` | 8 |
+| `web/lib/schemas/recipient.test.ts` | 7 |
+| `web/lib/schemas/schemas.test.ts` | 8 |
+| `web/tests/a11y.test.tsx` | 21 |
