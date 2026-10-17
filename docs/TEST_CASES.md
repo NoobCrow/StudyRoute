@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1129 tests** in 82 files. Last run: `1129 passed in 313.86s (0:05:13)`.
+- Backend: **1130 tests** in 82 files. Last run: `1130 passed in 163.03s (0:02:43)`.
 - Frontend: **139 tests** in 18 files (Vitest).
 
 ```bash
@@ -92,7 +92,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_chain_service.py` | 16 | The chain service: a hash-chained log that rebuilds the in-memory EVM exactly. |
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
 | `tests/test_countries.py` | 17 | Every country is a destination: generated defaults sit under the six hand-written corridors. The hand-written rules (GB, US, DE, AU, CA, MY) must win. Everything else comes from the `countries` section of config/rules.yaml, which scripts/gen_countries.py writes. |
-| `tests/test_demo_flow.py` | 3 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
+| `tests/test_demo_flow.py` | 4 | The blueprint 19.1 demo script runs end to end (fake clock instead of real waiting). |
 | `tests/test_dialogue_flow.py` | 8 | The conversation the dialogue policy drives, end to end with the trained reader. A scripted policy stands in for the learned one so each turn is predictable; the legal-action rules still apply to it. One test at the end uses the shipped policy and checks only what must hold whatever it chooses. |
 | `tests/test_dialogue_policy.py` | 7 | Loading and running the dialogue policy: integrity, shape, and the mask that beats the network. |
 | `tests/test_dialogue_state.py` | 10 | The safety rules of the dialogue policy are plain code, and they hold in every state. The network may rank actions; it may never pick one these rules forbid. So the rules are checked exhaustively over a grid of states, not sampled. |
