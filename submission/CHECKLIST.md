@@ -65,21 +65,21 @@ judges access; put the link in the submission e-mail.
 ## 3. Technical gate (all must pass before you send)
 
 - [x] From a clean clone on a machine with Docker: `docker compose up --build`, open
-      http://localhost:8080, sign in with a demo account. Done on 15 Oct 2026 from the unzipped
+      http://localhost:8080, sign in with a demo account. Done on 15 Oct 2026 and again on 17 Oct 2026 from the unzipped
       archive in a Linux VM (Docker 29.1.3, Compose 2.40.3); details in `docs/DOCKER.md`. Repeat it
       on your own machine if you can (Docker Desktop on Windows was not tried).
 - [x] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
       (also with `docker-compose.hardened.yml`).
 - [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
-- [ ] `cd backend && pytest -q && ruff check . && ruff format --check .`
-- [ ] `cd frontend && npm run typecheck && npm test && npm run build`
+- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1130 passed on Windows and on Linux in a container; ruff clean)
+- [x] `cd frontend && npm run typecheck && npm test && npm run build` (17 Oct 2026: 139 tests, on Windows and on Linux in a container)
 - [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit, docker).
-- [ ] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs).
+- [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.
 - [ ] Every screen shows the sandbox banner (sign-in page included).
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in
       `.env`, run `python -m app.scripts.check_ai` (must print OK), restart, and confirm the
       "Model: ..." badge in the chat. Otherwise say "template mode".
-- [ ] Regenerate the evidence if the code changed: `python -m app.scripts.export_evidence --tamper`
+- [x] Regenerate the evidence if the code changed: `python -m app.scripts.export_evidence --tamper` (done 17 Oct 2026 against the final code)
       (needs a running API with fresh demo data).
 - [ ] Fill in the placeholders in `PROJECT_DESCRIPTION.md` and `DECK_OUTLINE.md` (team name,
       members, contact).

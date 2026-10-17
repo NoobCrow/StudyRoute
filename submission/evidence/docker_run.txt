@@ -216,3 +216,45 @@ PASS (68 events).
 
 Not repeated for this build: the packet capture (docker_telemetry_capture.txt) and the browser
 audit. The policy is NumPy only and opens no connection.
+
+---- Third run, 17 October 2026: the final archive (commit 47aa067), both UIs ----
+Recorded by hand. Source: dist/studyroute-submission.zip (663 files, sha256 cfc8c858fc61...) built
+from that commit, copied into the same Ubuntu 24.04 VM and unzipped in an empty directory.
+
+A. The stack as docker compose ships it (the Vite UI in frontend/)
+$ docker compose up --build -d --wait               backend and web: Healthy
+$ python scripts/docker_smoke.py                    All smoke checks passed.
+$ docker compose exec backend python -m app.scripts.demo_flow
+59 OK lines, 0 failed, "All demo checks passed." Chain verifies PASS (69 events).
+A second run on the same data now stops with "this household's KYC is already verified ... start
+from clean demo data" and exit code 2 (before this commit it failed halfway with a KeyError).
+$ node scripts/security/browser_audit.mjs http://127.0.0.1:8080
+40 of 40 checks passed (120 requests, none to a tracker, no cookies, no Referer, no source maps).
+Packet capture of everything the containers send outside their own network, during a backend
+restart, the browser audit and a real prediction by the trained reader: 870 packets, all of them
+replies to the host that ran the browser; 0 to any other address.
+Hardened overlay (docker-compose.hardened.yml), started from an empty volume: ReadonlyRootfs=true,
+CapDrop=[ALL], no-new-privileges, users studyroute and 101; a write to /srv was refused (read-only
+file system). Smoke passed, demo 59 OK lines, 0 failed. After docker compose down (no -v) and up,
+the audit chain still verified (70 events).
+
+B. The Next.js UI (web/), through a throwaway override file inside the VM (build: ./web); NOT what
+docker-compose.yml ships, recorded so the choice between the two UIs rests on evidence
+Image 78 MB, hardened overlay: ReadonlyRootfs=true, CapDrop=[ALL], user 101, both Healthy.
+docker_smoke passed; demo_flow 59 OK lines, 0 failed; browser_audit 40 of 40; csp-check 11 of 11
+pages; csp-interact 11 of 11 interactions; the 10-screen tour at 1440 and at 390 and the sideways-
+scroll sweep of all 10 routes at 390: no problems.
+
+C. The test suites on Linux, from the unzipped archive, in containers
+python:3.12-slim: the whole backend suite, exit code 0 (1130 tests).
+node:22-alpine: web/ typecheck, ESLint, Prettier and 360 of 360 tests (29 files);
+frontend/ typecheck and 139 of 139 tests (18 files).
+
+Two problems of the test rig, not of the application, so they are written down:
+1. QEMU's forwarded port refused connections when Chrome opened many at once (ERR_CONNECTION_REFUSED
+   on script files of the first page). nginx itself answered 144 parallel requests from inside the
+   VM with 200, and the same page check passed through an SSH tunnel (11 of 11 pages).
+2. After about 40 minutes of builds the guest kernel panicked (init was killed by a segmentation
+   fault; the emulated CPU is a bare qemu64 under Windows hypervisor acceleration). The VM was
+   powered off by force and started again. Both containers came back on their own and the audit
+   chain still verified (109 events), which doubles as a crash-recovery check.
