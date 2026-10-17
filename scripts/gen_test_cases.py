@@ -63,13 +63,13 @@ def run_summary() -> str:
 def frontend_tests() -> dict[str, int]:
     """Per-file test counts from Vitest's own JSON report (so it.each is counted correctly)."""
     npx = shutil.which("npx")
-    if npx is None or not (ROOT / "frontend" / "node_modules").is_dir():
+    if npx is None or not (ROOT / "web" / "node_modules").is_dir():
         return {}
     with tempfile.TemporaryDirectory() as folder:
         report = Path(folder) / "report.json"
         subprocess.run(  # noqa: S603
             [npx, "vitest", "run", "--reporter=json", f"--outputFile={report}"],
-            cwd=ROOT / "frontend",
+            cwd=ROOT / "web",
             capture_output=True,
             check=False,
         )
@@ -103,7 +103,7 @@ def build(summary: str | None) -> str:
     frontend_line = (
         f"- Frontend: **{sum(front.values())} tests** in {len(front)} files (Vitest)."
         if front
-        else "- Frontend: run `npm test` in `frontend/` (Vitest)."
+        else "- Frontend: run `npm test` in `web/` (Vitest)."
     )
     lines = [
         "# Test cases",
@@ -119,8 +119,8 @@ def build(summary: str | None) -> str:
         frontend_line,
         "",
         "```bash",
-        "cd backend  && pytest -q",
-        "cd frontend && npm test",
+        "cd backend && pytest -q",
+        "cd web     && npm test",
         "python -m app.scripts.demo_flow   # end-to-end demo against a running API",
         "```",
         "",

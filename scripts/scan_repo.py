@@ -19,7 +19,7 @@ SKIP_SUFFIXES = {".png", ".docx", ".ico", ".svg", ".lock", ".json"}
 SKIP_FILES = {
     "scripts/scan_repo.py",  # defines the patterns
     "backend/tests/test_repo_scan.py",  # plants fake secrets to prove the scanner catches them
-    "frontend/package-lock.json",
+    "web/package-lock.json",
 }
 EMAIL_LABEL = "e-mail on a real domain"
 # .test is a reserved TLD that can never receive mail, so synthetic addresses are fine.

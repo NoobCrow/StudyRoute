@@ -1,10 +1,10 @@
 // Loads pages of the static export in real Chrome under the generated production CSP and fails on
 // any violation, console error or failed request.
-//   WEB=1 node ../scripts/security/prod_like_server.mjs 8091 8000 &   (serves web/out)
+//   node ../scripts/security/prod_like_server.mjs 8091 8000 &   (serves web/out)
 //   node scripts/csp-check.mjs http://127.0.0.1:8091 / /compare/
 import { createRequire } from "node:module";
 
-const require = createRequire(new URL("../../frontend/package.json", import.meta.url));
+const require = createRequire(new URL("../package.json", import.meta.url));
 const puppeteer = require("puppeteer-core");
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const [base, ...paths] = process.argv.slice(2);

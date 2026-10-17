@@ -1,6 +1,7 @@
-// Serves frontend/dist with the project's REAL security headers (frontend/security_headers.conf) and
-// proxies /api and /health to the API, the way nginx does. Used to test the app under the production CSP.
-//   cd frontend && npm run build
+// Serves web/out (the static export of the Next.js UI) with the project's REAL security headers
+// (web/security_headers.conf, written by the build) and proxies /api and /health to the API, the way
+// nginx does. Used to test the app under the production CSP.
+//   cd web && npm run build
 //   node ../scripts/security/prod_like_server.mjs 8090 8002
 import http from "node:http";
 import fs from "node:fs";
@@ -9,10 +10,8 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
-// WEB=1 serves the Next.js static export (web/out) with the headers generated for it.
-const WEB = process.env.WEB === "1";
-const DIST = path.join(ROOT, WEB ? "web/out" : "frontend/dist");
-const HEADERS_FILE = path.join(ROOT, WEB ? "web/security_headers.conf" : "frontend/security_headers.conf");
+const DIST = path.join(ROOT, "web/out");
+const HEADERS_FILE = path.join(ROOT, "web/security_headers.conf");
 const API = { host: "127.0.0.1", port: Number(process.argv[3] ?? 8002) };
 const PORT = Number(process.argv[2] ?? 8090);
 const headers = {};
@@ -34,7 +33,7 @@ http.createServer((req, res) => {
   let file = path.resolve(root, "." + decodeURIComponent(req.url.split("?")[0]));
   if (fs.existsSync(file) && fs.statSync(file).isDirectory() && fs.existsSync(path.join(file, "index.html"))) file = path.join(file, "index.html");
   if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-    const dynamic = WEB && /^\/payments\/[^/]+\/?$/.test(req.url.split("?")[0]) ? path.join(root, "payments", "_", "index.html") : null;
+    const dynamic = /^\/payments\/[^/]+\/?$/.test(req.url.split("?")[0]) ? path.join(root, "payments", "_", "index.html") : null;
     file = dynamic && fs.existsSync(dynamic) ? dynamic : path.join(root, "index.html");
   }
   res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] ?? "application/octet-stream", "Cache-Control": file.endsWith("index.html") ? "no-cache" : "public, max-age=31536000, immutable", ...headers });

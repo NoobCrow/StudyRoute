@@ -22,9 +22,9 @@ spec.loader.exec_module(make_submission)
 DOCKER_FILES = (
     "backend/Dockerfile",
     "backend/docker-entrypoint.sh",
-    "frontend/Dockerfile",
-    "frontend/nginx.conf",
-    "frontend/security_headers.conf",
+    "web/Dockerfile",
+    "web/nginx.conf",
+    "web/security_headers.base.conf",
     "docker-compose.yml",
     ".dockerignore",
 )

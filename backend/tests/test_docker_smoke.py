@@ -20,12 +20,13 @@ smoke = importlib.util.module_from_spec(spec)
 sys.modules["docker_smoke"] = smoke  # dataclasses look the module up here
 spec.loader.exec_module(smoke)
 
-INDEX = b'<!doctype html><div id="root"></div><script type="module" src="/assets/index-abc.js"></script>'
+INDEX = b'<!doctype html><title>StudyRoute</title><script src="/_next/static/chunks/app-abc.js" async></script>'
 
 
 def repo_security_headers() -> dict[str, str]:
-    """The exact headers frontend/security_headers.conf makes nginx send."""
-    text = (ROOT / "frontend" / "security_headers.conf").read_text(encoding="utf-8")
+    """The headers web/security_headers.base.conf makes nginx send. The build adds the hashes of
+    the exported inline scripts to the CSP, so the written file is not in git; the base is."""
+    text = (ROOT / "web" / "security_headers.base.conf").read_text(encoding="utf-8")
     return dict(re.findall(r'add_header\s+(\S+)\s+"(.*)"\s+always;', text))
 
 
@@ -66,7 +67,7 @@ class Stack(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         path = self.path.split("?")[0]
-        if path.startswith("/assets/"):
+        if path.startswith("/_next/static/"):
             headers = {**self._web_headers(), "Cache-Control": "public, immutable"}
             self._send(200, b"console.log(1)", "text/javascript", headers)
         elif path in ("/health", "/api/v1/health"):

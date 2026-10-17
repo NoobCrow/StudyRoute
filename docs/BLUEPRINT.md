@@ -1428,7 +1428,7 @@ Save this as CLAUDE.md in the repository root. A ready file named CLAUDE.md is i
 >
 > \- Backend: Python 3.12, FastAPI, SQLAlchemy, SQLite (Postgres optional), pytest
 >
-> \- Frontend: React + TypeScript (Vite)
+> \- Frontend: Next.js (static export), React and TypeScript, Tailwind and shadcn/ui, in web/
 >
 > \- One-command start: docker compose up
 >
@@ -1452,9 +1452,9 @@ Save this as CLAUDE.md in the repository root. A ready file named CLAUDE.md is i
 >
 > backend/tests/ pytest. One test per blueprint test ID (T01..T24)
 >
-> frontend/ screens: dashboard, compare, recipient, documents,
+> web/ screens: dashboard, compare, payments, recipients, documents,
 >
-> approval, tracker, audit, chat
+> audit, rules, bank network, smart escrow, sandbox, assistant
 >
 > docs/BLUEPRINT.md the spec
 >
@@ -1748,7 +1748,7 @@ This section records where the built sandbox goes beyond, or deliberately simpli
 | Audit log (section 15) | Append-only is enforced with SQLite triggers that block UPDATE and DELETE. A Postgres deployment should also revoke those privileges from the application role. |
 | Rate limits (section 8.7) | Groups: auth, quotes, payment writes, bank writes (20 a minute per user), assistant chat, webhooks, plus a failure counter for rejected webhooks. |
 | Test IDs (section 16) | T01 to T24 each have at least one test; tests/test_blueprint_coverage.py fails if one is missing. Extra tests cover the AI layer, demo flow and repository scan. |
-| Delivery | docker-compose.yml starts the API and an nginx web server on http://localhost:8080. The security headers are in frontend/security_headers.conf. docs/SECURITY.md maps each row of 12.1 to its proof; docs/OPEN_QUESTIONS.md lists what is unverified or not built. |
+| Delivery | docker-compose.yml starts the API and an nginx web server on http://localhost:8080. The security headers are in web/security_headers.base.conf (the build adds the hashes of the exported inline scripts). docs/SECURITY.md maps each row of 12.1 to its proof; docs/OPEN_QUESTIONS.md lists what is unverified or not built. |
 | Bank network (new, outside sections 1 to 23) | A simulated interbank network at /api/v1/bank (sandbox only): invented banks, clearing houses, a correspondent and 17 synthetic accounts in config/bank_network.yaml, a double-entry ledger (append-only), national transfers (same bank, instant, next batch, high value) and international transfers (BDT to a host bank through the correspondent, MT103 preview on the hops). A transfer is planned, then confirmed by a parent with an MFA proof bound to that transfer and an Idempotency-Key, then moved one hop at a time by the worker with one audit event per hop. Failures unwind exactly. International pricing reuses the fee engine. Permissions bank:read (parent, student, admin) and bank:transfer (parent). The AI has none. See docs/BANK_NETWORK.md. |
 | Final-readiness tools | scripts/preflight.py reports OK, FAIL and OPEN for the repository and the items only a person can do; scripts/personalize.py fills the team name and repository link into the submission documents and the deck. Neither touches git, the network or an e-mail. |
 | Smart escrow (new, outside sections 1 to 23) | Solidity contracts (TokenisedDeposit, TuitionEscrow, AuditAnchor) run on an in-memory EVM (py-evm) at /api/v1/escrows and /api/v1/chain (sandbox only). The chain's history is an append-only, hash-chained table that rebuilds the EVM exactly. Locking funds, paying early and cancelling need an MFA proof bound to that escrow and an Idempotency-Key; the reviewer can freeze and unfreeze only; the audit log's head hash can be anchored on the chain and verified. Permissions escrow:read, escrow:write (parent), escrow:freeze, chain:read, chain:anchor (reviewer). The AI has none. See docs/SMART_ESCROW.md. |

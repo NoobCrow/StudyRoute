@@ -20,7 +20,7 @@ logged. Each part below exists to make one of those four statements true and tes
 
 
 ```
- Browser (React + TypeScript)
+ Browser (Next.js static export, React + TypeScript)
         |  same origin, strict CSP
         v
      nginx  --- serves the built UI, proxies /api, sets X-Forwarded-For
@@ -50,7 +50,7 @@ logged. Each part below exists to make one of those four statements true and tes
 | Chain | `backend/app/chain/`, `contracts/` | Compiled contracts, ABI codec and the in-memory EVM (`py-evm`) | None (memory) |
 | Providers | `backend/app/providers/` | Mock providers, simulator, webhook signing | HTTP (webhooks) |
 | AI | `backend/app/ai/` | Orchestrator, masking, number guard, tools, templates | Optional network call to a model |
-| Web | `frontend/src/` | Dashboard, compare, recipients, documents, payment, audit, rules, sandbox, chat | HTTP |
+| Web | `web/` | Dashboard, compare, payments, recipients, documents, audit, rules, bank network, smart escrow, sandbox, assistant | HTTP |
 
 The engine has no database, clock or network access, so it is fully unit-testable and its output
 can be trusted as the single source of numbers.
@@ -418,7 +418,7 @@ The full threat and control matrix, with the test that proves each row, is in
 | Provider trust | HMAC-signed webhooks with timestamp window, secret rotation and event de-duplication |
 | AI safety | Policy check, masking, number guard, tool allow-list, human approval, template fallback |
 | Data protection | AES-256-GCM for account numbers; masked display; log redaction filter; personal data masked before any model call; "Reset my data" |
-| Web | Strict CSP with no inline script or style; `nosniff`; `Referrer-Policy: no-referrer`; frame-ancestors none; HSTS; exact-origin CORS without credentials; bearer tokens in memory only |
+| Web | Strict CSP: no inline style, and no inline script except the exported pages' own bootstrap scripts, allowed by SHA-256 hash (R42); `nosniff`; `Referrer-Policy: no-referrer`; frame-ancestors none; HSTS; exact-origin CORS without credentials; bearer tokens in memory only |
 | Abuse | Per-IP and per-user rate limits, request size limit, schema validation that rejects unknown fields |
 | Compliance | Rules in configuration with `source_url`, `last_checked` and a `verified` flag; yellow "Not verified" badge and "Indicative. Confirm with your AD bank." for anything unchecked; mock KYC gate; mock sanctions check; travel-rule fields in the instruction preview |
 | Sandbox honesty | `X-Sandbox: true` on every API response and a banner on every screen; every simulated part labelled; no claim of a live bank or FX feed |

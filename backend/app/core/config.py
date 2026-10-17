@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     rules_file: Path | None = None
     bank_network_file: Path | None = None
-    cors_origins: str = "http://localhost:5173,http://localhost:8080,http://127.0.0.1:8080"
+    cors_origins: str = "http://localhost:3000,http://localhost:8080,http://127.0.0.1:8080"
 
     sandbox_mfa_code: str | None = DEFAULT_SANDBOX_MFA_CODE
     seed_demo_password: str | None = None

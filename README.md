@@ -95,8 +95,8 @@ pip install -r requirements-dev.txt
 python -m app.scripts.seed                # synthetic demo data (add --reset to start over)
 uvicorn app.main:create_app --factory
 
-# terminal 2: UI on http://localhost:5173 (proxies /api to the API)
-cd frontend
+# terminal 2: UI on http://localhost:3000 (proxies /api to the API)
+cd web
 npm ci
 npm run dev
 ```
@@ -205,8 +205,9 @@ backend/app/ai/dialogue/  the dialogue policy (reinforcement learning): legal-ac
 ml/                     training: data generator, train, export, evaluate (needs an NVIDIA GPU)
 ml/rl/                  the simulator, baselines, Double DQN trainer and evaluation of the dialogue policy
 backend/tests/          pytest, one or more tests per blueprint ID T01..T24
-frontend/               React + TypeScript (Vite): dashboard, compare, recipients,
-                        documents, payment (approval, tracker), audit, rules, chat
+web/                    Next.js (static export) + TypeScript, Tailwind, shadcn/ui: dashboard, compare,
+                        payments, recipients, documents, audit, rules, bank network, smart escrow,
+                        sandbox and the assistant (see web/README.md)
 config/rules.yaml       limits, checklists, calendars, providers (each with source and verified flag)
 config/bank_network.yaml  the invented banks, rails and demo accounts of the bank simulation
 docs/                   BLUEPRINT.md (the spec), SECURITY.md, OPEN_QUESTIONS.md
@@ -330,12 +331,13 @@ the template automatically, and the guard badge says why.
 ## Tests and quality
 
 ```bash
-cd backend  && pytest -q && ruff check . && ruff format --check .
-cd frontend && npm run typecheck && npm test && npm run build
+cd backend && pytest -q && ruff check . && ruff format --check .
+cd web     && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e
 python scripts/scan_repo.py      # secrets, real e-mails, passport-like numbers, TODOs
 python -m app.scripts.check_ai   # (from backend/) template mode, or your model once a key is set
 python ml/evaluate.py            # re-measure the trained reader against the rules (writes docs/AI_EVALUATION.md)
 python ml/rl/evaluate_rl.py      # re-measure the dialogue policy against the baselines (writes docs/AI_RL_EVALUATION.md)
+python -m app.scripts.gallery    # (from backend/) retake the screenshots of this README, with fresh demo data, the API and the built web UI running
 ```
 
 `backend/tests/test_blueprint_coverage.py` fails if any blueprint test ID (T01 to T24) has no test.

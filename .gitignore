@@ -27,10 +27,8 @@ htmlcov/
 *.sqlite
 *.sqlite3
 
-# Node / frontend
+# Node (the web UI keeps its own build-output rules in web/.gitignore)
 node_modules/
-frontend/dist/
-frontend/coverage/
 *.tsbuildinfo
 
 # Editors / OS

@@ -47,7 +47,7 @@ outside the database, so that rewrite is caught.
 | `SandboxChain` | `backend/app/chain/evm.py` | The EVM (`py-evm`): deploy, send, read. One transaction is one block. |
 | `ChainService` | `backend/app/domain/chain_service.py` | The hash-chained `chain_log`, replay, time control, anchoring, verification. |
 | `EscrowService` | `backend/app/domain/escrow.py` | The business flow, MFA, KYC, limits, sanctions, one audit event per state change. |
-| Screen | `frontend/src/screens/Escrow.tsx` | "Smart escrow" in the menu. |
+| Screen | `web/components/escrow/` | "Smart escrow" in the menu. |
 
 ## 3. Who can do what
 

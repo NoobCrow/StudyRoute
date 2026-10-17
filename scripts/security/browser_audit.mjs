@@ -6,7 +6,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const require = createRequire(path.join(ROOT, "frontend", "package.json"));
+const require = createRequire(path.join(ROOT, "web", "package.json"));
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const puppeteer = require("puppeteer-core");
 const APP = process.argv[2] ?? "http://127.0.0.1:8090";
@@ -46,9 +46,9 @@ page.on("pageerror", (e) => consoleLines.push(`pageerror: ${e.message}`));
 let docHeaders = null;
 page.on("response", (r) => { if (r.request().resourceType() === "document" && !docHeaders) docHeaders = r.headers(); });
 
-// The selectors below match both web UIs: the Vite one (frontend/: .app-header, .nav) and the Next.js one (web/: main#main, nav[aria-label=Main]).
-const EMAIL = 'input[type="email"]', PASSWORD = 'input[type="password"]', SIGNED_IN = ".app-header, main#main";
-const navLink = (href) => `.nav a[href="${href}"], nav[aria-label="Main"] a[href="${href === "/" ? "/" : `${href}/`}"]`;
+// The selectors below match the Next.js UI (web/): main#main and nav[aria-label=Main].
+const EMAIL = 'input[type="email"]', PASSWORD = 'input[type="password"]', SIGNED_IN = "main#main";
+const navLink = (href) => `nav[aria-label="Main"] a[href="${href === "/" ? "/" : `${href}/`}"]`;
 const signOut = () => page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Sign out")?.click());
 async function signIn(email) {
   await page.evaluate(() => { try { sessionStorage.clear(); } catch {} }).catch(() => {});

@@ -14,13 +14,13 @@ CR = b"\r"
 DOCKER_FILES = (
     "backend/Dockerfile",
     "backend/docker-entrypoint.sh",
-    "frontend/Dockerfile",
-    "frontend/nginx.conf",
-    "frontend/security_headers.conf",
+    "web/Dockerfile",
+    "web/nginx.conf",
+    "web/security_headers.base.conf",
     "docker-compose.yml",
     "docker-compose.hardened.yml",
     ".dockerignore",
-    "frontend/.dockerignore",
+    "web/.dockerignore",
 )
 
 
@@ -36,7 +36,7 @@ def read(name: str) -> str:
 
 def nginx_locations() -> dict[str, str]:
     """Location path -> block body (comments removed), from the repository's own nginx.conf."""
-    lines = read("frontend/nginx.conf").splitlines()
+    lines = read("web/nginx.conf").splitlines()
     conf = "\n".join(line for line in lines if not line.lstrip().startswith("#"))
     return dict(re.findall(r"location\s+([^\s{]+(?:\s+/\S*)?)\s*\{([^}]*)\}", conf))
 
@@ -122,9 +122,14 @@ def test_the_build_context_leaves_out_secrets_and_local_state() -> None:
 
 
 def test_the_web_image_is_unprivileged_and_ships_the_security_headers() -> None:
-    dockerfile = read("frontend/Dockerfile")
+    dockerfile = read("web/Dockerfile")
     assert "FROM nginxinc/nginx-unprivileged" in dockerfile
-    assert "COPY security_headers.conf /etc/nginx/security_headers.conf" in dockerfile
+    # The build writes security_headers.conf (the policy plus the hashes of the exported inline scripts).
+    assert (
+        "COPY --from=build /app/security_headers.conf /etc/nginx/security_headers.conf"
+        in dockerfile
+    )
+    assert "RUN npm run build" in dockerfile
     assert "COPY nginx.conf /etc/nginx/conf.d/default.conf" in dockerfile
     assert "EXPOSE 8080" in dockerfile
 
@@ -146,12 +151,12 @@ def test_nginx_does_not_add_security_headers_to_api_responses() -> None:
 
 def test_nginx_adds_the_security_headers_to_the_page_and_the_assets() -> None:
     locations = nginx_locations()
-    for path in ("/", "/assets/"):
+    for path in ("/", "/_next/static/"):
         assert "include /etc/nginx/security_headers.conf;" in locations[path], path
 
 
 def test_the_request_size_limit_is_set_and_the_version_is_hidden() -> None:
-    conf = read("frontend/nginx.conf")
+    conf = read("web/nginx.conf")
     assert "client_max_body_size 128k;" in conf
     assert "server_tokens off;" in conf
 

@@ -28,7 +28,7 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 5"], channel: "chrome" } },
   ],
   webServer: {
-    command: `cross-env WEB=1 node ../scripts/security/prod_like_server.mjs ${PORT} 8000`,
+    command: `node ../scripts/security/prod_like_server.mjs ${PORT} 8000`,
     url: `http://127.0.0.1:${PORT}/login/`,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

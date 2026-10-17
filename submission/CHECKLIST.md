@@ -42,7 +42,7 @@ after it. Keep a copy of every e-mail you send and any reply.
 | 01 | **Technical documentation**: system architecture, core algorithm description, security design | Yes | `docs/TECHNICAL_DOCUMENTATION.md` (links `docs/SECURITY.md`) | Export to PDF if you want one file |
 | 02 | **Presentation deck**, final presentation no longer than 10 minutes | Yes | **`submission/StudyRoute_Deck.pptx`** (12 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Replace `[Team name]` and `[repository link]` on slides 1 and 12, then rehearse to 10 minutes |
 | 03 | **Demo video**, no longer than 5 minutes | Optional, but see 06 | Shot-by-shot script in `submission/VIDEO_SCRIPT.md` | Record it |
-| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `frontend/`, `docker-compose.yml` | **Create the GitHub repository and push** (see below); add its link to the e-mail |
+| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Yes | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Create the GitHub repository and push** (see below); add its link to the e-mail |
 | 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Yes | `docs/SECURITY_SELF_ASSESSMENT.md` | Read the risk list and agree with it |
 | 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Yes | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | The demo video (see 03) |
 
@@ -72,8 +72,8 @@ judges access; put the link in the submission e-mail.
       (also with `docker-compose.hardened.yml`).
 - [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
 - [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1130 passed on Windows and on Linux in a container; ruff clean)
-- [x] `cd frontend && npm run typecheck && npm test && npm run build` (17 Oct 2026: 139 tests, on Windows and on Linux in a container)
-- [ ] CI is green on the pushed commit (backend, frontend, secret scan, dependency audit, docker).
+- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026: 360 unit and accessibility tests, 18 browser tests; the unit tests also on Linux in a container)
+- [ ] CI is green on the pushed commit (backend, web, contracts, secret scan, dependency audit, docker).
 - [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.
 - [ ] Every screen shows the sandbox banner (sign-in page included).
 - [ ] If you will show model mode: set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL` in

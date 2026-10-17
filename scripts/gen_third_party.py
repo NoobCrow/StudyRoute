@@ -3,8 +3,8 @@
     python scripts/gen_third_party.py
 
 Run it with the backend's Python environment (the packages must be installed there) after
-`npm ci` in frontend/. Python licences come from the installed package metadata, JavaScript
-licences from frontend/package-lock.json. Only direct dependencies are listed; transitive ones
+`npm ci` in web/. Python licences come from the installed package metadata, JavaScript
+licences from web/package-lock.json. Only direct dependencies are listed; transitive ones
 are covered by the lock files.
 """
 
@@ -48,7 +48,7 @@ def python_rows(requirements: Path) -> list[tuple[str, str, str]]:
 
 
 def javascript_rows(
-    folder: str = "frontend",
+    folder: str = "web",
 ) -> tuple[list[tuple[str, str, str]], list[tuple[str, str, str]]]:
     package = json.loads((ROOT / folder / "package.json").read_text(encoding="utf-8"))
     lock = json.loads((ROOT / folder / "package-lock.json").read_text(encoding="utf-8"))
@@ -99,7 +99,7 @@ def main() -> int:
         "accounts in the sandbox are invented by the team. The competition rules require",
         "third-party components to be properly licensed; this is the inventory. Only direct",
         "dependencies are listed; the exact versions of everything installed are pinned in",
-        "`backend/requirements.txt`, `frontend/package-lock.json` and `contracts/package-lock.json`.",
+        "`backend/requirements.txt`, `web/package-lock.json` and `contracts/package-lock.json`.",
         "",
         "## Backend runtime (Python 3.12)",
         "",

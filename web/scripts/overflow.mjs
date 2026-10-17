@@ -2,7 +2,7 @@
 //   node scripts/overflow.mjs http://localhost:3000 /bank/ 390
 import { createRequire } from "node:module";
 
-const require = createRequire(new URL("../../frontend/package.json", import.meta.url));
+const require = createRequire(new URL("../package.json", import.meta.url));
 const puppeteer = require("puppeteer-core");
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const [base, route, widthArg = "390", who = "parent"] = process.argv.slice(2);

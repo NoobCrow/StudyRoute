@@ -1,11 +1,11 @@
 // Opens the interactive widgets of the production build under the strict Content-Security-Policy and
 // fails on any console error (a CSP violation shows up as one): date picker, dropdowns, theme menu,
 // command palette, the assistant sheet with a real question, the reset dialog and a quote.
-//   WEB=1 node ../scripts/security/prod_like_server.mjs 8091 8000 &
+//   node ../scripts/security/prod_like_server.mjs 8091 8000 &
 //   node scripts/csp-interact.mjs http://127.0.0.1:8091
 import { createRequire } from "node:module";
 
-const require = createRequire(new URL("../../frontend/package.json", import.meta.url));
+const require = createRequire(new URL("../package.json", import.meta.url));
 const puppeteer = require("puppeteer-core");
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const base = process.argv[2] ?? "http://127.0.0.1:8091";

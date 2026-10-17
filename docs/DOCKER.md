@@ -24,7 +24,7 @@ with generated throw-away secrets.
 
 | Container | Image | Role | Port |
 |-----------|-------|------|------|
-| `web` | nginx (unprivileged) with the built React UI | Serves the UI, proxies `/api/` and `/health` to the API, sends the security headers | **8080**, the only published port |
+| `web` | nginx (unprivileged) with the exported Next.js UI | Serves the UI, proxies `/api/` and `/health` to the API, sends the security headers | **8080**, the only published port |
 | `backend` | Python 3.12 slim, non-root user | FastAPI sandbox API; seeds demo data on first start | 8000, reachable only from `web` |
 
 `web` waits until the API reports healthy. Both containers have health checks, and the data
@@ -179,7 +179,7 @@ when the repository is pushed.
 
 - **The pinned dependencies fit the image.** `backend/requirements.txt` was resolved for the
   container's platform (Linux, Python 3.12, `x86_64` and `aarch64`): all 59 pins have a published
-  wheel. The frontend lock file carries the Linux (including musl) native builds.
+  wheel. The web UI's lock file carries the Linux (including musl) native builds.
 - **The API as the image runs it** (clean environment from the lock file, the real
   `docker-entrypoint.sh`) and **the repository's `nginx.conf` in a real nginx 1.27**, natively on
   Windows. Those runs found and fixed two real defects: the proxy added the web page's security

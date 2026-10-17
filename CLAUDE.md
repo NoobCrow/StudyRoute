@@ -32,7 +32,7 @@ over clever and unfinished.
 
 ## Stack (change only with a good reason)
 - Backend: Python 3.12, FastAPI, SQLAlchemy, SQLite (Postgres optional), pytest
-- Frontend: React + TypeScript (Vite)
+- Frontend: Next.js (static export), React and TypeScript, Tailwind and shadcn/ui, in web/
 - One-command start: docker compose up
 - AI: provider-agnostic client in backend/app/ai/. Must run in TEMPLATE MODE
   with no API key. Pin and log the model version when a key is present.
@@ -50,14 +50,15 @@ backend/app/ai/nlu/     the trained reader (tokenizer, ONNX runtime, value check
 backend/app/ai/dialogue/ the RL dialogue policy: state, legal-action rules, NumPy policy; weights in model/
 ml/                     training and evaluation of the reader; ml/rl/ the RL simulator and trainer
 backend/tests/          pytest. One test per blueprint test ID (T01..T24)
-frontend/               screens: dashboard, compare, recipient, documents,
-                        approval, tracker, audit, chat
+web/                    screens: dashboard, compare, payments, recipients, documents,
+                        audit, rules, bank network, smart escrow, sandbox, assistant
 docs/BLUEPRINT.md       the spec
 config/rules.yaml       limits, checklists, calendars (blueprint 13)
 
 ## Commands
 - Run tests: cd backend && pytest -q
 - Lint/format: ruff check . && ruff format .
+- Web UI checks: cd web && npm run typecheck && npm run lint && npm test; npm run build; npm run e2e
 - Start all: docker compose up --build
 - Reset demo data: python -m app.scripts.seed
 - Run the demo script against a running API: python -m app.scripts.demo_flow
@@ -68,6 +69,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Re-measure the trained reader against the rules: python ml/evaluate.py (backend venv)
 - Retrain the reader on a GPU: docs/AI_AGENT.md section 7
 - Retrain / re-evaluate the RL dialogue policy: docs/AI_RL.md section 8 (ml/rl/)
+- Retake the README screenshots (fresh demo data, API and built web UI running): python -m app.scripts.gallery
 - Build the submission archive: python scripts/make_submission.py
 
 ## How to work

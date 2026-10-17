@@ -25,7 +25,7 @@ RATE_LIMIT_ENABLED=false uvicorn app.main:create_app --factory --port 8002 &
 python ../scripts/security/attack_probe.py http://127.0.0.1:8002 /tmp/lab
 
 # 3. the browser audit under the production CSP
-(cd ../frontend && npm ci && npm run build)
+(cd ../web && npm ci && npm run build)
 node ../scripts/security/prod_like_server.mjs 8090 8002 &
 node ../scripts/security/browser_audit.mjs http://127.0.0.1:8090
 

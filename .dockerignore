@@ -11,7 +11,8 @@ data/
 **/.pytest_cache
 **/.ruff_cache
 **/node_modules
-frontend/dist
+web/out
+web/.next
 docs
 submission
 *.db

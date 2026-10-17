@@ -131,9 +131,9 @@ def check_api(base: str, report: Report) -> None:
     )
 
 
-# The built page names its app root (Vite: id="root") or its Next.js bundles under /_next/static/.
+# The exported page names its Next.js bundles under /_next/static/.
 def is_app_shell(body: bytes) -> bool:
-    return b'id="root"' in body or b"/_next/static/" in body
+    return b"/_next/static/" in body
 
 
 def check_web(base: str, report: Report) -> None:
@@ -164,9 +164,7 @@ def check_web(base: str, report: Report) -> None:
     report.check(
         deep.status == 200 and is_app_shell(deep.body), "a deep link falls back to the app"
     )
-    asset = re.search(
-        r'src="(/(?:assets|_next/static)/[^"]+\.js)"', index.body.decode("utf-8", "replace")
-    )
+    asset = re.search(r'src="(/_next/static/[^"]+\.js)"', index.body.decode("utf-8", "replace"))
     report.check(asset is not None, "the page references a built JavaScript asset")
     if asset:
         script = fetch(f"{base}{asset.group(1)}")

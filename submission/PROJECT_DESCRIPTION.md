@@ -86,10 +86,10 @@ with your AD bank." The app never claims a live bank or a live FX feed.
 
 ## What is built
 
-A FastAPI and SQLite backend (engine, domain, audit, mock providers, AI layer), a React and
-TypeScript web app (dashboard, compare, recipients, documents, payment with approval and tracker,
-audit log, rules, bank network, smart escrow, chat), almost 900 backend tests that trace to all 24 blueprint scenarios (T01 to
-T24), over 120 frontend tests including automated accessibility checks, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
+A FastAPI and SQLite backend (engine, domain, audit, mock providers, AI layer), a Next.js and
+TypeScript web app (dashboard, compare, payments, recipients, documents, payment with approval and tracker,
+audit log, rules, bank network, smart escrow, assistant), over 1,100 backend tests that trace to all 24 blueprint scenarios (T01 to
+T24), over 350 web UI tests (unit, component and automated accessibility checks) plus browser smoke tests, a scripted end-to-end demo (`python -m app.scripts.demo_flow`), CI with
 secret scanning, and a one-command start: `docker compose up --build`, then open
 `http://localhost:8080`.
 

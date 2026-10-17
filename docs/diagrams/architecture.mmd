@@ -1,5 +1,5 @@
 flowchart LR
-  B["<b>Browser</b><br/>React + TypeScript<br/>strict CSP, no inline code"]
+  B["<b>Browser</b><br/>Next.js + TypeScript<br/>strict CSP, scripts by hash"]
   N["<b>nginx</b><br/>serves the UI, proxies /api<br/>security headers"]
   A["<b>FastAPI</b><br/>auth, rate limits, validation,<br/>Idempotency-Key, RFC 7807 errors"]
   E["<b>Engine</b> (pure, no I/O)<br/>money, FX, fees, ranking,<br/>planner, interbank plans"]

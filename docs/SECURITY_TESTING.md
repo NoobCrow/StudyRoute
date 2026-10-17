@@ -8,8 +8,8 @@ no flaw exists, and an independent penetration test has not been done.
 
 | Area | How | Result |
 |------|-----|--------|
-| **Everything the suites cover** | `pytest` (backend), `vitest` (frontend), `ruff`, `tsc`, production build | All pass |
-| **Known vulnerable dependencies** | `pip-audit` on the pinned backend lock; `npm audit` on the frontend (production and all) and on `contracts/` | 0 vulnerabilities in all three |
+| **Everything the suites cover** | `pytest` (backend), `vitest` and Playwright (web UI), `ruff`, `tsc`, ESLint, production build | All pass |
+| **Known vulnerable dependencies** | `pip-audit` on the pinned backend lock; `npm audit` on the web UI (production) and on `contracts/` | 0 vulnerabilities in all three |
 | **Anonymous access** | Every one of the 70 routes from the API's own OpenAPI document called with no token | All refused; no server error |
 | **Token forgery** | `alg=none`, HS256 signed with the public key (algorithm confusion), ES256 with an attacker's key, cut and flipped signatures, expired, refresh token used as access token, empty and garbage bearers, token in the URL | All refused (401) |
 | **One family reading another's data** | A second, unrelated household (parent and student) against payments, quotes, trackers, compliance reports, instruction previews, escrows, bank transfers and statements, recipients, documents, audit events and every list | All 403 or 404; nothing of household 1 appears anywhere in household 2's responses |
@@ -64,7 +64,8 @@ entrypoint check.
   the API port unpublished.
 * **Account lockout can be used to lock out someone else's account for 15 minutes.** That is the
   usual trade-off against guessing.
-* **The Vite dev server** is for development only (R31).
+* **The Next.js dev server** is for development only (R31).
+* **The CSP lists hashed inline scripts and four libraries are patched at install time** (R42).
 * **SQLite triggers can be dropped by someone with file access.** The audit hash chain, the chain
   log's hash chain and the on-chain anchor are what detect that.
 * **If an AI key is configured**, masked facts go to that provider. In the default template mode

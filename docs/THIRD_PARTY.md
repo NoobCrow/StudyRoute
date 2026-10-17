@@ -8,7 +8,7 @@ pretrained model that the team fine-tuned. The exchange rates, providers, fees, 
 accounts in the sandbox are invented by the team. The competition rules require
 third-party components to be properly licensed; this is the inventory. Only direct
 dependencies are listed; the exact versions of everything installed are pinned in
-`backend/requirements.txt`, `frontend/package-lock.json` and `contracts/package-lock.json`.
+`backend/requirements.txt`, `web/package-lock.json` and `contracts/package-lock.json`.
 
 ## Backend runtime (Python 3.12)
 
@@ -43,29 +43,55 @@ dependencies are listed; the exact versions of everything installed are pinned i
 
 | Package | Version | Licence |
 |---------|---------|---------|
-| @fontsource-variable/inter | 5.3.0 | OFL-1.1 |
-| @fontsource-variable/jetbrains-mono | 5.3.0 | OFL-1.1 |
-| @fontsource-variable/source-serif-4 | 5.3.1 | OFL-1.1 |
+| @date-fns/tz | 1.5.0 | MIT |
+| @hookform/resolvers | 5.9.1 | MIT |
+| @tanstack/react-query | 5.104.0 | MIT |
+| class-variance-authority | 0.7.1 | Apache-2.0 |
+| clsx | 2.1.1 | MIT |
+| cmdk | 1.1.1 | MIT |
+| date-fns | 4.4.0 | MIT |
+| geist | 1.7.2 | SIL OPEN FONT LICENSE |
+| input-otp | 1.5.0 | MIT |
+| lucide-react | 1.49.0 | ISC |
+| next | 16.3.8 | MIT |
+| next-themes | 0.4.6 | MIT |
+| radix-ui | 1.6.7 | MIT |
 | react | 19.3.0 | MIT |
+| react-day-picker | 10.0.2 | MIT |
 | react-dom | 19.3.0 | MIT |
-| react-router-dom | 7.18.4 | MIT |
+| react-hook-form | 7.89.0 | MIT |
+| recharts | 3.8.0 | MIT |
+| sonner | 2.0.8 | MIT |
+| tailwind-merge | 3.7.0 | MIT |
+| tw-animate-css | 1.4.0 | MIT |
+| zod | 3.25.76 | MIT |
 
 ## Frontend tooling (build and tests)
 
 | Package | Version | Licence |
 |---------|---------|---------|
+| @playwright/test | 1.63.0 | Apache-2.0 |
+| @tailwindcss/postcss | 4.3.3 | MIT |
 | @testing-library/jest-dom | 7.0.1 | MIT |
 | @testing-library/react | 16.3.3 | MIT |
-| @testing-library/user-event | 14.6.8 | MIT |
+| @testing-library/user-event | 14.6.7 | MIT |
+| @types/node | 26.6.4 | MIT |
 | @types/react | 19.3.0 | MIT |
 | @types/react-dom | 19.3.0 | MIT |
-| @vitejs/plugin-react | 6.1.2 | MIT |
-| axe-core | 4.14.0 | MPL-2.0 |
-| jsdom | 30.1.2 | MIT |
+| @vitejs/plugin-react | 6.1.1 | MIT |
+| axe-core | 4.13.0 | MPL-2.0 |
+| cross-env | 10.1.0 | MIT |
+| eslint | 9.39.5 | MIT |
+| eslint-config-next | 16.3.8 | MIT |
+| jsdom | 30.1.1 | MIT |
+| postcss | 8.5.28 | MIT |
+| prettier | 3.9.9 | MIT |
+| prettier-plugin-tailwindcss | 0.8.1 | MIT |
 | puppeteer-core | 25.13.0 | Apache-2.0 |
-| typescript | 7.0.2 | Apache-2.0 |
-| vite | 8.3.4 | MIT |
-| vitest | 5.0.4 | MIT |
+| shadcn | 4.21.1 | MIT |
+| tailwindcss | 4.3.3 | MIT |
+| typescript | 6.0.3 | Apache-2.0 |
+| vitest | 5.0.3 | MIT |
 
 ## Smart-contract build tools (`contracts/`, development only)
 
