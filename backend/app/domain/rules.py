@@ -145,6 +145,14 @@ class Rules:
     def raw(self, key: str) -> Any:
         return self.record(key).value
 
+    def records_with_prefix(self, prefix: str) -> dict[str, RuleRecord]:
+        """The rules whose key starts with `prefix` (for example `student_costs.`), by the rest."""
+        return {
+            key[len(prefix) :]: record
+            for key, record in sorted(self._records.items())
+            if key.startswith(prefix)
+        }
+
     def to_api(self) -> list[dict[str, Any]]:
         return [self._records[key].to_api() for key in sorted(self._records)]
 

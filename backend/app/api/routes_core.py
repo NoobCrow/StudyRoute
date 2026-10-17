@@ -29,6 +29,7 @@ from app.domain.recipients import RecipientCreate
 from app.domain.rules import load_rules
 from app.domain.send_plan import build_send_plan
 from app.domain.stress import parse_drops, stress_quote
+from app.domain.student_guide import arrival_guide, student_budget
 from app.engine import fx
 from app.engine.money import CURRENCY_EXPONENTS, Money
 from app.engine.planner import INDICATIVE, plan_deadline
@@ -379,6 +380,33 @@ def send_plan(
         rules, total=Money(monthly_minor * months, currency), months=months, charge_code=charge_code
     )
     return body
+
+
+@router.get("/planner/student-budget")
+def student_budget_route(
+    budget_bdt_minor: int | None = Query(default=None, gt=0, le=10**12),
+    housing: str = Query(default="shared", pattern=r"^(shared|studio)$"),
+    country: str | None = Query(default=None, pattern=r"^[A-Z]{2}$"),
+    actor: Actor = Depends(require(Perm.PLANNER_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    """Student budget: a month in each city, set against a monthly budget in taka. Read-only."""
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+    budget = Money(budget_bdt_minor, "BDT") if budget_bdt_minor is not None else None
+    return student_budget(rules, budget_bdt=budget, housing=housing, country=country)
+
+
+@router.get("/planner/arrival-guide")
+def arrival_guide_route(
+    country: str = Query(default="GB", pattern=r"^[A-Z]{2}$"),
+    actor: Actor = Depends(require(Perm.PLANNER_READ)),
+    ctx: AppContext = Depends(get_ctx),
+) -> dict[str, Any]:
+    """Arrival guide: what to do before flying and in the first weeks. Read-only."""
+    with ctx.db.read() as session:
+        rules = load_rules(session)
+    return arrival_guide(rules, country)
 
 
 @router.get("/rates/history")

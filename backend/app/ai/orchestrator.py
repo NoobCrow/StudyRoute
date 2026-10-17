@@ -27,6 +27,7 @@ from app.ai.nlu.understanding import Pending, Understanding, understand
 from app.ai.number_guard import check_numbers
 from app.ai.policy import PolicyResult, check_text
 from app.ai.prompt import build_prompt
+from app.ai.student_topic import parse_student_topic
 from app.ai.tasks import Progress, TaskResult, TaskRunner
 from app.ai.templates import INDICATIVE, Responder, refusal
 from app.api.context import AppContext
@@ -153,8 +154,9 @@ class Orchestrator:
         with ctx.db.read() as session:
             rules = load_rules(session)
             chat = gather_context(
-                ctx, session, ai, rules, intent, quote_id, payment_id, stress_drops(text)
-            )  # 3. facts
+                ctx, session, ai, rules, intent, quote_id, payment_id,
+                stress_drops(text), parse_student_topic(text, rules),
+            )  # 3. facts  # fmt: skip
         for key, label, value in task.facts if task else ():
             chat.facts.add(key, label, value)
         masker = Masker(chat.person_names)  # 4. mask personal data

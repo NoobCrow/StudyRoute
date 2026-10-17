@@ -25,6 +25,10 @@ class Intent(StrEnum):
     PLAN = "PLAN"  # a task: read a payment request, quote it, prepare the plan
     CADENCE = "CADENCE"  # a task: compare monthly, quarterly, termly and upfront sending
     STRESS = "STRESS"  # a question: what if the taka weakened before the money is sent
+    COSTS = (
+        "COSTS"  # a question: rent and the cost of a month in a city, or which city fits a budget
+    )
+    ARRIVAL = "ARRIVAL"  # a question: what to do before flying and in the first weeks abroad
 
 
 _STRESS = re.compile(
@@ -50,8 +54,28 @@ def stress_drops(message: str) -> tuple[Decimal, ...]:
     return tuple(merged)
 
 
+_COSTS = re.compile(
+    r"\brents?\b.{0,30}\b(?:in|for|at|near)\b|\b(?:the|average|typical|monthly|student)\s+rents?\b"
+    r"|how\s+much\s+(?:is|are|does|do)\b.{0,30}\b(?:rent|accommodation|housing|living)"
+    r"|cost\s+of\s+living|living\s+(?:costs?|expenses?)\s+(?:in|for|at)\b"
+    r"|\bcosts?\s+(?:to|of)\s+(?:live|living|study|studying)\b"
+    r"|\bwhich\s+(?:city|cities|towns?|countr(?:y|ies)|places?)\b|\bafford\b"
+    r"|student\s+budget|monthly\s+budget|\bcheapest\s+(?:city|cities|countr(?:y|ies)|places?)\b",
+    re.I,
+)
+_ARRIVAL = re.compile(
+    r"when\s+i\s+(?:arrive|land|get\s+there|reach|get\s+to)\b|(?:after|once)\s+(?:i\s+)?(?:arrive|land)\b"
+    r"|\bjust\s+arrived\b|first\s+(?:weeks?|months?|few\s+days|days)\b.{0,20}\b(?:abroad|there|in|overseas)\b"
+    r"|settl(?:e|ing)\s+in\b|before\s+(?:i|we|you)\s+(?:fly|leave|travel|go\s+abroad|depart)\b"
+    r"|arrival\s+(?:guide|checklist|steps|help|tips|list)\b|student\s+bank\s+account|local\s+sim\b"
+    r"|moving\s+abroad|new\s+(?:to|in)\s+(?:the\s+)?(?:country|city|uk|usa)\b",
+    re.I,
+)
+
 _RULES: list[tuple[Intent, re.Pattern[str]]] = [
     (Intent.STRESS, _STRESS),
+    (Intent.ARRIVAL, _ARRIVAL),
+    (Intent.COSTS, _COSTS),
     (
         Intent.DRAFT,
         re.compile(
@@ -164,6 +188,11 @@ def choose_intent(message: str, parsed: ParsedRequest, *, has_context: bool) -> 
     """
     if _STRESS.search(message):
         return Intent.STRESS  # a what-if about the rate never starts a new quote
+    if not (_PLAN_ANY.search(message) or _CADENCE_WORDS.search(message)):
+        if _ARRIVAL.search(message):
+            return Intent.ARRIVAL  # a student question, even with a number in it
+        if _COSTS.search(message):
+            return Intent.COSTS  # "which city fits BDT 200,000" is not a send plan
     if _NOT_A_PLAN.search(message):
         return classify(message)
     if parsed.has_amount:

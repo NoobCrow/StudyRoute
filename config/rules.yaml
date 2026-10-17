@@ -446,6 +446,188 @@ checklists:
     last_checked: "2026-10-15"
     note: "A general list for countries without their own. Indicative. Living-expense limits are not verified."
 
+# --- student help (F21 budget, F22 arrival guide): synthetic or indicative, never verified ---
+student_costs:
+  GB:
+    value:
+      currency: GBP
+      cities:
+        London: {rent_shared: 850, rent_studio: 1500, food: 280, transport: 160, utilities: 90, phone_internet: 25, other: 200}
+        Manchester: {rent_shared: 600, rent_studio: 950, food: 240, transport: 70, utilities: 80, phone_internet: 25, other: 180}
+        Birmingham: {rent_shared: 520, rent_studio: 850, food: 230, transport: 65, utilities: 75, phone_internet: 25, other: 170}
+        Glasgow: {rent_shared: 480, rent_studio: 800, food: 230, transport: 60, utilities: 70, phone_internet: 25, other: 165}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole GBP for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+  US:
+    value:
+      currency: USD
+      cities:
+        "New York": {rent_shared: 1400, rent_studio: 2400, food: 450, transport: 130, utilities: 120, phone_internet: 50, other: 300}
+        Boston: {rent_shared: 1200, rent_studio: 2000, food: 420, transport: 90, utilities: 110, phone_internet: 50, other: 280}
+        Austin: {rent_shared: 850, rent_studio: 1400, food: 380, transport: 80, utilities: 110, phone_internet: 50, other: 260}
+        Columbus: {rent_shared: 650, rent_studio: 1050, food: 340, transport: 70, utilities: 100, phone_internet: 50, other: 240}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole USD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+  DE:
+    value:
+      currency: EUR
+      cities:
+        Berlin: {rent_shared: 500, rent_studio: 850, food: 260, transport: 40, utilities: 70, phone_internet: 20, other: 150}
+        Munich: {rent_shared: 700, rent_studio: 1100, food: 280, transport: 45, utilities: 80, phone_internet: 20, other: 170}
+        Leipzig: {rent_shared: 380, rent_studio: 600, food: 230, transport: 40, utilities: 65, phone_internet: 20, other: 140}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole EUR for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+  AU:
+    value:
+      currency: AUD
+      cities:
+        Sydney: {rent_shared: 1100, rent_studio: 1900, food: 450, transport: 180, utilities: 110, phone_internet: 40, other: 300}
+        Melbourne: {rent_shared: 950, rent_studio: 1600, food: 420, transport: 160, utilities: 105, phone_internet: 40, other: 280}
+        Adelaide: {rent_shared: 750, rent_studio: 1200, food: 390, transport: 130, utilities: 100, phone_internet: 40, other: 250}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole AUD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+  CA:
+    value:
+      currency: CAD
+      cities:
+        Toronto: {rent_shared: 1000, rent_studio: 1700, food: 420, transport: 150, utilities: 100, phone_internet: 60, other: 250}
+        Vancouver: {rent_shared: 1100, rent_studio: 1800, food: 430, transport: 110, utilities: 100, phone_internet: 60, other: 250}
+        Montreal: {rent_shared: 700, rent_studio: 1100, food: 380, transport: 90, utilities: 90, phone_internet: 55, other: 220}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole CAD for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+  MY:
+    value:
+      currency: MYR
+      cities:
+        "Kuala Lumpur": {rent_shared: 600, rent_studio: 1200, food: 700, transport: 150, utilities: 150, phone_internet: 50, other: 400}
+        Penang: {rent_shared: 500, rent_studio: 950, food: 600, transport: 100, utilities: 120, phone_internet: 50, other: 350}
+        "Johor Bahru": {rent_shared: 450, rent_studio: 850, food: 550, transport: 90, utilities: 110, phone_internet: 50, other: 320}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented monthly figures in whole MYR for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+
+arrival_labels:
+  value:
+    accommodation: {label: "Book a place to live before you fly", hint: "Start with your university's own halls or accommodation office. Never pay a landlord you have not checked, and keep every receipt."}
+    arrival_money: {label: "Plan the first month's money", hint: "The first month costs more than the rest: deposit, bedding and a travel pass. Use the Budget tab and send the money early."}
+    health_cover: {label: "Arrange health cover", hint: "Check what your visa and university require. Keep the policy number on your phone."}
+    travel_documents: {label: "Pack your documents", hint: "Passport, visa papers, offer letter and your address in hand luggage, with copies kept somewhere else."}
+    bank_letter: {label: "Ask your university for a bank letter", hint: "Many banks want a letter that confirms you are a student before they open an account."}
+    student_account: {label: "Open a student bank account", hint: "Take your passport, visa papers and the university letter. Ask about fees and about receiving money from abroad."}
+    local_sim: {label: "Get a local SIM or eSIM", hint: "Your bank and university send security codes by phone. Compare student plans before you sign."}
+    enrol: {label: "Finish enrolment and collect your student card", hint: "Register with the university in the first week. The card often brings discounts and library access."}
+    emergency_numbers: {label: "Save the emergency numbers", hint: "Police, ambulance, your embassy and your university's help line."}
+    transport_card: {label: "Get a student travel card", hint: "Ask the university which student transport discounts apply."}
+    scams: {label: "Learn the common student scams", hint: "Fake rental adverts, fake visa agents and fake fee-collection calls target new students. Check any request for money with the university first."}
+    work_rules: {label: "Know how much you may work", hint: "Check the official visa page for work limits. Breaking them can end your visa."}
+    register_address: {label: "Register your address if required", hint: "Some countries ask students to register where they live. Your international office will say whether yours does."}
+    budget_check: {label: "Check your first month against your budget", hint: "Compare what you spent with the Budget tab. If it is higher, tell your family early."}
+    link_account: {label: "Share your new account with your family", hint: "Send the bank details through a safe channel. Never share passwords, card numbers or one-time codes."}
+    gb_visa_documents: {label: "Check how you receive your visa documents", hint: "The international office will explain whether you collect a card or use an online account. Do it in the first days."}
+    gb_doctor: {label: "Register with a local doctor (GP)", hint: "Registering while you are well is easier than when you are ill. Ask your university how."}
+    us_i20: {label: "Keep your I-20 with your passport", hint: "You will be asked for it at the border and by your university. Keep it in your hand luggage."}
+    us_work_permission: {label: "Ask before you take any job", hint: "Work permission for students is limited. Speak to your international student office first."}
+    de_blocked_account: {label: "Check the blocked-account step for your visa", hint: "Many student visas ask you to show funds in a blocked account. Check the embassy page; your university can help."}
+    de_register_address: {label: "Register your address (Anmeldung)", hint: "Germany usually asks you to register where you live soon after you move in. Ask your city office or university."}
+    au_oshc: {label: "Keep your student health cover active (OSHC)", hint: "Your visa normally requires health cover for the whole stay. Keep the card and the policy number."}
+    ca_study_permit: {label: "Keep your study permit papers safe", hint: "Carry the letter you receive at the border together with your passport. Your university can explain the next steps."}
+    ca_sin: {label: "Ask about a Social Insurance Number", hint: "You normally need one before you can work. Ask the international office when and how."}
+    my_student_pass: {label: "Complete your student pass steps with the university", hint: "Universities usually guide new students through the immigration steps. Follow their instructions and keep copies."}
+  kind: regulatory
+  verified: false
+  source_url: "https://example.org/replace-with-official-student-guidance"
+  last_checked: "2026-10-17"
+  note: "Indicative first-weeks advice. Rules for visas, work and registration differ and change: check your university's international office and the official government page."
+
+arrival_guide:
+  GENERIC:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "A general list for countries without their own. Indicative. Confirm with your university and the official government page."
+  GB:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams, gb_visa_documents]
+      first_month: [work_rules, register_address, budget_check, link_account, gb_doctor]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+  US:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, us_i20]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account, us_work_permission]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+  DE:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, de_blocked_account]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, budget_check, link_account, de_register_address]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+  AU:
+    value:
+      before: [accommodation, arrival_money, travel_documents, bank_letter, au_oshc]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+  CA:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, ca_study_permit]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account, ca_sin]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+  MY:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams, my_student_pass]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Visa, work and registration rules change: confirm with your university and the official government page."
+
 # --- generated by scripts/gen_countries.py: do not edit by hand, run the script ---
 countries:
   directory:

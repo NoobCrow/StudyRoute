@@ -6,8 +6,11 @@ from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from app.ai.facts import FactSet
+from app.ai.student_topic import StudentTopic
 from app.domain.rules import Rules
+from app.domain.student_guide import student_budget
 from app.engine.money import Money
+from app.engine.student_budget import HOUSING_LABELS
 
 _PCT = Decimal("0.01")
 
@@ -152,6 +155,119 @@ def _add_deadline_facts(facts: FactSet, fit: dict[str, Any], names: dict[str, st
         "The lowest-cost provider would arrive after the due date",
         "yes" if fit["cheapest_misses_deadline"] else "no",
     )
+
+
+LIST_MAX = 5
+
+
+def _add_cost_row(facts: FactSet, prefix: str, row: dict[str, Any], *, judged: bool) -> None:
+    facts.add(f"{prefix}.city", "City", row["city"])
+    facts.add(f"{prefix}.country_name", "Country", row["country_name"])
+    facts.add(
+        f"{prefix}.total", f"A month in {row['city']}, local money", row["total"]["formatted"]
+    )
+    facts.add(
+        f"{prefix}.total_bdt", f"A month in {row['city']}, in taka", row["total_bdt"]["formatted"]
+    )
+    if judged:
+        facts.add(
+            f"{prefix}.fits", f"{row['city']} fits the budget", "yes" if row["fits"] else "no"
+        )
+        if row["fits"]:
+            facts.add(
+                f"{prefix}.spare", f"{row['city']}: taka to spare", row["spare_bdt"]["formatted"]
+            )
+        else:
+            facts.add(f"{prefix}.gap", f"{row['city']}: taka short", row["gap_bdt"]["formatted"])
+
+
+def _add_city_detail(
+    facts: FactSet, rules: Rules, topic: StudentTopic, row: dict[str, Any]
+) -> None:
+    facts.add("cost.city", "City asked about", row["city"])
+    facts.add("cost.country_name", "Country of the city", row["country_name"])
+    facts.add("cost.currency", "Currency of the city", row["currency"])
+    for line in row["lines"]:
+        facts.add(f"cost.line.{line['key']}", f"{line['label']} in a month", line["formatted"])
+    facts.add("cost.total", "A month in this city, local money", row["total"]["formatted"])
+    facts.add("cost.total_bdt", "A month in this city, in taka", row["total_bdt"]["formatted"])
+    facts.add("cost.rent_bdt", "The rent in taka", row["rent_bdt"]["formatted"])
+    facts.add("cost.rent_share", "Rent as a share of the month", f"{row['rent_share_pct']}%")
+    facts.add("cost.rate", "Synthetic rate used (BDT per unit)", row["rate_bdt_per_unit"])
+    other = "studio" if topic.housing == "shared" else "shared"
+    rows = student_budget(
+        rules, budget_bdt=topic.budget_bdt, housing=other, country=row["country"]
+    )["items"]
+    twin = next(r for r in rows if r["city"] == row["city"])
+    facts.add("cost.other_housing", "The other kind of housing", HOUSING_LABELS[other])
+    facts.add(
+        "cost.other_total", "A month with the other kind of housing", twin["total"]["formatted"]
+    )
+    facts.add("cost.other_total_bdt", "That month in taka", twin["total_bdt"]["formatted"])
+    if topic.budget_bdt is not None:
+        facts.add("cost.fits", "This city fits the budget", "yes" if row["fits"] else "no")
+        if row["fits"]:
+            facts.add("cost.spare", "Taka to spare each month", row["spare_bdt"]["formatted"])
+        else:
+            facts.add("cost.gap", "Taka short each month", row["gap_bdt"]["formatted"])
+
+
+def build_student_cost_facts(facts: FactSet, rules: Rules, topic: StudentTopic) -> None:
+    """A month in a city, a country's cities, or which cities fit a budget: the engine's figures."""
+    overview = student_budget(
+        rules, budget_bdt=topic.budget_bdt, housing=topic.housing, country=None
+    )
+    facts.add("cost.verified", "Are the cost figures verified", "no, invented for the sandbox")
+    facts.add("cost.disclaimer", "How to read the cost figures", overview["disclaimer"])
+    facts.add("cost.housing", "Kind of housing", overview["housing_label"])
+    facts.add(
+        "cost.countries",
+        "Countries with student cost figures",
+        ", ".join(c["name"] for c in overview["countries"]),
+    )
+    judged = topic.budget_bdt is not None
+    if judged:
+        facts.add("cost.budget", "Monthly budget in taka", overview["budget"]["formatted"])
+    if topic.country is not None and topic.country not in {
+        c["country"] for c in overview["countries"]
+    }:
+        facts.add(
+            "cost.no_figures", "A country with no cost figures", rules.corridor(topic.country).name
+        )
+        return
+    scoped = overview
+    if topic.country is not None:
+        scoped = student_budget(
+            rules, budget_bdt=topic.budget_bdt, housing=topic.housing, country=topic.country
+        )
+        facts.add("cost.country_name", "Country asked about", rules.corridor(topic.country).name)
+    items = scoped["items"]
+    facts.add("cost.count", "Number of cities", str(len(items)))
+    if judged:
+        facts.add("cost.fitting", "Cities that fit the budget", str(scoped["summary"]["fitting"]))
+    if topic.city is not None:
+        row = next(r for r in items if r["city"] == topic.city)
+        _add_city_detail(facts, rules, topic, row)
+        return
+    fitting = [r for r in items if r["fits"]]  # the cities that fit, or the cheapest if none
+    shown = (fitting[:LIST_MAX] or items[:1]) if judged else items[:LIST_MAX]
+    facts.add("cost.listed", "Number of cities listed", str(len(shown)))
+    for index, row in enumerate(shown):
+        _add_cost_row(facts, f"cost.c{index}", row, judged=judged)
+
+
+def build_arrival_facts(facts: FactSet, guide: dict[str, Any]) -> None:
+    """What to do before flying and in the first weeks: the guide's own steps, in order."""
+    facts.add("arrival.country", "Destination of the guide", guide["country_name"])
+    facts.add("arrival.general", "Is this the general list", "yes" if guide["general"] else "no")
+    facts.add("arrival.count", "Number of steps in the guide", str(guide["item_count"]))
+    facts.add("arrival.note", "How far to trust the guide", guide["note"])
+    for stage in guide["stages"]:
+        facts.add(
+            f"arrival.{stage['key']}",
+            f"Steps: {stage['label'].lower()}",
+            "; ".join(item["label"] for item in stage["items"]),
+        )
 
 
 def _add_difference(facts: FactSet, cheaper: dict[str, Any], dearer: dict[str, Any]) -> None:

@@ -18,6 +18,19 @@ EXAMPLE_CADENCE_HINT = "How often should I send GBP 800 a month for 9 months?"
 NO_QUOTE = (
     "I do not have a quote to work from. Run a quote on the Compare screen and I will explain it."
 )
+COST_WORDS = (
+    ("rent", "rent"),
+    ("food", "food and groceries"),
+    ("transport", "transport"),
+    ("utilities", "bills"),
+    ("phone_internet", "phone and internet"),
+    ("other", "study materials and leisure"),
+)
+ARRIVAL_STAGES = (
+    ("before", "Before you fly"),
+    ("first_week", "In your first week"),
+    ("first_month", "In your first month"),
+)
 
 
 @dataclass
@@ -136,8 +149,99 @@ class Responder:
             Intent.LIMITS: self.limits, Intent.KYC: self.kyc, Intent.STATUS: self.status,
             Intent.DRAFT: self.draft, Intent.REQUEST_APPROVAL: self.request_approval,
             Intent.PLAN: self.plan, Intent.CADENCE: self.cadence, Intent.STRESS: self.stress,
+            Intent.COSTS: self.costs, Intent.ARRIVAL: self.arrival,
         }.get(intent, self.help)  # fmt: skip
         return handler()
+
+    # --- student questions: the cost of a city, and the first weeks abroad -----------------
+    def _cost_rows(self, count: int) -> str:
+        return ", ".join(
+            f"{self.v(f'cost.c{i}.city')} {self.v(f'cost.c{i}.total')} "
+            f"({self.v(f'cost.c{i}.total_bdt')})"
+            for i in range(count)
+        )
+
+    def _city_cost(self) -> str:
+        parts = ", ".join(f"{word} {self.v(f'cost.line.{key}')}" for key, word in COST_WORDS)
+        text = (
+            f"{self.v('cost.city')}, {self.v('cost.country_name')}, "
+            f"{self.v('cost.housing').lower()}: {parts}. That is {self.v('cost.total')} in all, "
+            f"about {self.v('cost.total_bdt')} at the synthetic rate of {self.v('cost.rate')} BDT "
+            f"per {self.v('cost.currency')}; the rent alone is {self.v('cost.rent_bdt')} "
+            f"({self.v('cost.rent_share')} of the month). With {self.v('cost.other_housing').lower()} "
+            f"instead, a month is {self.v('cost.other_total')} ({self.v('cost.other_total_bdt')})."
+        )
+        if self.facts.has("cost.fits"):
+            city, budget = self.v("cost.city"), self.v("cost.budget")
+            if self.v("cost.fits") == "yes":
+                text += (
+                    f" Against your monthly budget of {budget}, {city} fits, with "
+                    f"{self.v('cost.spare')} to spare."
+                )
+            else:
+                text += (
+                    f" Against your monthly budget of {budget}, {city} does not fit: it is "
+                    f"{self.v('cost.gap')} short."
+                )
+        return text
+
+    def _cost_list(self) -> str:
+        listed = int(self.v("cost.listed"))
+        housing = self.v("cost.housing").lower()
+        scope = self.v("cost.country_name") if self.facts.has("cost.country_name") else ""
+        place = f"Student costs in {scope}" if scope else "Student costs across the cities I know"
+        if not self.facts.has("cost.budget"):
+            return (
+                f"{place}, from the cheapest month ({housing}): {self._cost_rows(listed)}. Name a "
+                "city for the full month, or give me a monthly budget in taka and I will say "
+                "which cities fit."
+            )
+        fitting, count = self.v("cost.fitting"), self.v("cost.count")
+        text = (
+            f"With a monthly budget of {self.v('cost.budget')}, {fitting} of {count} cities fit "
+            f"({housing})."
+        )
+        if fitting == "0":
+            return (
+                f"{text} No city fits. The cheapest is {self.v('cost.c0.city')} at "
+                f"{self.v('cost.c0.total_bdt')}, {self.v('cost.c0.gap')} short."
+            )
+        text += f" Cheapest first: {self._cost_rows(listed)}."
+        if int(fitting) > listed:
+            text += f" These are the {listed} cheapest."
+        return text
+
+    def costs(self) -> Answer:
+        if self.facts.has("cost.no_figures"):
+            return self._finish(
+                f"I do not have student cost figures for {self.v('cost.no_figures')}. I have them "
+                f"for {self.v('cost.countries')}. {INDICATIVE}"
+            )
+        body = self._city_cost() if self.facts.has("cost.city") else self._cost_list()
+        return self._finish(" ".join(f"{body} {self.v('cost.disclaimer')}".split()))
+
+    def arrival(self) -> Answer:
+        where = self.v("arrival.country")
+        steps = " ".join(f"{label}: {self.v(f'arrival.{key}')}." for key, label in ARRIVAL_STAGES)
+        if self.v("arrival.general") == "yes":
+            opening = (
+                "A general list for any country, because steps specific to yours are not loaded."
+            )
+            closing = (
+                "Tell me the country, for example 'What should I do when I arrive in Germany?', "
+                "and I will give the steps specific to it."
+            )
+        else:
+            opening = (
+                f"Arrival guide for {where} (indicative: rules for visas, work and registration "
+                "change, so confirm them with your university and the official government page)."
+            )
+            closing = ""
+        text = (
+            f"{opening} {steps} That is {self.v('arrival.count')} steps; open Student guide, then "
+            f"Arrival checklist, for the hint on each and to tick them off. {closing} {INDICATIVE}"
+        )
+        return self._finish(" ".join(text.split()))
 
     def stress(self) -> Answer:
         if not self._have_quote() or not self.facts.has("stress.count"):
@@ -163,6 +267,8 @@ class Responder:
         return self._finish(
             "I can explain provider costs and the hidden FX margin, the charge codes OUR, SHA and BEN, "
             "your deadline, the documents a bank may ask for, KYC and the sandbox limits. "
+            "I can also tell you the rent and the cost of a month in a student city, which city "
+            "fits a budget in taka, and what to do before you fly and in your first weeks abroad. "
             "I only use numbers from the engine, and I cannot approve, submit, cancel or change anything. "
             "A human must do that in the app."
         )

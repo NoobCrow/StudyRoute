@@ -16,11 +16,13 @@ from app.ai import facts_builder as fb
 from app.ai.facts import FactSet
 from app.ai.intents import Intent
 from app.ai.policy import check_text
+from app.ai.student_topic import StudentTopic
 from app.api.context import AppContext
 from app.domain.constants import RecipientType
 from app.domain.rbac import Actor, Perm, authorize
 from app.domain.rules import Rules
 from app.domain.stress import DEFAULT_DROPS, stress_quote
+from app.domain.student_guide import arrival_guide
 from app.engine.planner import plan_deadline
 from app.models import Recipient, User
 
@@ -55,6 +57,7 @@ def gather_context(
     quote_id: str | None,
     payment_id: str | None,
     drops: Sequence[Decimal] = DEFAULT_DROPS,
+    topic: StudentTopic | None = None,
 ) -> ChatContext:
     owner = ai.owner_id or ""
     facts = FactSet()
@@ -91,6 +94,15 @@ def gather_context(
     if intent is Intent.CHECKLIST or (intent is Intent.PLAN and quote_id):
         authorize(ai, Perm.CHECKLIST_READ)
         fb.build_checklist_facts(facts, rules.checklist(country, purpose))
+    if intent is Intent.COSTS:
+        authorize(ai, Perm.PLANNER_READ)
+        fb.build_student_cost_facts(facts, rules, topic or StudentTopic(None, None, None, "shared"))
+    if intent is Intent.ARRIVAL:
+        authorize(ai, Perm.PLANNER_READ)
+        named = topic.country if topic else None
+        fb.build_arrival_facts(
+            facts, arrival_guide(rules, named or (country if quote_id else None))
+        )
     fb.build_kyc_facts(facts, ctx.kyc.view(session, ai, rules))
     _collect_documents(ctx, session, ai, chat)
     return chat
