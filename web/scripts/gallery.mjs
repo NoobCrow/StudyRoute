@@ -10,6 +10,7 @@
 //   { clickRow: { row: ["Settled", "Example"], text: "Open" } }   the button in the table row holding all these texts
 //   { scrollTo: "Smart send plan", offset: 110 }   bring the element with this text to the top
 //   { scrollTop: true }               back to the top of the page
+//   { scrollBottom: true }            to the very end of the page
 //   { press: "Escape" }  { wait: 800 }
 import { createRequire } from "node:module";
 import fs from "node:fs";
@@ -116,6 +117,8 @@ async function runStep(page, step) {
       step.offset ?? 16,
     );
   } else if (step.scrollTop) await page.evaluate(() => window.scrollTo(0, 0));
+  else if (step.scrollBottom)
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   else if (step.press) await page.keyboard.press(step.press);
   else if (step.wait) await sleep(step.wait);
   else throw new Error(`unknown step ${JSON.stringify(step)}`);

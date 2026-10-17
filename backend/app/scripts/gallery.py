@@ -343,7 +343,7 @@ class Gallery(DemoFlow):
         self._shot(
             "18-plan-to-draft.png",
             "/",
-            height=1600,
+            height=1100,
             steps=[
                 *OPEN_ASSISTANT,
                 *say(plan, 1),
@@ -356,7 +356,7 @@ class Gallery(DemoFlow):
                         "text": "INV-2026-4471 / STU-883201",
                     }
                 },
-                {"scrollTo": "Create a draft payment", "offset": 110},
+                {"scrollBottom": True},
             ],
         )
         self._shot(
