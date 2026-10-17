@@ -136,6 +136,25 @@ await step("compare: get quotes and open the stress test", async () => {
     { timeout: 20000 },
   );
 });
+await step(
+  "student guide: open a city's month, then tick a step on the arrival checklist",
+  async () => {
+    await page.evaluate(() => document.querySelector('a[href="/guide/"]')?.click());
+    await page.waitForSelector("#g-budget");
+    await page.waitForSelector("table tbody tr");
+    await clickText("Details", "main");
+    await page.waitForSelector("[role=dialog]");
+    await page.keyboard.press("Escape");
+    await page.waitForSelector("[role=dialog]", { hidden: true });
+    await click("#g-housing");
+    await page.waitForSelector("[role=option]");
+    await page.keyboard.press("Escape");
+    await sleep(500); // Radix keeps the page unclickable for a moment after a select closes
+    await clickText("Arrival checklist");
+    await page.waitForSelector("#step-accommodation");
+    await click("#step-accommodation");
+  },
+);
 await step("recipients: open the form select", async () => {
   await page.evaluate(() => document.querySelector('a[href="/recipients/"]')?.click());
   await page.waitForSelector("#r-type");

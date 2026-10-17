@@ -71,8 +71,8 @@ judges access; put the link in the submission e-mail.
 - [x] `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
       (also with `docker-compose.hardened.yml`).
 - [x] `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
-- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1130 passed on Windows and on Linux in a container; ruff clean)
-- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026: 360 unit and accessibility tests, 18 browser tests; the unit tests also on Linux in a container)
+- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (17 Oct 2026: 1223 passed on Windows and on Linux in a container; ruff clean)
+- [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (17 Oct 2026: 406 unit and accessibility tests, 20 browser tests; the unit tests also on Linux in a container)
 - [ ] CI is green on the pushed commit (backend, web, contracts, secret scan, dependency audit, docker).
 - [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.
 - [ ] Every screen shows the sandbox banner (sign-in page included).

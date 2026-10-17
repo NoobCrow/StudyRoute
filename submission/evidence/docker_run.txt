@@ -285,3 +285,35 @@ banner timeouts; no panic text in the console this time). It was powered off by 
 again; both containers returned on their own and the audit chain still verified (96 events). The
 browser scripts went through an SSH tunnel because QEMU's forwarded port refuses bursts of
 connections; one 390 tour crashed when the tunnel died with the stalled VM and passed when repeated.
+
+---- Fifth run, 17 October 2026: the student guide and the one-click draft (commit aa0a9e1) ----
+Recorded by hand. Source: dist/studyroute-submission.zip (sha256 2d2aea0aef47..., 35,959,247 bytes) built
+from that commit, copied into the same Ubuntu 24.04 VM and unzipped in an empty directory.
+
+$ docker compose up --build -d --wait               backend and web: Healthy (web image 78 MB)
+$ python scripts/docker_smoke.py                    All smoke checks passed.
+$ docker compose exec backend python -m app.scripts.demo_flow
+65 OK lines, 0 failed, "All demo checks passed." Five of them are new: the student budget lists 20 cities
+cheapest first, its figures are labelled invented and not verified, the arrival guide has three stages and
+is not verified, and the assistant answers the rent in a city, which cities fit a budget, and what to do on
+arrival, each from the engine's figures with the number guard passed.
+$ node scripts/security/browser_audit.mjs           41 of 41 checks passed (425 requests, none to a tracker);
+the new check is that /guide runs no injected script.
+csp-check.mjs: 12 of 12 pages under the generated CSP. csp-interact.mjs: 12 of 12 interactions; the new one
+opens a city's sheet, a select and the arrival tab and ticks a step. tour.mjs: the 11 screens at 1440 (11 of
+11) and at 390 (11 of 11). overflow.mjs at 390 and at 360 on the guide's two tabs, the dashboard, Compare,
+Payments, Documents and the bank screen: nothing scrolls sideways.
+Packet capture of everything the containers send outside their own network, across a backend restart, a
+prediction by the trained reader, the widget checks, both tours and the sweep: 0 packets.
+Hardened overlay from an empty volume: ReadonlyRootfs=true, CapDrop=[ALL], a write to /srv refused. Smoke
+passed, demo 65 OK lines, 0 failed; after docker compose down and up the audit chain still verified
+(73 events).
+Linux, from the unzipped archive: the whole backend suite (python:3.12-slim) 1223 passed in 4 min 16 s;
+web/ (node:22-alpine) typecheck, ESLint, Prettier clean and 406 of 406 tests (33 files).
+
+Test-rig notes, not application findings: the VM stalled once after about 30 minutes of load; it was
+powered off by force and started again, both containers returned on their own and the audit chain still
+verified (93 events). The first runs of the new widget step in csp-interact.mjs failed twice because the
+script clicked while Radix was still closing a sheet or a select; it now waits for each to close, and passed.
+The trained reader labels "What is the rent in Manchester?" out of scope, as expected (it never saw such
+questions); a rule decides these intents and the demo and the tests prove the answers.

@@ -180,6 +180,15 @@ the tours showed 0 packets leaving the compose network; and the whole backend su
 the web UI's 360 tests passed on Linux inside containers. Details, and the two test-rig problems of
 the VM, are in `submission/evidence/docker_run.txt`.
 
+**Run again with the student guide and the one-click draft (17 October).** The archive built from commit
+`aa0a9e1` was unzipped in an empty directory in the same VM. `docker compose up --build` built the image and both
+containers became healthy; the smoke script, the demo (65 OK lines, five of them new: the student budget, the
+arrival guide and three assistant answers), the real-Chrome browser audit (41 of 41, now covering `/guide`), the CSP
+page and widget checks (12 of 12 each), both screen tours, the sideways-scroll sweep and the hardened overlay all
+passed; a packet capture across a restart, the trained reader, the widgets and the tours showed 0 packets leaving the
+compose network; and the whole backend suite (1223 tests) and the web UI's 406 tests passed on Linux in containers.
+The VM stalled once and was restarted; see `submission/evidence/docker_run.txt`.
+
 **Not covered by that run:** Docker Desktop on Windows or macOS (the VM was Linux `amd64`), `arm64`
 images, a different base-image digest tomorrow (the tags `python:3.12-slim`, `node:22-alpine` and
 `nginxinc/nginx-unprivileged:1.27-alpine` move), and the GitHub Actions `docker` job, which runs
