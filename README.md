@@ -492,6 +492,19 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 </tr>
 </table>
 
+### AI risk score and the bank review desk
+
+<table>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/40-risk-score-parent.png"><img src="submission/screenshots/40-risk-score-parent.png" alt="The parent's page: AI risk score 99 out of 100, medium risk, a warning, and the four factors" width="100%"></a><br><b>What a parent sees</b><br><sub>A risk score from four factors (amount, frequency, timeline, person), a warning only when it is medium or high, and what to have ready. Every payment still needs the parent's MFA.</sub></td>
+<td valign="top" width="50%"><a href="submission/screenshots/42-bank-review-brief.png"><img src="submission/screenshots/42-bank-review-brief.png" alt="The bank reviewer's one-page brief with the AI risk score and the yes, no or ask-for-more choices" width="100%"></a><br><b>What the bank reviewer sees</b><br><sub>One page: the facts, the AI's score and its reasons, and yes / no / ask for more, signed with MFA. Nothing is pre-selected.</sub></td>
+</tr>
+<tr>
+<td valign="top" width="50%"><a href="submission/screenshots/41-bank-review-queue.png"><img src="submission/screenshots/41-bank-review-queue.png" alt="The reviewer's queue with a clock and the AI risk reading" width="100%"></a><br><b>The reviewer's queue</b><br><sub>Most overdue first, then the AI's reading, with a 24-hour target clock.</sub></td>
+<td valign="top" width="50%"><b>Run it yourself</b><br><sub><code>python -m app.scripts.review_demo</code> plays the whole story against a running API and checks every step; its output is in <code>submission/evidence/review_demo_run.txt</code>. Details: <a href="docs/BANK_REVIEW.md">docs/BANK_REVIEW.md</a>, <a href="docs/AI_RISK.md">docs/AI_RISK.md</a>.</sub></td>
+</tr>
+</table>
+
 ### Roles and the sandbox
 
 <table>

@@ -74,7 +74,7 @@ that is 15:59 UTC, 17:00 London (BST), 09:00 US Pacific (PDT), 01:00 Tokyo (Oct 
 |---|-------------|--------------------|
 | 01 | Technical documentation | system architecture, core algorithm description, security design |
 | 02 | Presentation deck | final presentation no longer than 10 minutes |
-| 03 | Demo video | optional, no longer than 5 minutes |
+| 03 | Demo video, 5 minutes at most | Interim repair demo recorded; a voiced pitch video is being recorded by the team | `submission/StudyRoute_Demo.mp4` is an interim recording of the actual local synthetic UI and API with English subtitles and no voiceover. The team is recording the final pitch video with a speaker from `submission/VIDEO_SCRIPT.md` (which now includes the AI risk score and bank review scene). The video is optional in the rules; deliverable 06 asks for it as evidence |
 | 04 | Source code | with README, GitHub repository link, deployment instructions, and test cases |
 | 05 | Security self-assessment report | permission-tier implementation and known-risk list |
 | 06 | Execution evidence | for non-on-chain topics: simulated-account/sandbox operation logs and demo video; for the on-chain topic: real on-chain transaction hashes |
@@ -151,7 +151,7 @@ Website: fintechathon.g-ican.com. E-mail: wangyr@pbcsf.tsinghua.edu.cn
 |-----------|--------|---------------|-------|
 | Task completion | 40% | One sentence becomes a quote, a ranking, a deadline plan and a draft; a human approves with MFA; a simulated provider settles; a tracker and a sealed compliance report follow. The 14-step demo passes end to end, and 24 blueprint scenarios map to tests. Topic C coverage: remittances and tuition end to end; multi-currency only as simulated accounts; **credit building is not built** | `submission/evidence/`, `docs/TEST_CASES.md`, `python -m app.scripts.demo_flow` |
 | Security & compliance | 30% | The AI can never approve or move money; approval needs a fresh MFA proof bound to the summary hash; idempotency; signed webhooks; a hash-chained audit log with an outside anchor; encrypted account numbers and document text; cookie sessions; strict CSP. Attack, brute-force, data-leak, man-in-the-middle and TLS probes pass. Regulatory values are placeholders marked "Not verified". There has been no independent penetration test | `docs/SECURITY.md`, `docs/SECURITY_TESTING.md`, `docs/SECURITY_SELF_ASSESSMENT.md` |
-| Innovation & interaction | 30% | True-total-cost ranking with a short-payment warning; backward deadline planning; currency-drop stress test; a student guide with a live budget slider; a trained reader and a small reinforcement-learning dialogue policy (both measured, with limits stated); an animated, accessible interface | `docs/AI_AGENT.md`, `docs/AI_EVALUATION.md`, `docs/AI_RL.md`, `web/README.md` |
+| Innovation & interaction | 30% | True-total-cost ranking with a short-payment warning; backward deadline planning; currency-drop stress test; a student guide with a live budget slider; a trained reader and a small reinforcement-learning dialogue policy (both measured, with limits stated); an animated, accessible interface; a trained explainer that rewords answers and an AI risk score (amount, frequency, timeline, person) with a warning only when it is medium or high and a bank review desk for a quick yes or no, all measured with their limits stated (`docs/AI_EXPLAINER.md`, `docs/AI_RISK.md`, `docs/AI_RISK_MODELS.md`, `docs/BANK_REVIEW.md`) | `docs/AI_AGENT.md`, `docs/AI_EVALUATION.md`, `docs/AI_RL.md`, `web/README.md` |
 
 ### Integrity and independent work
 

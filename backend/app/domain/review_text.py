@@ -13,29 +13,33 @@ from typing import Any
 FACTOR_TEXT: dict[str, dict[str, str]] = {
     "AMOUNT": {
         "title": "Amount",
-        "raises": "The amount is larger than most similar payments.",
-        "neutral": "The amount is typical for similar payments.",
-        "lowers": "The amount is smaller than most similar payments.",
+        "raises": "The amount looks unusual next to similar payments.",
+        "neutral": "The amount makes little difference to the score.",
+        "lowers": "The amount looks ordinary next to similar payments.",
     },
     "FREQUENCY": {
         "title": "Frequency",
-        "raises": "This household has made several payments recently.",
-        "neutral": "The number of recent payments is normal.",
-        "lowers": "There have been few recent payments.",
+        "raises": "How often this household has paid lately looks unusual.",
+        "neutral": "How often this household has paid lately makes little difference.",
+        "lowers": "How often this household has paid lately looks ordinary.",
     },
     "TIMELINE": {
         "title": "Timeline",
-        "raises": "This payment comes soon after the previous one.",
-        "neutral": "The timing is normal.",
-        "lowers": "A good while has passed since the last payment.",
+        "raises": "The time since the previous payment looks unusual.",
+        "neutral": "The time since the previous payment makes little difference.",
+        "lowers": "The time since the previous payment looks ordinary.",
     },
     "PERSON": {
         "title": "Person",
-        "raises": "You have not paid this person or university before.",
-        "neutral": "There is nothing unusual about who is being paid.",
-        "lowers": "You have paid this receiver before.",
+        "raises": "Who is being paid, and the history with them, looks unusual.",
+        "neutral": "Who is being paid makes little difference.",
+        "lowers": "Who is being paid looks ordinary.",
     },
 }
+
+# What is known for certain about the receiver, used instead of the general sentence above.
+PERSON_FIRST = "You have not paid this person or university before."
+PERSON_KNOWN = "You have paid this receiver before."
 
 SIGNAL_TEXT: dict[str, dict[str, Any]] = {
     "BANK_AUTHORIZES_ALL": {

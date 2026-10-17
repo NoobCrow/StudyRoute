@@ -34,6 +34,8 @@ from app.domain.recipients import RecipientService
 from app.domain.review_text import (
     FACTOR_TEXT,
     GLOSSARY,
+    PERSON_FIRST,
+    PERSON_KNOWN,
     REASON_TEXT,
     SIGNAL_TEXT,
     STATUS_TEXT,
@@ -302,9 +304,14 @@ class BankReviewService:
                 level = "raises" if code in raised else "neutral"
             else:
                 level = "raises" if share >= 0.25 else "lowers" if share <= -0.25 else "neutral"
-            factors.append(
-                {"code": code, "title": text["title"], "level": level, "plain": text[level]}
-            )
+            plain = text[level]
+            if code == "PERSON":  # say what is known for certain, not only that it looks unusual
+                first = reading.get("population") == "first"
+                if level == "raises" and first:
+                    plain = PERSON_FIRST
+                elif level == "lowers" and not first:
+                    plain = PERSON_KNOWN
+            factors.append({"code": code, "title": text["title"], "level": level, "plain": plain})
         band = reading["band"]
         return {
             "score": reading["percentile"],
