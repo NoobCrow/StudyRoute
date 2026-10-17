@@ -456,19 +456,28 @@ function payments(cancelled: boolean) {
 export async function mockApi(page: Page): Promise<void> {
   let allowlisted = false;
   let cancelled = false;
+  let signedIn = false;
   await page.route("**/api/v1/**", async (route) => {
     const request = route.request();
     const path = new URL(request.url()).pathname.replace("/api/v1", "");
     const method = request.method();
     if (path === "/health") return json(route, HEALTH);
-    if (path === "/auth/login") {
+    if (path === "/auth/browser/login") {
       const body = request.postDataJSON() as { password?: string };
-      return body.password === HEALTH.demo.password
+      signedIn = body.password === HEALTH.demo.password;
+      return signedIn
         ? json(route, { ...TOKENS, user: USER })
         : problem(route, 401, "INVALID_CREDENTIALS", "Email or password is wrong.");
     }
-    if (path === "/auth/refresh") return json(route, TOKENS);
-    if (path === "/auth/logout") return json(route, { ok: true });
+    if (path === "/auth/browser/session")
+      return signedIn
+        ? json(route, { ...TOKENS, user: USER })
+        : problem(route, 401, "UNAUTHENTICATED", "No browser session.");
+    if (path === "/auth/browser/logout") {
+      signedIn = false;
+      return json(route, { signed_out: true });
+    }
+    if (path === "/assistant/connection" && method === "GET") return json(route, { saved: false });
     if (path === "/me") return json(route, USER);
     if (path === "/corridors") return json(route, CORRIDORS);
     if (path === "/kyc/status") return json(route, KYC);

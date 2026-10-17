@@ -50,7 +50,10 @@ page.on("response", (r) => { if (r.request().resourceType() === "document" && !d
 const EMAIL = 'input[type="email"]', PASSWORD = 'input[type="password"]', SIGNED_IN = "main#main";
 const navLink = (href) => `nav[aria-label="Main"] a[href="${href === "/" ? "/" : `${href}/`}"]`;
 const signOut = () => page.evaluate(() => [...document.querySelectorAll("button")].find((b) => b.textContent.trim() === "Sign out")?.click());
+const cdp = await page.createCDPSession();
 async function signIn(email) {
+  // A browser session is an HttpOnly cookie: start every sign-in from a clean jar, as a new person would.
+  await cdp.send("Network.clearBrowserCookies");
   await page.evaluate(() => { try { sessionStorage.clear(); } catch {} }).catch(() => {});
   await page.goto(`${APP}/login`, { waitUntil: "networkidle0" });
   if (!(await page.$(EMAIL))) { await page.evaluate(() => sessionStorage.clear()); await page.goto(`${APP}/login`, { waitUntil: "networkidle0" }); }
@@ -105,16 +108,19 @@ check("every request the app made went to its own origin (no third parties, no a
 check(`the app made ${requests.length} requests, none to a tracker`, true);
 check("no request carried a Referer header (Referrer-Policy: no-referrer)", referers.length === 0, referers.slice(0, 2).join(" | "));
 const cookies = await page.cookies();
-check("the app set no cookies", cookies.length === 0, JSON.stringify(cookies.map((c) => c.name)));
+const sessionCookies = cookies.filter((c) => c.name === "sr_browser_session");
+check("the only cookie is the one HttpOnly, SameSite=Strict session cookie (nothing to track a browser with)", cookies.length === sessionCookies.length && cookies.length <= 1 && sessionCookies.every((c) => c.httpOnly && c.sameSite === "Strict"), JSON.stringify(cookies.map((c) => ({ name: c.name, httpOnly: c.httpOnly, sameSite: c.sameSite }))));
+check("script cannot read the session cookie (document.cookie is empty)", (await page.evaluate(() => document.cookie)) === "", "");
 await signIn("parent@demo.studyroute.test");
 const storage = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }));
 check("localStorage holds nothing sensitive (only a theme choice and rate-alert targets)", Object.keys(storage.local).every((k) => /^sr\.(theme|rate-alert)/.test(k)), JSON.stringify(Object.keys(storage.local)));
-check("sessionStorage holds only the refresh token, never a password, e-mail or access token", Object.keys(storage.session).every((k) => k === "sr.refresh") && !/Sandbox#2026|@|eyJ/.test(JSON.stringify(storage.session).replace(/"sr\.refresh":"[^"]*"/, "")), JSON.stringify(Object.keys(storage.session)));
+check("sessionStorage holds no token, password or e-mail (the refresh token is no longer in JavaScript storage)", !Object.keys(storage.session).some((k) => /refresh|token|auth/i.test(k)) && !/Sandbox#2026|@|eyJ/.test(JSON.stringify(storage.session)), JSON.stringify(Object.keys(storage.session)));
 const fp = await page.evaluate(() => ({ canvas: typeof HTMLCanvasElement.prototype.toDataURL, ga: typeof window.ga, gtag: typeof window.gtag, dl: typeof window.dataLayer, fbq: typeof window.fbq }));
 check("no analytics globals (ga, gtag, dataLayer, fbq) exist", fp.ga === "undefined" && fp.gtag === "undefined" && fp.dl === "undefined" && fp.fbq === "undefined", JSON.stringify(fp));
 await signOut(); await sleep(800);
 const after = await page.evaluate(() => ({ s: Object.keys(sessionStorage), l: Object.keys(localStorage) }));
-check("signing out clears the refresh token from sessionStorage", !after.s.includes("sr.refresh"), JSON.stringify(after));
+const cookiesAfter = (await page.cookies()).filter((c) => c.name === "sr_browser_session");
+check("signing out removes the session cookie and leaves nothing in sessionStorage", cookiesAfter.length === 0 && after.s.length === 0, JSON.stringify({ cookies: cookiesAfter.length, ...after }));
 // no source maps or secrets in what the browser can download
 const assets = [...new Set(requests.filter((u) => /[/](assets|_next[/]static)[/]/.test(u)))];
 let maps = 0, secretish = 0;

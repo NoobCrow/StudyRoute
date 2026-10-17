@@ -12,6 +12,8 @@ from app.core.clock import Clock
 # group -> (limit per minute, what the limit is keyed on)
 LIMITS: dict[str, tuple[int, str]] = {
     "auth": (10, "ip"),
+    "browser_restore": (60, "ip"),
+    "browser_logout": (10, "ip"),
     "quotes": (30, "user"),
     "payment_writes": (10, "user"),
     "bank_writes": (20, "user"),

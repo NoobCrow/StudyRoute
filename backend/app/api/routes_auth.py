@@ -5,11 +5,12 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request, Response
 
 from app.api.context import AppContext
 from app.api.deps import current_actor, get_ctx, limit_ip, require
 from app.api.schemas import LoginIn, MfaVerifyIn, RefreshIn
+from app.core import browser_session as browser
 from app.core import errors
 from app.core.clock import iso_utc
 from app.core.crypto import sha256_hex, sha256_ref
@@ -64,6 +65,16 @@ def _payer_of(session: Any, user: User) -> User | None:
 def login(
     body: LoginIn, ctx: AppContext = Depends(get_ctx), _: None = Depends(limit_ip("auth"))
 ) -> dict[str, Any]:
+    return _login(body, ctx)
+
+
+def _login(
+    body: LoginIn,
+    ctx: AppContext,
+    *,
+    request: Request | None = None,
+    response: Response | None = None,
+) -> dict[str, Any]:
     now = ctx.clock.now()
     settings = ctx.settings
     email_key = sha256_ref(body.email.strip().lower())
@@ -93,7 +104,13 @@ def login(
         user.failed_logins = 0
         user.locked_until = None
         ctx.login_attempts.clear(email_key)
-        tokens = _issue_tokens(ctx, session, user)
+        if request is not None and response is not None:
+            browser.revoke_previous(session, request, ctx)
+            raw, row = browser.create_session(session, user, ctx)
+            tokens = browser.access_for(user, row, ctx)
+            browser.set_cookie(response, request, ctx, raw)
+        else:
+            tokens = _issue_tokens(ctx, session, user)
         ctx.audit.append(
             session,
             actor_type=ActorType.USER,
@@ -102,6 +119,52 @@ def login(
             decision=Decision.APPROVED,
         )
         return {**tokens, "user": _user_view(user, _payer_of(session, user))}
+
+
+@router.post("/auth/browser/login")
+def browser_login(
+    body: LoginIn,
+    request: Request,
+    response: Response,
+    ctx: AppContext = Depends(get_ctx),
+    _: None = Depends(limit_ip("auth")),
+) -> dict[str, Any]:
+    browser.trusted_browser(request, ctx)
+    return _login(body, ctx, request=request, response=response)
+
+
+@router.post("/auth/browser/session")
+def browser_restore(
+    request: Request,
+    response: Response,
+    ctx: AppContext = Depends(get_ctx),
+    _: None = Depends(limit_ip("browser_restore")),
+) -> dict[str, Any]:
+    browser.trusted_browser(request, ctx)
+    response.headers["Cache-Control"] = "no-store"
+    with ctx.db.read() as session:
+        row = browser.active_session(session, request.cookies.get(browser.COOKIE), ctx)
+        user = session.get(User, row.user_id)
+        if user is None or user.role == ActorKind.AI.value:
+            raise errors.Unauthenticated("Unknown browser user.")
+        return {
+            **browser.access_for(user, row, ctx),
+            "user": _user_view(user, _payer_of(session, user)),
+        }
+
+
+@router.post("/auth/browser/logout")
+def browser_logout(
+    request: Request,
+    response: Response,
+    ctx: AppContext = Depends(get_ctx),
+    _: None = Depends(limit_ip("browser_logout")),
+) -> dict[str, Any]:
+    browser.trusted_browser(request, ctx)
+    with ctx.db.write() as session:
+        browser.revoke_previous(session, request, ctx)
+    browser.clear_cookie(response, request, ctx)
+    return {"signed_out": True}
 
 
 @router.post("/auth/refresh")

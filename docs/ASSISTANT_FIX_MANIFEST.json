@@ -1,0 +1,74 @@
+{
+  "version": "assistant-offline-v2",
+  "base_source_archive": "StudyRoute-redwan1.0.zip",
+  "incremental_update_requires": "StudyRoute assistant fix v1 already applied",
+  "incremental_paths": [
+    "backend/app/ai/conversation.py",
+    "backend/tests/test_ai_conversation.py",
+    "docs/ASSISTANT_FIX.bn.md",
+    "docs/ASSISTANT_FIX_TESTS.md",
+    "docs/ASSISTANT_FIX_MANIFEST.json"
+  ],
+  "files": [
+    {
+      "path": "backend/app/ai/conversation.py",
+      "sha256": "4679b5ad1ebea865a0db008cff0a69736de4fa605f055ea1193e955d4cbdf8f5"
+    },
+    {
+      "path": "backend/app/ai/orchestrator.py",
+      "sha256": "05d245c23b957959401c1f5c9a6950d89ce6637150d2f691c73acd860f7402a2"
+    },
+    {
+      "path": "backend/app/ai/prompt.py",
+      "sha256": "884044f718eec965a8db033bd12d1134a342a7c1852b2eb6204ed092a5c439c7"
+    },
+    {
+      "path": "backend/app/ai/templates.py",
+      "sha256": "bf3ffefbde6e6f9ab2b377c4fe9ba2ad2eaaf395d5777783e3065e685e307c43"
+    },
+    {
+      "path": "backend/app/api/routes_assistant.py",
+      "sha256": "297c947bd8f6e218ca80415dbf93df5182e312978d48cd798fd452ddef8c53ec"
+    },
+    {
+      "path": "backend/app/api/schemas.py",
+      "sha256": "590df58bba0bc13e9dc098ab00435275a1d488766fd4e0802e796a6b94ed8676"
+    },
+    {
+      "path": "backend/tests/test_ai_conversation.py",
+      "sha256": "3d9b5c02ef34db7c4ed7fb0adb9cafbf8ab44536f864cf78ab9a6e8eccf0545e"
+    },
+    {
+      "path": "docs/ASSISTANT_FIX.bn.md",
+      "sha256": "45aa4ea8c5fd5ff03d85ec90148f1f0c7413a26e236852495a621e4a5a0273c3"
+    },
+    {
+      "path": "docs/ASSISTANT_FIX_TESTS.md",
+      "sha256": "2eb468cbc901ce2c7b2cb298950b1264b025cdad9ea37783716acc8b9dd92e0c"
+    },
+    {
+      "path": "frontend/src/components/ChatPanel.tsx",
+      "sha256": "2297d8bb193f527e3f23b4c1543a1bf8a98d277117c80ffb9cdc36e669c2e6ad"
+    },
+    {
+      "path": "frontend/src/components/tasks.test.tsx",
+      "sha256": "3b785eb15a34a4a640e9e479ea566c36855e4a4a0452c126197e3b8f940198eb"
+    },
+    {
+      "path": "web/components/assistant/assistant-context.tsx",
+      "sha256": "96b5856aa93de40773904f4799f457ae51d8a3e3d00916167fc9cd5bd1a5c867"
+    },
+    {
+      "path": "web/components/assistant/assistant-panel.tsx",
+      "sha256": "bd9269cadf816dda627fe99825c82a91e7de82da4187b56750fc72a6a9ee64a1"
+    },
+    {
+      "path": "web/components/assistant/assistant.test.tsx",
+      "sha256": "d9e9fc8e5f695eb6dea527b38b9ee4b6d88ca2dd4b6d35be8386ed0607021a36"
+    },
+    {
+      "path": "web/components/layout/assistant-sheet.tsx",
+      "sha256": "48263ef6087ceff69e5142ee86d561d620262b9be21aff1a19c40b257ce36a23"
+    }
+  ]
+}

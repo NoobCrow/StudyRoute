@@ -294,6 +294,63 @@ rec("6.8 reusing someone else's Idempotency-Key does not replay their response",
 same = p1.call("POST", "/escrows", idem=KEY, json_body=esc_body(uni1, "DIFFERENT BODY"))
 rec("6.9 the same user reusing a key with a different body is refused", same.status_code == 422, str(same.status_code))
 
+# ------------------------------------------------------------------ 6b. browser (cookie) sessions
+# The browser session is one HttpOnly cookie. It must work only for the same-origin browser client: an exact
+# trusted Origin plus a custom header are required, the cookie is never API authority on its own, and
+# logout revokes both the cookie and the access token that came with it.
+BROWSER_HEADERS = {"X-StudyRoute-Browser": "1", "Origin": BASE}
+CREDS = {"email": "parent@demo.studyroute.test", "password": PASSWORD}
+COOKIE_NAME = "sr_browser_session"
+jar = httpx.Client(timeout=30, event_hooks={"response": [hook]})  # a browser's own cookie jar
+
+
+def browser_post(path, *, headers=None, body=None, who=jar):
+    return who.post(f"{API}{path}", headers=BROWSER_HEADERS if headers is None else headers, json=body if body is not None else {})
+
+
+def with_cookie(value, **extra):
+    return {**BROWSER_HEADERS, "Cookie": f"{COOKIE_NAME}={value}", **extra}
+
+
+no_origin = {k: v for k, v in BROWSER_HEADERS.items() if k != "Origin"}
+no_header = {k: v for k, v in BROWSER_HEADERS.items() if k != "X-StudyRoute-Browser"}
+for what, hdrs in [
+    ("with no Origin", no_origin),
+    ("from a foreign Origin", {**BROWSER_HEADERS, "Origin": "https://evil.example"}),
+    ("from the null Origin", {**BROWSER_HEADERS, "Origin": "null"}),
+    ("without the browser header", no_header),
+    ("marked cross-site by the browser", {**BROWSER_HEADERS, "Sec-Fetch-Site": "cross-site"}),
+]:
+    denied = browser_post("/auth/browser/login", headers=hdrs, body=CREDS)
+    rec(f"6.10 browser sign-in {what} is refused and sets no cookie", denied.status_code == 403 and "set-cookie" not in denied.headers, str(denied.status_code))
+bad_login = browser_post("/auth/browser/login", body={**CREDS, "password": "wrong-Password-1"})
+rec("6.11 a wrong password through the browser route gets 401 and no cookie", bad_login.status_code == 401 and "set-cookie" not in bad_login.headers, str(bad_login.status_code))
+good = browser_post("/auth/browser/login", body=CREDS)
+issued = good.json() if good.status_code == 200 else {}
+raw_cookie = jar.cookies.get(COOKIE_NAME) or ""
+flags = good.headers.get("set-cookie", "").lower()
+rec("6.12 the session cookie is HttpOnly, SameSite=Strict and limited to the API path", all(f in flags for f in ("httponly", "samesite=strict", "path=/api/v1")) and bool(raw_cookie), flags[:120])
+rec("6.13 the sign-in body holds an access token but never a refresh token or the cookie value", "access_token" in issued and "refresh_token" not in issued and bool(raw_cookie) and raw_cookie not in good.text, ",".join(issued))
+stolen = browser_post("/auth/browser/session", headers=with_cookie(raw_cookie, Origin="https://evil.example"), who=client)
+rec("6.14 a stolen cookie sent from a foreign Origin restores nothing", stolen.status_code == 403, str(stolen.status_code))
+bare = client.get(f"{API}/payments", headers={"Cookie": f"{COOKIE_NAME}={raw_cookie}"})
+rec("6.15 the cookie alone is never API authority (no ambient credential, so no CSRF)", bare.status_code == 401, str(bare.status_code))
+made_up = browser_post("/auth/browser/session", headers=with_cookie("bs_" + uuid.uuid4().hex), who=client)
+rec("6.16 a made-up cookie value restores nothing", made_up.status_code == 401, str(made_up.status_code))
+restored = browser_post("/auth/browser/session", headers=with_cookie(raw_cookie), who=client)
+rec("6.17 the real cookie from the real Origin restores the session", restored.status_code == 200 and "access_token" in restored.json(), str(restored.status_code))
+session_token = {"Authorization": f"Bearer {issued.get('access_token', '')}"}
+token_only = client.get(f"{API}/payments", headers=session_token)
+rec("6.18 an access token lifted from the page is useless without its cookie (bound to the session)", token_only.status_code == 401, str(token_only.status_code))
+with_both = client.get(f"{API}/payments", headers={**session_token, "Cookie": f"{COOKIE_NAME}={raw_cookie}"})
+rec("6.18b the access token works together with its own cookie", with_both.status_code == 200, str(with_both.status_code))
+signed_out = browser_post("/auth/browser/logout", headers=with_cookie(raw_cookie), who=client)
+rec("6.19 logout succeeds and clears the cookie", signed_out.status_code == 200 and "set-cookie" in signed_out.headers, str(signed_out.status_code))
+replay = browser_post("/auth/browser/session", headers=with_cookie(raw_cookie), who=client)
+rec("6.20 after logout the old cookie restores nothing", replay.status_code == 401, str(replay.status_code))
+after_logout = client.get(f"{API}/payments", headers={**session_token, "Cookie": f"{COOKIE_NAME}={raw_cookie}"})
+rec("6.21 after logout the token and cookie of that session are refused together", after_logout.status_code == 401, str(after_logout.status_code))
+
 # ------------------------------------------------------------------ 7. what leaves the server
 blob_checks = {
     "a password hash": r"\$argon2",
@@ -307,8 +364,8 @@ blob_checks = {
 for label, pattern in blob_checks.items():
     hits = [l for l, text in bodies if re.search(pattern, text)]
     rec(f"7.1 no response ever contains {label}", not hits, "; ".join(hits[:3]))
-cookie_hits = [l for l, h in all_headers if "set-cookie" in {k.lower() for k in h}]
-rec("7.3 the server never sets a cookie (nothing to track a browser with)", not cookie_hits, "; ".join(cookie_hits[:3]))
+cookie_hits = [l for l, h in all_headers if "set-cookie" in {k.lower() for k in h} and "/auth/browser/" not in l]
+rec("7.3 no endpoint sets a cookie except the browser sign-in routes (nothing else to track a browser with)", not cookie_hits, "; ".join(cookie_hits[:3]))
 ver = {h.get("server", "") for _, h in all_headers}
 rec("7.4 the Server header discloses no version", all(not re.search(r"\d", v) for v in ver), ", ".join(ver))
 for needed in ("x-content-type-options", "x-frame-options", "referrer-policy", "content-security-policy", "permissions-policy", "strict-transport-security", "cache-control"):

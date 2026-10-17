@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { LogOut, Monitor, Moon, Search, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -117,7 +119,11 @@ export function CommandMenu({ onAskAssistant }: { onAskAssistant: () => void }) 
             <CommandItem
               onSelect={() =>
                 run(() => {
-                  void logout().then(() => router.replace("/login/"));
+                  void logout()
+                    .then(() => router.replace("/login/"))
+                    .catch(() =>
+                      toast.error("Sign out failed. Check your connection and try again."),
+                    );
                 })
               }
             >

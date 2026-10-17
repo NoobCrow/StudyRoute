@@ -1,0 +1,323 @@
+{
+  "format": "studyroute-session-update-v1",
+  "base": "original uploaded StudyRoute-redwan1.0.zip",
+  "merge_into_existing_project": true,
+  "preserved_not_in_archive": [
+    ".env",
+    ".venv",
+    "backend/data",
+    "node_modules"
+  ],
+  "files": [
+    {
+      "path": ".env.example",
+      "sha256": "c12403cc8377304231139197617f6a714cd69a0faa5ab8cebcb57f0c5d1d27e8"
+    },
+    {
+      "path": "README.md",
+      "sha256": "03f456a1ae28b484d5d275359005ed18474a906bdd9566e7b8697dd262927a04"
+    },
+    {
+      "path": "backend/app/ai/arithmetic.py",
+      "sha256": "5d949db12bea23e7d8f0119f6d0098cf9dea9a613a07451af10ee4d8c333fb28"
+    },
+    {
+      "path": "backend/app/ai/claim_checks.py",
+      "sha256": "a93a6393bbfc73678a133d3b848b0e36c2edcfc7f4f60f7617f902b2f481a953"
+    },
+    {
+      "path": "backend/app/ai/cloud.py",
+      "sha256": "d291971ab420238c22f3bc70c300d8a7605d0684c774b35b33f09fe616c8a4ec"
+    },
+    {
+      "path": "backend/app/ai/conversation.py",
+      "sha256": "168b316db98d0f778e1ae6001d40155f272a4bb33c4cbedfbd2c5ae146dad8c6"
+    },
+    {
+      "path": "backend/app/ai/facts.py",
+      "sha256": "987a46cbd984033153c4008d52581951ad279ddcce6460ef211dd94d7adc1536"
+    },
+    {
+      "path": "backend/app/ai/guards.py",
+      "sha256": "561287e3551b131e48061e7b82adc370defde7a985d0ba56f508cabc450b3ee1"
+    },
+    {
+      "path": "backend/app/ai/llm.py",
+      "sha256": "bdc0bfa976f3c3bf6e5ce3ec7edec1d7a969d3af12b0e547189ceb1157f22ccc"
+    },
+    {
+      "path": "backend/app/ai/masking.py",
+      "sha256": "1931fa8a082d3e57f9e2151cac7c300aa6bb5bfa7add371f6569294814868b35"
+    },
+    {
+      "path": "backend/app/ai/orchestrator.py",
+      "sha256": "f9f617aeed68bd51d7c85e59602a90521a2442198089372eba4b0b3f9a47f597"
+    },
+    {
+      "path": "backend/app/ai/prompt.py",
+      "sha256": "ea21cb4e8034308f424c047d1350e89c8b47001e5060c214bad996ee622107f0"
+    },
+    {
+      "path": "backend/app/ai/relevance.py",
+      "sha256": "268856943d05032e8e0ae6ce640b04ae68ef0616d5c5bdb38af7e6039e519ca0"
+    },
+    {
+      "path": "backend/app/ai/templates.py",
+      "sha256": "bf3ffefbde6e6f9ab2b377c4fe9ba2ad2eaaf395d5777783e3065e685e307c43"
+    },
+    {
+      "path": "backend/app/api/deps.py",
+      "sha256": "e4e47b8750db4502d0771c47eac04d486530288fc8a2a18734d6c4645f9546d5"
+    },
+    {
+      "path": "backend/app/api/rate_limit.py",
+      "sha256": "98fdcbbd833d7762c70abb1aad94123626b5f53dbed60d451e2607d671da54c3"
+    },
+    {
+      "path": "backend/app/api/routes_assistant.py",
+      "sha256": "88468a68207c7b0979730474c9fad9ac55388d67391230508429b454e287bbc6"
+    },
+    {
+      "path": "backend/app/api/routes_auth.py",
+      "sha256": "0297a4ef946688c99c8a1bf8e8328bcde685139297f96f686fa6b1095ac069fa"
+    },
+    {
+      "path": "backend/app/api/schemas.py",
+      "sha256": "a8681a85bfbb9768f136a080b96912d990c91baa66ba9a2656f47c2637c01176"
+    },
+    {
+      "path": "backend/app/core/browser_session.py",
+      "sha256": "2070b7ef1c4a510f4e53211877da24635c1bb69513884a3d9e6f74bb67ee2b0c"
+    },
+    {
+      "path": "backend/app/core/config.py",
+      "sha256": "192130a820d14475f253a6f91eec6fe3d62266a2c5f11197a3bb35d7e7dbef23"
+    },
+    {
+      "path": "backend/app/core/logging.py",
+      "sha256": "feb058cfda15c3e08e0a9a9842f731a5b727822dab8dd164fbd7f9671d149292"
+    },
+    {
+      "path": "backend/app/domain/auth.py",
+      "sha256": "399387ffad00f43ad0d92698bc5e71e0400473da98d76aeecfc19cc1fdb64b47"
+    },
+    {
+      "path": "backend/app/models.py",
+      "sha256": "5f8673219875edccd6c28b5c2669c330a43e721aecd5205435f31513b38241f3"
+    },
+    {
+      "path": "backend/app/scripts/check_ai.py",
+      "sha256": "53176f5b78ef872d62ee973b43bdeac2b824d5ef61cb8fd139d37182e8e8dafd"
+    },
+    {
+      "path": "backend/tests/helpers.py",
+      "sha256": "45d6e9dbcbd2bcbe937b6f0b1f3ef52c4da673492fc5a5ed34a71c42176eec94"
+    },
+    {
+      "path": "backend/tests/test_ai_arithmetic.py",
+      "sha256": "35815e61da2103553d7be895015f2b04fd5f6bd2eb5ea0f9c1866369e0055707"
+    },
+    {
+      "path": "backend/tests/test_ai_cloud.py",
+      "sha256": "436f7878ede562bbd05354984f60737af0b3af82cf02fff8035c02b67d6b1a00"
+    },
+    {
+      "path": "backend/tests/test_ai_conversation.py",
+      "sha256": "3d9b5c02ef34db7c4ed7fb0adb9cafbf8ab44536f864cf78ab9a6e8eccf0545e"
+    },
+    {
+      "path": "backend/tests/test_ai_llm_clients.py",
+      "sha256": "498e31c61837b6875873a5151224e439a97f94ec439f7e228797d4c688b25875"
+    },
+    {
+      "path": "backend/tests/test_ai_quality.py",
+      "sha256": "f8cf2c5252f46a1fa2d33e78c0d68a94a1d79b230d8305bcffb88e430634e522"
+    },
+    {
+      "path": "backend/tests/test_browser_session.py",
+      "sha256": "e9a7949dae0ed358879eb190a4a5e95137b3e1af7f0784f29c45a920a1fdcc68"
+    },
+    {
+      "path": "deploy/huggingface-space/README.md",
+      "sha256": "cd9ac720ca5cfbad6153f9652f838528a23b26a612d171e8073b4da0b8a47a0d"
+    },
+    {
+      "path": "deploy/huggingface-space/app.py",
+      "sha256": "3576d36704f4362cfa08a4a6769c197b260d5c68acde357485c660ace97b31d0"
+    },
+    {
+      "path": "deploy/huggingface-space/requirements.txt",
+      "sha256": "6636bf3b82f33c05e42f7a165c3a117f0c4b2c01b404cc44645f1a6720b80e7e"
+    },
+    {
+      "path": "docker-compose.yml",
+      "sha256": "d6031f2c57d20a07aeed4fdd76c9d9218f585466e6c762b4b327832f141c78f5"
+    },
+    {
+      "path": "docs/ASSISTANT_CLOUD_SETUP.bn.md",
+      "sha256": "1a260068c9943604ef41ada507f931c3ffd6de846115b95249ffaf11965ba8d1"
+    },
+    {
+      "path": "docs/ASSISTANT_CLOUD_TESTS.md",
+      "sha256": "569ae81d40b3df447fe1a2b2632f51aa1694a43ab960f105bb511d0f8c3bcef0"
+    },
+    {
+      "path": "docs/ASSISTANT_CLOUD_VERIFICATION.json",
+      "sha256": "64fb425d73fa698ccad8d762dc4f382f438b4f71690146ae830c61e192b53769"
+    },
+    {
+      "path": "docs/ASSISTANT_FIX.bn.md",
+      "sha256": "45aa4ea8c5fd5ff03d85ec90148f1f0c7413a26e236852495a621e4a5a0273c3"
+    },
+    {
+      "path": "docs/ASSISTANT_FIX_TESTS.md",
+      "sha256": "2eb468cbc901ce2c7b2cb298950b1264b025cdad9ea37783716acc8b9dd92e0c"
+    },
+    {
+      "path": "docs/ASSISTANT_QUALITY_UPDATE.bn.md",
+      "sha256": "d4e47926ec46446a3a500171e20a62ad5ba6c7492540b01649f96663ee0427c3"
+    },
+    {
+      "path": "docs/ASSISTANT_SESSION_VALIDATION.json",
+      "sha256": "27c8b1fc870235378fe9d59bb89db44a96f0be5ac0655705fe6069f6acda97f6"
+    },
+    {
+      "path": "docs/SECURITY.md",
+      "sha256": "ba5ff78d6adfd1543529c9e0685899204a96f6cadcc78ee2ebbb1f1ccb8bb930"
+    },
+    {
+      "path": "docs/SECURITY_SELF_ASSESSMENT.md",
+      "sha256": "c74d625c6f4df22e9a3ce28b139aa77c941c3033d6bb8b063bab350b4c88a29c"
+    },
+    {
+      "path": "docs/SECURITY_TESTING.md",
+      "sha256": "4711ae124440e6ae24352e91cf07c0a0871f44e8ed5ee4763c4f197442655ec3"
+    },
+    {
+      "path": "docs/SESSION_FIX.bn.md",
+      "sha256": "9d6627ebdc0f0a7892c94d20b25313868eecf2e6db9e4c96864abf5c3eda60bc"
+    },
+    {
+      "path": "frontend/nginx.conf",
+      "sha256": "6f2e65d0619b5f61d2f52f04129fe78ed5b10543bf2d666a66a2c33ac22d8d6d"
+    },
+    {
+      "path": "frontend/src/api/client.test.ts",
+      "sha256": "e2d18aebde3b13ffe6654cd3b93ff7210271ccde104be1a01a6ecdfbae052a6d"
+    },
+    {
+      "path": "frontend/src/api/client.ts",
+      "sha256": "66328f04fe95ab1ed361bbecf886273f73a4f833151793ddf00911a12ac1db23"
+    },
+    {
+      "path": "frontend/src/api/types.ts",
+      "sha256": "12c011b29e580a38e5f2f857c9356724527eb240f3d4e9e5efec01597cc082cd"
+    },
+    {
+      "path": "frontend/src/auth/AuthContext.tsx",
+      "sha256": "e3513c7aaae094f88d3828e9dc9832e52971dcbd22d4956e9d6d06a0bffdfcb3"
+    },
+    {
+      "path": "frontend/src/components/AssistantContext.tsx",
+      "sha256": "f894ac0e7da64107051b18e513c99495f741ede3694a7c4a6bb82fcfb4e2ccaa"
+    },
+    {
+      "path": "frontend/src/components/ChatPanel.tsx",
+      "sha256": "8931892a8b1a15c056d447952113aedd7fe0d48a1efa2ba94a8d60cfbd9114bd"
+    },
+    {
+      "path": "frontend/src/components/CloudSettings.tsx",
+      "sha256": "b796a2cc1af69e76873a79f49c1fc5dea6773e9325186eeef726981517838953"
+    },
+    {
+      "path": "frontend/src/components/Layout.tsx",
+      "sha256": "29d17ffd73d35bccba0532d1a52a3b219c005d4c8bf066ab74f2f736405021bf"
+    },
+    {
+      "path": "frontend/src/components/cloud.test.tsx",
+      "sha256": "30c2f759de96bfb7317b0b5666f022ab4f99595afd7cd1c692b2a88e1672f510"
+    },
+    {
+      "path": "frontend/src/components/components.test.tsx",
+      "sha256": "ad40a1caae4b24a43fb60337e13c6f1a0d40bbd67667a3f272f4907cd278ec89"
+    },
+    {
+      "path": "frontend/src/components/tasks.test.tsx",
+      "sha256": "37b73f4c724a721b8c483dbeea5ece4fd244e420bc497a6d290da37fd2fe93c4"
+    },
+    {
+      "path": "web/components/assistant/assistant-context.tsx",
+      "sha256": "d350a646e6321280c604bdba6bcc1b5f94b73f90c6a0f28e114755d713f8bbd6"
+    },
+    {
+      "path": "web/components/assistant/assistant-panel.tsx",
+      "sha256": "12f61255ab2bc2aed4961dce86301e6e3e936c18275be9cd969f5ecfb43d5d0b"
+    },
+    {
+      "path": "web/components/assistant/assistant.test.tsx",
+      "sha256": "b68ee464fe223baa4aa4808724ee80eb73c98b586d6e5e63f8dc4cf4503e9855"
+    },
+    {
+      "path": "web/components/assistant/cloud-settings.test.tsx",
+      "sha256": "ccb92dab2911dc66abeeaf90b4df3e2e23e046c2ce14913a2f479b93b7c38492"
+    },
+    {
+      "path": "web/components/assistant/cloud-settings.tsx",
+      "sha256": "bee4e7dad0716532c8b457799adac1e50bfa52446610d12abe20765db4bf31fb"
+    },
+    {
+      "path": "web/components/layout/app-shell.tsx",
+      "sha256": "77bb40be951f8e97f4602cedd81ef5450acff66a6b0b17e22020071f0645358d"
+    },
+    {
+      "path": "web/components/layout/app-sidebar.tsx",
+      "sha256": "ee037fdc449681d41f6c385ab1a8261f226b10d73486770eb6dffdbdb6de76cc"
+    },
+    {
+      "path": "web/components/layout/assistant-sheet.tsx",
+      "sha256": "73c408b10ba38474df6275d6c6c5bac5b19d9fdf07b06b1fd547c40d8b984735"
+    },
+    {
+      "path": "web/components/layout/command-menu.tsx",
+      "sha256": "445fa1f33ff230c692d2743208b0bb6b8fb2426ae22ffe5b40bdb5722028110b"
+    },
+    {
+      "path": "web/components/providers/app-providers.tsx",
+      "sha256": "97b44769e660387d96a4a4b642312807bbc35b2eaa55a14f6e6de9848dd6ea52"
+    },
+    {
+      "path": "web/components/providers/auth-provider.test.tsx",
+      "sha256": "7a75be3734317df17d23d931fba97d3008692dd1dd7ca9b1db9f1e4aceb3f5a3"
+    },
+    {
+      "path": "web/components/providers/auth-provider.tsx",
+      "sha256": "70a319c547cd46487c121f5888595da1b760b29dd1f18f7457bc7fe514b5fc65"
+    },
+    {
+      "path": "web/e2e/fixtures.ts",
+      "sha256": "7fed95e11da7488007c6a9172ec4523d7c564b4d7295d589dbe426d8f5303f7a"
+    },
+    {
+      "path": "web/e2e/mock-api.ts",
+      "sha256": "91d1b9dc1e3a5623d14668bab6e79d8947dd440c9a947964d7fac05981efac3c"
+    },
+    {
+      "path": "web/lib/api/client.test.ts",
+      "sha256": "a9b0fa3f379a4eb4dffcfe2ba2e216693cbc925f3c0864d393b80b4abdb563ed"
+    },
+    {
+      "path": "web/lib/api/client.ts",
+      "sha256": "ce63d51933f94f7b5f13366f26bdeef11df0d6fcad44fda8223cebb6b7723939"
+    },
+    {
+      "path": "web/lib/api/types.ts",
+      "sha256": "dbd77321df6c3599763ad2021139aa7fd99f8a19649e5cde163f5f71d08d48bc"
+    },
+    {
+      "path": "web/nginx.conf",
+      "sha256": "8e97a7e262f37e15d5edd9330ba7f442bcdb3eb3c678e81976728c53a989b2dd"
+    }
+  ],
+  "status": "superseded cumulative layer; use SAVED_API_KEY_MANIFEST.json",
+  "current_validation": "SAVED_API_KEY_VALIDATION.json"
+}

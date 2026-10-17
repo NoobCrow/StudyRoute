@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, StrictInt, StrictStr
 
 from app.domain.constants import KycStatus
 
@@ -127,15 +127,35 @@ class PendingTaskIn(Strict):
     conf_months: float | None = Field(default=None, ge=0, le=1)
 
 
+class CloudConnectionIn(Strict):
+    provider: Literal["gemini", "groq"]
+    api_key: SecretStr = Field(min_length=10, max_length=512, repr=False)
+    consent: Literal[True]
+
+
+class SaveCloudConnectionIn(CloudConnectionIn):
+    storage_consent: Literal[True]
+
+
+class ConversationTurnIn(Strict):
+    role: Literal["user", "assistant"]
+    text: StrictStr = Field(min_length=1, max_length=2000)
+
+
 class ChatContextIn(Strict):
     quote_id: StrictStr | None = Field(default=None, max_length=64)
     payment_id: StrictStr | None = Field(default=None, max_length=64)
     pending: PendingTaskIn | None = None
+    conversation: list[ConversationTurnIn] = Field(default_factory=list, max_length=6)
+    history: list[Annotated[StrictStr, Field(min_length=1, max_length=1000)]] = Field(
+        default_factory=list, max_length=6
+    )
 
 
 class ChatIn(Strict):
     message: StrictStr = Field(min_length=1, max_length=1000)
     context: ChatContextIn = Field(default_factory=ChatContextIn)
+    connection: CloudConnectionIn | None = Field(default=None, repr=False)
 
 
 class ProviderEventIn(Strict):

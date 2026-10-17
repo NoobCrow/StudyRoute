@@ -46,9 +46,11 @@ test or demo step that proves it. Test names refer to `backend/tests/`. Demo ste
 ## Layers
 
 - **Browser.** Static files with a strict CSP (no inline style; inline scripts only by SHA-256 hash), `nosniff`,
-  `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, HSTS. Tokens live in memory; only the
-  rotating refresh token is kept in `sessionStorage`. `credentials: "omit"`, so cookies are never
-  sent and CSRF does not apply.
+  `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, HSTS. Browser access tokens live in memory. Browser sessions use a hashed, server-revocable
+  opaque HttpOnly/SameSite=Strict cookie, Secure in production, with an absolute expiry.
+  The browser uses same-origin credentials; cookie-auth endpoints require an exact trusted
+  Origin and X-StudyRoute-Browser header. CSRF protection is required (see SESSION_FIX.bn.md).
+  No refresh token is kept in JavaScript storage. Legacy bearer API refresh tokens still rotate.
 - **nginx.** Serves the UI and proxies `/api` on the same origin, so no CORS is needed. It sets
   `X-Forwarded-For` from the real client address (overwriting any client value). Only nginx is
   published by `docker-compose.yml`. nginx adds the page's security headers to the UI and its
@@ -74,3 +76,26 @@ from the real deployment; the audit log is tamper-evident rather than tamper-pro
 Read these files line by line before relying on them: `app/domain/auth.py`, `app/api/idempotency.py`,
 `app/providers/webhooks.py`, `app/audit/chain.py` and `app/audit/service.py`, `app/domain/state_machine.py`,
 `app/domain/rbac.py`, `app/ai/guards.py`, `app/ai/number_guard.py`, `app/ai/masking.py`.
+
+## Account-linked saved AI credentials (supersedes memory-only BYOK notes)
+
+- Optional explicit storage consent saves one Gemini/Groq connection per **actual human user ID**,
+  never a household owner/delegated identity. Existing CHAT_USE permissions remain unchanged.
+- `saved_ai_connections.api_key_enc` uses existing AES-256-GCM FieldCipher, fresh random nonce,
+  AAD bound to user ID and provider. `DATA_ENCRYPTION_KEY` (or persisted sandbox dev secrets)
+  stays server-side. Back up the encryption secret separately and protect DB/server access.
+- GET `/api/v1/assistant/connection` returns non-secret metadata only, Cache-Control: no-store.
+  PUT tests a synthetic request then atomically replaces the encrypted setting with explicit consent.
+  Provider quota errors may be saved as **unverified**, never mislabeled as validation success.
+  Invalid key/network/unsafe-response tests do not overwrite the prior saved row.
+- Browser chat resolves the key on the server; no API key in localStorage/sessionStorage,
+  chat history, URL, metadata response, or BroadcastChannel. The channel carries only a change event.
+- Logout clears browser account state, **not** the saved DB setting. DELETE removes it; parent
+  data reset deletes only that parent's personal setting, not a student's saved credential.
+  Existing request-scoped connection overrides remain compatible.
+- Decryption/provider errors do not silently switch providers. Wrong/lost encryption secrets
+  require restoring the server secret or explicitly removing/re-saving the key.
+- Encryption at rest is not end-to-end encryption: the server must decrypt to call the provider.
+  Anyone able to sign in as the same account can consume its saved key's quota; shared demo
+  credentials must not be used to protect personal API keys. Keys should have minimal permissions.
+- Provider HTTP is mocked in automated verification; no live provider billing/inference is claimed.

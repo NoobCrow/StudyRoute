@@ -4,6 +4,10 @@ Run on 15 October 2026 against the sandbox with the tools in [`scripts/security/
 `PASS` means the attack was **defended**. This is evidence, not a guarantee: no test can prove that
 no flaw exists, and an independent penetration test has not been done.
 
+Re-run on 17 October 2026 after the cloud-assistant and cookie-session branch was merged: the
+attack probe defended **122 of 122** (17 of them new, on the browser sessions) and the real-Chrome
+audit under the production CSP passed **42 of 42**.
+
 ## What was tested
 
 | Area | How | Result |
@@ -19,16 +23,17 @@ no flaw exists, and an independent penetration test has not been done.
 | **Injection** | Seven SQL-injection strings in query strings and JSON bodies on every text field; XSS markup; template strings | No server error, no database error or path in any response, nothing dropped |
 | **Hostile input** | 3 MB body, 200,000-deep JSON, invalid UTF-8, NUL bytes, malformed JSON, mass assignment (`owner_id`, `role`, `status`), path traversal, 5,000-character ids | Clean 4xx every time |
 | **Protocol abuse** | `TRACE`, CORS preflights from an evil origin, forged and missing webhook signatures, hostile `X-Request-ID` | Refused or neutralised |
+| **Browser (cookie) sessions** | Sign-in with no, foreign, null or cross-site Origin and without the browser header; a wrong password; a stolen cookie replayed from a foreign Origin; an access token lifted from the page without its cookie; the cookie alone as API authority; a made-up cookie; logout, then replay of the old cookie and token (probe checks 6.10 to 6.21) | All refused; no cookie set on a refusal; the cookie is HttpOnly, SameSite=Strict and limited to the API path |
 | **Brute force** | Login and MFA guessing, `X-Forwarded-For` spoofing, lockout, per-user write limits, user enumeration by answer and by timing | See "Found and fixed" |
 | **Data leakage (responses)** | Every response (about 260) scanned for password hashes, MFA secrets, the encrypted-account field, private keys, full IBANs, token hashes, database paths | None |
 | **Data leakage (logs, files, audit)** | The server log, the database file at byte level and every audit event scanned for e-mails, passwords, tokens, MFA codes, IBANs, names and attack payloads | None. A user's IBAN is stored encrypted; only the synthetic bank-network account numbers are plain text |
 | **Git** | Current tree and all 34 commits searched for keys, tokens and sensitive files; commit identities | None; only GitHub no-reply addresses |
 | **Server-side egress** | A packet capture of the real backend container while the 14-step demo ran with the trained reader on, then 130 s idle | No packet to a public address (after fixing ONNX Runtime's telemetry, see "Found and fixed") |
-| **Tracking and third parties** | Real Chrome through every screen as parent and reviewer, recording all 120 requests, cookies, storage, referrers and global variables | Every request went to the app's own origin. No cookie, no `Referer` header, no analytics, no CDN, no remote font |
+| **Tracking and third parties** | Real Chrome through every screen as parent and reviewer, recording every request (about 1,500), cookies, storage, referrers and global variables | Every request went to the app's own origin. The only cookie is the HttpOnly, SameSite=Strict session cookie, which script cannot read; no `Referer` header, no token in storage, no analytics, no CDN, no remote font |
 | **Stored and reflected XSS** | Markup planted in recipient names, document names and rule reasons; hostile URLs | Shown as literal text on every screen; nothing ran |
 | **CSP and framing** | Injected inline script and style, a script from another origin, a request to another origin, an iframe of the app | All blocked by the production CSP |
 | **Shipped assets** | Every downloaded JavaScript and CSS file | No source maps, no keys, no tokens, no passwords |
-| **Response headers** | CSP, HSTS, nosniff, frame options, referrer policy, permissions policy, `Cache-Control: no-store` on every response; no cookies; no server banner | Present everywhere |
+| **Response headers** | CSP, HSTS, nosniff, frame options, referrer policy, permissions policy, `Cache-Control: no-store` on every response; a cookie only from the browser sign-in routes; no server banner | Present everywhere |
 
 ## Found and fixed during this run
 
@@ -58,8 +63,10 @@ entrypoint check.
 * **The sandbox publishes its demo password and MFA code** on purpose (R29). Never put a sandbox on
   the internet. To do so anyway, set `SHOW_DEMO_HINTS=false`, `SEED_DEMO_PASSWORD` and
   `SANDBOX_MFA_CODE`.
-* **The refresh token is in `sessionStorage`** (R3). No XSS flaw was found and the CSP forbids
-  injected script, but a cookie that script cannot read would be stronger.
+* **Browser sessions use an HttpOnly cookie** (R3 updated). Tokens are not stored in
+  sessionStorage/localStorage. XSS could still act as the user; HttpOnly is not an XSS cure.
+  CSRF rejection, absolute expiry, logout revocation and concurrent tab restore are tested in
+  `test_browser_session.py`. Legacy bearer API refresh rotation is retained.
 * **The container trusts `X-Forwarded-For`** because only nginx can reach the API (R30). A test keeps
   the API port unpublished.
 * **Account lockout can be used to lock out someone else's account for 15 minutes.** That is the

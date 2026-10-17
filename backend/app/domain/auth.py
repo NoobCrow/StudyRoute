@@ -66,6 +66,7 @@ class TokenClaims:
     token_id: str
     expires_at: datetime
     act_for: str | None
+    browser_session: str | None = None
 
 
 class TokenService:
@@ -90,6 +91,7 @@ class TokenService:
         scopes: frozenset[str],
         now: datetime,
         act_for: str | None = None,
+        browser_session: str | None = None,
     ) -> tuple[str, datetime]:
         expires = now + timedelta(seconds=self._ttl)
         claims: dict[str, Any] = {
@@ -102,6 +104,8 @@ class TokenService:
             "exp": int(expires.timestamp()),
             "jti": new_id("jti"),
         }
+        if browser_session:
+            claims["browser_session"] = browser_session
         if act_for:
             claims["act_for"] = act_for
         token = jwt.encode(claims, self._private, algorithm="ES256", headers={"kid": "sandbox-1"})
@@ -138,6 +142,7 @@ class TokenService:
             token_id=str(claims["jti"]),
             expires_at=expires,
             act_for=claims.get("act_for"),
+            browser_session=claims.get("browser_session"),
         )
 
 

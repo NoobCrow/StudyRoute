@@ -1,3 +1,17 @@
+> **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
+> Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
+> the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
+
+> **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
+> ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
+> and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). **With no key and no Space the
+> assistant runs in labelled template mode** (offline, engine facts only): this is the default, so
+> `docker compose up` works with nothing configured. A person's own saved or per-request
+> Gemini or Groq key uses the cloud whatever the server setting is. To make your Hugging Face
+> Space the default instead, set `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN`
+> and `HF_SPACE_APP_SECRET`); an unreachable Space is then reported as not connected.
+> The cloud paths have **not** been live-tested with a real HF account or real provider keys.
+
 # StudyRoute
 
 **A sandbox AI assistant for paying tuition and living costs abroad from Bangladesh.**
@@ -514,3 +528,8 @@ what only a person can supply (registration, video, deck).
 StudyRoute is a sandbox for a competition. It is not a bank, an Authorised Dealer or a financial
 adviser, gives no legal, tax or investment advice, and never moves real money. Regulatory figures
 are placeholders until checked against official sources.
+
+
+> **Cumulative assistant + session update:** See [বাংলা installation and session guide](docs/SESSION_FIX.bn.md).
+Browser login now uses an HttpOnly server session instead of a refresh token in sessionStorage;
+legacy bearer API rotation is unchanged. Preserve your existing `.env`, `.venv` and database.

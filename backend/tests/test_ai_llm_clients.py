@@ -55,7 +55,7 @@ def anthropic_with(messages: FakeMessages, model: str = "claude-opus-5-5") -> An
 
 
 def settings_for(**kwargs: Any) -> Settings:
-    return Settings(**kwargs)
+    return Settings(assistant_cloud_enabled=False, **kwargs)
 
 
 def test_template_mode_is_the_default_without_a_key() -> None:

@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { useAssistant } from "@/components/assistant/assistant-context";
+import { CloudSettings } from "@/components/assistant/cloud-settings";
 import { TaskView } from "@/components/assistant/plan-card";
 import { ErrorNotice } from "@/components/app/notice";
 import { Chip } from "@/components/app/status";
@@ -84,7 +85,7 @@ function Disclosure({ summary, children }: { summary: string; children: React.Re
 
 function GuardNote({ reply }: { reply: ChatResponse }) {
   const { status, failure, flags } = reply.guard;
-  if (status === "passed" && flags.length === 0) return null;
+  if (status === "cloud_unavailable" || (status === "passed" && flags.length === 0)) return null;
   const text: Record<string, string> = {
     policy_blocked: "Blocked by the safety check. Nothing was changed.",
     template_fallback: `A model reply was discarded (${failure ?? "guard"}). This is the engine's template answer.`,
@@ -122,7 +123,10 @@ function HowIRead({
         <Chip tone={trained ? "info" : "warn"}>
           {trained ? `Reader: ${understanding.model}` : "Rules only"}
         </Chip>{" "}
-        Intent <strong>{understanding.model_intent ?? understanding.intent}</strong>
+        Intent <strong>{understanding.intent}</strong>
+        {understanding.model_intent && understanding.model_intent !== understanding.intent
+          ? `; reader suggested ${understanding.model_intent}`
+          : ""}
         {understanding.confidence !== null
           ? ` (${Math.round(understanding.confidence * 100)}% sure)`
           : ""}
@@ -152,8 +156,8 @@ function HowIRead({
         </p>
       ) : null}
       <p className="text-muted-foreground">
-        The model only marks words. Plain code turns them into values and the engine does every
-        calculation.
+        The small reader marks payment details; it is not the cloud language model. The engine
+        calculates amounts. A connected cloud model writes the reply.
       </p>
     </Disclosure>
   );
@@ -195,7 +199,9 @@ function Details({
           </Button>
         </div>
       ) : null}
-      <HowIRead understanding={reply.understanding} dialogue={reply.dialogue} />
+      {reply.mode !== "unavailable" ? (
+        <HowIRead understanding={reply.understanding} dialogue={reply.dialogue} />
+      ) : null}
       {reply.facts.length > 0 ? (
         <Disclosure summary={`Facts used (${reply.facts.length})`}>
           <ul className="space-y-0.5">
@@ -233,7 +239,7 @@ function Details({
 /** The conversation, the suggestions and the message box. It sits in a side sheet. */
 export function AssistantPanel() {
   const scope = useCurrentChatScope();
-  const { turns, busy, error, ask } = useAssistant();
+  const { turns, busy, connecting, error, ask } = useAssistant();
   const form = useForm<z.infer<typeof messageSchema>>({
     resolver: zodResolver(messageSchema),
     defaultValues: { message: "" },
@@ -249,6 +255,9 @@ export function AssistantPanel() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b px-4 py-2">
+        <CloudSettings />
+      </div>
       <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3" aria-live="polite">
         <p className="text-muted-foreground text-xs">
           I explain the engine&apos;s numbers. I cannot approve, submit, cancel or change anything.
@@ -312,7 +321,7 @@ export function AssistantPanel() {
           autoComplete="off"
           {...form.register("message")}
         />
-        <Button type="submit" size="icon" disabled={busy} aria-label="Send">
+        <Button type="submit" size="icon" disabled={busy || connecting} aria-label="Send">
           <Send aria-hidden="true" />
         </Button>
       </form>

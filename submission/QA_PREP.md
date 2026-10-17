@@ -50,12 +50,16 @@ assistant work is final and update them to match.
 
 ## 5. What happens when your model or an API fails?
 
-- **Answer:** the assistant runs in template mode with no key, so the demo never depends on a
-  network. If a model returns a figure the engine did not produce, the number guard discards the
-  answer and a template takes over. `NLU_MODE=off` and `DIALOGUE_MODE=off` switch the trained parts
-  off, and a changed model file is refused at start-up.
-- **Say plainly:** the live-model path was tested with fakes only (risk R15) until a key is used
-  with `python -m app.scripts.check_ai`. Update this line after that run.
+- **Answer:** with no key the assistant runs in labelled template mode, so the demo never depends
+  on a network. A person can add their own Gemini or Groq key in the assistant settings (saved
+  encrypted, with consent); an operator can instead point it at their own Hugging Face Space. If a
+  model returns a figure the engine did not produce, the number guard rejects the answer; if a
+  provider is unreachable, out of quota or rejects the key, the person sees a typed message (with
+  the provider's own retry time when it gives one) and nothing is done. `NLU_MODE=off` and
+  `DIALOGUE_MODE=off` switch the trained parts off, and a changed model file is refused at start-up.
+- **Say plainly:** the Gemini, Groq and Hugging Face paths were tested with mocked HTTP only; none
+  has run against a real provider (risks R15 and R48, `docs/ASSISTANT_CLOUD_VERIFICATION.json`).
+  Update this line after a real run with `python -m app.scripts.check_ai`.
 
 ## 6. What is the strongest baseline you beat?
 

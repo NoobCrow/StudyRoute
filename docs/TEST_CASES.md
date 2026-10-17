@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1223 tests** in 86 files. Last run: `1223 passed in 187.02s (0:03:07)`.
-- Frontend: **406 tests** in 33 files (Vitest).
+- Backend: **1494 tests** in 93 files. Last run: `1494 passed in 351.68s (0:05:51)`.
+- Frontend: **422 tests** in 34 files (Vitest).
 
 ```bash
 cd backend && pytest -q
@@ -48,7 +48,10 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 
 | File | Tests | Covers |
 |------|-------|--------|
+| `tests/test_ai_arithmetic.py` | 4 |  |
 | `tests/test_ai_assistant.py` | 12 | The assistant in TEMPLATE MODE (no API key): explanations from engine facts only. |
+| `tests/test_ai_cloud.py` | 22 | Cloud integration contracts. All HTTP mocked; no real keys, billing or remote GPU usage. |
+| `tests/test_ai_conversation.py` | 12 | Regression tests for relevant offline answers and untrusted topic-only history. |
 | `tests/test_ai_deadline_fit.py` | 5 | The assistant proposes the cheapest provider that ARRIVES before the due date. The fake clock starts on Wednesday 14 October 2026. The synthetic providers settle in 1 (A), 2 (B) and 3 (C) business days, counting only days that both Bangladesh and the UK work. B is the cheapest overall, so a very tight deadline makes the assistant pass over it, and say why. |
 | `tests/test_ai_guards.py` | 10 |  |
 | `tests/test_ai_intents.py` | 2 |  |
@@ -58,6 +61,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_ai_masking.py` | 6 |  |
 | `tests/test_ai_number_guard.py` | 5 |  |
 | `tests/test_ai_policy.py` | 4 |  |
+| `tests/test_ai_quality.py` | 11 | Quality regressions from live user screenshots; model calls below are mocked. |
 | `tests/test_ai_reader_agent.py` | 9 | The assistant with the trained reader switched on, end to end. These tests use the shipped model, so they need ONNX Runtime and the model files. The point is not the model's accuracy (``test_nlu_quality.py`` covers that) but that the whole agent still obeys the rules: the model proposes, plain code verifies, the engine computes, a human decides. |
 | `tests/test_ai_redteam.py` | 5 | T19: the blueprint 14.6 red-team prompts. No state change, no invented numbers, and an audit event for every blocked attempt. |
 | `tests/test_ai_request_parser.py` | 7 | Reading "I need to pay GBP 10,000 by 28 October" without a model: exact, never a float. |
@@ -90,6 +94,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_audit.py` | 12 | Audit log: append-only, hash-chained, tamper-evident (blueprint 15, test T16). |
 | `tests/test_bank_setup.py` | 6 | The bank network configuration and how the seed script adds it to an existing database. |
 | `tests/test_blueprint_coverage.py` | 2 | Traceability: every blueprint test ID (T01..T24, section 16) must have at least one test. |
+| `tests/test_browser_session.py` | 11 | Browser cookie security and multi-tab regression tests (no real credentials). |
 | `tests/test_chain_contracts.py` | 26 | The three Solidity contracts, run for real on the in-memory EVM. These are the contract tests: access control, who may move funds and when, the compliance freeze, and the rule that the escrow always holds exactly what is still locked. |
 | `tests/test_chain_service.py` | 16 | The chain service: a hash-chained log that rebuilds the in-memory EVM exactly. |
 | `tests/test_check_ai.py` | 5 | The AI readiness check: template mode, a healthy model, and every way it can fail. |
@@ -124,9 +129,11 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
+| `tests/test_response_language.py` | 1 | Current-turn language selection, independent of old chat language. |
 | `tests/test_rl_env.py` | 7 | The reinforcement-learning simulator: its reward accounting and its rules, on a hand-made bank. The bank here has no model in it (the values the assistant "perceives" are written out), so these tests check the simulator and the baseline policies, not the reader. |
 | `tests/test_rl_quality.py` | 4 | A quality floor for the shipped dialogue policy, and a guard against a stale report. The simulator is an assumption (see docs/AI_RL.md), so this only checks what the training claims: on goals the policy never trained on, it beats the old behaviour (plan as soon as the amount is known) by a clear margin, and the report and manifest describe the policy that is shipped. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
+| `tests/test_saved_ai_connection.py` | 11 | Encrypted per-person BYOK persistence; all provider HTTP is mocked. |
 | `tests/test_security.py` | 12 | Headers, CORS, body limits, XSS handling (T23) and log privacy (T24). |
 | `tests/test_security_households.py` | 6 | Two unrelated households: nothing crosses between them. The household is the security boundary of the product. A second family signs in and tries to read, change or borrow the first family's records, MFA proofs and idempotency keys. Everything must answer 403 or 404 and reveal nothing. |
 | `tests/test_security_self_assessment.py` | 3 | The permission matrix in docs/SECURITY_SELF_ASSESSMENT.md must equal the code. |
@@ -141,7 +148,8 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 |------|-------|
 | `web/app/login/login-page.test.tsx` | 7 |
 | `web/components/app/app-basics.test.tsx` | 12 |
-| `web/components/assistant/assistant.test.tsx` | 12 |
+| `web/components/assistant/assistant.test.tsx` | 14 |
+| `web/components/assistant/cloud-settings.test.tsx` | 10 |
 | `web/components/compare/compare-components.test.tsx` | 24 |
 | `web/components/compare/compare-screen.test.tsx` | 20 |
 | `web/components/compare/draft-form.test.tsx` | 13 |
@@ -153,9 +161,9 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/components/payment/payment-screen.test.tsx` | 6 |
 | `web/components/payment/payments-list.test.tsx` | 26 |
 | `web/components/payment/report-screen.test.tsx` | 6 |
-| `web/components/providers/auth-provider.test.tsx` | 7 |
+| `web/components/providers/auth-provider.test.tsx` | 8 |
 | `web/components/recipients/recipients-screen.test.tsx` | 25 |
-| `web/lib/api/client.test.ts` | 6 |
+| `web/lib/api/client.test.ts` | 9 |
 | `web/lib/canonical.test.ts` | 4 |
 | `web/lib/corridors.test.ts` | 8 |
 | `web/lib/domain/arrival-ticks.test.ts` | 6 |

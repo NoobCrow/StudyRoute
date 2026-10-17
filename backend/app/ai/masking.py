@@ -11,6 +11,9 @@ from collections.abc import Iterable
 
 from app.engine.validators import last4
 
+_API_CREDENTIAL = re.compile(
+    r"\b(?:AIza[A-Za-z0-9_-]{20,}|gsk_[A-Za-z0-9_-]{16,}|hf_[A-Za-z0-9]{16,}|sk-[A-Za-z0-9_-]{16,})\b"
+)
 _EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+")
 _PHONE = re.compile(r"\+\d[\d\s().-]{7,}\d")
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
@@ -39,7 +42,8 @@ class Masker:
         return token
 
     def mask(self, text: str) -> str:
-        masked = _EMAIL.sub("[EMAIL_REMOVED]", text)
+        masked = _API_CREDENTIAL.sub("[API_KEY_REMOVED]", text)
+        masked = _EMAIL.sub("[EMAIL_REMOVED]", masked)
         masked = _PHONE.sub("[PHONE_REMOVED]", masked)
         masked = _IBAN.sub(
             lambda m: self._account_token(f"{m.group()[:2]}** **** {last4(m.group())}"), masked

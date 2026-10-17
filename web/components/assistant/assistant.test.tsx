@@ -115,8 +115,17 @@ describe("assistant chat", () => {
     await screen.findByRole("region", { name: "Payment plan" });
     await userEvent.type(screen.getByLabelText("Your question"), "Why is B cheaper than A?");
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as {
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat")),
+      ).toHaveLength(2),
+    );
+    const second = JSON.parse(
+      String(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat"))[1]?.[1]
+          ?.body,
+      ),
+    ) as {
       context: { quote_id: string | null };
     };
     expect(second.context.quote_id).toBe("qte_plan1");
@@ -142,15 +151,67 @@ describe("assistant chat", () => {
     panel();
     await userEvent.type(screen.getByLabelText("Your question"), "I need to pay tuition");
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat")),
+      ).toHaveLength(1),
+    );
     await screen.findByText("I made a quote.");
     await userEvent.type(screen.getByLabelText("Your question"), "GBP 10,000 by 28 October");
     await userEvent.click(screen.getByRole("button", { name: "Send" }));
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as {
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat")),
+      ).toHaveLength(2),
+    );
+    const second = JSON.parse(
+      String(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat"))[1]?.[1]
+          ?.body,
+      ),
+    ) as {
       context: { pending: { kind: string; purpose: string } | null };
     };
     expect(second.context.pending).toMatchObject({ kind: "payment_plan", purpose: "TUITION" });
+  });
+
+  it("sends bounded previous user questions for contextual follow-ups, not assistant answers", async () => {
+    const fetchMock = mockApi({
+      "/assistant/chat": chatReply({ reply: "Distinct assistant answer" }),
+    });
+    panel();
+    const questions = [
+      "hello",
+      "What is my KYC status?",
+      "how do I fix it?",
+      "tell me more",
+      "What is escrow?",
+      "What is bank network?",
+      "What is the audit log?",
+      "explain",
+    ];
+    for (let i = 0; i < questions.length; i++) {
+      await userEvent.type(screen.getByLabelText("Your question"), questions[i]!);
+      await userEvent.click(screen.getByRole("button", { name: "Send" }));
+      await vi.waitFor(() =>
+        expect(
+          fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat")),
+        ).toHaveLength(i + 1),
+      );
+      await vi.waitFor(() =>
+        expect(screen.getByRole("button", { name: "Send" })).not.toBeDisabled(),
+      );
+      const body = JSON.parse(
+        String(
+          fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat"))[i]?.[1]
+            ?.body,
+        ),
+      ) as {
+        context: { history: string[] };
+      };
+      expect(body.context.history).toEqual(questions.slice(Math.max(0, i - 6), i));
+      expect(body.context.history).not.toContain("Distinct assistant answer");
+    }
   });
 
   it("shows how the message was read: the intent, how sure the model was and each marked word", async () => {
@@ -197,6 +258,22 @@ describe("assistant chat", () => {
     expect(screen.getByText(/I could not read "soon" as a date/)).toBeInTheDocument();
   });
 
+  it("shows the effective intent separately from a reader suggestion", async () => {
+    const response = chatReply();
+    mockApi({
+      "/assistant/chat": chatReply({
+        reply: "KYC guidance",
+        understanding: { ...response.understanding, intent: "KYC", model_intent: "OUT_OF_SCOPE" },
+      }),
+    });
+    panel();
+    await userEvent.type(screen.getByLabelText("Your question"), "how do I fix it?");
+    await userEvent.click(screen.getByRole("button", { name: "Send" }));
+    await userEvent.click(await screen.findByText(/How I read this/));
+    expect(screen.getByText("KYC", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByText(/reader suggested OUT_OF_SCOPE/)).toBeInTheDocument();
+  });
+
   it("reads the values back and sends yes with what it held when the person confirms", async () => {
     const readBack = chatReply({
       task: {
@@ -230,8 +307,17 @@ describe("assistant chat", () => {
     const yes = await screen.findByRole("button", { name: "Yes, plan it" });
     expect(screen.getByRole("button", { name: "No, change something" })).toBeInTheDocument();
     await userEvent.click(yes);
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    const second = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)) as {
+    await vi.waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat")),
+      ).toHaveLength(2),
+    );
+    const second = JSON.parse(
+      String(
+        fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/assistant/chat"))[1]?.[1]
+          ?.body,
+      ),
+    ) as {
       message: string;
       context: { pending: { awaiting_confirmation: boolean; amount_minor: number } };
     };

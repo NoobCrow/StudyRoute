@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { ClientOnly } from "@/components/providers/client-only";
@@ -19,17 +19,27 @@ function makeQueryClient(): QueryClient {
   });
 }
 
-export function AppProviders({ children }: { children: ReactNode }) {
+function AccountQueries({ children }: { children: ReactNode }) {
   const [client] = useState(makeQueryClient);
+  useEffect(
+    () => () => {
+      client.clear();
+    },
+    [client],
+  );
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+}
+
+export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="sr.theme">
       <ClientOnly>
-        <QueryClientProvider client={client}>
-          <AuthProvider>
+        <AuthProvider>
+          <AccountQueries>
             <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
             <Toaster position="bottom-right" />
-          </AuthProvider>
-        </QueryClientProvider>
+          </AccountQueries>
+        </AuthProvider>
       </ClientOnly>
     </ThemeProvider>
   );

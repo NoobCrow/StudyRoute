@@ -1,5 +1,5 @@
-// Thin fetch wrapper: bearer token, refresh rotation, Idempotency-Key, RFC 7807 errors.
-import type { Problem, RefreshResponse } from "./types";
+// Fetch wrapper: memory-only access JWT, HttpOnly session restore, idempotency and RFC 7807 errors.
+import type { Problem, BrowserSessionResponse, UserView } from "./types";
 
 const BASE = "/api/v1";
 const REFRESH_KEY = "sr.refresh";
@@ -28,20 +28,25 @@ export function setAccessToken(token: string | null): void {
 export function onSessionExpired(handler: (() => void) | null): void {
   expiredHandler = handler;
 }
-export function getRefreshToken(): string | null {
-  try {
-    return sessionStorage.getItem(REFRESH_KEY);
-  } catch {
-    return null;
+// Remove obsolete per-tab credentials. Never migrate a one-use refresh token across tabs.
+export function clearLegacyAuthStorage(): void {
+  for (const name of ["sessionStorage", "localStorage"] as const) {
+    try {
+      window[name].removeItem(REFRESH_KEY);
+    } catch {
+      /* storage may be blocked */
+    }
   }
 }
-export function setRefreshToken(token: string | null): void {
-  try {
-    if (token) sessionStorage.setItem(REFRESH_KEY, token);
-    else sessionStorage.removeItem(REFRESH_KEY);
-  } catch {
-    /* storage can be blocked: the session simply will not survive a reload */
-  }
+let sessionHandler: ((user: UserView) => void) | null = null;
+let epoch = 0;
+export function onSessionRestored(handler: ((user: UserView) => void) | null): void {
+  sessionHandler = handler;
+}
+export function invalidateSession(): void {
+  epoch += 1;
+  accessToken = null;
+  restoring = null;
 }
 
 /** A UUID v4 that also works on plain-http pages, where crypto.randomUUID is missing. */
@@ -89,7 +94,10 @@ async function send<T>(
   body: unknown,
   opts: CallOptions,
 ): Promise<Reply<T>> {
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "X-StudyRoute-Browser": "1",
+  };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (opts.auth !== false && accessToken) headers.Authorization = `Bearer ${accessToken}`;
   if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
@@ -100,7 +108,7 @@ async function send<T>(
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: opts.signal,
-    credentials: "omit",
+    credentials: "same-origin",
   });
   const text = await response.text();
   const data: unknown = text ? safeJson(text) : null;
@@ -120,29 +128,39 @@ async function send<T>(
   );
 }
 
-let refreshing: Promise<boolean> | null = null;
+let restoring: Promise<BrowserSessionResponse | null> | null = null;
 
-async function refreshTokens(): Promise<boolean> {
-  const token = getRefreshToken();
-  if (!token) return false;
-  refreshing ??= (async () => {
+export function restoreBrowserSession(): Promise<BrowserSessionResponse | null> {
+  if (restoring) return restoring;
+  const started = epoch;
+  const pending = (async () => {
     try {
-      const { data: next } = await send<RefreshResponse>(
+      const { data } = await send<BrowserSessionResponse>(
         "POST",
-        "/auth/refresh",
-        { refresh_token: token },
+        "/auth/browser/session",
+        {},
         { auth: false },
       );
-      accessToken = next.access_token;
-      setRefreshToken(next.refresh_token);
-      return true;
-    } catch {
-      return false;
-    } finally {
-      refreshing = null;
+      if (started !== epoch) return null;
+      accessToken = data.access_token;
+      sessionHandler?.(data.user);
+      return data;
+    } catch (error) {
+      if (!(error instanceof ApiError) || error.status !== 401) throw error;
+      if (started === epoch) {
+        accessToken = null;
+        expiredHandler?.();
+      }
+      return null;
     }
   })();
-  return refreshing;
+  restoring = pending;
+  void pending
+    .finally(() => {
+      if (restoring === pending) restoring = null;
+    })
+    .catch(() => {});
+  return pending;
 }
 
 /** Like `api`, but also returns the status and headers (used to show Idempotent-Replay). */
@@ -152,14 +170,21 @@ export async function apiReply<T>(
   body?: unknown,
   opts: CallOptions = {},
 ): Promise<Reply<T>> {
+  const started = epoch;
   try {
     return await send<T>(method, path, body, opts);
   } catch (error) {
-    const expired = error instanceof ApiError && error.status === 401 && opts.auth !== false;
-    if (!expired) throw error;
-    if (await refreshTokens()) return send<T>(method, path, body, opts);
+    const expired =
+      error instanceof ApiError &&
+      error.status === 401 &&
+      error.code === "UNAUTHENTICATED" &&
+      opts.auth !== false;
+    if (!expired || started !== epoch) throw error;
+    const restored = await restoreBrowserSession();
+    if (started !== epoch) throw error;
+    if (restored) return send<T>(method, path, body, opts);
     setAccessToken(null);
-    setRefreshToken(null);
+    clearLegacyAuthStorage();
     expiredHandler?.();
     throw error;
   }

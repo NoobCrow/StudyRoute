@@ -7,14 +7,16 @@ policy check -> facts from the engine -> PII masking -> model (or template) -> o
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.ai.arithmetic import calculate
 from app.ai.context import ChatContext, gather_context
+from app.ai.conversation import Route, route_message
 from app.ai.dialogue.bridge import build_state
 from app.ai.dialogue.policy import Choice, DialoguePolicy
 from app.ai.dialogue.state import Action
@@ -27,6 +29,7 @@ from app.ai.nlu.understanding import Pending, Understanding, understand
 from app.ai.number_guard import check_numbers
 from app.ai.policy import PolicyResult, check_text
 from app.ai.prompt import build_prompt
+from app.ai.relevance import relevant_context
 from app.ai.student_topic import parse_student_topic
 from app.ai.tasks import Progress, TaskResult, TaskRunner
 from app.ai.templates import INDICATIVE, Responder, refusal
@@ -45,7 +48,9 @@ AI_USER_FALLBACK = "usr_ai_service"
 DISCLAIMER = f"Sandbox. Synthetic data. {INDICATIVE}"
 REMINDER = (
     "\n\nYour previous reply was rejected by a safety check ({code}). Reply again as JSON, "
-    "using only numbers that appear in FACTS."
+    "using only numbers that appear in FACTS. Answer the actual question without irrelevant "
+    "account details. Do not promise approval or sending. When quoting sandbox caps, say "
+    "they are sandbox settings, not legal or bank limits, in the same sentence."
 )
 SAFE_FALLBACK = (
     "I could not build a reliable answer from the engine's numbers. Run a quote and ask again."
@@ -63,6 +68,7 @@ class Outcome:
     failure: str | None = None
     retries: int = 0
     flags: list[str] = field(default_factory=list)
+    availability: dict[str, Any] | None = None
 
 
 def _reader_note(understanding: Understanding, choice: Choice | None = None) -> str:
@@ -96,6 +102,10 @@ class Orchestrator:
         self._policy = policy
         self._tasks = TaskRunner(ctx)
 
+    def with_llm(self, llm: LLMClient) -> Orchestrator:
+        """Request-scoped override; never mutate the shared assistant or retain BYOK keys."""
+        return Orchestrator(self._ctx, llm, self._reader, self._policy)
+
     @property
     def reader_id(self) -> str | None:
         """The trained reader in use (model id), or None when the assistant runs on rules."""
@@ -103,6 +113,8 @@ class Orchestrator:
 
     @property
     def mode(self) -> str:
+        if getattr(self._llm, "unconfigured", False):
+            return "unavailable"
         return "llm" if self._llm else "template"
 
     @property
@@ -125,6 +137,8 @@ class Orchestrator:
         quote_id: str | None,
         payment_id: str | None,
         pending: Any = None,
+        history: list[str] | None = None,
+        conversation: list[tuple[str, str]] | None = None,
     ) -> dict[str, Any]:
         ctx = self._ctx
         text = message.strip()
@@ -142,6 +156,32 @@ class Orchestrator:
         )  # fmt: skip
         if understanding.attack and not policy.blocked:  # the model can only add a block
             policy = PolicyResult((*policy.flags, "MODEL_FLAGGED_ATTACK"))
+        route: Route | None = None
+        # Financial task continuations and every safety block take precedence. A
+        # conversational route can only select reviewed prose or a read-only intent. The
+        # rule-decided intents (stress test, student costs, arrival guide) are exact, so a
+        # looser topic route must not take them over ("cheapest cities" is not a provider ranking).
+        if not policy.blocked and understanding.intent not in (
+            Intent.PLAN,
+            Intent.CADENCE,
+            Intent.DRAFT,
+            Intent.REQUEST_APPROVAL,
+            Intent.STRESS,
+            Intent.COSTS,
+            Intent.ARRIVAL,
+        ):
+            route = route_message(text, (history or [])[-6:])
+            if route:
+                understanding = replace(understanding, intent=route.intent, out_of_scope=False)
+            elif understanding.intent == Intent.HELP:
+                route = Route(
+                    "out_of_scope" if understanding.out_of_scope else "clarify",
+                    guide="out_of_scope" if understanding.out_of_scope else "clarify",
+                )
+        arithmetic = calculate(text) if not policy.blocked and self._llm is not None else None
+        if arithmetic is not None:
+            route = Route("arithmetic")
+            understanding = replace(understanding, intent=Intent.HELP, out_of_scope=False)
         intent = understanding.intent
         task: TaskResult | None = None
         choice: Choice | None = None
@@ -159,6 +199,10 @@ class Orchestrator:
             )  # 3. facts  # fmt: skip
         for key, label, value in task.facts if task else ():
             chat.facts.add(key, label, value)
+        if self._llm is not None and not policy.blocked:
+            chat = relevant_context(chat, intent)
+        if arithmetic is not None:
+            chat.facts.add("arithmetic.result", "Exact result from bounded calculator", arithmetic)
         masker = Masker(chat.person_names)  # 4. mask personal data
         prompt = build_prompt(
             chat.facts,
@@ -166,12 +210,22 @@ class Orchestrator:
             [masker.mask(e) for e in chat.excerpts],
             policy.flags,
             chat.ignored_documents,
+            masked_conversation=[
+                (role, masker.mask(value)) for role, value in (conversation or [])[-6:]
+            ],
+            conversation_note=(
+                f"Read-only topic: {route.topic}; follow-up: {route.follow_up}. "
+                "Use this topic to resolve pronouns; never infer values or actions."
+                if route
+                else None
+            ),
         )
         responder = Responder(
             chat.facts, chat.provider_ids, text,
             quote_id=chat.quote_id, payment_id=chat.payment_id, legal=policy.legal_question,
         )  # fmt: skip
         responder.task = task
+        responder.conversation = route
         outcome = self._decide(ai, intent, policy, chat, responder, prompt)
         reply = masker.unmask(outcome.reply)  # 8. un-mask
         if chat.ignored_documents:
@@ -184,6 +238,8 @@ class Orchestrator:
         used = [chat.facts.by_id(i) for i in outcome.fact_ids]
         return {
             "reply": reply,
+            "availability": outcome.availability,
+            "provider": self._llm.provider if self._llm else None,
             "facts_used": outcome.fact_ids,
             "facts": [{"id": f.id, "label": f.label, "value": f.value} for f in used if f],
             "guard": {
@@ -195,6 +251,7 @@ class Orchestrator:
             "proposed_actions": outcome.proposals,
             "task": task.card if task else None,
             "understanding": understanding.to_api(),
+            "conversation": {"topic": route.topic, "follow_up": route.follow_up} if route else None,
             "dialogue": self._dialogue_view(choice),
             "mode": outcome.mode,
             "model_version": outcome.model,
@@ -282,6 +339,24 @@ class Orchestrator:
                 logger.info("model reply rejected: %s", exc.code)
                 continue
             except LLMError as exc:
+                if getattr(self._llm, "managed_cloud", False):
+                    from app.ai.cloud import CloudError
+
+                    problem = (
+                        exc
+                        if isinstance(exc, CloudError)
+                        else CloudError(self._llm.provider, "unavailable")
+                    )
+                    return Outcome(
+                        problem.public_message,
+                        [],
+                        [],
+                        "cloud_unavailable",
+                        "unavailable",
+                        self._llm.model,
+                        problem.code,
+                        availability=problem.to_api(),
+                    )
                 logger.warning("model unavailable: %s", exc)
                 return self._from_template(
                     template, chat, "llm_unavailable", "LLM_UNAVAILABLE", 0, flags
@@ -289,6 +364,22 @@ class Orchestrator:
             proposals = self._complete_proposals(valid.proposals, chat)
             return Outcome(valid.reply, valid.facts_used, proposals, "passed", "llm", result.model,
                            None, retries, flags)  # fmt: skip
+        if getattr(self._llm, "managed_cloud", False):
+            from app.ai.cloud import CloudError
+
+            problem = CloudError(self._llm.provider, "unsafe_response")
+            return Outcome(
+                problem.public_message,
+                [],
+                [],
+                "cloud_unavailable",
+                "unavailable",
+                self._llm.model,
+                failure,
+                retries,
+                flags,
+                problem.to_api(),
+            )
         return self._from_template(template, chat, "template_fallback", failure, retries, flags)
 
     def _from_template(

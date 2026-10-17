@@ -19,7 +19,14 @@ const browser = await puppeteer.launch({
 const page = await (await browser.createBrowserContext()).newPage();
 await page.setViewport({ width: 1440, height: 1000 });
 const errors = [];
-page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+// The sign-in page asks the server for a session before anyone has signed in; the 401 it gets is the
+// expected answer ("nobody yet"), and Chrome logs every failed response as a console error.
+const EXPECTED_NO_SESSION = "/api/v1/auth/browser/session";
+page.on("console", (m) => {
+  if (m.type() !== "error") return;
+  if (m.location().url?.endsWith(EXPECTED_NO_SESSION) && /status of 401/.test(m.text())) return;
+  errors.push(m.text());
+});
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 page.on("requestfailed", (r) => {
   if (r.failure()?.errorText !== "net::ERR_ABORTED") errors.push(`request failed: ${r.url()}`);
