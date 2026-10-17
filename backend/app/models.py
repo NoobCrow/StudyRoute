@@ -27,6 +27,7 @@ from app.domain.constants import (
     KycStatus,
     PaymentState,
     RecipientType,
+    ReviewStatus,
     Role,
     sql_in,
 )
@@ -480,4 +481,31 @@ class SavedAIConnection(Base):
     model: Mapped[str] = mapped_column(String(128))
     api_key_enc: Mapped[str] = mapped_column(Text)
     verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+class BankReview(Base):
+    """One bank-side review per payment (simulated). The reviewer decides; nothing here decides."""
+
+    __tablename__ = "bank_reviews"
+    __table_args__ = (
+        CheckConstraint(f"status IN ({sql_in(ReviewStatus)})", name="ck_bank_reviews_status"),
+        Index("ix_bank_reviews_status_due", "status", "due_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    payment_id: Mapped[str] = mapped_column(ForeignKey("payments.id"), unique=True)
+    owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    status: Mapped[str] = mapped_column(String(16))
+    signals_json: Mapped[dict[str, Any]] = mapped_column(JSON)
+    priority_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    opened_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    due_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    decided_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    reason_code: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    reviewer_note: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    parent_reply: Mapped[str | None] = mapped_column(Text, nullable=True)  # sealed (AES-GCM)
+    reminders: Mapped[int] = mapped_column(Integer, default=0)
+    last_reminder_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime)

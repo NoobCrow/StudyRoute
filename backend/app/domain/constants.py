@@ -78,6 +78,20 @@ class Decision(StrEnum):
     BLOCKED = "blocked"
 
 
+class ReviewStatus(StrEnum):
+    CLEARED_AUTO = "CLEARED_AUTO"  # nothing to look at: the fast lane, no person waits
+    OPEN = "OPEN"  # waiting for the bank reviewer
+    INFO_REQUESTED = "INFO_REQUESTED"  # the reviewer asked the parent something
+    CLEARED = "CLEARED"  # a reviewer said yes
+    DECLINED = "DECLINED"  # a reviewer said no
+
+
+class ReviewDecision(StrEnum):
+    CLEAR = "CLEAR"
+    ASK_INFO = "ASK_INFO"
+    DECLINE = "DECLINE"
+
+
 class Purpose(StrEnum):
     TUITION = "TUITION"
     LIVING = "LIVING"

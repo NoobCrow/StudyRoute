@@ -6,6 +6,7 @@ from app.ai.dialogue.policy import load_policy
 from app.ai.llm import build_llm_client
 from app.ai.nlu.runtime import load_reader
 from app.ai.orchestrator import Orchestrator
+from app.ai.risk.scorer import load_scorer
 from app.api.context import AppContext
 from app.api.rate_limit import RateLimiter
 from app.audit.service import AuditService
@@ -17,6 +18,7 @@ from app.core.secret_store import SecretStore
 from app.domain.auth import FailedLoginTracker, PasswordService, TokenService
 from app.domain.bank_directory import load_directory
 from app.domain.bank_network import BankNetworkService
+from app.domain.bank_review import BankReviewService
 from app.domain.chain_service import ChainService
 from app.domain.compliance_report import ReportService
 from app.domain.config_service import ConfigService
@@ -87,6 +89,10 @@ def build_context(
     ctx.worker = BackgroundWorker(ctx)
     ctx.sandbox = SandboxService(clock, audit, payments)
     ctx.reports = ReportService(clock, audit, payments, recipients)
+    ctx.reviews = BankReviewService(
+        clock, audit, payments, recipients, cipher, load_scorer(settings.risk_mode)
+    )
+    payments.attach_reviews(ctx.reviews)
     ctx.bank = BankNetworkService(
         clock, audit, Ledger(clock), load_directory(settings.resolve_bank_network_file())
     )

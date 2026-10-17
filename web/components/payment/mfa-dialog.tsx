@@ -33,7 +33,8 @@ export type MfaScope =
   | "confirm_bank_transfer"
   | "confirm_escrow"
   | "release_escrow"
-  | "cancel_escrow";
+  | "cancel_escrow"
+  | "review_payment";
 
 const CODE_LENGTH = 6;
 const codeSchema = z.object({

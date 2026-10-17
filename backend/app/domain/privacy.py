@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.audit.service import AuditService
 from app.domain.rbac import Actor, Perm, authorize
 from app.models import (
+    BankReview,
     Document,
     IdempotencyKey,
     MfaProof,
@@ -26,6 +27,7 @@ def reset_household_data(session: Session, audit: AuditService, actor: Actor) ->
     owner = actor.owner_id or actor.user_id
     ids = list(session.execute(select(Payment.id).where(Payment.owner_id == owner)).scalars())
     if ids:
+        session.execute(delete(BankReview).where(BankReview.payment_id.in_(ids)))
         session.execute(delete(Document).where(Document.payment_id.in_(ids)))
         session.execute(delete(ProviderLedger).where(ProviderLedger.payment_id.in_(ids)))
         session.execute(delete(PaymentTransition).where(PaymentTransition.payment_id.in_(ids)))

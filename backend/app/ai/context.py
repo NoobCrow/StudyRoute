@@ -3,6 +3,7 @@ permissions (the same checks a human call would face)."""
 
 from __future__ import annotations
 
+import contextlib
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
@@ -18,6 +19,7 @@ from app.ai.intents import Intent
 from app.ai.policy import check_text
 from app.ai.student_topic import StudentTopic
 from app.api.context import AppContext
+from app.core import errors
 from app.domain.constants import RecipientType
 from app.domain.rbac import Actor, Perm, authorize
 from app.domain.rules import Rules
@@ -69,6 +71,8 @@ def gather_context(
         payment = ctx.payments.load(session, ai, payment_id)
         view = ctx.payments.view(session, rules, payment)
         fb.build_payment_facts(facts, view)
+        with contextlib.suppress(errors.NotFound):  # no bank review until approval is requested
+            fb.build_review_facts(facts, ctx.reviews.view(session, ai, rules, payment_id))
         quote_id, due, chat.payment_id = payment.quote_id, payment.due_date, payment.id
         recipient = session.get(Recipient, payment.recipient_id)
         if recipient is not None and recipient.type == RecipientType.STUDENT.value:

@@ -6,8 +6,8 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1534 tests** in 97 files. Last run: `1534 passed in 277.56s (0:04:37)`.
-- Frontend: **439 tests** in 39 files (Vitest).
+- Backend: **1652 tests** in 107 files. Last run: `1652 passed in 413.09s (0:06:53)`.
+- Frontend: **462 tests** in 41 files (Vitest).
 
 ```bash
 cd backend && pytest -q
@@ -93,6 +93,9 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_api_validation.py` | 15 | Input validation and the RFC 7807 error format (T02, T03). |
 | `tests/test_api_webhooks.py` | 10 | Signed provider webhooks: T12 (bad signature), T13 (replay window), T14 (duplicates). |
 | `tests/test_audit.py` | 12 | Audit log: append-only, hash-chained, tamper-evident (blueprint 15, test T16). |
+| `tests/test_bank_review.py` | 21 | The sandbox bank's review desk: fast lane, flagged payments, the reviewer's yes / no / ask. What matters here is who can do what. A flagged payment cannot be approved until a human reviewer clears it with a fresh MFA proof; the AI can read the plain-language page and nothing else; every step writes an audit event; and no wording ever says a payment is legal or illegal. |
+| `tests/test_bank_review_assistant.py` | 8 | The assistant explains the bank check in plain words, from the review's own facts only. |
+| `tests/test_bank_review_real_model.py` | 4 | The review desk with the real, shipped risk model (skipped when its files are not there). The stand-in model tests in test_risk_scorer.py prove the arrangement; these prove that the model that ships does what the documents say: an ordinary payment takes the fast lane, and a run of quick payments followed by a first payment to a new receiver is read as unusual and waits for a person. |
 | `tests/test_bank_setup.py` | 6 | The bank network configuration and how the seed script adds it to an existing database. |
 | `tests/test_blueprint_coverage.py` | 2 | Traceability: every blueprint test ID (T01..T24, section 16) must have at least one test. |
 | `tests/test_browser_session.py` | 11 | Browser cookie security and multi-tab regression tests (no real credentials). |
@@ -118,6 +121,9 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_engine_runway_rates.py` | 8 | F9 living-cost runway and F10 synthetic rate history / best-day hint (pure engine). |
 | `tests/test_engine_student_budget.py` | 12 | F21 student budget (pure engine): the cost of a month in a city and which cities fit a budget. |
 | `tests/test_engine_validators.py` | 13 | IBAN mod-97, BIC, UK sort code and account, US ABA and UETR validators (blueprint 5.2). |
+| `tests/test_explainer_integration.py` | 13 | The small explainer inside the assistant, with a stand-in model (no model files needed). What is tested is the arrangement around the model: the engine drafts, the model may only rewrite, and anything unfaithful is replaced by the engine's own answer. The real model's quality is measured by `ml/explainer/evaluate.py` and `tests/test_explainer_model.py`. |
+| `tests/test_explainer_model.py` | 7 | The shipped explainer, for real: its files, its answers, and a quality floor. The fixture `tests/data/explainer_cases.json` holds synthetic held-out questions with the engine's own drafts (the test split, which the model never trained on). The full evaluation (700 answers, with the untrained baseline) is `ml/explainer/evaluate.py`, written to docs/AI_EXPLAINER.md. This file guards against a regression: a worse model, a broken export or a changed check would fail here. |
+| `tests/test_explainer_verify.py` | 12 | The checks that decide whether a rewrite of the engine's draft may be used. These are the checks that keep the small model honest: it may make an answer clearer, never different. |
 | `tests/test_export_evidence.py` | 3 | The execution-evidence exporter writes complete, valid and secret-free files. |
 | `tests/test_gallery.py` | 5 | app/scripts/gallery.py: the parts that are plain logic (the photographs need a browser). |
 | `tests/test_ledger.py` | 12 | The ledger: normal-side balances, overdraft refusal, reversals, integrity checks, append-only. |
@@ -132,6 +138,10 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |
 | `tests/test_response_language.py` | 1 | Current-turn language selection, independent of old chat language. |
+| `tests/test_risk_history.py` | 7 | The two ways of counting earlier payments agree: the fast one used in training and a plain loop. Training counts millions of rows with a sort and a search (``ml/aml/history.py``). The live app asks the database the same question for one payment. If the fast way ever disagreed with the plain meaning ("earlier rows of the same key within the window"), the model would be trained on numbers it never sees in use. This test checks the fast way against a brute-force loop on random data. |
+| `tests/test_risk_model.py` | 10 | A quality floor for the shipped review-priority model, so a worse one cannot be swapped in quietly. The floors sit well below what `ml/aml/train.py` measured on the test period (the last fifth of the timeline, never used for any choice). The full report is docs/AI_RISK.md. What this guards: the files are the ones that were recorded, the recorded results are still good, the model ranks the obvious cases the right way round, and it is fast. |
+| `tests/test_risk_scorer.py` | 18 | The risk model: it reads a payment, says why, is checked before use, and can be off. |
+| `tests/test_risk_signals.py` | 10 | The review signals are plain rules: same facts in, same signals out, and never a verdict. |
 | `tests/test_rl_env.py` | 7 | The reinforcement-learning simulator: its reward accounting and its rules, on a hand-made bank. The bank here has no model in it (the values the assistant "perceives" are written out), so these tests check the simulator and the baseline policies, not the reader. |
 | `tests/test_rl_quality.py` | 4 | A quality floor for the shipped dialogue policy, and a guard against a stale report. The simulator is an assumption (see docs/AI_RL.md), so this only checks what the training claims: on goals the policy never trained on, it beats the old behaviour (plan as soon as the amount is known) by a clear margin, and the report and manifest describe the policy that is shipped. |
 | `tests/test_rules.py` | 10 | Rules configuration: YAML seeds the table, the typed view feeds the engine. |
@@ -163,6 +173,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/components/documents/documents-screen.test.tsx` | 17 |
 | `web/components/guide/guide-screen.test.tsx` | 16 |
 | `web/components/guide/guide-slider.test.tsx` | 5 |
+| `web/components/layout/assistant-sheet.test.tsx` | 3 |
 | `web/components/layout/nav.test.ts` | 4 |
 | `web/components/layout/theme-menu.test.tsx` | 1 |
 | `web/components/payment/mfa-dialog.test.tsx` | 10 |
@@ -171,6 +182,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/components/payment/report-screen.test.tsx` | 6 |
 | `web/components/providers/auth-provider.test.tsx` | 8 |
 | `web/components/recipients/recipients-screen.test.tsx` | 25 |
+| `web/components/review/review.test.tsx` | 16 |
 | `web/lib/api/client.test.ts` | 9 |
 | `web/lib/canonical.test.ts` | 4 |
 | `web/lib/corridors.test.ts` | 8 |
@@ -187,5 +199,5 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `web/lib/schemas/payments-params.test.ts` | 8 |
 | `web/lib/schemas/recipient.test.ts` | 7 |
 | `web/lib/schemas/schemas.test.ts` | 8 |
-| `web/tests/a11y.test.tsx` | 24 |
+| `web/tests/a11y.test.tsx` | 28 |
 | `web/tests/motion-css.test.ts` | 5 |

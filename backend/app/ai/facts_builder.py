@@ -296,6 +296,55 @@ def build_payment_facts(facts: FactSet, payment: dict[str, Any]) -> None:
         facts.add(f"blocker.{blocker['code']}", "Something blocking approval", blocker["message"])
 
 
+def build_review_facts(facts: FactSet, review: dict[str, Any]) -> None:
+    """The sandbox bank's review of this payment, in the words the parent's page already uses."""
+    facts.add("review.headline", "Bank check", review["headline"])
+    facts.add("review.plain", "What the bank check means", review["plain"])
+    clock = review["clock"]
+    if clock["running"]:
+        left = clock["minutes_left"]
+        hours = abs(left) // 60
+        text = (
+            f"about {hours} hours left of the bank's {clock['target_hours']}-hour target"
+            if left >= 0
+            else f"about {hours} hours past the bank's {clock['target_hours']}-hour target"
+        )
+        facts.add("review.clock", "How long the bank has had it", text)
+    ai = review.get("ai")
+    if ai:
+        facts.add(
+            "review.score",
+            "AI risk score",
+            f"{ai['score']} out of 100, {ai['band'].lower()} risk",
+        )
+        facts.add(
+            "review.warning",
+            "Warning",
+            "A warning is shown: take care before authorizing." if ai["warning"] else "No warning.",
+        )
+        for factor in ai["factors"]:
+            facts.add(
+                f"review.factor.{factor['code']}",
+                factor["title"],
+                f"{factor['title']}: {factor['plain']}",
+            )
+    for index, signal in enumerate(review["signals"]):
+        facts.add(
+            f"review.signal.{index}",
+            "A reason for the bank check",
+            f"{signal['title']}: {signal['means']}",
+        )
+        facts.add(
+            f"review.prepare.{index}",
+            f"To prepare: {signal['title']}",
+            "; ".join(signal["prepare"]),
+        )
+    if review.get("reviewer_asked"):
+        facts.add("review.asked", "What the bank asked", review["reviewer_asked"])
+    if review.get("decision_reason"):
+        facts.add("review.reason", "Why the bank said no", review["decision_reason"])
+
+
 def build_plan_facts(facts: FactSet, plan: dict[str, Any], country_name: str) -> None:
     facts.add("plan.country", "Destination country", country_name)
     facts.add("plan.due_date", "University due date", plan["due_date"])

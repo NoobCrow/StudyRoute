@@ -7,6 +7,7 @@ policy check -> facts from the engine -> PII masking -> model (or template) -> o
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -52,6 +53,7 @@ REMINDER = (
     "account details. Do not promise approval or sending. When quoting sandbox caps, say "
     "they are sandbox settings, not legal or bank limits, in the same sentence."
 )
+DRAFT_HEADER = "\n\nENGINE DRAFT (every figure in it is correct; keep them exactly):\n"
 SAFE_FALLBACK = (
     "I could not build a reliable answer from the engine's numbers. Run a quote and ask again."
 )
@@ -226,7 +228,7 @@ class Orchestrator:
         )  # fmt: skip
         responder.task = task
         responder.conversation = route
-        outcome = self._decide(ai, intent, policy, chat, responder, prompt)
+        outcome = self._decide(ai, intent, policy, chat, responder, prompt, masker.mask)
         reply = masker.unmask(outcome.reply)  # 8. un-mask
         if chat.ignored_documents:
             kinds = ", ".join(chat.ignored_documents)
@@ -314,7 +316,7 @@ class Orchestrator:
 
     def _decide(
         self, ai: Actor, intent: Any, policy: PolicyResult, chat: ChatContext,
-        responder: Responder, prompt: str,
+        responder: Responder, prompt: str, mask: Callable[[str], str] = str,
     ) -> Outcome:  # fmt: skip
         flags = list(policy.flags)
         if policy.blocked:
@@ -325,6 +327,9 @@ class Orchestrator:
         if self._llm is None:
             return self._from_template(template, chat, "passed", None, 0, flags)
         failure, retries = "", 0
+        if getattr(self._llm, "wants_draft", False):
+            # A model that rewrites the engine's answer is handed that answer, masked like the rest.
+            prompt += DRAFT_HEADER + mask(template.reply)
         for attempt in range(2):
             retries = attempt
             user_prompt = prompt if attempt == 0 else prompt + REMINDER.format(code=failure)
@@ -362,7 +367,13 @@ class Orchestrator:
                     template, chat, "llm_unavailable", "LLM_UNAVAILABLE", 0, flags
                 )
             proposals = self._complete_proposals(valid.proposals, chat)
-            return Outcome(valid.reply, valid.facts_used, proposals, "passed", "llm", result.model,
+            used = valid.facts_used
+            if getattr(self._llm, "wants_draft", False):
+                # The rewrite keeps the engine's figures, so the engine's own fact references and
+                # proposals still apply; the model never chooses either.
+                used = [f.id for k in template.keys if (f := chat.facts.get(k))]
+                proposals = template.proposals
+            return Outcome(valid.reply, used, proposals, "passed", "llm", result.model,
                            None, retries, flags)  # fmt: skip
         if getattr(self._llm, "managed_cloud", False):
             from app.ai.cloud import CloudError

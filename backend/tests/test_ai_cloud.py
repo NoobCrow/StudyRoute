@@ -216,12 +216,15 @@ def test_space_error_event_mapping(stream: str, code: str) -> None:
 def test_with_nothing_configured_the_assistant_runs_offline_in_template_mode() -> None:
     """The project must work with no key and no Space: the Space is only the default when asked for."""
     assert Settings().assistant_cloud_enabled is False
-    assert build_llm_client(Settings()) is None
+    assert build_llm_client(Settings(explainer_mode="off")) is None
+    # With the explainer's files present the default is the small model on this machine, never a host
+    default = build_llm_client(Settings())
+    assert default is None or default.provider == "local"
 
 
 def test_cloud_default_requires_real_space_configuration() -> None:
     assert isinstance(build_llm_client(Settings(assistant_cloud_enabled=True)), MissingCloudLLM)
-    assert build_llm_client(Settings(assistant_cloud_enabled=False)) is None
+    assert build_llm_client(Settings(assistant_cloud_enabled=False, explainer_mode="off")) is None
     assert isinstance(
         default_cloud(Settings(hf_space_url="https://owned-space.hf.space")), MissingCloudLLM
     )

@@ -5,7 +5,7 @@
 > **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
 > ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
 > and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). **With no key and no Space the
-> assistant runs in labelled template mode** (offline, engine facts only): this is the default, so
+> assistant runs offline** (the engine's facts, reworded by a small trained model on this machine, or in labelled template mode with `EXPLAINER_MODE=off`): this is the default, so
 > `docker compose up` works with nothing configured. A person's own saved or per-request
 > Gemini or Groq key uses the cloud whatever the server setting is. To make your Hugging Face
 > Space the default instead, set `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN`
@@ -66,6 +66,8 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F21 | **Student budget**: invented monthly costs (rent in a shared flat or a studio, food, transport, bills, phone, other) for 20 student cities in the six main countries. The engine adds a month up, converts it to taka (rounded up, so it never promises too little) and shows which cities fit your monthly budget, with the rent share and how much is spare or short. Marked not verified; compare with the university's own estimate | Student guide, Chat |
 | F22 | **Arrival guide**: what to do before you fly, in your first week and in your first month, for each of the six countries and a general list for any other, with a hint on every step and ticks saved in your browser. Indicative; visa, work and registration rules change | Student guide, Chat |
 | F23 | **Fewer clicks to a payment**: the one recipient you have already allowlisted is chosen for you, and **Create draft and request approval** does both steps at once. Approving still needs you and a fresh MFA code | Compare |
+| F24 | **AI risk score and the bank review desk**: a small neural network, trained on your GPU on IBM's public synthetic transactions, gives every payment a risk score out of 100 built from four factors (amount, frequency, timeline, person); a low score shows no warning and nobody waits, a medium or high score shows a warning and waits for a person at the sandbox bank, and every payment needs a person's authorization whatever its score. The reviewer answers yes, no or "tell me more" from one page, signed with MFA. A target-time clock and a reminder keep it moving, and a parent who has never dealt with an AD bank is told what is happening and what to prepare. The AI only routes: it cannot clear, decline or approve, and nothing says a payment is legal or illegal. Precision and recall cannot both pass 90% on this data and the document says so. See [docs/BANK_REVIEW.md](docs/BANK_REVIEW.md) and [docs/AI_RISK.md](docs/AI_RISK.md) | Payment, Bank review |
+| F25 | **A trained explainer**: a small language model (FLAN-T5-small, fine-tuned on your GPU on rewrites that a larger teacher model proposed and plain code verified, then pruned and quantised to 53 MB of ONNX) rewords the engine's answer on this machine, with no key and no network. It cannot add a number: 81% of its answers on 700 held-out questions pass every check, **99.8% of the figures it writes are the engine's and 97.5% of the engine's figures are kept**, and when a check fails the engine's own answer is shown. It rewords; it does not know more than the engine. See [docs/AI_EXPLAINER.md](docs/AI_EXPLAINER.md) | Chat |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
 ## Quick start (one command)
@@ -269,10 +271,13 @@ allowlisted, sanctions clear, caps, fresh MFA, matching summary hash) and writes
 
 <p align="center"><img src="docs/diagrams/ai-pipeline.png" alt="AI pipeline: policy check, engine facts, masking, model or template, number guard, reply guard, human click" width="100%"></p>
 
-It starts in **template mode**: deterministic answers built from engine facts, no network, no key,
-and a visible "Template mode" badge. To use a real model, copy `.env.example` to `.env` and set
-`LLM_PROVIDER`, `LLM_API_KEY` and a pinned `LLM_MODEL`. The model id is recorded in every AI audit
-event. The same checks apply in both modes: policy check, masking, number guard, tool allow-list.
+With no key and no network the engine builds every answer from its own facts. On top of that, a small
+**trained explainer** (`docs/AI_EXPLAINER.md`) rewords the engine's answer on this machine; if a rewrite
+fails a check, the engine's answer is shown (the badge then says "Offline assistant"). To use a larger
+real model instead, copy `.env.example` to `.env` and set `LLM_PROVIDER`, `LLM_API_KEY` and a pinned
+`LLM_MODEL`. The model id is recorded in every AI audit event. The same checks apply in every mode:
+policy check, masking, number guard, tool allow-list. `EXPLAINER_MODE=off` returns to the engine's own
+wording.
 
 ### What the assistant can do for you (and what it cannot)
 

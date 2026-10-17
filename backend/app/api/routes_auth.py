@@ -231,6 +231,7 @@ def mfa_verify(
         auth.ensure_not_locked(user.mfa_locked_until, now)
         subject_table = {
             "approve_payment": Payment,
+            "review_payment": Payment,
             "allowlist_recipient": Recipient,
             "confirm_bank_transfer": BankTransfer,
             "confirm_escrow": Escrow,

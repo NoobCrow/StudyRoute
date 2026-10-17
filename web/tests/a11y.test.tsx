@@ -20,6 +20,9 @@ import { PaymentsScreen } from "@/components/payment/payments-screen";
 import { ReportScreen } from "@/components/payment/report-screen";
 import { useAuth } from "@/components/providers/auth-provider";
 import { RecipientsScreen } from "@/components/recipients/recipients-screen";
+import { ParentReviewPanel } from "@/components/review/parent-review-panel";
+import { ReviewDesk } from "@/components/review/review-desk";
+import { ReviewerBriefCard } from "@/components/review/reviewer-brief";
 import { SandboxScreen } from "@/components/sandbox/sandbox-screen";
 import { resetHealthCache } from "@/lib/api/health";
 import type { ComplianceReport, Role } from "@/lib/api/types";
@@ -49,6 +52,7 @@ import {
   verdict,
 } from "@/tests/fixtures";
 import { mockGuideApi } from "@/tests/guide";
+import { BRIEF, QUEUE, WAITING } from "@/tests/review";
 import { setLocation } from "@/tests/navigation";
 import { renderWithProviders } from "@/tests/render";
 
@@ -642,6 +646,45 @@ describe("accessibility (axe): student guide", () => {
     const { container } = renderWithProviders(<GuideScreen />);
     await screen.findByText(/This is a general list/);
     await userEvent.click(screen.getByLabelText("Open a student bank account"));
+    expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe("accessibility (axe): the bank review desk", () => {
+  it("the parent's plain-language panel with its reasons, reminder and glossary", async () => {
+    mockApi({ "/payments/pay_1/bank-review": WAITING });
+    const { container } = renderWithProviders(<ParentReviewPanel paymentId="pay_1" />);
+    await screen.findByText("Large payment");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the parent's panel while the bank waits for an answer", async () => {
+    mockApi({
+      "/payments/pay_1/bank-review": {
+        ...WAITING,
+        status: "INFO_REQUESTED",
+        reviewer_asked: "Please send the fee demand note.",
+        can_reply: true,
+        can_remind: false,
+      },
+    });
+    const { container } = renderWithProviders(<ParentReviewPanel paymentId="pay_1" />);
+    await screen.findByLabelText("Your answer to the bank");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the reviewer's brief with the decision form and the reason fields open", async () => {
+    mockApi({ "/payments/pay_1/bank-review": BRIEF });
+    const { container } = renderWithProviders(<ReviewerBriefCard paymentId="pay_1" />);
+    await userEvent.click(await screen.findByLabelText(/Ask for more/));
+    await screen.findByLabelText("Reason");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the reviewer's queue", async () => {
+    mockApi({ "/bank-review/queue": QUEUE });
+    const { container } = renderWithProviders(<ReviewDesk />);
+    await screen.findByText("Large payment, No invoice on file");
     expect(await violations(container)).toEqual([]);
   });
 });

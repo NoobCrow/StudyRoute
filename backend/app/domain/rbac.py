@@ -43,6 +43,9 @@ class Perm(StrEnum):
     ESCROW_FREEZE = "escrow:freeze"
     CHAIN_READ = "chain:read"
     CHAIN_ANCHOR = "chain:anchor"
+    REVIEW_READ = "review:read"
+    REVIEW_ANSWER = "review:answer"
+    REVIEW_DECIDE = "review:decide"
 
 
 P = Perm
@@ -78,6 +81,8 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.ESCROW_READ,
             P.ESCROW_WRITE,
             P.CHAIN_READ,
+            P.REVIEW_READ,
+            P.REVIEW_ANSWER,
         }
     ),
     ActorKind.STUDENT: frozenset(
@@ -97,6 +102,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.BANK_READ,
             P.ESCROW_READ,
             P.CHAIN_READ,
+            P.REVIEW_READ,
         }
     ),
     ActorKind.ADMIN: frozenset(
@@ -117,6 +123,9 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.ESCROW_FREEZE,
             P.CHAIN_READ,
             P.CHAIN_ANCHOR,
+            P.REVIEW_READ,
+            P.REVIEW_DECIDE,
+            P.MFA_ISSUE,
         }
     ),
     ActorKind.AI: frozenset(
@@ -131,6 +140,7 @@ ROLE_PERMISSIONS: dict[ActorKind, frozenset[Perm]] = {
             P.KYC_READ,
             P.PLANNER_READ,
             P.DOCUMENT_READ,
+            P.REVIEW_READ,
         }
     ),
     ActorKind.SYSTEM: frozenset(),

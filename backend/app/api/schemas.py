@@ -79,6 +79,16 @@ class RejectIn(Strict):
     reason: StrictStr | None = Field(default=None, max_length=200)
 
 
+class ReviewDecisionIn(Strict):
+    decision: StrictStr = Field(pattern=r"^(CLEAR|ASK_INFO|DECLINE)$")
+    reason_code: StrictStr | None = Field(default=None, max_length=32)
+    note: StrictStr | None = Field(default=None, max_length=500)
+
+
+class ReviewReplyIn(Strict):
+    message: StrictStr = Field(min_length=5, max_length=500)
+
+
 class KycSubmitIn(Strict):
     documents: list[StrictStr] = Field(min_length=1, max_length=20)
 

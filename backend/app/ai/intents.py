@@ -142,7 +142,10 @@ _RULES: list[tuple[Intent, re.Pattern[str]]] = [
     (
         Intent.STATUS,
         re.compile(
-            r"\bstatus\b|where\s+is|tracker|\btrack\b|\buetr\b|settled|delivered|\barrive", re.I
+            r"\bstatus\b|where\s+is|tracker|\btrack\b|\buetr\b|settled|delivered|\barrive|"
+            r"bank\s+(?:check|review)|on\s+hold|held\s+up|bank\s+(?:ask|take|say)|"
+            r"risk\s+score|how\s+risky|any\s+warning",
+            re.I,
         ),
     ),
     (

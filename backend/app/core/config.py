@@ -83,6 +83,14 @@ class Settings(BaseSettings):
     # The small policy, trained with reinforcement learning, that chooses whether to ask, confirm or
     # plan. Needs the trained reader. "off" plans as soon as the amount is known.
     dialogue_mode: Literal["auto", "off"] = "auto"
+    # The small trained explainer that rewords the engine's own answer, adding nothing (runs
+    # locally, no network). "auto" uses it when onnxruntime, sentencepiece and the model files are
+    # present; "off" shows the engine's own answer. A configured cloud model takes precedence.
+    explainer_mode: Literal["auto", "off"] = "auto"
+    # The small risk model (app/ai/risk) that rates each payment and so decides which ones a person
+    # at the bank looks at. "auto" uses it when its files are present; "off" lets the plain rules
+    # decide instead. It never clears, declines or approves anything.
+    risk_mode: Literal["auto", "off"] = "auto"
 
     @model_validator(mode="after")
     def _finalise(self) -> Settings:

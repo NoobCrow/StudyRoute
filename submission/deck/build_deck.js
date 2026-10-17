@@ -67,6 +67,8 @@ function facts() {
 }
 const AI = JSON.parse(read("submission/evidence/ai_evaluation.json"));
 const RL = JSON.parse(read("submission/evidence/ai_rl_evaluation.json"));
+const EXPL = JSON.parse(read("submission/evidence/ai_explainer_evaluation.json"));
+const RISK = JSON.parse(read("submission/evidence/ai_risk_operating_points.json"));
 const F = facts();
 if (F.scenarios !== 24) throw new Error(`Expected 24 blueprint scenarios, found ${F.scenarios}.`);
 
@@ -359,18 +361,20 @@ const blind = { rules: AI.results.rules.blind, agent: AI.results.agent.blind };
 const pc = (v) => `${(100 * v).toFixed(1).replace(/\.0$/, "")}%`;
 const rlBefore = RL.results["before: plan as soon as the amount is known"];
 const rlLearned = RL.results["RL policy (shipped)"];
+const riskRoute = RISK["routing used by the review desk"]["medium or high (a person looks)"];
 const trained = [
   ["What it does", `Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates. A GPU run of a few minutes on ${AI.data.train.toLocaleString("en-US")} messages; ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
   ["Reinforcement learning", `A policy trained by Double DQN decides when to ask, read back or plan. On simulated parents: wrong plans ${pc(rlLearned.wrong_plan)} against ${pc(rlBefore.wrong_plan)}, ${rlLearned.turns.toFixed(2)} questions against ${rlBefore.turns.toFixed(2)}. Code limits its legal moves.`],
-  ["Honest limits", "Synthetic data, English, no real users yet. The simulated parents and rewards are our assumptions. About 1 attack in 14 still slips past; permissions and MFA remain the real defence."],
+  ["Also trained, and the limits", `A language model rewords answers (${pc(EXPL.shipped_model.raw_output.figure_precision)} of its figures are the engine's; a failed check shows the engine's text). A risk model scores every payment (amount, frequency, timeline, person) and warns on a high one: precision ${pc(riskRoute.precision)}, recall ${pc(riskRoute.recall)}. Every payment needs a person's authorization anyway. Synthetic data, no real users.`],
 ];
 slides.push({
-  layout: "content", section: "Trust", title: "A trained agent, measured",
+  layout: "content", section: "Trust", title: "Trained agents, measured",
   notes:
     "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values, and when the old rules and the model disagree, the assistant asks. " +
     `On messages we wrote by hand after the model was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, ` +
     `read a plan request exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
-    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. Plain code limits its legal moves, and the parents are our assumption.`,
+    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. Plain code limits its legal moves, and the parents are our assumption. ` +
+    `Two more small models are trained on the same GPU. A language model rewords the engine's answer on the user's own machine: on ${EXPL.test_pairs} held-out questions ${pc(EXPL.shipped_model.shown_share)} of its answers pass every code check and the rest show the engine's own text; ${pc(EXPL.shipped_model.raw_output.figure_precision)} of the figures it writes are the engine's. It mostly rewords. A risk model, trained on IBM's public synthetic transactions, gives each payment a score from four factors, amount, frequency, timeline and person: a low score shows no warning, a high one shows a warning and sends the payment to a person at the sandbox bank, and every payment needs a person's authorization whatever its score; on a later period it caught ${pc(riskRoute.recall)} of the flagged payments with ${pc(riskRoute.precision)} precision, and the data cannot support both above ninety. It routes; a person decides.`,
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,

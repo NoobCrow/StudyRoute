@@ -54,6 +54,8 @@ def make_settings(tmp_path: Path, **overrides: Any) -> Settings:
         "sandbox_mfa_code": MFA_CODE,
         "nlu_mode": "off",  # the existing tests exercise the rules; new tests switch the reader on
         "dialogue_mode": "off",
+        "explainer_mode": "off",  # the small explainer is switched on by the tests that exercise it
+        "risk_mode": "off",  # the risk model likewise; without it the plain rules route reviews
         "assistant_cloud_enabled": False,  # deterministic/offline regression harness
     }
     values.update(overrides)

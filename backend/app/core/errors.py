@@ -75,6 +75,9 @@ RouteNotSupported = _make(422, "ROUTE_NOT_SUPPORTED", "This transfer route is no
 InvalidIban = _make(422, "INVALID_IBAN", "Invalid IBAN")
 InvalidBic = _make(422, "INVALID_BIC", "Invalid BIC")
 SanctionsHit = _make(422, "SANCTIONS_HIT", "Recipient blocked by sanctions screening")
+BankReviewPending = _make(
+    409, "BANK_REVIEW_PENDING", "The bank reviewer has not cleared this payment"
+)
 RateLimited = _make(429, "RATE_LIMITED", "Too many requests")
 Internal = _make(500, "INTERNAL", "Internal error")
 

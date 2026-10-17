@@ -141,7 +141,7 @@ Website: fintechathon.g-ican.com. E-mail: wangyr@pbcsf.tsinghua.edu.cn
 | 01 | Technical documentation | Done | `docs/TECHNICAL_DOCUMENTATION.md` (architecture, algorithms, security design) |
 | 02 | Presentation deck, 10 minutes at most | Done | `submission/StudyRoute_Deck.pptx`: 12 slides, speaker notes of about 8.9 minutes. Rehearse it |
 | 03 | Demo video, 5 minutes at most | **Not done** | Script ready: `submission/VIDEO_SCRIPT.md` (about 4:25). The video must still be recorded; rule 06 also asks for it |
-| 04 | Source code, README, GitHub link, deployment instructions, test cases | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` (1,534 backend, 439 web and 24 browser tests, last run 17 Oct 2026). **The GitHub repository is private**: judges cannot open the link until it is made public or shared. Latest work is not yet pushed |
+| 04 | Source code, README, GitHub link, deployment instructions, test cases | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` (1,652 backend, 462 web and 24 browser tests, last run 18 Oct 2026). **The GitHub repository is private**: judges cannot open the link until it is made public or shared. Latest work is not yet pushed |
 | 05 | Security self-assessment, permission tiers and known risks | Done | `docs/SECURITY_SELF_ASSESSMENT.md` (risks R1 to R50) and `docs/SECURITY_TESTING.md` |
 | 06 | Execution evidence: sandbox logs and demo video | Logs done, video not done | `submission/evidence/` (operation log, audit log and its verification, payments, tamper demo, security probes) |
 

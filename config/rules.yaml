@@ -83,6 +83,48 @@ compliance:
     verified: true
     note: "A recipient name containing this text delays simulated settlement."
 
+review:
+  large_amount_usd_equivalent:
+    value: 40000
+    kind: sandbox_design
+    verified: false
+    note: "Sandbox design: a payment at or above this goes to a human bank reviewer first. Not a legal threshold. Confirm with your AD bank."
+  split_window_days:
+    value: 7
+    kind: sandbox_design
+    verified: false
+    note: "Look-back window for several smaller payments that together pass the large-amount line."
+  split_min_payments:
+    value: 3
+    kind: sandbox_design
+    verified: false
+    note: "How many payments in the window (this one included) count as a possible split."
+  review_test_token:
+    value: "REVIEW_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text is sent to a human reviewer (simulated name check)."
+  bank_authorizes_every_payment:
+    value: false
+    kind: sandbox_design
+    verified: true
+    note: "When true, every payment waits for the bank's yes, low risk or high. When false, only payments the AI rates medium or higher do. The parent's own MFA authorization is needed for every payment either way."
+  decision_target_hours:
+    value: 24
+    kind: sandbox_design
+    verified: false
+    note: "How long the sandbox bank reviewer aims to take. A real bank sets its own time."
+  reminder_cooldown_hours:
+    value: 4
+    kind: sandbox_design
+    verified: false
+    note: "A parent may send one reminder this often."
+  decline_reason_codes:
+    value: [UNCLEAR_PURPOSE, DOCUMENTS_MISSING, NAME_MISMATCH, OVER_BANK_POLICY, OTHER]
+    kind: sandbox_design
+    verified: false
+    note: "Reasons a reviewer may give. They are shown to the parent in plain words."
+
 kyc:
   required_documents:
     value: [passport, parent_id, source_of_funds]

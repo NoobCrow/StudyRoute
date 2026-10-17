@@ -33,6 +33,7 @@ MFA_SCOPES = (
     "confirm_escrow",
     "release_escrow",
     "cancel_escrow",
+    "review_payment",
 )
 TOTP_STEP_SECONDS = 30
 

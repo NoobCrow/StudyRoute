@@ -109,3 +109,22 @@ assistant work is final and update them to match.
 - **Why smart escrow and a bank network?** Extras beyond Topic C. They run on a simulated chain
   and ledger, and the AI has no permission in either. They are not the core claim.
 - **Is it legal?** We never say so. Every limit is a placeholder marked "Not verified".
+- **Is the AI risk model any good?** On a later period of IBM's public synthetic transaction data
+  (never used to choose anything) it puts 63% of the flagged payments in its top 1% (random order finds
+  1%), and the desk's routing catches 56% of them with 29% precision. It learned the
+  generator's habits (the data has no laundering label on any wire or cross-currency payment, so we
+  removed the channel and currencies as inputs), it was never run on real payments, and it only routes:
+  a person decides. `docs/AI_RISK.md` shows every number including the bad ones.
+- **Why not 90% precision and 90% recall?** On this data no setting reaches both: where precision is
+  90% recall is about 13%, where recall is 85% precision is about 1.5%. Accuracy is above 99.6% only
+  because 99.8% of the payments are not flagged. We did not hide it by testing on an easy subset.
+- **Can the AI approve or clear a payment?** No. It has no permission for either. The risk model decides
+  who a person looks at; the reviewer answers with a fresh single-use MFA proof for that payment; the
+  parent approves with their own. The tests assert each of these.
+- **What does the language model actually add?** Friendlier wording, nothing else. 81% of its answers
+  on 700 held-out questions pass every code check (the rest show the engine's own text), and 99.8% of
+  the figures it writes are the engine's. About half the time it copies the engine's draft. It cannot
+  know more than the engine does.
+- **What if a model file is changed?** Each model is checked against a SHA-256 manifest at start-up and
+  refused on a mismatch; the assistant falls back to the engine's wording and the review desk falls back
+  to plain rules, and says so on the page.

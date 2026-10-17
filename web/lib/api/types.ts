@@ -951,3 +951,142 @@ export interface BrowserSessionResponse {
   session_expires_at: string;
   user: UserView;
 }
+
+// ---- the sandbox bank's review desk ----------------------------------------------------------------
+
+export type ReviewStatusName = "CLEARED_AUTO" | "OPEN" | "INFO_REQUESTED" | "CLEARED" | "DECLINED";
+
+export interface ReviewClock {
+  running: boolean;
+  state: "on_time" | "due_soon" | "overdue" | "not_running";
+  target_hours: number;
+  due_at?: string;
+  minutes_left?: number;
+  waited_minutes?: number;
+}
+
+export interface ReviewPriority {
+  percentile: number;
+  band: "HIGH" | "MEDIUM" | "LOW";
+  model_id: string;
+  sha256: string;
+  population?: string;
+  drivers?: string[];
+  hit_rate?: number | null;
+}
+
+/** The AI model's risk reading of a payment, in words. It routes; a person decides. */
+export interface AiFactor {
+  code: "AMOUNT" | "FREQUENCY" | "TIMELINE" | "PERSON";
+  title: string;
+  level: "raises" | "neutral" | "lowers";
+  plain: string;
+}
+
+export interface AiReading {
+  score: number;
+  band: "HIGH" | "MEDIUM" | "LOW";
+  warning: boolean;
+  percentile: number;
+  among: string;
+  factors: AiFactor[];
+  drivers: AiFactor[];
+  hit_rate: number | null;
+  model_id: string;
+  decides_who_a_person_looks_at: boolean;
+}
+
+/** What a parent (or student, or the assistant) reads about the bank's check. */
+export interface ParentReview {
+  payment_id: string;
+  status: ReviewStatusName;
+  headline: string;
+  plain: string;
+  lane: "fast" | "reviewed";
+  signals: {
+    code: string;
+    title: string;
+    means: string;
+    why: string;
+    prepare: string[];
+    figures: Record<string, string>;
+    needs_bank_person: boolean;
+  }[];
+  ai: AiReading | null;
+  clock: ReviewClock;
+  reviewer_asked: string | null;
+  decision_reason: string | null;
+  decision_note: string | null;
+  your_reply: string | null;
+  can_reply: boolean;
+  can_remind: boolean;
+  reminders_sent: number;
+  glossary: { term: string; plain: string }[];
+  simulated: boolean;
+  disclaimer: string;
+}
+
+/** The one page the bank reviewer reads before saying yes, no or "tell me more". */
+export interface ReviewerBrief {
+  payment_id: string;
+  status: ReviewStatusName;
+  payment_state: PaymentState;
+  payer: { name: string; kyc_status: KycStatusName };
+  recipient: { label: string; allowlisted: boolean };
+  amount: Money;
+  purpose: string;
+  destination_country: string;
+  reference: string;
+  provider_name: string;
+  due_date: string | null;
+  documents_on_file: string[];
+  signals: {
+    code: string;
+    title: string;
+    needs_human: boolean;
+    figures: Record<string, string>;
+    check: string;
+  }[];
+  questions: string[];
+  hint: { suggested: "CLEAR" | "ASK_INFO" | "DECLINE"; why: string; note: string };
+  priority: ReviewPriority | null;
+  ai: AiReading | null;
+  routing: "ai" | "rules";
+  clock: ReviewClock;
+  reminders: number;
+  parent_reply: string | null;
+  reviewer_note: string | null;
+  decided_by: string | null;
+  decided_at: string | null;
+  reason_codes: string[];
+  can_decide: boolean;
+  simulated: boolean;
+  disclaimer: string;
+}
+
+export interface ReviewQueueItem {
+  payment_id: string;
+  status: ReviewStatusName;
+  amount: Money;
+  purpose: string;
+  signals: string[];
+  priority: ReviewPriority | null;
+  clock: ReviewClock;
+  reminders: number;
+  escalated: boolean;
+  opened_at: string;
+  reasons_for_a_person: number;
+}
+
+export interface ReviewQueue {
+  items: ReviewQueueItem[];
+  stats: {
+    waiting: number;
+    overdue: number;
+    decided: number;
+    average_hours_to_decide: number | null;
+    target_hours: number;
+  };
+  simulated: boolean;
+  disclaimer: string;
+}

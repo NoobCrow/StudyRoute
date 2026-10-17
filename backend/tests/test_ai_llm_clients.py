@@ -59,10 +59,13 @@ def settings_for(**kwargs: Any) -> Settings:
 
 
 def test_template_mode_is_the_default_without_a_key() -> None:
-    assert build_llm_client(settings_for()) is None
-    assert build_llm_client(settings_for(llm_provider="anthropic")) is None
-    empty = settings_for(llm_provider="anthropic", llm_api_key=SecretStr(""))
+    assert build_llm_client(settings_for(explainer_mode="off")) is None
+    assert build_llm_client(settings_for(llm_provider="anthropic", explainer_mode="off")) is None
+    empty = settings_for(llm_provider="anthropic", llm_api_key=SecretStr(""), explainer_mode="off")
     assert build_llm_client(empty) is None
+    # Without a key the only model that can be chosen is the small one that runs on this machine
+    default = build_llm_client(settings_for())
+    assert default is None or default.provider == "local"
 
 
 def test_an_anthropic_key_builds_a_client_with_the_pinned_or_default_model() -> None:

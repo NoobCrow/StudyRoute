@@ -15,6 +15,9 @@ describe("nav", () => {
     expect(labels("admin")).not.toContain("Compare");
     expect(labels("admin")).not.toContain("Recipients");
     expect(labels("admin")).not.toContain("Student guide");
+    expect(labels("admin")).toContain("Bank review");
+    expect(labels("parent")).not.toContain("Bank review");
+    expect(labels("student")).not.toContain("Bank review");
     expect(labels("student")).toContain("Student guide");
     expect(labels("student")).not.toContain("Audit log");
     expect(labels("parent")).toEqual(

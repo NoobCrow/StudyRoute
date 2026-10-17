@@ -49,4 +49,5 @@ class AppContext:
     bank: Any = None  # the sandbox bank network, set by the container
     chain: Any = None  # the sandbox chain (EVM log and replay), set by the container
     escrow: Any = None  # programmable escrow on the sandbox chain, set by the container
+    reviews: Any = None  # the sandbox bank's review desk, set by the container
     login_attempts: Any = None  # failed-sign-in counter per e-mail, set by the container

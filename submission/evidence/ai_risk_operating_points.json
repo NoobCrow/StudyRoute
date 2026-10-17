@@ -1,0 +1,218 @@
+{
+  "all payments": {
+    "threshold_chosen_on_tuning_period": 0.7113,
+    "test_rows": 1015564,
+    "test_flagged": 1797,
+    "best_f1_point": {
+      "sent_to_a_person": 962,
+      "true_positives": 649,
+      "false_positives": 313,
+      "missed": 1148,
+      "accuracy": 0.99856,
+      "precision": 0.6746,
+      "recall": 0.3612,
+      "f1": 0.4705
+    },
+    "top_share_of_payments": {
+      "0.1%": {
+        "sent_to_a_person": 1015,
+        "true_positives": 677,
+        "false_positives": 338,
+        "missed": 1120,
+        "accuracy": 0.99856,
+        "precision": 0.667,
+        "recall": 0.3767,
+        "f1": 0.4815
+      },
+      "0.5%": {
+        "sent_to_a_person": 5077,
+        "true_positives": 1051,
+        "false_positives": 4026,
+        "missed": 746,
+        "accuracy": 0.9953,
+        "precision": 0.207,
+        "recall": 0.5849,
+        "f1": 0.3058
+      },
+      "1.0%": {
+        "sent_to_a_person": 10155,
+        "true_positives": 1136,
+        "false_positives": 9019,
+        "missed": 661,
+        "accuracy": 0.99047,
+        "precision": 0.1119,
+        "recall": 0.6322,
+        "f1": 0.1901
+      },
+      "2.0%": {
+        "sent_to_a_person": 20311,
+        "true_positives": 1301,
+        "false_positives": 19010,
+        "missed": 496,
+        "accuracy": 0.98079,
+        "precision": 0.0641,
+        "recall": 0.724,
+        "f1": 0.1177
+      },
+      "5.0%": {
+        "sent_to_a_person": 50778,
+        "true_positives": 1450,
+        "false_positives": 49328,
+        "missed": 347,
+        "accuracy": 0.95109,
+        "precision": 0.0286,
+        "recall": 0.8069,
+        "f1": 0.0552
+      },
+      "10.0%": {
+        "sent_to_a_person": 101556,
+        "true_positives": 1540,
+        "false_positives": 100016,
+        "missed": 257,
+        "accuracy": 0.90126,
+        "precision": 0.0152,
+        "recall": 0.857,
+        "f1": 0.0298
+      }
+    },
+    "never_flag_anything": {
+      "sent_to_a_person": 0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "missed": 1797,
+      "accuracy": 0.99823,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "first payments to a receiver": {
+    "threshold_chosen_on_tuning_period": 1.1949,
+    "test_rows": 40349,
+    "test_flagged": 1417,
+    "best_f1_point": {
+      "sent_to_a_person": 780,
+      "true_positives": 569,
+      "false_positives": 211,
+      "missed": 848,
+      "accuracy": 0.97375,
+      "precision": 0.7295,
+      "recall": 0.4016,
+      "f1": 0.518
+    },
+    "top_share_of_payments": {
+      "0.1%": {
+        "sent_to_a_person": 40,
+        "true_positives": 40,
+        "false_positives": 0,
+        "missed": 1377,
+        "accuracy": 0.96587,
+        "precision": 1.0,
+        "recall": 0.0282,
+        "f1": 0.0549
+      },
+      "0.5%": {
+        "sent_to_a_person": 201,
+        "true_positives": 185,
+        "false_positives": 16,
+        "missed": 1232,
+        "accuracy": 0.96907,
+        "precision": 0.9204,
+        "recall": 0.1306,
+        "f1": 0.2287
+      },
+      "1.0%": {
+        "sent_to_a_person": 403,
+        "true_positives": 334,
+        "false_positives": 69,
+        "missed": 1083,
+        "accuracy": 0.97145,
+        "precision": 0.8288,
+        "recall": 0.2357,
+        "f1": 0.367
+      },
+      "2.0%": {
+        "sent_to_a_person": 806,
+        "true_positives": 586,
+        "false_positives": 220,
+        "missed": 831,
+        "accuracy": 0.97395,
+        "precision": 0.727,
+        "recall": 0.4135,
+        "f1": 0.5272
+      },
+      "5.0%": {
+        "sent_to_a_person": 2017,
+        "true_positives": 907,
+        "false_positives": 1110,
+        "missed": 510,
+        "accuracy": 0.95985,
+        "precision": 0.4497,
+        "recall": 0.6401,
+        "f1": 0.5282
+      },
+      "10.0%": {
+        "sent_to_a_person": 4034,
+        "true_positives": 1012,
+        "false_positives": 3022,
+        "missed": 405,
+        "accuracy": 0.91507,
+        "precision": 0.2509,
+        "recall": 0.7142,
+        "f1": 0.3713
+      }
+    },
+    "never_flag_anything": {
+      "sent_to_a_person": 0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "missed": 1417,
+      "accuracy": 0.96488,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    }
+  },
+  "routing used by the review desk": {
+    "medium or high (a person looks)": {
+      "sent_to_a_person": 3474,
+      "true_positives": 1015,
+      "false_positives": 2459,
+      "missed": 782,
+      "accuracy": 0.99681,
+      "precision": 0.2922,
+      "recall": 0.5648,
+      "f1": 0.3851
+    },
+    "high only": {
+      "sent_to_a_person": 1548,
+      "true_positives": 815,
+      "false_positives": 733,
+      "missed": 982,
+      "accuracy": 0.99831,
+      "precision": 0.5265,
+      "recall": 0.4535,
+      "f1": 0.4873
+    },
+    "medium only": {
+      "sent_to_a_person": 1926,
+      "true_positives": 200,
+      "false_positives": 1726,
+      "missed": 1597,
+      "accuracy": 0.99673,
+      "precision": 0.1038,
+      "recall": 0.1113,
+      "f1": 0.1074
+    },
+    "medium or high, first payments to a receiver only": {
+      "sent_to_a_person": 3416,
+      "true_positives": 998,
+      "false_positives": 2418,
+      "missed": 419,
+      "accuracy": 0.92969,
+      "precision": 0.2922,
+      "recall": 0.7043,
+      "f1": 0.413
+    }
+  }
+}

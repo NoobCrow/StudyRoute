@@ -1,0 +1,18 @@
+{
+  "split": "train",
+  "pairs": 6000,
+  "proposed": 18000,
+  "verified": 7785,
+  "verified_share": 0.4325,
+  "pairs_with_a_verified_rewrite": 3679,
+  "rejected_for": {
+    "NEW_FIGURE": 2813,
+    "REFUSAL_LOST": 2302,
+    "DROPPED_FIGURES": 2025,
+    "DISCLAIMER_LOST": 1960,
+    "PROVIDER_NAME": 207,
+    "ACTION_CLAIM": 28,
+    "PROMISE": 14,
+    "LENGTH": 4
+  }
+}

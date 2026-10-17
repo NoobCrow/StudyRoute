@@ -37,6 +37,8 @@ services:
       CLOUD_TIMEOUT_SECONDS: ${CLOUD_TIMEOUT_SECONDS:-}
       NLU_MODE: ${NLU_MODE:-}
       DIALOGUE_MODE: ${DIALOGUE_MODE:-}
+      EXPLAINER_MODE: ${EXPLAINER_MODE:-}
+      RISK_MODE: ${RISK_MODE:-}
     volumes:
       - studyroute-data:/srv/data
     expose:

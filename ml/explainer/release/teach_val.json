@@ -1,0 +1,16 @@
+{
+  "split": "val",
+  "pairs": 500,
+  "proposed": 1500,
+  "verified": 681,
+  "verified_share": 0.454,
+  "pairs_with_a_verified_rewrite": 320,
+  "rejected_for": {
+    "NEW_FIGURE": 277,
+    "DROPPED_FIGURES": 167,
+    "REFUSAL_LOST": 160,
+    "DISCLAIMER_LOST": 150,
+    "PROVIDER_NAME": 7,
+    "PROMISE": 1
+  }
+}

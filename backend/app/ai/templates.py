@@ -5,6 +5,7 @@ Every number is looked up in the FACTS; nothing is calculated here.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -393,10 +394,41 @@ class Responder:
         text = f"The payment to deliver {self.v('payment.target')} is {self.v('payment.state')}."
         if self.facts.has("payment.uetr"):
             text += f" Its tracking reference (UETR) is {self.v('payment.uetr')}."
-        blockers = self.facts.keys_with_prefix("blocker.")
+        # The bank check has its own paragraph below, so its blocker is not said twice.
+        blockers = [
+            k for k in self.facts.keys_with_prefix("blocker.") if k != "blocker.BANK_REVIEW_PENDING"
+        ]
         if blockers:
             text += " What blocks it now: " + " ".join(self.v(k) for k in blockers)
+        text += self._bank_check()
         return self._finish(text + " Everything here is simulated.")
+
+    def _bank_check(self) -> str:
+        """What the bank's check means for the parent, only from the review's own facts."""
+        if not self.facts.has("review.headline"):
+            return ""
+        text = f" Bank check: {self.v('review.headline')}. {self.v('review.plain')}"
+        if self.facts.has("review.score"):
+            text += f" The AI's risk score is {self.v('review.score')}. {self.v('review.warning')}"
+            if re.search(r"why|factor|reason|made of|explain|score", self.message, re.I):
+                text += " The score is made of four things: " + " ".join(
+                    self.v(k) for k in self.facts.keys_with_prefix("review.factor.")
+                )
+            text += (
+                " Every payment still needs your own authorization with MFA, whatever the score."
+            )
+        if self.facts.has("review.clock"):
+            text += f" It has {self.v('review.clock')}."
+        for key in self.facts.keys_with_prefix("review.signal."):
+            text += f" {self.v(key)}"
+        if self.facts.has("review.asked"):
+            text += f" The bank asked: {self.v('review.asked')}"
+        if self.facts.has("review.reason"):
+            text += f" {self.v('review.reason')}"
+        if re.search(r"prepar|bring|need|documents?|ask", self.message, re.I):
+            for key in self.facts.keys_with_prefix("review.prepare."):
+                text += f" To prepare: {self.v(key)}."
+        return text
 
     def draft(self) -> Answer:
         if not self._have_quote():

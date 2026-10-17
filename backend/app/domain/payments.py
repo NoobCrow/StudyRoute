@@ -108,6 +108,11 @@ class PaymentService:
         self._quotes = quotes
         self._kyc = kyc
         self._providers = providers
+        self._reviews: Any = None  # the bank review desk, attached by the container
+
+    def attach_reviews(self, reviews: Any) -> None:
+        """Let the sandbox bank's review desk open a review and hold an approval."""
+        self._reviews = reviews
 
     # --- loading and read-only helpers ---------------------------------------------------
     def load(self, session: Session, actor: Actor, payment_id: str) -> Payment:
@@ -177,7 +182,12 @@ class PaymentService:
             (not ctx.sanctions_clear, "SANCTIONS_HIT", "Recipient matched mock screening."),
             (ctx.limit_error is not None, "LIMIT_EXCEEDED", LIMIT_BLOCKER),
         ]  # fmt: skip
-        return [{"code": code, "message": msg} for failed, code, msg in checks if failed]
+        found = [{"code": code, "message": msg} for failed, code, msg in checks if failed]
+        if self._reviews is not None and payment.state == PaymentState.PENDING_APPROVAL.value:
+            review = self._reviews.blocker(session, payment)
+            if review is not None:
+                found.append(review)
+        return found
 
     # --- the one place a state changes ----------------------------------------------------
     def _apply(
@@ -454,6 +464,8 @@ class PaymentService:
             decision=Decision.SUGGESTED if actor.audit_type.value == "ai" else None,
             note="Approval requested",
         )  # fmt: skip
+        if self._reviews is not None:
+            self._reviews.open_for(session, actor, rules, payment)
         return {
             "payment_id": payment.id,
             "state": payment.state,
@@ -490,6 +502,10 @@ class PaymentService:
         payment = self.load(session, actor, payment_id)
         self._kyc.complete_due_reviews(session)
         next_state(PaymentState(payment.state), Event.APPROVE, actor.kind)
+        if self._reviews is not None:
+            self._reviews.gate(
+                session, payment
+            )  # a bank reviewer must clear a flagged payment first
         now = self._clock.now()
         proof = auth.find_valid_mfa_proof(
             session,

@@ -11,6 +11,8 @@ import { StateBadge } from "@/components/app/status";
 import { KycCard } from "@/components/dashboard/kyc-card";
 import { MfaDialog } from "@/components/payment/mfa-dialog";
 import { Mt103Card, SummaryCard, TrackerCard } from "@/components/payment/payment-panels";
+import { ParentReviewPanel } from "@/components/review/parent-review-panel";
+import { ReviewerBriefCard } from "@/components/review/reviewer-brief";
 import { SecurityDemo, type ApproveAttempt } from "@/components/payment/security-demo";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -222,6 +224,17 @@ export function PaymentScreen() {
         </Card>
       ) : null}
       {open && user.role !== "admin" ? <KycCard /> : null}
+      {data.state !== "DRAFT" && data.state !== "QUOTED" ? (
+        user.role === "admin" ? (
+          <ReviewerBriefCard
+            paymentId={data.payment_id}
+            sandboxCode={sandbox.code || undefined}
+            onDecided={refreshAll}
+          />
+        ) : (
+          <ParentReviewPanel paymentId={data.payment_id} />
+        )
+      ) : null}
 
       <Card aria-labelledby="actions-title">
         <CardHeader>
@@ -309,6 +322,7 @@ export function PaymentScreen() {
             </p>
           ) : null}
           <p className="text-muted-foreground text-xs">
+            Every payment needs your authorization with a fresh MFA code, whatever its risk score.
             The assistant can suggest these steps but can never take them. {data.disclaimer}
           </p>
         </CardContent>

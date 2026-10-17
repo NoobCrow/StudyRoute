@@ -29,22 +29,26 @@ export function AssistantSheet({
             <Chip
               tone={mode?.mode === "llm" ? "info" : "warn"}
               title={
-                mode?.mode === "llm"
-                  ? "A configured external language model explains checked engine facts."
-                  : mode?.mode === "unavailable"
-                    ? "No model answer was returned. Check cloud connection settings."
-                    : "Configure Hugging Face or connect a provider to use cloud chat."
+                mode?.mode === "llm" && mode.provider === "local"
+                  ? "A small trained model on this machine rewords the engine's own answer. Every figure is the engine's and is checked in code; if a rewrite fails a check, the engine's answer is shown."
+                  : mode?.mode === "llm"
+                    ? "A configured external language model explains checked engine facts."
+                    : mode?.mode === "unavailable"
+                      ? "No model answer was returned. Check cloud connection settings."
+                      : "Configure Hugging Face or connect a provider to use cloud chat."
               }
             >
               {connected
                 ? `${connected.provider}: ${connected.model}`
-                : mode?.mode === "llm"
-                  ? `Model: ${mode.model_version}`
-                  : mode?.mode === "unavailable"
-                    ? "Cloud unavailable"
-                    : mode?.mode === "template"
-                      ? "Offline assistant"
-                      : "Cloud assistant"}
+                : mode?.mode === "llm" && mode.provider === "local"
+                  ? "Trained explainer"
+                  : mode?.mode === "llm"
+                    ? `Model: ${mode.model_version}`
+                    : mode?.mode === "unavailable"
+                      ? "Cloud unavailable"
+                      : mode?.mode === "template"
+                        ? "Offline assistant"
+                        : "Cloud assistant"}
             </Chip>
             {mode?.understanding.source === "trained" ? (
               <Chip

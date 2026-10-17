@@ -45,6 +45,7 @@ Thumbs.db
 ml/.cache/
 ml/.tmp/
 ml/runs/
+ml/explainer/runs/
 
 # the training data and generator of the trained reader are part of the project (unlike runtime data/)
 !ml/data/

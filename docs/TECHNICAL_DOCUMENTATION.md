@@ -404,6 +404,22 @@ splits the total in integer minor units. The AI has no escrow or chain permissio
 `AuditAnchor` contract stores audit head hashes; `GET /chain/verify` reports `MISMATCH` when the
 database no longer agrees, even if every hash was recomputed. See [SMART_ESCROW.md](SMART_ESCROW.md).
 
+### 2.15 The bank review desk
+
+Runs when approval is requested. A small neural network (`ai/risk/`, eight inputs in four factors, NumPy at run time, a
+SHA-256 manifest) reads the payment and rates it `LOW`, `MEDIUM` or `HIGH` from cut-offs set on a tuning
+period, with the groups of inputs that drove the score (found by hiding each in turn). `LOW` takes the fast
+lane; `MEDIUM` and `HIGH` (or a sandbox name-list match) open a `bank_reviews` row (status `OPEN`, a target
+time, the signals, the reading), write one audit event naming the model and the routing, and the approval
+guard then refuses `BANK_REVIEW_PENDING` until a reviewer clears it. The plain rules in
+`engine/risk_signals.py` (large amount, several payments that add up to one, a new receiver, no fee
+demand note) are context for the reviewer, and decide only when the model is not loaded. The reviewer (an
+admin user) answers `CLEAR`, `ASK_INFO` or `DECLINE` with a fresh single-use MFA proof under the scope
+`review_payment`; a decline calls the existing rejection, so the state machine is unchanged. The parent's
+short answer is sealed with the field cipher. A clock (on time, due soon, overdue), a reminder with a
+cool-down and the average time to decide make a slow review visible. See `docs/BANK_REVIEW.md` and
+`docs/AI_RISK.md` for the permissions, the API, the results and the limits.
+
 ## 3. Security design
 
 The full threat and control matrix, with the test that proves each row, is in

@@ -16,3 +16,4 @@ py-evm>=0.12.1b1
 eth-abi>=5.1
 onnxruntime>=1.20  # runs the trained reader (app/ai/nlu) on CPU
 numpy>=2.0
+sentencepiece>=0.2  # tokenizer of the trained explainer (app/ai/explainer)

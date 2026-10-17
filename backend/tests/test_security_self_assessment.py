@@ -41,6 +41,8 @@ def test_the_documented_ai_tier_never_includes_a_decision() -> None:
         "escrow:freeze",
         "chain:read",
         "chain:anchor",
+        "review:answer",
+        "review:decide",
     ):
         assert ai_column[decision] == "-", decision
 

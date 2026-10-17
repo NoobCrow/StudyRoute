@@ -122,6 +122,17 @@ class LLMClient(Protocol):
     def complete(self, *, system: str, user: str) -> LLMResult: ...
 
 
+def _local_explainer(settings: Settings) -> LLMClient | None:
+    """The shipped explainer, when it is switched on and its files are present and intact."""
+    if settings.explainer_mode == "off":
+        return None
+    from app.ai.explainer.client import LocalExplainerLLM
+    from app.ai.explainer.runtime import load_explainer
+
+    explainer = load_explainer(settings.explainer_mode)
+    return LocalExplainerLLM(explainer) if explainer else None
+
+
 def build_llm_client(settings: Settings) -> LLMClient | None:
     """Return a configured client, or None for TEMPLATE MODE (no key, no network)."""
     if settings.llm_provider is None or settings.llm_api_key is None:
@@ -129,7 +140,7 @@ def build_llm_client(settings: Settings) -> LLMClient | None:
             from app.ai.cloud import default_cloud
 
             return default_cloud(settings)
-        return None
+        return _local_explainer(settings)
     key = settings.llm_api_key.get_secret_value()
     if settings.llm_provider in ("gemini", "groq"):
         from app.ai.cloud import ProviderLLM

@@ -48,7 +48,12 @@ backend/app/providers/  mock provider adapters, signed webhooks
 backend/app/ai/         orchestrator, masking, number guard, tools
 backend/app/ai/nlu/     the trained reader (tokenizer, ONNX runtime, value checks); model in model/
 backend/app/ai/dialogue/ the RL dialogue policy: state, legal-action rules, NumPy policy; weights in model/
+backend/app/ai/explainer/ the small trained explainer: rewords the engine's draft; every rewrite is checked in code; model in model/
+backend/app/ai/risk/    the small trained risk model that rates each payment and routes it to a person; never clears or approves
+backend/app/domain/bank_review.py  the sandbox bank's review desk (docs/BANK_REVIEW.md)
 ml/                     training and evaluation of the reader; ml/rl/ the RL simulator and trainer
+ml/explainer/           data, teacher, verifier, training and evaluation of the explainer (docs/AI_EXPLAINER.md)
+ml/aml/                 data build, training, ablation and operating points of the risk model (docs/AI_RISK.md)
 backend/tests/          pytest. One test per blueprint test ID (T01..T24)
 web/                    screens: dashboard, compare, payments, recipients, documents,
                         audit, rules, bank network, smart escrow, sandbox, assistant
@@ -62,6 +67,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Start all: docker compose up --build
 - Reset demo data: python -m app.scripts.seed
 - Run the demo script against a running API: python -m app.scripts.demo_flow
+- Show the AI risk model and the bank review desk against a running API: python -m app.scripts.review_demo
 - Check the AI layer (template mode or a configured model): python -m app.scripts.check_ai
 - Regenerate the destination countries (needs `pip install babel`, a dev tool only): python scripts/gen_countries.py
 - Scan for secrets, real e-mails and TODOs: python scripts/scan_repo.py

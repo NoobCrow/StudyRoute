@@ -205,6 +205,38 @@ class Rules:
         return str(self.raw("compliance.slow_test_token"))
 
     @property
+    def review_large_usd(self) -> int:
+        return int(self.raw("review.large_amount_usd_equivalent"))
+
+    @property
+    def review_split_window_days(self) -> int:
+        return int(self.raw("review.split_window_days"))
+
+    @property
+    def review_split_min_payments(self) -> int:
+        return int(self.raw("review.split_min_payments"))
+
+    @property
+    def review_test_token(self) -> str:
+        return str(self.raw("review.review_test_token"))
+
+    @property
+    def review_bank_authorizes_all(self) -> bool:
+        return bool(self.raw("review.bank_authorizes_every_payment"))
+
+    @property
+    def review_target_hours(self) -> int:
+        return int(self.raw("review.decision_target_hours"))
+
+    @property
+    def review_reminder_hours(self) -> int:
+        return int(self.raw("review.reminder_cooldown_hours"))
+
+    @property
+    def review_reason_codes(self) -> list[str]:
+        return [str(item) for item in self.raw("review.decline_reason_codes")]
+
+    @property
     def kyc_required_documents(self) -> list[str]:
         return [str(item) for item in self.raw("kyc.required_documents")]
 
