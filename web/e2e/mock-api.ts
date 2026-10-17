@@ -288,6 +288,151 @@ const LONG_NAMED_DOCUMENT = {
   mock: true,
 };
 
+const STUDENT_CITIES = [
+  {
+    city: "Johor Bahru",
+    country: "MY",
+    country_name: "Malaysia",
+    currency: "MYR",
+    rent: "MYR 450.00",
+    total: "MYR 1,570.00",
+    bdt: 4_082_000,
+    bdtText: "BDT 40,820.00",
+    share: "28.7",
+    rate: "26.000000",
+  },
+  {
+    city: "Manchester",
+    country: "GB",
+    country_name: "United Kingdom",
+    currency: "GBP",
+    rent: "GBP 600.00",
+    total: "GBP 1,195.00",
+    bdt: 19_120_000,
+    bdtText: "BDT 191,200.00",
+    share: "50.2",
+    rate: "160.000000",
+  },
+  {
+    city: "London",
+    country: "GB",
+    country_name: "United Kingdom",
+    currency: "GBP",
+    rent: "GBP 850.00",
+    total: "GBP 1,605.00",
+    bdt: 25_680_000,
+    bdtText: "BDT 256,800.00",
+    share: "53.0",
+    rate: "160.000000",
+  },
+];
+
+function bdtMoney(minor: number) {
+  const whole = Math.trunc(minor / 100)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return {
+    amount_minor: minor,
+    currency: "BDT",
+    formatted: `BDT ${whole}.${String(minor % 100).padStart(2, "0")}`,
+  };
+}
+
+/** The student budget for a request: the same shape the API sends, with `fits` worked out from the budget asked for. */
+function studentBudget(url: URL) {
+  const raw = url.searchParams.get("budget_bdt_minor");
+  const budget = raw === null ? null : Number(raw);
+  const items = STUDENT_CITIES.map((c) => {
+    const fits = budget === null ? null : c.bdt <= budget;
+    const money = (formatted: string) => ({ amount_minor: 0, currency: c.currency, formatted });
+    return {
+      country: c.country,
+      country_name: c.country_name,
+      city: c.city,
+      currency: c.currency,
+      housing: "shared",
+      lines: [{ key: "rent", label: "Rent", ...money(c.rent) }],
+      total: money(c.total),
+      rent_share_pct: c.share,
+      rate_bdt_per_unit: c.rate,
+      total_bdt: { amount_minor: c.bdt, currency: "BDT", formatted: c.bdtText },
+      rent_bdt: bdtMoney(c.bdt / 2),
+      fits,
+      spare_bdt: fits && budget !== null ? bdtMoney(budget - c.bdt) : null,
+      gap_bdt: fits === false && budget !== null ? bdtMoney(c.bdt - budget) : null,
+    };
+  });
+  return {
+    housing: "shared",
+    housing_label: "A room in a shared flat",
+    budget: budget === null ? null : bdtMoney(budget),
+    countries: [
+      { country: "GB", name: "United Kingdom", currency: "GBP", cities: 2 },
+      { country: "MY", name: "Malaysia", currency: "MYR", cities: 1 },
+    ],
+    items,
+    summary: {
+      cities: items.length,
+      fitting: budget === null ? null : items.filter((r) => r.fits).length,
+      cheapest: {
+        country: "MY",
+        city: "Johor Bahru",
+        total: items[0]?.total,
+        total_bdt: items[0]?.total_bdt,
+      },
+      dearest: null,
+    },
+    source: {
+      verified: false,
+      badge: "NOT_VERIFIED",
+      source_url: "https://example.org/replace-with-cost-of-living-source",
+      last_checked: "2026-10-17",
+      note: "Invented.",
+    },
+    synthetic: true,
+    disclaimer:
+      "Invented figures for the sandbox, not a survey. Indicative. Confirm with your AD bank.",
+  };
+}
+
+const ARRIVAL_GUIDE = {
+  country: "GB",
+  country_name: "United Kingdom",
+  general: false,
+  stages: [
+    {
+      key: "before",
+      label: "Before you fly",
+      items: [
+        {
+          key: "accommodation",
+          label: "Book a place to live before you fly",
+          hint: "Use the halls.",
+        },
+      ],
+    },
+    {
+      key: "first_week",
+      label: "In your first week",
+      items: [
+        {
+          key: "student_account",
+          label: "Open a student bank account",
+          hint: "Take your passport.",
+        },
+      ],
+    },
+    { key: "first_month", label: "In your first month", items: [] },
+  ],
+  item_count: 2,
+  verified: false,
+  badge: "NOT_VERIFIED",
+  source_url: "https://example.org/replace-with-official-student-guidance",
+  last_checked: "2026-10-17",
+  note: "Indicative. Confirm with your university.",
+  indicative: "Indicative. Confirm with your AD bank.",
+};
+
 function payments(cancelled: boolean) {
   const created = new Date(Date.now() - 2 * 86_400_000).toISOString();
   const base = {
@@ -366,6 +511,9 @@ export async function mockApi(page: Page): Promise<void> {
     if (path === "/quotes" && method === "POST") return json(route, QUOTE, 201);
     if (path === "/quotes/qte_1/stress") return json(route, STRESS);
     if (path === "/checklist") return json(route, CHECKLIST);
+    if (path === "/planner/student-budget")
+      return json(route, studentBudget(new URL(request.url())));
+    if (path === "/planner/arrival-guide") return json(route, ARRIVAL_GUIDE);
     if (path === "/documents") return json(route, { items: [LONG_NAMED_DOCUMENT] });
     return problem(route, 500, "NOT_MOCKED", `${method} ${path} is not mocked.`);
   });

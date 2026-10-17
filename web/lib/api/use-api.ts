@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 
 import { get } from "@/lib/api/client";
@@ -14,6 +14,8 @@ export interface Loaded<T> {
 
 interface Options {
   enabled?: boolean;
+  /** While a changed path loads, keep showing the answer to the one before, instead of nothing. */
+  keepPrevious?: boolean;
   /** Poll every so many milliseconds while this says so (used for the live tracker and KYC review). */
   refetchInterval?: number | false | ((data: unknown) => number | false);
 }
@@ -24,6 +26,7 @@ export function useApi<T>(path: string | null, options: Options = {}): Loaded<T>
     queryKey: ["api", path],
     queryFn: () => get<T>(path as string),
     enabled: path !== null && options.enabled !== false,
+    placeholderData: options.keepPrevious ? keepPreviousData : undefined,
     refetchInterval: (query) => {
       const interval = options.refetchInterval ?? false;
       return typeof interval === "function" ? interval(query.state.data) : interval;

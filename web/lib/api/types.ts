@@ -840,3 +840,75 @@ export interface AnchorVerdict {
     head: { seq: number; hash: string };
   };
 }
+
+// --- Student guide: the budget (F21) and the arrival guide (F22) --------------------------------
+export type Housing = "shared" | "studio";
+export interface BudgetLine extends Money {
+  key: string;
+  label: string;
+}
+export interface BudgetCity {
+  country: string;
+  country_name: string;
+  city: string;
+  currency: string;
+  housing: Housing;
+  lines: BudgetLine[];
+  total: Money;
+  rent_share_pct: string;
+  rate_bdt_per_unit: string;
+  total_bdt: Money;
+  rent_bdt: Money;
+  /** null when no budget was given. */
+  fits: boolean | null;
+  spare_bdt: Money | null;
+  gap_bdt: Money | null;
+}
+export interface BudgetBrief {
+  country: string;
+  city: string;
+  total: Money;
+  total_bdt: Money;
+}
+export interface StudentBudget {
+  housing: Housing;
+  housing_label: string;
+  budget: Money | null;
+  countries: { country: string; name: string; currency: string; cities: number }[];
+  items: BudgetCity[];
+  summary: {
+    cities: number;
+    fitting: number | null;
+    cheapest: BudgetBrief | null;
+    dearest: BudgetBrief | null;
+  };
+  source: {
+    verified: boolean;
+    badge: string | null;
+    source_url: string | null;
+    last_checked: string | null;
+    note: string | null;
+  };
+  synthetic: boolean;
+  disclaimer: string;
+}
+export type ArrivalStageKey = "before" | "first_week" | "first_month";
+export interface ArrivalStep {
+  key: string;
+  label: string;
+  hint: string;
+}
+export interface ArrivalGuide {
+  country: string | null;
+  country_name: string;
+  /** True when the country has no list of its own and the general one is shown. */
+  general: boolean;
+  stages: { key: ArrivalStageKey; label: string; items: ArrivalStep[] }[];
+  item_count: number;
+  verified: boolean;
+  badge: string | null;
+  source_url: string | null;
+  last_checked: string | null;
+  note: string | null;
+  indicative: string;
+}

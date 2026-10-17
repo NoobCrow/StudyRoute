@@ -39,6 +39,7 @@ const ROUTES = [
   "/payments/",
   "/recipients/",
   "/documents/",
+  "/guide/",
   "/audit/",
   "/rules/",
   "/bank/",

@@ -14,6 +14,8 @@ describe("nav", () => {
       NAV.filter((item) => item.roles.includes(role)).map((item) => item.label);
     expect(labels("admin")).not.toContain("Compare");
     expect(labels("admin")).not.toContain("Recipients");
+    expect(labels("admin")).not.toContain("Student guide");
+    expect(labels("student")).toContain("Student guide");
     expect(labels("student")).not.toContain("Audit log");
     expect(labels("parent")).toEqual(
       expect.arrayContaining(["Compare", "Recipients", "Audit log"]),
@@ -32,6 +34,7 @@ describe("nav", () => {
     expect(trailFor("/")).toEqual(["Dashboard"]);
     expect(trailFor("/compare/")).toEqual(["Compare"]);
     expect(trailFor("/payments/")).toEqual(["Payments"]);
+    expect(trailFor("/guide/")).toEqual(["Student guide"]);
     expect(trailFor("/payments/view/")).toEqual(["Payments", "Payment"]);
     expect(trailFor("/payments/report/")).toEqual(["Payments", "Compliance report"]);
     expect(trailFor("/nowhere/")).toEqual(["StudyRoute"]);

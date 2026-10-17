@@ -3,6 +3,7 @@ import {
   CreditCard,
   FileText,
   FlaskConical,
+  GraduationCap,
   Landmark,
   LayoutDashboard,
   ListChecks,
@@ -31,6 +32,7 @@ export const NAV: readonly NavItem[] = [
   },
   { href: "/recipients/", label: "Recipients", icon: Users, roles: ["parent", "student"] },
   { href: "/documents/", label: "Documents", icon: FileText, roles: ["parent", "student"] },
+  { href: "/guide/", label: "Student guide", icon: GraduationCap, roles: ["parent", "student"] },
   { href: "/audit/", label: "Audit log", icon: ListChecks, roles: ["parent", "admin"] },
   {
     href: "/rules/",

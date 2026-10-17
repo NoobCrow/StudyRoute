@@ -26,6 +26,9 @@ const SUGGESTIONS = [
   "What if the taka drops 10%?",
   "What do OUR, SHA and BEN mean?",
   "What documents do I need?",
+  "What is the rent in Manchester?",
+  "Which city fits BDT 200,000 a month?",
+  "What should I do when I arrive?",
 ];
 
 const SLOT_NAMES: Record<string, string> = {

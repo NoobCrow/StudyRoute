@@ -12,6 +12,7 @@ import { BankScreen } from "@/components/bank/bank-screen";
 import { CompareScreen } from "@/components/compare/compare-screen";
 import { DashboardScreen } from "@/components/dashboard/dashboard-screen";
 import { EscrowScreen } from "@/components/escrow/escrow-screen";
+import { GuideScreen } from "@/components/guide/guide-screen";
 import { AppShell } from "@/components/layout/app-shell";
 import { SandboxBanner } from "@/components/layout/sandbox-banner";
 import { PaymentScreen } from "@/components/payment/payment-screen";
@@ -47,6 +48,7 @@ import {
   user,
   verdict,
 } from "@/tests/fixtures";
+import { mockGuideApi } from "@/tests/guide";
 import { setLocation } from "@/tests/navigation";
 import { renderWithProviders } from "@/tests/render";
 
@@ -607,6 +609,39 @@ describe("accessibility (axe): payments list", () => {
     await screen.findByText("1 payment");
     await userEvent.type(screen.getByLabelText("Search by reference or recipient"), "zzz");
     await screen.findByText("No payments match these filters.");
+    expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe("accessibility (axe): student guide", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("the budget tab with the form, the table, the fit badges and the city sheet", async () => {
+    mockGuideApi();
+    const { container } = renderWithProviders(<GuideScreen />);
+    await screen.findByRole("table", { name: "Student cities, cheapest month first" });
+    expect(await violations(container)).toEqual([]);
+    await userEvent.click(screen.getByRole("button", { name: "Details for Manchester" }));
+    expect(await violations(await screen.findByRole("dialog"))).toEqual([]);
+  });
+
+  it("the budget tab with no budget, and with an invalid one", async () => {
+    mockGuideApi();
+    const { container } = renderWithProviders(<GuideScreen />);
+    await screen.findByRole("table");
+    const field = screen.getByLabelText("Monthly budget");
+    await userEvent.clear(field);
+    await userEvent.type(field, "1.234");
+    await screen.findByText("Use digits only, with at most 2 decimal places.");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("the arrival checklist with ticked steps and the general-list notice", async () => {
+    setLocation("/guide/", "tab=arrival&arrival=FR");
+    mockGuideApi();
+    const { container } = renderWithProviders(<GuideScreen />);
+    await screen.findByText(/This is a general list/);
+    await userEvent.click(screen.getByLabelText("Open a student bank account"));
     expect(await violations(container)).toEqual([]);
   });
 });

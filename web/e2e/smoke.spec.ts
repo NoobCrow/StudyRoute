@@ -163,3 +163,29 @@ test("payments: filter by status, open a payment's sheet and cancel it", async (
   await expect(page.getByRole("tab", { name: /In progress\s*0/ })).toBeVisible();
   await expect(page.getByText("Cancelled", { exact: true }).first()).toBeVisible();
 });
+
+test("student guide: find a city that fits a budget, then tick off the arrival steps", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.goto("/guide/");
+  await expect(page.getByRole("heading", { name: "Student guide" })).toBeVisible();
+  const table = page.getByRole("table", { name: "Student cities, cheapest month first" });
+  await expect(table).toContainText("Johor Bahru");
+  await expect(page.getByText("2 of 3 cities")).toBeVisible();
+  await expect(page.getByText("Short by BDT 56,800.00")).toBeVisible();
+
+  // A bigger budget lets London in; the address follows so the view can be shared.
+  const budget = page.getByLabel("Monthly budget");
+  await budget.fill("260000");
+  await expect(page.getByText("3 of 3 cities")).toBeVisible();
+  await expect(page).toHaveURL(/budget=260000/);
+
+  await page.getByRole("tab", { name: "Arrival checklist" }).click();
+  const step = page.getByLabel("Open a student bank account");
+  await step.check();
+  await expect(page.getByText("1 of 2 done")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Open a student bank account")).toBeChecked();
+  expect(await scrollsSideways(page)).toBe(false);
+});
