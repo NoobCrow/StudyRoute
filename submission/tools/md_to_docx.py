@@ -121,7 +121,7 @@ def main() -> int:
     section = document.sections[0]
     section.left_margin = section.right_margin = Inches(0.8)
     section.top_margin = section.bottom_margin = Inches(0.8)
-    add_footer(section, "SR-TEC-2026-01  |  Final edition  |  Synthetic data, not production assurance")
+    add_footer(section, "SR-TEC-2026-01  |  Synthetic data, not production assurance")
 
     i = 0
     seen_title = False
@@ -172,7 +172,7 @@ def main() -> int:
                 document.add_paragraph("Technical Documentation", style="Title")
                 p = document.add_paragraph("Architecture, core algorithms, trained components and security design")
                 p.runs[0].font.size = Pt(12)
-                document.add_paragraph("SR-TEC-2026-01  |  Final edition  |  18 October 2026  |  Team TeamEkxin")
+                document.add_paragraph("SR-TEC-2026-01  |  18 October 2026  |  Team TeamEkxin")
                 document.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
             else:
                 document.add_heading(text, level=min(level - 1, 3) if level > 1 else 1)

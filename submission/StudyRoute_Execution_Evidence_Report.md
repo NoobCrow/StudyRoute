@@ -5,20 +5,20 @@ SR-EVD-2026-01 | 18 October 2026
 
 > Synthetic-data demonstrator. Self-assessment, not production certification.
 
-## Final-submission update (edition 1.1)
-*00 / VERIFIED AFTER EDITION 1.0*
+## Final-submission update
+*00 / VERIFIED AFTER THE ORIGINAL ASSESSMENT*
 
-The execution evidence in this document (edition 1.0, 18 October 2026) is unchanged: every result and count below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes edition 1.0's statement that the remote repository was not checked. This page makes the document edition 1.1.
+The original execution evidence in this document (18 October 2026) is unchanged: every result and count below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes the original statement that the remote repository was not checked. This page is the final-submission update.
 
 | Item | Result |
 | --- | --- |
-| Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. Edition 1.0 could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
+| Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. The original assessment could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
 | Repository access | Public; default branch main. The README, the technical-documentation PDF and the deck load anonymously (HTTP 200). [E07] |
 | Continuous integration | GitHub reports the workflow "ci" on that commit as success: docker, contracts, web, secret-scan, backend and dependency-audit all succeeded (run 39081290614). The job logs were not re-reviewed here. [E07] |
 | Other branches | A branch named botkeep (3 commits, head e2c28a0c74b6) is on the remote and is not part of main. It was not assessed; this document still covers main only. [E07] |
-| The one skipped test module | backend/tests/test_explainer_model.py is skipped because its fixture, backend/tests/data/explainer_cases.json, is excluded by the repository's .gitignore rule data/: it is absent from the public repository and from the archive. A fresh clone therefore collects 1,673 tests, runs 1,672 and skips the explainer quality-floor tests, which is exactly the edition 1.0 result. Reconciled submission counts: 1,679 on a fixture-complete machine (1,678 pass, 1 skipped); fresh clone: 1,673 collected, 1,672 pass, 1 skip. This is a documentation count correction, not a new execution of the fixture-complete configuration. Adding the fixture to the repository is an open item for the maintainers and is not changed by this update. [E07] |
+| The one skipped test module | backend/tests/test_explainer_model.py is skipped because its fixture, backend/tests/data/explainer_cases.json, is excluded by the repository's .gitignore rule data/: it is absent from the public repository and from the archive. A fresh clone therefore collects 1,673 tests, runs 1,672 and skips the explainer quality-floor tests, which is exactly the original result. Reconciled submission counts: 1,679 on a fixture-complete machine (1,678 pass, 1 skipped); fresh clone: 1,673 collected, 1,672 pass, 1 skip. This is a documentation count correction, not a new execution of the fixture-complete configuration. Adding the fixture to the repository is an open item for the maintainers and is not changed by this update. [E07] |
 | The team's Docker run (inherited, not re-run here) | Same day, in an Ubuntu 24.04 VM with Docker 29.1.3: the smoke checks, the 14-step demo (66 checks OK), the bank-review demo, a real-Chrome audit (48 of 48) and the hardened overlay (read-only filesystem, all capabilities dropped) passed. The run used the archive of commit 8d91cc8 with the two files of the later fix c9d044b copied in; it was not a fresh archive of bcce930. It first found that the trained explainer reworded the assistant's questions (3 demo checks failed; the CI docker job had failed 4); the fix is part of bcce930. Raw output: inherited/submission/evidence/docker_2026-10-18/ and docker_run.txt (H04). |
-| Corrections to edition 1.0 | Section 10 says the supplied web log's 439 cases are real and that an older summary says 463. The order is the reverse: 439 comes from the teammate's release log, taken before the merge that added the bank-review screens' tests, and 463 is the count on the merged tree (docs/TEST_CASES.md; the team's own run, not re-run here). [E07] |
+| Corrections to the original assessment | Section 10 says the supplied web log's 439 cases are real and that an older summary says 463. The order is the reverse: 439 comes from the teammate's release log, taken before the merge that added the bank-review screens' tests, and 463 is the count on the merged tree (docs/TEST_CASES.md; the team's own run, not re-run here). [E07] |
 
 **Canonical counts.** The figures in this report — 1,672 passed / 1 skipped on a fresh clone, 1,673 collected — are the canonical test counts for the submission. The technical documentation, the deck and the README have been aligned to them; where they also cite 1,679, that is the count on a machine that has the explainer fixture.
 
@@ -70,7 +70,7 @@ This report documents repeatable local execution of the supplied StudyRoute sour
 | SUPPLIED / HISTORICAL | Carried in the archive. Inspected, not rerun unless separately stated. | Web unit tests; browser smoke; Docker logs; AI benchmark JSON. |
 | NOT VERIFIED | Outside this review; no supporting execution asserted. | Botkeep deployment; live bank/FX/KYC; independent pentest; external immutable anchor. |
 
-The archive ZIP comment supplies the commit identifier. Edition 1.1 checked it: the remote main branch is the same commit (E07). source-file-inventory.json records every original archived file’s length and SHA-256 before generated test caches are considered. Raw evidence is copied without rewriting outcomes. [E05]
+The archive ZIP comment supplies the commit identifier. The final-submission update checked it: the remote main branch is the same commit (E07). source-file-inventory.json records every original archived file’s length and SHA-256 before generated test caches are considered. Raw evidence is copied without rewriting outcomes. [E05]
 
 > **Hash limitation** — A checksum proves consistency with the manifest delivered alongside it; it is not an authenticated digital signature or proof of publisher identity. Keep the delivered digest or package in separately trusted storage.
 
@@ -262,7 +262,7 @@ Reader, DialoguePolicy, RiskScorer and LocalExplainerLLM loaded in the current e
 
 ### Why the counts differ
 
-The archive contains older summaries alongside detailed release records from different runs. A test count is meaningful only with its exact artifact, source snapshot and scope. This edition does not silently choose the largest number, combine overlapping runs or call supplied logs fresh. The freshly generated E01 JUnit is the primary current backend result. [H01–H04; E01]
+The archive contains older summaries alongside detailed release records from different runs. A test count is meaningful only with its exact artifact, source snapshot and scope. This report does not silently choose the largest number, combine overlapping runs or call supplied logs fresh. The freshly generated E01 JUnit is the primary current backend result. [H01–H04; E01]
 
 > **Publication history** — The supplied evidence-normalization.json records earlier log formatting and synthetic URL userinfo normalization. Those historical records are retained as supplied; this report does not assert that every inherited artifact was independently regenerated.
 

@@ -23,7 +23,6 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "docs" / "TECHNICAL_DOCUMENTATION.md"
 TARGET = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / "submission" / "StudyRoute_Technical_Documentation.pdf"
 DOC_ID = "SR-TEC-2026-01"
-EDITION = "Final edition"
 DATE = "18 October 2026"
 USUAL_CHROME = (
     "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -59,7 +58,7 @@ BODY_CSS = """
 @page { size: A4; margin: 22mm 16mm 18mm 16mm;
   @top-left { content: "STUDYROUTE"; font: 700 8pt Arial, Helvetica, sans-serif; color: #0b8a86; vertical-align: bottom; padding-bottom: 2.5mm; width: 50%%; border-bottom: 1px solid #cfd8e0; }
   @top-right { content: "TECHNICAL DOCUMENTATION"; font: 8pt Arial, Helvetica, sans-serif; color: #6b7a88; text-align: right; vertical-align: bottom; padding-bottom: 2.5mm; width: 50%%; border-bottom: 1px solid #cfd8e0; }
-  @bottom-left { content: "%(doc_id)s  |  %(edition)s  |  Synthetic data, not production assurance"; font: 7.6pt Arial, Helvetica, sans-serif; color: #6b7a88; vertical-align: top; padding-top: 3mm; }
+  @bottom-left { content: "%(doc_id)s  |  Synthetic data, not production assurance"; font: 7.6pt Arial, Helvetica, sans-serif; color: #6b7a88; vertical-align: top; padding-top: 3mm; }
   @bottom-right { content: counter(page); font: 8pt Arial, Helvetica, sans-serif; color: #6b7a88; vertical-align: top; padding-top: 3mm; } }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 9.4pt; line-height: 1.38; color: #1b2733; }
@@ -116,7 +115,7 @@ def cover_html(items: list[tuple[str, str]]) -> str:
         "<div class='s'>No real money, live bank, real users or independent certification</div></div>"
         f"<div class='toc'><div class='h'>REPORT CONTENTS</div><div class='cols'><div class='col'>{column(items[:half])}</div>"
         f"<div class='col'>{column(items[half:])}</div></div></div>"
-        f"<div class='foot'><div class='a'><span>{DOC_ID} &nbsp;|&nbsp; {EDITION}</span><span>{DATE}</span></div>"
+        f"<div class='foot'><div class='a'><span>{DOC_ID}</span><span>{DATE}</span></div>"
         "<div class='b'>Prepared for StudyRoute submission review &bull; Team TeamEkxin &bull; github.com/NoobCrow/StudyRoute</div></div>"
         "</body></html>"
     )
@@ -136,7 +135,7 @@ def body_html(markdown_module: object, text: str) -> str:
         text[start:], extensions=["tables", "fenced_code", "sane_lists"]
     )
     body = re.sub(r"(<h2[^>]*>(.*?)</h2>)", kicker, body)
-    css = BODY_CSS % {"doc_id": DOC_ID, "edition": EDITION}
+    css = BODY_CSS % {"doc_id": DOC_ID}
     return (
         f"<!doctype html><html lang='en'><head><meta charset='utf-8'><title>StudyRoute: technical documentation</title>"
         f"<base href='{SOURCE.parent.as_uri()}/'><style>{css}</style></head><body>{body}</body></html>"
@@ -171,7 +170,7 @@ def main() -> int:
         writer.add_page(PdfReader(str(work / "cover.pdf")).pages[0])
         for page in PdfReader(str(work / "body.pdf")).pages:
             writer.add_page(page)
-        writer.add_metadata({"/Title": "StudyRoute | Technical Documentation", "/Author": "TeamEkxin", "/Subject": f"{DOC_ID} {EDITION}"})
+        writer.add_metadata({"/Title": "StudyRoute | Technical Documentation", "/Author": "TeamEkxin", "/Subject": DOC_ID})
         with TARGET.open("wb") as handle:
             writer.write(handle)
     pages = len(PdfReader(str(TARGET)).pages)

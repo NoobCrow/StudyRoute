@@ -740,7 +740,7 @@ slides.push({
       "A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.",
     elements: [
       { type: "table", x: 0.5, y: 1.3, colW: [3.1, 0.95, 4.95], rowH: 0.45, size: 10, rows: [head, ...rows] },
-      text(0.5, 5.0, 9, 0.3, "Source: security self-assessment, edition 1.2, sections 13 and 14: every record, the raw-log hashes and what each fix did and did not show.", { size: 10, color: "text2" }),
+      text(0.5, 5.0, 9, 0.3, "Source: security self-assessment, sections 13 and 14: every record, the raw-log hashes and what each fix did and did not show.", { size: 10, color: "text2" }),
     ],
   });
 }

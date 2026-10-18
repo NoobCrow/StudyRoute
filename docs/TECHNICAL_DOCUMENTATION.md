@@ -587,7 +587,7 @@ not in that text, so it stays unverified. This is our reading and no lawyer or A
 
 ### 3.8 Residual risks and release gates
 
-The ten residual risks that matter most, from the separately prepared Security Self-Assessment (edition 1.1),
+The ten residual risks that matter most, from the separately prepared Security Self-Assessment,
 which covers the same commit and cross-references our 55-item register in `docs/SECURITY_SELF_ASSESSMENT.md`:
 
 | ID | Residual risk | Priority |

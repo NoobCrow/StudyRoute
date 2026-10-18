@@ -1,31 +1,31 @@
 # StudyRoute — Security Self-Assessment
 Permission tiers, control assurance and residual risk
 
-SR-SEC-2026-01 | edition 1.2 | Recorded evidence: 15–18 October 2026
+SR-SEC-2026-01 | Recorded evidence: 15–18 October 2026
 
 > Synthetic-data demonstrator. Self-assessment, not production certification.
 
-## Final-submission update (edition 1.1)
-*00 / VERIFIED AFTER EDITION 1.0*
+## Final-submission update
+*00 / VERIFIED AFTER THE ORIGINAL ASSESSMENT*
 
-The assessment in this document (edition 1.0, 18 October 2026) is unchanged: every result, count and risk below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes edition 1.0's statement that the remote repository was not checked. That historical update made the document edition 1.1. Edition 1.2 adds the attack-testing evidence and complete recorded case catalogue in sections 13–14; the original assessment boundary remains unchanged.
+The original assessment in this document (18 October 2026) is unchanged: every result, count and risk below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes the original statement that the remote repository was not checked. The final submission adds the attack-testing evidence and complete recorded case catalogue in sections 13–14; the original assessment boundary remains unchanged.
 
 | Item | Result |
 | --- | --- |
-| Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. Edition 1.0 could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
+| Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. The original assessment could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
 | Repository access | Public; default branch main. The README, the technical-documentation PDF and the deck load anonymously (HTTP 200). [E07] |
 | Continuous integration | GitHub reports the workflow "ci" on that commit as success: docker, contracts, web, secret-scan, backend and dependency-audit all succeeded (run 39081290614). The job logs were not re-reviewed here. [E07] |
 | Other branches | A branch named botkeep (3 commits, head e2c28a0c74b6) is on the remote and is not part of main. It was not assessed; this document still covers main only. [E07] |
 | The one skipped test module | 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests. The missing file is backend/tests/data/explainer_cases.json; adding it remains a maintainer action. Fixture-complete counts are supplied, not rerun by this report update. |
 | Regulatory assumptions (SR-04) | Four study-abroad rules (one AD bank branch for the whole course, one academic year at a time, release per the institution's estimate, international cards for education) were read in the official Bangladesh Bank circular FEPD-1 No. 40 of 30 September 2026, section 10, and are marked verified in config/rules.yaml. The USD 2,000 a month living-cost figure is not in that text and stays unverified. This is the team's reading and no lawyer or AD bank has reviewed it, so SR-04 otherwise stands. |
 | The team's Docker run (inherited, not re-run here) | Same day, in an Ubuntu 24.04 VM with Docker 29.1.3: the smoke checks, the 14-step demo (66 checks OK), the bank-review demo, a real-Chrome audit (48 of 48) and the hardened overlay (read-only filesystem, all capabilities dropped) passed. The run used the archive of commit 8d91cc8 with the two files of the later fix c9d044b copied in; it was not a fresh archive of bcce930. It first found that the trained explainer reworded the assistant's questions (3 demo checks failed; the CI docker job had failed 4); the fix is part of bcce930. Raw output: inherited/submission/evidence/docker_2026-10-18/ and docker_run.txt (H04). |
-| Corrections to edition 1.0 | The current submission reconciles the counts in the preceding row. Section 10 keeps inherited run scopes separate; no historical raw test output has been rewritten. The new sections 13–14 itemize the previously summarized team-run security probes. |
+| Corrections to the original assessment | The current submission reconciles the counts in the preceding row. Section 10 keeps inherited run scopes separate; no historical raw test output has been rewritten. The new sections 13–14 itemize the previously summarized team-run security probes. |
 
 > **Not changed by this update** — The permission tiers, the control review, the risk register SR-01 to SR-10, the release gates G1 to G8, every count and result in section 10, and the conclusion that the evidence supports a controlled synthetic-data demonstration only.
 
 ## Executive assessment
 
-**Edition 1.2 security-evidence update.** Sections 13–14 itemize the recorded attack, brute-force, data-leakage, MITM, adversarial-assistant and browser-security probes. These are supplied team-run lab results, not a new independent pentest or public-deployment assessment.
+**Final-submission security-evidence update.** Sections 13–14 itemize the recorded attack, brute-force, data-leakage, MITM, adversarial-assistant and browser-security probes. These are supplied team-run lab results, not a new independent pentest or public-deployment assessment.
 *01 / DECISION & ASSURANCE*
 
 StudyRoute is a synthetic-data demonstrator for cross-border student payments. Its security design separates deterministic financial calculations, AI-assisted preparation and human authorization. The reviewed source enforces significant safeguards, but the evidence supports a controlled sandbox demonstration—not production payment processing or a regulatory compliance claim. [C01–C10]
@@ -38,7 +38,7 @@ StudyRoute is a synthetic-data demonstrator for cross-border student payments. I
 | AI safety | AI is constrained by domain permissions and tool restrictions. Model accuracy is not treated as authorization. |
 | Deployment readiness | Conditional for isolated synthetic demonstration. Public HTTPS, operational hardening and live rails are not verified. |
 
-### Evidence established for this edition
+### Evidence established for this report
 
 Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fresh HTTP API demonstration: **66 checks passed, 0 failed**. The local audit verified **76 events**; editing event 75 was detected and restoration returned PASS. All four local model components loaded. These are local results on the supplied main-branch archive, not Botkeep deployment results. [E01–E06]
 
@@ -52,7 +52,7 @@ Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fr
 | Source package | StudyRoute-main.zip; 834 archived files; 116,683,391 uncompressed bytes. |
 | Repository context | NoobCrow/StudyRoute, main archive supplied by the project owner. |
 | Archive commit identifier | bcce930ae0974712e922245878fd976b03a8938a |
-| Review date | 18 October 2026 (UTC); report edition 1.0. |
+| Review date | 18 October 2026 (UTC). |
 | Execution environment | Linux x86_64; Python 3.13.14; reused local dependency environment. |
 | Test boundary | Disposable SQLite test databases and one isolated loopback HTTP API instance. |
 
@@ -65,7 +65,7 @@ Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fr
 
 ### Explicit exclusions
 
-No external penetration testing, internet-facing TLS assessment, load testing, new vulnerability-advisory database scan, clean-machine dependency installation, model retraining, new blind study, real provider call, real KYC/sanctions integration or actual financial settlement was performed. Docker, frontend builds and browser probes were not rerun for this edition. [E01–E06; H01–H04]
+No external penetration testing, internet-facing TLS assessment, load testing, new vulnerability-advisory database scan, clean-machine dependency installation, model retraining, new blind study, real provider call, real KYC/sanctions integration or actual financial settlement was performed. Docker, frontend builds and browser probes were not rerun for this report. [E01–E06; H01–H04]
 
 > **Branch and deployment boundary** — The Botkeep branch uses a separate packaging/bootstrap path and was still being imported during this work. This report assesses the supplied main archive; it does not certify that deployment, its Release downloader, environment variables or public domain.
 
@@ -218,7 +218,7 @@ Priorities are qualitative judgments of what must be resolved before real-money 
 
 **Residual exposure:** The demo reviewer has broad cross-household visibility; real mandates and dual control are not established. **Required action:** Named reviewers; least-privilege scoping; escalation and dual review for sensitive decisions. **Proposed owner:** Operations + security lead. Original register: R24, R25, R52.
 
-### Assessment corrections carried into this edition
+### Assessment corrections carried into this report
 
 The inherited “AI can only quote” wording is distinguished from the broader AI service-role permission set. ONNX is not described as immune to runtime vulnerabilities. Prompt filtering is not described as guaranteeing harmless output. Historical zero-advisory checks are not presented as a current clean dependency bill of health. [C01; C08; C10; H01]
 
@@ -238,7 +238,7 @@ The inherited “AI can only quote” wording is distinguished from the broader 
 
 ### Do not add overlapping test counts
 
-The supplied release record contains 1,542 backend cases, plus focused 42-case and 53-case runs. These runs overlap and represent different snapshots/scopes; older summaries also cite other backend counts. This edition uses the fresh complete-suite JUnit result as its primary backend count, and keeps inherited results separate. [E01; H01; C10]
+The supplied release record contains 1,542 backend cases, plus focused 42-case and 53-case runs. These runs overlap and represent different snapshots/scopes; older summaries also cite other backend counts. This report uses the fresh complete-suite JUnit result as its primary backend count, and keeps inherited results separate. [E01; H01; C10]
 
 > **Sampling and assumptions** — The explainer quality-floor module was skipped because its cases fixture is absent; model loadability was checked separately. Positive tests and limited hostile-input corpora do not establish exhaustive safety. The test harness is team-authored; representative user studies, independent attack testing and verification of the actual public deployment remain open.
 
@@ -268,7 +268,7 @@ The supplied release record contains 1,542 backend cases, plus focused 42-case a
 ## References & evidence locator
 *12 / TRACEABILITY*
 
-Bracketed identifiers link claims to source paths or bundled raw evidence. The original repository source is the supplied archive; edition 1.1 verified that the remote main branch is the same commit (E07). Fresh results are located under validation/ in the companion evidence bundle. The full catalogue and per-file hashes are in EVIDENCE_INDEX.md and SHA256SUMS.txt.
+Bracketed identifiers link claims to source paths or bundled raw evidence. The original repository source is the supplied archive; the final-submission update verified that the remote main branch is the same commit (E07). Fresh results are located under validation/ in the companion evidence bundle. The full catalogue and per-file hashes are in EVIDENCE_INDEX.md and SHA256SUMS.txt.
 
 | ID | Reference |
 | --- | --- |
@@ -291,7 +291,7 @@ Primary fresh references: E01 regression; E02 local API run; E03 audit/tamper; E
 ## Attack testing, leakage and MITM: scope & results
 *13 / TEAM-RUN SECURITY EVIDENCE — NOT A NEW TEST RUN*
 
-Purpose. This addition makes the previously compressed security evidence explicit. The six raw files from 18 October 2026 were inspected and their check labels counted for this edition; the tools themselves were not re-executed. The team ran them against synthetic-data lab instances using throwaway databases, not against a third-party target or the current public Botkeep deployment. [S01–S06; S08]
+Purpose. This addition makes the previously compressed security evidence explicit. The six raw files from 18 October 2026 were inspected and their check labels counted for this report; the tools themselves were not re-executed. The team ran them against synthetic-data lab instances using throwaway databases, not against a third-party target or the current public Botkeep deployment. [S01–S06; S08]
 
 | Probe family | Recorded outcome | Raw evidence / tool |
 | --- | --- | --- |
@@ -326,7 +326,7 @@ Evidence class. All probe outcomes below are inherited/team-authored evidence. T
 | Adversarial assistant | 20 hostile prompts as parent and student plus a post-prompt state check for each role: 42 recorded checks. Prompts seek secrets, instructions or forbidden financial actions. | S05 |
 | Browser injection / privacy | Stored and hostile-URL markup, reviewer note/reply, CSP, framing, cookie access, storage, asset/source-map secrets and third-party requests. | S06 |
 
-The catalogue preserves the raw labels; labels such as “2.x” and “4.x” repeat in the original file. Edition-local IDs AP-001, BF-001 and so on disambiguate them without inventing new test results. [S01–S06]
+The catalogue preserves the raw labels; labels such as “2.x” and “4.x” repeat in the original file. Report-local IDs AP-001, BF-001 and so on disambiguate them without inventing new test results. [S01–S06]
 
 
 ## Data-leakage scope and MITM exposure
@@ -397,7 +397,7 @@ Reproduction entry points: read scripts/security/README.md and use the supplied 
 
 Every PASS and INFO line from S01–S06 is listed below in original order within its file. Case labels are copied verbatim; raw labels may already truncate payloads/URLs, and this report does not reconstruct omitted strings. “PASS” preserves the source status, including successful positive controls. An INFO row is an exposure or observation, not an attack that was necessarily blocked. No original raw file was edited.
 
-S01 | attack_probe.txt | Records 1–18 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 1–18 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -424,7 +424,7 @@ S01 | attack_probe.txt | Records 1–18 of 146 in this file. Case IDs are editio
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 19–36 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 19–36 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -451,7 +451,7 @@ S01 | attack_probe.txt | Records 19–36 of 146 in this file. Case IDs are editi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 37–54 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 37–54 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -478,7 +478,7 @@ S01 | attack_probe.txt | Records 37–54 of 146 in this file. Case IDs are editi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 55–72 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 55–72 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -505,7 +505,7 @@ S01 | attack_probe.txt | Records 55–72 of 146 in this file. Case IDs are editi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 73–90 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 73–90 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -532,7 +532,7 @@ S01 | attack_probe.txt | Records 73–90 of 146 in this file. Case IDs are editi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 91–108 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 91–108 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -559,7 +559,7 @@ S01 | attack_probe.txt | Records 91–108 of 146 in this file. Case IDs are edit
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 109–126 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 109–126 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -586,7 +586,7 @@ S01 | attack_probe.txt | Records 109–126 of 146 in this file. Case IDs are edi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 127–144 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 127–144 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -613,7 +613,7 @@ S01 | attack_probe.txt | Records 127–144 of 146 in this file. Case IDs are edi
 ## Attack surface / authorization — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S01 | attack_probe.txt | Records 145–146 of 146 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S01 | attack_probe.txt | Records 145–146 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -624,7 +624,7 @@ S01 | attack_probe.txt | Records 145–146 of 146 in this file. Case IDs are edi
 ## Brute force / account enumeration
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S02 | brute_probe.txt | Records 1–8 of 8 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S02 | brute_probe.txt | Records 1–8 of 8 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -641,7 +641,7 @@ S02 | brute_probe.txt | Records 1–8 of 8 in this file. Case IDs are edition-lo
 ## Data leakage / planted canaries
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S03 | leak_scan.txt | Records 1–18 of 52 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S03 | leak_scan.txt | Records 1–18 of 52 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -668,7 +668,7 @@ S03 | leak_scan.txt | Records 1–18 of 52 in this file. Case IDs are edition-lo
 ## Data leakage / planted canaries — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S03 | leak_scan.txt | Records 19–36 of 52 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S03 | leak_scan.txt | Records 19–36 of 52 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -695,7 +695,7 @@ S03 | leak_scan.txt | Records 19–36 of 52 in this file. Case IDs are edition-l
 ## Data leakage / planted canaries — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S03 | leak_scan.txt | Records 37–52 of 52 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S03 | leak_scan.txt | Records 37–52 of 52 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -720,7 +720,7 @@ S03 | leak_scan.txt | Records 37–52 of 52 in this file. Case IDs are edition-l
 ## Man-in-the-middle / replay
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S04 | mitm_probe.txt | Records 1–18 of 18 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S04 | mitm_probe.txt | Records 1–18 of 18 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -747,7 +747,7 @@ S04 | mitm_probe.txt | Records 1–18 of 18 in this file. Case IDs are edition-l
 ## Adversarial assistant prompts
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S05 | assistant_probe.txt | Records 1–18 of 42 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S05 | assistant_probe.txt | Records 1–18 of 42 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -774,7 +774,7 @@ S05 | assistant_probe.txt | Records 1–18 of 42 in this file. Case IDs are edit
 ## Adversarial assistant prompts — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S05 | assistant_probe.txt | Records 19–36 of 42 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S05 | assistant_probe.txt | Records 19–36 of 42 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -801,7 +801,7 @@ S05 | assistant_probe.txt | Records 19–36 of 42 in this file. Case IDs are edi
 ## Adversarial assistant prompts — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S05 | assistant_probe.txt | Records 37–42 of 42 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S05 | assistant_probe.txt | Records 37–42 of 42 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -816,7 +816,7 @@ S05 | assistant_probe.txt | Records 37–42 of 42 in this file. Case IDs are edi
 ## Browser / CSP / XSS / tracking
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S06 | browser_audit.txt | Records 1–18 of 48 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S06 | browser_audit.txt | Records 1–18 of 48 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -843,7 +843,7 @@ S06 | browser_audit.txt | Records 1–18 of 48 in this file. Case IDs are editio
 ## Browser / CSP / XSS / tracking — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S06 | browser_audit.txt | Records 19–36 of 48 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S06 | browser_audit.txt | Records 19–36 of 48 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -870,7 +870,7 @@ S06 | browser_audit.txt | Records 19–36 of 48 in this file. Case IDs are editi
 ## Browser / CSP / XSS / tracking — continued
 *14 / COMPLETE RECORDED CHECK CATALOGUE*
 
-S06 | browser_audit.txt | Records 37–48 of 48 in this file. Case IDs are edition-local; line numbers refer to the original raw log.
+S06 | browser_audit.txt | Records 37–48 of 48 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
