@@ -1,14 +1,14 @@
 # StudyRoute — Execution Evidence Report
 Reproducible local execution with traceable raw evidence
 
-SR-EVD-2026-01 | v1.0 | 18 October 2026
+SR-EVD-2026-01 | 18 October 2026
 
 > Synthetic-data demonstrator. Self-assessment, not production certification.
 
 ## Final-submission update (edition 1.1)
 *00 / VERIFIED AFTER EDITION 1.0*
 
-The execution evidence in this document (edition 1.0, 18 October 2026) is unchanged: every result and count below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes edition 1.0's statement that the remote repository was not checked. The cover still reads Version 1.0; this page makes it edition 1.1.
+The execution evidence in this document (edition 1.0, 18 October 2026) is unchanged: every result and count below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes edition 1.0's statement that the remote repository was not checked. This page makes the document edition 1.1.
 
 | Item | Result |
 | --- | --- |
