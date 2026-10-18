@@ -80,7 +80,9 @@ Dear Ms. WANG Yiran,
 Please find the final submission of team TeamEkxin for the International Track, Topic C:
 Cross-border and Student Finance Assistant. The project is StudyRoute, a sandbox AI agent that
 helps a parent in Bangladesh pay a student's tuition and living costs abroad. All data is
-synthetic and no real money moves.
+synthetic and no real money moves. The corridor is large and growing: Bangladesh Bank data show USD 881.7
+million sent through banks for overseas education in 2025-26, a record and 32% more than a year earlier
+(sources and our sums, with their limits, are in the technical documentation and docs/BUSINESS_CASE.md).
 
 Mandatory, attached:
 1. Technical documentation (architecture, core algorithms, security design):

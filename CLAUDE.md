@@ -77,6 +77,8 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Retrain / re-evaluate the RL dialogue policy: docs/AI_RL.md section 8 (ml/rl/)
 - Retake the README screenshots (fresh demo data, API and built web UI running): python -m app.scripts.gallery
 - Build the submission archive: python scripts/make_submission.py
+- Make the send-ready PDFs with cover pages (pip install markdown, needs Chrome): python scripts/make_pdfs.py
+- Rebuild the deck (always with the team values): cd submission/deck && TEAM_NAME="TeamEkxin" REPO_LINK="https://github.com/NoobCrow/StudyRoute" node build_deck.js
 
 ## How to work
 - Work one blueprint phase at a time. Read the relevant section first.

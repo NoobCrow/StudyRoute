@@ -50,6 +50,9 @@ PLACEHOLDER_FILES = (
     "submission/EMAIL_TEMPLATES.md",
 )
 # What `scripts/personalize.py` fills in. Anything else in square brackets is for you at send time.
+SLIDES = 13  # about 45 seconds each, inside the 10-minute cap
+WORDS_PER_MINUTE = 150  # a normal speaking pace
+MAX_SPEECH_MINUTES = 10
 PLACEHOLDERS = ("[Team name]", "[team name]", "[repository link]", "[names and universities]")
 VIDEO_SUFFIXES = {".mp4", ".mov", ".webm", ".mkv"}
 
@@ -143,11 +146,39 @@ def deck_check(root: Path) -> Check:
             ]
     except (OSError, zipfile.BadZipFile) as error:
         return Check(FAIL, "deck", f"not a readable .pptx: {error}")
-    if len(slides) != 12 or len(notes) != 12:
+    if len(slides) != SLIDES or len(notes) != SLIDES:
         return Check(
-            FAIL, "deck", f"{len(slides)} slides and {len(notes)} notes, expected 12 and 12"
+            FAIL,
+            "deck",
+            f"{len(slides)} slides and {len(notes)} notes, expected {SLIDES} and {SLIDES}",
         )
-    return Check(OK, "deck", "12 slides with speaker notes (about 8.9 minutes of speech)")
+    minutes = speech_minutes(path)
+    if minutes > MAX_SPEECH_MINUTES:
+        return Check(
+            FAIL,
+            "deck",
+            f"the speaker notes take about {minutes:.1f} minutes at {WORDS_PER_MINUTE} words a "
+            f"minute; the cap is {MAX_SPEECH_MINUTES} minutes",
+        )
+    return Check(
+        OK,
+        "deck",
+        f"{SLIDES} slides with speaker notes (about {minutes:.1f} minutes of speech at "
+        f"{WORDS_PER_MINUTE} words a minute)",
+    )
+
+
+def speech_minutes(path: Path) -> float:
+    """Minutes the speaker notes take at a normal speaking pace (one number field per slide)."""
+    words = 0
+    with zipfile.ZipFile(path) as archive:
+        for name in archive.namelist():
+            if re.fullmatch(r"ppt/notesSlides/notesSlide\d+\.xml", name):
+                text = " ".join(
+                    re.findall(r"<a:t>([^<]*)</a:t>", archive.read(name).decode("utf-8", "replace"))
+                )
+                words += max(len(text.split()) - 1, 0)
+    return words / WORDS_PER_MINUTE
 
 
 def find_placeholders(root: Path) -> dict[str, list[str]]:

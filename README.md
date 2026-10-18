@@ -1,25 +1,3 @@
-> **Hardening v2:** See [verified changes and limitations](docs/HARDENING_V2.md).
-> The university-route catalogue is deliberately narrow; unknown routes are not verified.
-
-> **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
-
-> **Reviewed repair release (17 Oct 2026).** Read [release fixes and limits](docs/RELEASE_FIXES.md),
-> [current verification evidence](submission/evidence/release/VERIFICATION.md), and
-> [নিরাপদ GitHub push নির্দেশনা](GITHUB_PUSH_BN.md) before uploading. Previously exposed credentials
-> still require owner-side revocation. No competition score is guaranteed.
-> Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
-> the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
-
-> **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
-> ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
-> and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). **With no key and no Space the
-> assistant runs offline** (the engine's facts, reworded by a small trained model on this machine, or in labelled template mode with `EXPLAINER_MODE=off`): this is the default, so
-> `docker compose up` works with nothing configured. A person's own saved or per-request
-> Gemini or Groq key uses the cloud whatever the server setting is. To make your Hugging Face
-> Space the default instead, set `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN`
-> and `HF_SPACE_APP_SECRET`); an unreachable Space is then reported as not connected.
-> The cloud paths have **not** been live-tested with a real HF account or real provider keys.
-
 # StudyRoute
 
 **A sandbox AI assistant for paying tuition and living costs abroad from Bangladesh.**
@@ -35,6 +13,18 @@ A parent in Bangladesh pays in BDT. The student studies in the UK, US, Germany, 
 or Malaysia. StudyRoute shows the true total cost of each provider (including the hidden exchange
 rate margin), warns when a university may be short-paid, works backwards from the due date, tracks
 documents and KYC, and walks the parent through a safe approval.
+
+## Why it matters
+
+| | |
+|---|---|
+| **USD 881.7 million** | sent through Bangladeshi banks for overseas education in 2025-26: a record, up 32% in a year (Bangladesh Bank data, via The Observer, 24 July 2026) |
+| **6.4%** | average cost of sending USD 200 worldwide in Q3 2025, against a 3% goal (World Bank; small remittances, so context only) |
+| **USD 8.8 million** | a year stays with families for each point of cost a better comparison removes from that volume (our arithmetic, not a forecast) |
+
+A bank could pay a small service fee for pre-checked, risk-routed payments; a university sees fewer short or
+unmatched ones. There is no partner, pilot or real user yet, so every figure is a number to test. Sources,
+sums and what would have to be true: [docs/BUSINESS_CASE.md](docs/BUSINESS_CASE.md).
 
 ## At a glance
 
@@ -239,6 +229,30 @@ config/rules.yaml       limits, checklists, calendars, providers (each with sour
 config/bank_network.yaml  the invented banks, rails and demo accounts of the bank simulation
 docs/                   BLUEPRINT.md (the spec), SECURITY.md, OPEN_QUESTIONS.md
 ```
+
+## Release notes and cautions
+
+> **Hardening v2:** See [verified changes and limitations](docs/HARDENING_V2.md).
+> The university-route catalogue is deliberately narrow; unknown routes are not verified.
+
+> **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
+
+> **Reviewed repair release (17 Oct 2026).** Read [release fixes and limits](docs/RELEASE_FIXES.md),
+> [current verification evidence](submission/evidence/release/VERIFICATION.md), and
+> [নিরাপদ GitHub push নির্দেশনা](GITHUB_PUSH_BN.md) before uploading. Previously exposed credentials
+> still require owner-side revocation. No competition score is guaranteed.
+> Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
+> the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
+
+> **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
+> ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
+> and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). **With no key and no Space the
+> assistant runs offline** (the engine's facts, reworded by a small trained model on this machine, or in labelled template mode with `EXPLAINER_MODE=off`): this is the default, so
+> `docker compose up` works with nothing configured. A person's own saved or per-request
+> Gemini or Groq key uses the cloud whatever the server setting is. To make your Hugging Face
+> Space the default instead, set `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN`
+> and `HF_SPACE_APP_SECRET`); an unreachable Space is then reported as not connected.
+> The cloud paths have **not** been live-tested with a real HF account or real provider keys.
 
 ## Security design in brief
 

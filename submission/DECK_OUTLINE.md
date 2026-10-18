@@ -1,10 +1,10 @@
 # Deck outline (blueprint 19.2) as slide text
 
-Twelve slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
-rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.9
-minutes** of speech at a brisk 160 words a minute (a calmer 140 is just under 10), so keep any
+Thirteen slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
+rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.4
+minutes** of speech at a normal 150 words a minute (about 9.7 at a slow 130), so keep any
 live demo to **1 minute** or none and point to the recorded video (`VIDEO_SCRIPT.md` is its scene
-list, 4:50). Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
+list, 4:50). `python scripts/preflight.py` fails if the notes ever run past 10 minutes at 150 words a minute. Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
 in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
 Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
 
@@ -48,7 +48,7 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Proven by tests and logs: every number comes from one engine in integer money (all 24 scenarios mapped to tests); only a human with a fresh MFA code can approve, and the AI has no such permission; edit one audit row and Verify fails at that event; the stack starts from the zipped archive with docker compose (run for real on 15 and 17 October).
 - Not proven, and said so: rates, fees and city costs are invented and not yet compared with real quotes; no real parent has used it and the trained models saw synthetic data; no outside security review; Bangladesh Bank limits are placeholders marked Not verified.
 - Both lists are in the repository: `docs/OPEN_QUESTIONS.md` and `docs/SECURITY_SELF_ASSESSMENT.md`.
-- Smart escrow and the bank network are extras beyond Topic C. They are not slides; they get one sentence on slide 12 and a few seconds in the video. Screenshots stay in `submission/screenshots/` (`27-smart-escrow.png`, `29-escrow-schedule.png`).
+- Smart escrow and the bank network are extras beyond Topic C. They are not slides; they get one sentence on slide 13 and a few seconds in the video. Screenshots stay in `submission/screenshots/` (`27-smart-escrow.png`, `29-escrow-schedule.png`).
 
 ## 8. AI that cannot cheat
 - Pipeline: policy check, facts from the engine, masking, model (optional), number guard, tool guard, audit.
@@ -72,10 +72,17 @@ Keep every figure synthetic and keep the sandbox banner visible in each screensh
 - Rules in config with source, last checked and a verified flag; yellow "Not verified" badges.
 - "Indicative. Confirm with your AD bank." Never "this is legal".
 
-## 12. Impact and next steps
-- More corridors and a verified rule set; moon-dependent holidays.
+## 12. Why it can work (the business case, `docs/BUSINESS_CASE.md`)
+- USD 881.7 million sent through Bangladeshi banks for overseas education in 2025-26, a record, up 32% (Bangladesh Bank data via The Observer, 24 July 2026).
+- 6.4% average cost of sending USD 200 worldwide (World Bank, Q3 2025) against a 3% goal: context, since tuition is priced differently.
+- Each point of cost removed from that volume is about USD 8.8 million a year for families: our arithmetic, not a forecast.
+- Who gains: family, bank (documents checked, risk-routed), university. Who could pay: a partner bank, at 0.2% of the volume a 5% share is about USD 88,000 a year: modest, a number to test.
+- Said on the slide: no partner, no pilot, no real users yet.
+
+## 13. Impact and next steps
+- Four study-abroad rules now rest on Bangladesh Bank's circular; verify the rest and add moon-dependent holidays.
 - A real AD bank partnership for quotes and KYC.
-- Escrow already runs in the sandbox; next, a permissioned chain with a bank-issued deposit token.
+- The escrow runs on a simulated chain in the sandbox; next, a permissioned chain with a bank-issued deposit token.
 - Regulator reporting built on the compliance report. Credit building (named in Topic C, not built).
 
 ## Demo order (3 to 5 minutes)

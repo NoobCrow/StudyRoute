@@ -103,8 +103,8 @@ slides.push({
   layout: "title", section: "Opening", title: "StudyRoute",
   notes:
     "Good morning. We are team " + TEAM + ", and this is StudyRoute, our entry for Topic C, the cross-border and student finance assistant. " +
-    "StudyRoute is a sandbox AI agent that helps a parent in Bangladesh pay a student's tuition abroad. Everything you will see is synthetic and no real money moves. " +
-    "Our design rule is on the slide, and the rest of the talk shows how we make each of those four sentences true and testable: the engine calculates, the AI explains, the human approves, and every step is logged.",
+    "It is a sandbox AI agent that helps a parent in Bangladesh pay a student's tuition abroad. Everything you will see is synthetic and no real money moves. " +
+    "Our rule is on the slide: the engine calculates, the AI explains, the human approves, and every step is logged.",
   elements: [
     text(0.6, 0.55, 6.0, 0.3, "TOPIC C  ·  CROSS-BORDER AND STUDENT FINANCE ASSISTANT", { size: 12, bold: true, color: "accent2" }),
     text(0.6, 2.35, 5.7, 1.3,
@@ -162,9 +162,9 @@ const people = [
 slides.push({
   layout: "content", section: "The problem", title: "A family carries the risk",
   notes:
-    "Two people feel this. The parent pays in taka, compares banks by the posted fee, approves a large transfer with little to check it against, and has to prove where the money came from. " +
-    "The student needs the university paid on time: if tuition arrives short or cannot be matched to the invoice, there are late fees and weeks of waiting with no status. " +
-    "StudyRoute gives both one plan. The parent decides. The student can see the plan, add recipient details and follow the status, but cannot approve.",
+    "Two people feel this. The parent pays in taka, compares banks by the posted fee, approves a large transfer with little to check it against, and must prove where the money came from. " +
+    "The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. " +
+    "StudyRoute gives both one plan. The parent decides; the student can see the plan and follow the status, but cannot approve.",
   elements: [
     ...people.flatMap((p) => [
       card(p.x, 1.35, 4.4, 3.2),
@@ -192,9 +192,9 @@ const chain = [
 slides.push({
   layout: "content", section: "The problem", title: "How money really moves",
   notes:
-    "This is the real chain. The parent pays in taka to an authorised dealer bank, which sells foreign currency and sends a SWIFT instruction carrying a UETR and a charge code. " +
+    "This is the real chain. The parent pays in taka to an authorised dealer bank, which sells foreign currency and sends a SWIFT instruction. " +
     "A correspondent bank may take a lifting fee, the receiving bank may take another, and the university matches the payment by reference. Each step has a typical failure, shown in red. " +
-    "StudyRoute simulates this chain end to end with invented banks, a correspondent and a double-entry ledger where debits equal credits, and a failed payment is returned in full. It never moves real money.",
+    "StudyRoute simulates this chain with invented banks and a double-entry ledger, and returns a failed payment in full. It never moves real money.",
   elements: [
     ...chain.flatMap(([head, sub, fill, risk], i) => {
       const x = 0.5 + i * 1.84;
@@ -224,11 +224,10 @@ const steps = [
 slides.push({
   layout: "content", section: "The solution", title: "From question to settled payment",
   notes:
-    "This is task completion. On the left, the parent typed one sentence into the chat: I need to pay ten thousand pounds of tuition by 28 October. " +
-    "The agent read it, made the quote, ranked the providers, planned the deadline and checked KYC, the recipient and the documents, and it built this plan card from the engine's output. " +
-    "The person creates the draft, chooses the recipient and approves with a fresh MFA code. " +
-    "The agent blocks the payment until KYC, the allowlist and the sandbox caps pass, then tracks it to settled and seals a compliance report. " +
-    "Look at what the agent did not do: it created no payment. It can propose a draft, but a person always clicks.",
+    "This is task completion. The parent typed one sentence: I need to pay ten thousand pounds of tuition by 28 October. " +
+    "The agent read it, made the quote, ranked the providers, planned the deadline, checked KYC and the documents, and built this plan card from the engine's output. " +
+    "The person creates the draft and approves with a fresh MFA code. The agent blocks the payment until KYC, the allowlist and the caps pass, then tracks it to settled and seals a compliance report. " +
+    "It created no payment itself: a person always clicks.",
   elements: [
     ...shot("17-agent-plan.png", 0.58, 1.43, 4.34, 3.39, "The assistant's payment plan built from one sentence"),
     text(0.5, 4.95, 4.5, 0.3, "One sentence in the chat. Synthetic data.", { size: 11, color: "text2" }),
@@ -249,11 +248,9 @@ const split = [["FX margin", 16000, "accent1", 63], ["Fixed fee", 3000, "accent4
 slides.push({
   layout: "content", section: "The solution", title: "The engine does the maths",
   notes:
-    "Every number comes from a deterministic engine: integer minor units, decimal rates, no floats. For one provider, total cost is the FX margin plus the fixed fee, the SWIFT fee, any fees the sender pays under OUR, " +
-    "plus a shortfall when fees are deducted from the amount. We rank by that percentage. In our synthetic example, Provider B is first at 1.58 percent, " +
-    "Provider C looks cheap but it is quoted as SHA, so the university would receive 35 pounds less, and Provider A is third at 2.16 percent. " +
-    "On the right is where Provider B's 25,300 taka goes: most of it is the margin. " +
-    "The same engine powers the smart send plan, names the cheapest provider that arrives before the due date, and can stress-test a quote if the taka weakens. A student guide shows which student cities a monthly budget covers, with invented figures marked not verified. It does not predict exchange rates, and says so.",
+    "Every number comes from a deterministic engine: integer money, decimal rates, no floats. Total cost is the FX margin plus the fixed fee, the SWIFT fee, any fees the sender pays, plus a shortfall when fees are deducted from the amount. " +
+    "In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap, but it is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16 percent. " +
+    "The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens. It does not predict exchange rates.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -287,21 +284,20 @@ const proven = [
   `Every number comes from one engine, in integer money. ${F.backendTests} backend tests cover all ${F.scenarios} scenarios.`,
   "Only a human with a fresh MFA code can approve. The AI has no such permission, and a test enforces the table.",
   "Edit one audit row and Verify fails at that event. Audit-only rewrites are detected; both logs share SQLite, so a DB owner can rewrite both.",
-  "Fresh local API/UI checks are in release evidence; Docker logs are inherited, not rerun for this repair.",
+  "The Docker stack passed its demo, 48 browser checks and the hardened overlay on 18 Oct; the attack probes defended 146 of 146.",
 ];
 const notProven = [
   "Rates, fees and city costs are invented. We have not compared them with real quotes yet.",
   "No real parent has used it. The trained models saw synthetic data.",
   "Local code review and regression tests; no external penetration test.",
-  "Bangladesh Bank limits are placeholders, marked Not verified.",
+  "Most Bangladesh Bank figures are placeholders marked Not verified; four rules were read in the official circular.",
 ];
 slides.push({
   layout: "content", section: "Trust", title: "Proven, and not proven yet",
   notes:
-    "Before the details, here is what we have shown and what we have not. " +
-    `What we have shown: every number comes from one deterministic engine, with ${F.backendTests} backend tests covering all ${F.scenarios} scenarios. Only a human with a fresh MFA code can approve, and the AI has no such permission. ` +
-    "Change one audit row and Verify fails at that event. And the stack starts from the zipped archive with one command. " +
-    "What we have not shown: the rates, fees and city costs are invented, and we have not yet compared them with real quotes. No real parent has used it. A local review found trust-boundary limits; no external penetration test was run. The Bangladesh Bank limits are placeholders, marked Not verified. " +
+    "Here is what we have shown and what we have not. " +
+    `Shown: every number comes from one deterministic engine, with ${F.backendTests} backend tests covering all ${F.scenarios} scenarios; only a human with a fresh MFA code can approve; change one audit row and Verify fails at that event; and the stack runs in Docker from the zipped archive. ` +
+    "Not shown: the rates, fees and city costs are invented and not compared with real quotes, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders marked Not verified. " +
     "Both lists are in the repository, because we would rather you hear the limits from us.",
   elements: [
     card(0.5, 1.35, 4.4, 3.45),
@@ -331,10 +327,9 @@ const guarantees = [
 slides.push({
   layout: "content", section: "Trust", title: "An AI that cannot cheat",
   notes:
-    "The assistant follows a fixed pipeline. A policy check flags attempts to override rules, approve or reveal secrets, and a flagged message never reaches the model. " +
-    "Facts come only from the engine. Personal data is masked before any model call. The model is the only step that is not deterministic, and it is optional. " +
-    "Then a number guard checks every figure in the reply against the engine's facts and falls back to a template if anything is invented, a tool guard allows only proposals, and everything is audited. " +
-    "So: every number comes from the engine, the AI can only propose, and it works with no API key at all.",
+    "The assistant follows a fixed pipeline. A policy check flags attempts to override rules, approve or reveal secrets. Facts come only from the engine, and personal data is masked before any model call. " +
+    "The model is the one step that is not deterministic, and it is optional. A number guard then checks every figure in the reply against the engine's facts and falls back to a template if anything is invented; a tool guard allows only proposals; everything is audited. " +
+    "So the AI can only propose, and it works with no API key.",
   elements: [
     ...pipeline.flatMap((label, i) => {
       const x = 0.5 + i * 1.3;
@@ -370,11 +365,10 @@ const trained = [
 slides.push({
   layout: "content", section: "Trust", title: "Trained agents, measured",
   notes:
-    "The assistant has a trained component, and we measured it. A small language model, fine-tuned on a gaming-class GPU in a few minutes, reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values, and when the old rules and the model disagree, the assistant asks. " +
-    `On messages we wrote by hand after the model was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, ` +
-    `read a plan request exactly ${pc(blind.agent.task_success)} against ${pc(blind.rules.task_success)}, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
-    `A second small policy, trained with reinforcement learning, chooses whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. The API adds mandatory review not measured here; the simulated parents are assumptions.` +
-    `Two more small models are trained on the same GPU. A language model rewords the engine's answer on the user's own machine: on ${EXPL.test_pairs} held-out questions ${pc(EXPL.shipped_model.shown_share)} of its answers pass every code check and the rest show the engine's own text; ${pc(EXPL.shipped_model.raw_output.figure_precision)} of the figures it writes are the engine's. It mostly rewords. A risk model, trained on IBM's public synthetic transactions, gives each payment a score from four factors, amount, frequency, timeline and person: a low score shows no warning, a high one shows a warning and sends the payment to a person at the sandbox bank, and every payment needs a person's authorization whatever its score; on a later period it caught ${pc(riskRoute.recall)} of the flagged payments with ${pc(riskRoute.precision)} precision, and the data cannot support both above ninety. It routes; a person decides.`,
+    "The assistant has a trained part, and we measured it. A small language model reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values. " +
+    `On 113 messages written by hand after it was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
+    `A second small policy, trained with reinforcement learning, decides whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. ` +
+    `Two more small models: one rewords the engine's answer, and a risk model scores each payment on amount, frequency, timeline and person. It caught ${pc(riskRoute.recall)} of flagged payments at ${pc(riskRoute.precision)} precision, and the data cannot support both above ninety. It routes; a person decides.`,
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,
@@ -416,11 +410,10 @@ const stats = [
 slides.push({
   layout: "content", section: "Trust", title: "Security you can verify",
   notes:
-    "Security and compliance is thirty percent of the score, so we made it checkable. On the left are the permission tiers, enforced in the domain layer, not just in the screens. " +
-    "Public, read, prepare, decide, and administer. Deciding, meaning approving a payment, is only for a human parent with a fresh MFA proof bound to that payment and to the hash of the summary they saw. " +
-    "The AI has no approve, cancel, limit or config permission at all. On the right, the numbers: " +
-    `${F.backendTests} backend and ${F.frontendTests} frontend tests, all ${F.scenarios} blueprint scenarios mapped to tests, and ${F.risks} known risks that we list openly in the self-assessment. ` +
-    "The audit log is hash-chained: Verify passes, we edit one row behind the application's back, and Verify fails at exactly that event.",
+    "Security and compliance is thirty percent of the score, so we made it checkable. On the left are the permission tiers, enforced in the domain layer, not just the screens. " +
+    "Approving a payment is only for a human parent with a fresh MFA proof bound to that payment and to the hash of the summary they saw. The AI has no approve, cancel, limit or config permission at all. " +
+    `On the right: ${F.backendTests} backend and ${F.frontendTests} frontend tests, all ${F.scenarios} scenarios mapped to tests, and ${F.risks} known risks listed openly. ` +
+    "We edit one audit row behind the application's back, and Verify fails at exactly that event.",
   elements: [
     ...tiers.flatMap(([lead, rest, fill, color], i) => {
       const y = 1.4 + i * 0.52;
@@ -448,10 +441,9 @@ slides.push({
 slides.push({
   layout: "content", section: "Trust", title: "Honest by design",
   notes:
-    "Honesty is a feature. A banner on every screen and an X-Sandbox header on every API response say this is a sandbox. " +
-    "The Sandbox screen on the left lists everything that is simulated and how to trigger the edge cases, such as a recipient named FAIL_TEST. " +
-    "Any rule that has not been checked against an official source carries a yellow Not verified badge and the sentence: indicative, confirm with your AD bank. " +
-    "On the right is a payment's compliance report: the parties, ten controls with their evidence, the approval proof and the audit trail, sealed with a hash that the browser recomputes. Change a copy and it says does not match.",
+    "Honesty is a feature. A banner on every screen and an X-Sandbox header on every response say this is a sandbox. The Sandbox screen lists everything simulated and how to trigger edge cases. " +
+    "Any rule not checked against an official source carries a yellow Not verified badge and the line: indicative, confirm with your AD bank. " +
+    "On the right is a payment's compliance report, sealed with a hash that the browser recomputes. Change a copy and it says does not match.",
   elements: [
     text(0.5, 1.2, 9, 0.4, "Every simulated part is labelled. Every unverified rule carries a badge.", { size: 16, bold: true, color: "text1", valign: "middle" }),
     ...shot("15-sandbox-admin.png", 0.58, 1.78, 4.0, 3.12, "Sandbox screen listing what is simulated"),
@@ -462,19 +454,60 @@ slides.push({
 });
 
 // 12 --------------------------------------------------------------------------------------------
+// Every figure here is sourced (see docs/BUSINESS_CASE.md) or is plain arithmetic on a sourced figure.
+const market = [
+  ["USD 881.7m", "sent through Bangladeshi banks for overseas education in FY2025-26: a record, up 32% in a year. Bangladesh Bank data, via The Observer, 24 Jul 2026."],
+  ["6.4%", "average cost of sending USD 200 worldwide, Q3 2025, against a 3% goal (World Bank). Small remittances, not tuition: context only."],
+  ["USD 8.8m", "a year stays with families for each 1 point of cost taken off that volume. Our arithmetic (1% of 881.7m), not a forecast."],
+];
+const gains = [
+  ["Family", "Lower true cost, a safe deadline, one plan."],
+  ["Bank", "Documents checked and risk-routed before a reviewer looks."],
+  ["University", "Fewer short or unmatched payments."],
+];
+slides.push({
+  layout: "content", section: "Close", title: "Why it can work",
+  notes:
+    "Why would this matter outside a competition? Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education in the last fiscal year, a record, up 32 percent. " +
+    "The World Bank puts the average cost of sending small remittances near 6.4 percent, twice the 3 percent goal; tuition is priced differently, so that is context. " +
+    "If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars a year: our arithmetic, not a forecast. " +
+    "A partner bank could pay a small service fee for pre-checked, risk-routed files. We have no partner, no pilot and no real users yet, so these are numbers to test.",
+  elements: [
+    ...market.flatMap(([num, body], i) => {
+      const y = 1.3 + i * 1.28;
+      return [
+        card(0.5, y, 5.3, 1.18),
+        text(0.65, y + 0.05, 1.95, 1.08, num, { size: 21, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
+        text(2.65, y + 0.05, 3.05, 1.08, body, { size: 11, color: "text1", valign: "middle" }),
+      ];
+    }),
+    card(6.0, 1.3, 3.5, 3.7),
+    text(6.2, 1.38, 3.1, 0.4, "Who gains", { size: 16, bold: true, color: "accent1", valign: "middle" }),
+    ...gains.flatMap(([who, what], i) => [
+      text(6.2, 1.85 + i * 0.62, 3.1, 0.58,
+        [{ text: who + ": ", bold: true }, { text: what }], { size: 12, color: "text1", valign: "middle" }),
+    ]),
+    text(6.2, 3.75, 3.1, 0.3, "Who could pay (to test)", { size: 14, bold: true, color: "accent1", valign: "middle" }),
+    text(6.2, 4.05, 3.1, 0.9,
+      "A partner bank pays a small service fee per assisted payment. At 0.2% of the volume, a 5% share is about USD 88,000 a year: modest, and a number to test.",
+      { size: 11, color: "text1" }),
+    text(0.5, 5.07, 9, 0.3, "Illustrations, not forecasts. No partner, no pilot, no real users yet. Sources and sums: docs/BUSINESS_CASE.md",
+      { size: 11, color: "text2" }),
+  ],
+});
+
+// 13 --------------------------------------------------------------------------------------------
 const next = [
-  ["Verified rules", "Replace each placeholder rule with an official Bangladesh Bank source."],
+  ["Verified rules", "Four study-abroad rules now rest on Bangladesh Bank's circular. Verify the rest."],
   ["A real AD bank partner", "Real quotes, real KYC, and regulator-ready reports from the audit log."],
   ["Credit building", "Topic C scope we have not built: help a student build a credit history abroad."],
-  ["A real chain", "Today the escrow runs on a simulated chain inside the app, with no network. Next: a permissioned chain and a bank-issued token."],
+  ["A real chain", "Today the escrow runs on a simulated chain, with no network. Next: a permissioned chain and a bank-issued token."],
 ];
 slides.push({
   layout: "closing", section: "Close", title: "What comes next",
   notes:
-    "Next steps. First, replace every placeholder rule with an official Bangladesh Bank source and add the moon-dependent holidays. " +
-    "Second, a partnership with an authorised dealer bank for real quotes and real KYC, and regulator-ready reports from the audit log. " +
-    "Third, beyond tuition, the sandbox already has a smart escrow for living costs and a bank-network simulation; the escrow contracts would move from our simulated chain to a permissioned one with a deposit token issued by a bank. " +
-    "Topic C also mentions credit building. We have not built it, and we would rather say so than pretend. We do show a household's money in every currency, but those are simulated accounts, not real ones. " +
+    "Next steps. Replace every placeholder rule with an official Bangladesh Bank source; we have started with four study-abroad rules. Partner with an authorised dealer bank for real quotes and real KYC. " +
+    "Move the escrow from our simulated chain to a permissioned one with a bank-issued deposit token. Topic C also mentions credit building; we have not built it, and we would rather say so. " +
     "To close: StudyRoute is clear, cheap and safe, because the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
   elements: [
     ...next.flatMap(([head, body], i) => {

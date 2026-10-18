@@ -10,6 +10,13 @@ and **security design**.
 **Design principle.** The engine calculates, the AI explains, the human approves, and every step is
 logged. Each part below exists to make one of those four statements true and testable.
 
+**Why it matters, in three numbers.** Bangladesh Bank data show **USD 881.7 million** sent through banks for
+overseas education in 2025-26, a record and 32% more than a year earlier (The Observer, 24 July 2026). The
+World Bank puts the average cost of sending small remittances at about **6.4%** against a 3% goal (Q3 2025;
+context only, tuition is priced differently). Each point of cost removed from that volume is about **USD 8.8
+million** a year for families (our arithmetic, not a forecast). There is no partner, pilot or real user yet; the
+sources, the sums and what would have to be true are in `docs/BUSINESS_CASE.md`.
+
 ---
 
 ## 1. System architecture

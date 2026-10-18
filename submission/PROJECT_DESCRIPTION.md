@@ -18,6 +18,17 @@ cross-border users, such as remittances, tuition payments, credit building and m
 management. StudyRoute covers remittances and tuition payments end to end and shows a household's
 money in every currency (simulated accounts); credit building is a next step.
 
+## Why it matters
+
+Bangladesh Bank data show **USD 881.7 million** sent through banks for overseas education in 2025-26, a
+record and 32% more than a year earlier (as reported by The Observer, 24 July 2026). The World Bank
+puts the average cost of sending small remittances at about 6.4%, against a 3% goal. If a better
+comparison took one percentage point off that volume, families would keep about **USD 8.8 million** a
+year (our arithmetic, not a forecast). A partner bank could pay a small service fee for payments that
+arrive pre-checked and risk-routed, and a university sees fewer short or unmatched payments. There is no
+partner, pilot or real user yet, so these are numbers to test; sources, sums and the conditions are in
+`docs/BUSINESS_CASE.md`.
+
 ## The solution
 
 StudyRoute is an AI agent that completes this task safely, from first quote to settlement:
