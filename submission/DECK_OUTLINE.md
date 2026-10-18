@@ -1,8 +1,8 @@
 # Deck outline as slide text
 
-Twenty-one slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The rules cap
-the final presentation at **10 minutes**. The speaker notes in the file are about **8.7 minutes** of speech at a
-normal 150 words a minute (about 10 at a slow 130), which is about half a minute a slide, so keep any live demo
+Twenty slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The rules cap
+the final presentation at **10 minutes**. The speaker notes in the file are about **8.3 minutes** of speech at a
+normal 150 words a minute (about 9.5 at a slow 130), which is about half a minute a slide, so keep any live demo
 to nothing and point to the live site and the video (`VIDEO_SCRIPT.md` is its scene list). The notes are also in
 `StudyRoute_Deck_Speaker_Notes.txt` with a time for each slide and an anticipated Q&A page that is not read aloud.
 `python scripts/preflight.py` fails if the notes ever run past 10 minutes at 150 words a minute. Rehearse with a
@@ -33,8 +33,7 @@ visible in each screenshot.
 | 17 | Security problems we found | Seven problems with their status (mitigated, open, fixed, partly), including plain HTTP and the stolen-token risk |
 | 18 | Honest by design | Banner and header on every response, the "Not verified" badge, the sealed compliance report |
 | 19 | Why it can work | USD 881.7m sent for overseas education in FY2025-26, the sums, who gains, and that there is no partner, pilot or user yet |
-| 20 | What the brief asked | The requirements table with status, and which slides show each scoring criterion |
-| 21 | What comes next | Verified rules, an AD bank partner, credit building (not built), a real chain; team and repository link |
+| 20 | What comes next | Verified rules, an AD bank partner, credit building (not built), a real chain; team and repository link |
 
 Sources and sums for slide 19: `docs/BUSINESS_CASE.md`. Figures on slides 10 to 12 come from
 `submission/evidence/ai_evaluation.json`, `ai_rl_evaluation.json`, `ai_explainer_evaluation.json` and

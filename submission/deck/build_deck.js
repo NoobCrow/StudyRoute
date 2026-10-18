@@ -745,48 +745,7 @@ slides.push({
   });
 }
 
-// 20: the requirements and where they are shown ------------------------------------------------------
-{
-  const head = ["What the brief asked", "Where it is", "Status"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" }));
-  const done = { text: "Done", bold: true, color: "accent6" };
-  const rows = [
-    ["Technical documentation", "20-page PDF: architecture, algorithms, security design", done],
-    ["Deck of 10 minutes", "This deck: 21 slides, speaker notes about 9 minutes", done],
-    ["Demo video, 5 minutes", "Script and a silent recording; narrated video pending", { text: "Pending", bold: true, color: "accent3" }],
-    ["Source, README, GitHub link", "Public repository; docker compose up; CI green", done],
-    ["Security self-assessment", "39 pages: 55 risks, 314 probe records, findings", done],
-    ["Execution evidence", "Operation logs, audit verify, tamper and restore", done],
-    ["Sandbox, synthetic data, English", "Banner on every screen; no real money moves", done],
-  ].map(([a, b, c], i) => [
-    { text: a, bold: true, fill: i % 2 === 0 ? "background2" : undefined }, { text: b, fill: i % 2 === 0 ? "background2" : undefined }, { ...c, fill: i % 2 === 0 ? "background2" : undefined },
-  ]);
-  const scoring = [
-    ["Task completion", "40%", "Slides 5 to 8 and 14"],
-    ["Security and compliance", "30%", "Slides 9 and 15 to 18"],
-    ["Innovation and interaction", "30%", "Slides 8 to 12 and 19"],
-  ];
-  slides.push({
-    layout: "content", section: "Close", title: "What the brief asked",
-    notes:
-      "Back to the brief. The technical documentation, this ten-minute deck, the source on a public repository with CI green, the security self-assessment and the execution evidence are all in. " +
-      "The narrated demo video is optional and still pending. Everything is a sandbox with synthetic data. And for the three scoring criteria, here are the slides that show each.",
-    elements: [
-      { type: "table", x: 0.5, y: 1.3, colW: [2.2, 3.35, 0.75], rowH: 0.43, size: 10.5, rows: [head, ...rows] },
-      ...scoring.flatMap(([name, pct, where], i) => {
-        const y = 1.3 + i * 1.22;
-        return [
-          card(7.05, y, 2.45, 1.12),
-          text(7.2, y + 0.05, 1.2, 0.5, pct, { size: 26, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
-          text(7.2, y + 0.55, 2.2, 0.28, name, { size: 11, bold: true, color: "text1" }),
-          text(7.2, y + 0.8, 2.2, 0.28, where, { size: 10, color: "text2" }),
-        ];
-      }),
-      text(0.5, 5.12, 9, 0.3, "Eligibility and registration are the team's to confirm with the organiser; nothing here certifies them.", { size: 10, color: "text2" }),
-    ],
-  });
-}
-
-// 21: the AI risk score and the human decision ----------------------------------------------------
+// 20: the AI risk score and the human decision ----------------------------------------------------
 {
   const card1 = image("43-risk-score-card.png", 0.5, 1.35, 5.6, 1.89, "The parent's view: AI risk score 99 out of 100 with the four factors");
   const card2 = image("44-review-decision.png", 0.5, 3.72, 2.7, 1.43, "The bank reviewer's decision: yes, ask for more or no, signed with MFA");
@@ -823,7 +782,7 @@ slides.push({
 }
 
 // Final order: the live and chart slides sit beside the slides they support.
-const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 21, 7, 17, 10, 18, 19, 11, 12, 20, 13];
+const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 20, 7, 17, 10, 18, 19, 11, 12, 13];
 if (slides.length !== ORDER.length) throw new Error(`Expected ${ORDER.length} slides, found ${slides.length}.`);
 slides.splice(0, slides.length, ...ORDER.map((n) => slides[n - 1]));
 

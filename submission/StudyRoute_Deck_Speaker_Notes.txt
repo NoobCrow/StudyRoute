@@ -1,5 +1,5 @@
 StudyRoute: speaker notes for the 10-minute presentation
-21 slides, 1,299 words: about 8.7 minutes at 150 words a minute (10.0 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
+20 slides, 1,241 words: about 8.3 minutes at 150 words a minute (9.5 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
 Say it in your own words; the notes are a guide, not a script to read.
 ==============================================================================
 
@@ -79,11 +79,7 @@ SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 7:50)
 
 Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. We have no partner, pilot or real users yet; these are numbers to test.
 
-SLIDE 20: What the brief asked   (about 58 words, 23 seconds; running total 8:13)
-
-Back to the brief. The technical documentation, this ten-minute deck, the source on a public repository with CI green, the security self-assessment and the execution evidence are all in. The narrated demo video is optional and still pending. Everything is a sandbox with synthetic data. And for the three scoring criteria, here are the slides that show each.
-
-SLIDE 21: What comes next   (about 65 words, 26 seconds; running total 8:39)
+SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:16)
 
 Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.
 
