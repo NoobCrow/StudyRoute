@@ -57,6 +57,7 @@ ml/aml/                 data build, training, ablation and operating points of t
 backend/tests/          pytest. One test per blueprint test ID (T01..T24)
 web/                    screens: dashboard, compare, payments, recipients, documents,
                         audit, rules, bank network, smart escrow, sandbox, assistant
+docs/README.md          index of the documents; submission/README_START_HERE.md lists the deliverables and submission/evidence/README.md the recorded runs
 docs/BLUEPRINT.md       the spec
 config/rules.yaml       limits, checklists, calendars (blueprint 13)
 
@@ -77,7 +78,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Retrain / re-evaluate the RL dialogue policy: docs/AI_RL.md section 8 (ml/rl/)
 - Retake the README screenshots (fresh demo data, API and built web UI running): python -m app.scripts.gallery
 - Build the submission archive: python scripts/make_submission.py
-- Make the send-ready PDFs with cover pages (pip install markdown, needs Chrome): python scripts/make_pdfs.py
+- Rebuild the technical documentation PDF (needs Chrome; pip install markdown pypdf) and re-check its figures: python submission/tools/build_report_pdf.py && python submission/tools/verify_report_numbers.py (Word copy: submission/tools/md_to_docx.py)
 - Rebuild the deck (always with the team values): cd submission/deck && TEAM_NAME="TeamEkxin" REPO_LINK="https://github.com/NoobCrow/StudyRoute" node build_deck.js
 
 ## How to work

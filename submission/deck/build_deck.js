@@ -69,6 +69,7 @@ const AI = JSON.parse(read("submission/evidence/ai_evaluation.json"));
 const RL = JSON.parse(read("submission/evidence/ai_rl_evaluation.json"));
 const EXPL = JSON.parse(read("submission/evidence/ai_explainer_evaluation.json"));
 const RISK = JSON.parse(read("submission/evidence/ai_risk_operating_points.json"));
+const RISKTRAIN = JSON.parse(read("submission/evidence/ai_risk_training.json"));
 const F = facts();
 if (F.scenarios !== 24) throw new Error(`Expected 24 blueprint scenarios, found ${F.scenarios}.`);
 
@@ -357,10 +358,12 @@ const pc = (v) => `${(100 * v).toFixed(1).replace(/\.0$/, "")}%`;
 const rlBefore = RL.results["before: plan as soon as the amount is known"];
 const rlLearned = RL.results["RL model (raw, before runtime review)"];
 const riskRoute = RISK["routing used by the review desk"]["medium or high (a person looks)"];
+const riskOrder = RISKTRAIN.results.mlp.test;
+const riskRandom = RISKTRAIN.results.random_order.test;
 const trained = [
   ["What it does", `Reads the intent and marks the words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates. A GPU run of a few minutes on ${AI.data.train.toLocaleString("en-US")} messages; ${(AI.model_bytes / 1e6).toFixed(0)} MB, ${Math.round(AI.latency_cpu.median_ms)} ms on a CPU.`],
   ["Reinforcement learning", `A policy trained by Double DQN decides when to ask, read back or plan. On simulated parents: wrong plans ${pc(rlLearned.wrong_plan)} against ${pc(rlBefore.wrong_plan)}, ${rlLearned.turns.toFixed(2)} questions against ${rlBefore.turns.toFixed(2)}. Raw simulator only; the API now adds mandatory clarification and read-back.`],
-  ["Also trained, and the limits", `A language model rewords answers (${pc(EXPL.shipped_model.raw_output.figure_precision)} of its figures are the engine's; a failed check shows the engine's text). A risk model scores every payment (amount, frequency, timeline, person) and warns on a high one: precision ${pc(riskRoute.precision)}, recall ${pc(riskRoute.recall)}. Every payment needs a person's authorization anyway. Synthetic data, no real users.`],
+  ["Also trained, and the limits", `A language model rewords answers: ${pc(EXPL.shipped_model.raw_output.figure_precision)} of its figures are the engine's; a failed check shows the engine's text. A risk model puts ${pc(riskOrder.found_in_top_1_percent)} of flagged payments in its top 1% (random: ${pc(riskRandom.found_in_top_1_percent)}). A person authorizes every payment. Synthetic data.`],
 ];
 slides.push({
   layout: "content", section: "Trust", title: "Trained agents, measured",
@@ -368,7 +371,7 @@ slides.push({
     "The assistant has a trained part, and we measured it. A small language model reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values. " +
     `On 113 messages written by hand after it was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
     `A second small policy, trained with reinforcement learning, decides whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. ` +
-    `Two more small models: one rewords the engine's answer, and a risk model scores each payment on amount, frequency, timeline and person. It caught ${pc(riskRoute.recall)} of flagged payments at ${pc(riskRoute.precision)} precision, and the data cannot support both above ninety. It routes; a person decides.`,
+    `Two more small models: one rewords the engine's answer, and a risk model scores each payment on amount, frequency, timeline and person. Its top one percent holds ${pc(riskOrder.found_in_top_1_percent)} of flagged payments; random order finds ${pc(riskRandom.found_in_top_1_percent)}. As a plain yes or no it is modest: flagging nothing is already ${pc(RISK["all payments"].never_flag_anything.accuracy)} accurate. It routes; a person decides.`,
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,
@@ -385,10 +388,11 @@ slides.push({
       { size: 12, color: "text2" }),
     ...trained.flatMap(([head, body], i) => {
       const y = 1.4 + i * 1.25;
+      const h = i === 2 ? 1.5 : 1.15; // the last card holds two models and needs more room
       return [
-        card(5.3, y, 4.2, 1.15),
+        card(5.3, y, 4.2, h),
         text(5.45, y + 0.04, 3.9, 0.3, head, { size: 14, bold: true, color: "accent1" }),
-        text(5.45, y + 0.36, 3.95, 0.78, body, { size: 11, color: "text1" }),
+        text(5.45, y + 0.36, 3.95, h - 0.4, body, { size: 11, color: "text1" }),
       ];
     }),
   ],

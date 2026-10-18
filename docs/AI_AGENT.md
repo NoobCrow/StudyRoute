@@ -72,7 +72,7 @@ Safety properties of the artefact itself:
 * The model is an **ONNX graph** (data, not code), so loading it cannot run code the way a pickled
   model can. Its SHA-256, and the vocabulary's, are checked against `manifest.json` at start-up. A
   mismatch means the reader is not used and the assistant falls back to its rules.
-* It runs **locally on CPU** (about 7 ms a message). Nothing leaves the machine. With no
+* It runs **locally on CPU** (median 18 ms, 95th percentile 57 ms a message). Nothing leaves the machine. With no
   `onnxruntime`, no model file, or `NLU_MODE=off`, the assistant runs on the rules alone, so template
   mode with no key still works exactly as before.
 * Every AI audit event records which reader understood the message, the model's short hash and its
@@ -91,7 +91,7 @@ Safety properties of the artefact itself:
 | Tokenizer | the project's own WordPiece (`tokenizer.py`), used in training and in the API, so the two cannot disagree; every word keeps its character offsets |
 | Training | one NVIDIA GeForce RTX 5060 Ti (16 GB), PyTorch 2.11 with CUDA 12.8, bf16, AdamW at 8e-5, batch 64, 6 epochs, seed 7. A few minutes end to end |
 | Calibration | temperature 1.4 so a confidence of 0.9 means about 90%; thresholds (intent 0.80, action 0.50, attack 0.50) chosen on the dev split by running the agent's own logic |
-| Cost at run time | median 6.6 ms and 95th percentile 10.7 ms per message on CPU |
+| Cost at run time | median 18 ms and 95th percentile 57 ms per message on CPU (`submission/evidence/ai_evaluation.json`) |
 
 **Choosing the base model.** Six candidates were fine-tuned with the same data and settings and
 compared on the *dev* split, which holds message templates the model never trained on. No test set

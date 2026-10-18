@@ -1,6 +1,6 @@
 # Submission checklist
 
-Repair-release status: see `evidence/release/VERIFICATION.md`. Historical Docker/Windows runs below are not fresh validation of this repaired tree. Confirm registration, team provenance, judge access and credential revocation yourself.
+Current evidence: `evidence/README.md` (index) and `evidence/docker_2026-10-18/`, `evidence/security_2026-10-18/` (the runs of 18 Oct 2026). Confirm registration, team provenance and eligibility yourself.
 
 Source: the official rules, "PBCSF Appendix 2: Problem Description and Competition Rules for
 International Track" (the full PDF is reproduced, with our check against it, in
@@ -61,12 +61,12 @@ the optional ones are the evidence behind the scores.
 
 | # | Deliverable | Required | Where it is in this repository | Still yours |
 |---|-------------|----------|--------------------------------|-------------|
-| 01 | **Technical documentation**: system architecture, core algorithm description, security design | **Yes (mandatory)** | **`submission/StudyRoute_Technical_Documentation.pdf`** (13 pages with a cover, one file, made from `docs/TECHNICAL_DOCUMENTATION.md`) | Open it once and read it; attach it |
+| 01 | **Technical documentation**: system architecture, core algorithm description, security design | **Yes (mandatory)** | **`submission/StudyRoute_Technical_Documentation.pdf`** (18 pages with a cover, one file, made from `docs/TECHNICAL_DOCUMENTATION.md`) | Open it once and read it; attach it |
 | 02 | **Presentation deck**, final presentation no longer than 10 minutes | **Yes (mandatory)** | **`submission/StudyRoute_Deck.pptx`** (13 slides with speaker notes, under a minute each); source `submission/deck/build_deck.js`; outline in `submission/DECK_OUTLINE.md` | Confirm the retained original team attribution and private-fork link; rehearse to 10 minutes |
 | 03 | **Demo video**, no longer than 5 minutes | Optional (the evidence item asks for it) | `submission/StudyRoute_Demo.mp4` and captions (actual repaired local UI/API, about 95 seconds); script in `submission/VIDEO_SCRIPT.md` | Watch it; add narration or a longer financial workflow if useful |
-| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Optional | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | **Safely update the existing fork** using `GITHUB_PUSH_BN.md`; add the accessible link to the e-mail |
-| 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Optional | `docs/SECURITY_SELF_ASSESSMENT.md`; one-file version **`submission/StudyRoute_Security_Self_Assessment.pdf`** (13 landscape pages with a cover) | Read the risk list and agree with it |
-| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Optional | `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | Watch the included demo (03); verify the evidence scope |
+| 04 | **Source code** with README, GitHub repository link, deployment instructions and test cases | Optional | `README.md` (setup and deployment), `docs/TEST_CASES.md` (T01 to T24 and every test file), `backend/`, `web/`, `docker-compose.yml` | Public repository https://github.com/NoobCrow/StudyRoute; add the link to the e-mail |
+| 05 | **Security self-assessment report**: permission-tier implementation and known-risk list | Optional | **`submission/StudyRoute_Security_Self_Assessment.pdf`** (14 pages; the register it cross-references is `docs/SECURITY_SELF_ASSESSMENT.md`) | Read the risk list and agree with it |
+| 06 | **Execution evidence**: for non-on-chain topics, simulated-account or sandbox operation logs **and** demo video | Optional | **`submission/StudyRoute_Execution_Evidence_Report.pdf`** (14 pages) and `submission/evidence/` (operation log, full audit log, Verify result, payments with UETR, tamper demo) | Watch the included demo (03); verify the evidence scope |
 
 Scoring (all topics): **task completion 40%, security and compliance 30%, innovation and
 interaction 30%**. Topic C is described as real financial pain points of international students and
@@ -76,9 +76,8 @@ multi-currency management are listed as next steps, not built.
 
 ### Putting the code on GitHub (deliverable 04)
 
-Use `GITHUB_PUSH_BN.md` for the existing `redwan786/StudyRoute` fork. Do not add another
-remote blindly or overwrite teammates' uncommitted work. Revoke exposed credentials first,
-scan before committing and give judges access to a private repository. Do not force-push.
+The repository is public at https://github.com/NoobCrow/StudyRoute. Scan before committing
+(`python scripts/scan_repo.py`), do not overwrite teammates' work and do not force-push.
 
 ## 3. Technical gate (all must pass before you send)
 
@@ -89,7 +88,7 @@ scan before committing and give judges access to a private repository. Do not fo
 - [ ] Re-run `python scripts/docker_smoke.py` prints "All smoke checks passed." against the running stack
       (also with `docker-compose.hardened.yml`).
 - [ ] Re-run `docker compose exec backend python -m app.scripts.demo_flow` prints "All demo checks passed."
-- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (current repair: use the exact local results in `evidence/release/VERIFICATION.md`; not a new Windows/container claim)
+- [x] `cd backend && pytest -q && ruff check . && ruff format --check .` (results of the last full run: technical documentation, section 5)
 - [x] `cd web && npm run typecheck && npm run lint && npm test && npm run build && npm run e2e` (current repair: 439 Vitest tests and 24 desktop/mobile production-CSP browser tests; browser API fixtures are mocked, while the recorded demo uses the actual local API)
 - [ ] CI is green on the pushed commit (backend, web, contracts, secret scan, dependency audit, docker).
 - [x] `python scripts/scan_repo.py` is clean (secrets, real e-mails, passport-like numbers, TODOs). Clean on 17 Oct 2026.

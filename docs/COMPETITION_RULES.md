@@ -139,19 +139,19 @@ Website: fintechathon.g-ican.com. E-mail: wangyr@pbcsf.tsinghua.edu.cn
 | 60% non-Chinese nationals | Done on paper | Nationalities are on the registration form (not stored here). The wording "60% non-Chinese nationals, major, or year of study" can be read more than one way: see `docs/OPEN_QUESTIONS.md`, section A, row 10 |
 | One team per person | Believed | Each member joined only this team: for the team to confirm |
 | Registered by 20 Oct, 23:59 Beijing (21:59 Dhaka) | **Done** | E-mail sent 15 Oct 2026, 21:25 (see `submission/REGISTRATION.md`). **The organiser's confirmation of the slot has not been seen**: ask again if none has arrived |
-| English for submissions, presentation and review | Done | All submitted documents are English. The extra Bengali guides from a teammate (`docs/*.bn.md`) are not part of the submission |
+| English for submissions, presentation and review | Done | All submitted documents are English. The earlier Bengali guides from a teammate were removed from the repository on 18 Oct 2026 (they are in the git history) |
 | A member can attend the final in Shenzhen if invited | Open | The team must decide who, and check the Chinese visa lead time (finalists are announced 31 Oct, check-in 20 Nov) |
 
 ### The six deliverables
 
 | # | Deliverable | Status | Where |
 |---|-------------|--------|-------|
-| 01 | Technical documentation (**mandatory**) | Done | `submission/StudyRoute_Technical_Documentation.pdf` (13 pages with a cover, one file, with the diagrams; made from `docs/TECHNICAL_DOCUMENTATION.md`: architecture, algorithms, security design) |
+| 01 | Technical documentation (**mandatory**) | Done | `submission/StudyRoute_Technical_Documentation.pdf` (18 pages, one file; source `docs/TECHNICAL_DOCUMENTATION.md`, whose sections 1 to 3 are the three items the rules name: system architecture, core algorithms and trained components, security design) |
 | 02 | Presentation deck, 10 minutes at most (**mandatory**) | Done | `submission/StudyRoute_Deck.pptx`: 13 slides including a business-case slide, speaker notes of about 8.4 minutes at 150 words a minute. Rehearse it |
 | 03 | Demo video, 5 minutes at most (optional) | Recorded repair demo | `submission/StudyRoute_Demo.mp4`, actual local synthetic UI/API with English subtitles; no voiceover or live bank quote. Review before submitting. `submission/VIDEO_SCRIPT.md` remains the fuller narration guide |
-| 04 | Source code, README, GitHub link, deployment instructions, test cases (optional) | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` and `submission/evidence/release/VERIFICATION.md` (current counts, results and mocked/unmocked scope; 1,677 backend (1 skipped on Windows), 463 web and 24 browser tests in the last full run of 18 Oct 2026). **The GitHub repository is private**: judges cannot open the link until it is made public or shared. Pushed up to `58750e5`; later commits are local until pushed |
-| 05 | Security self-assessment, permission tiers and known risks (optional) | Done | `submission/StudyRoute_Security_Self_Assessment.pdf` (from `docs/SECURITY_SELF_ASSESSMENT.md`) (risks R1 to R55) and `docs/SECURITY_TESTING.md` (re-run on 18 Oct 2026: 146 of 146 attacks defended, 48 of 48 browser checks; raw output in `submission/evidence/security_2026-10-18/`) |
-| 06 | Execution evidence: sandbox logs and demo video (optional) | Logs done, voiced video is the team's | `submission/StudyRoute_Execution_Evidence_Summary.pdf` (4 pages) and `submission/evidence/` (operation log, audit log and its verification, payments, tamper demo, security probes) |
+| 04 | Source code, README, GitHub link, deployment instructions, test cases (optional) | Mostly done | README and `docs/DOCKER.md` for deployment; `docs/TEST_CASES.md` and `submission/evidence/` (the recorded runs; test counts and the mocked/unmocked scope are in the technical documentation, section 5). The GitHub repository is public: https://github.com/NoobCrow/StudyRoute |
+| 05 | Security self-assessment, permission tiers and known risks (optional) | Done | `submission/StudyRoute_Security_Self_Assessment.pdf` (14 pages; the 55-item register it cross-references is `docs/SECURITY_SELF_ASSESSMENT.md`) and `docs/SECURITY_TESTING.md` (re-run on 18 Oct 2026: 146 of 146 attacks defended, 48 of 48 browser checks; raw output in `submission/evidence/security_2026-10-18/`) |
+| 06 | Execution evidence: sandbox logs and demo video (optional) | Logs done, voiced video is the team's | `submission/StudyRoute_Execution_Evidence_Report.pdf` (14 pages) and `submission/evidence/` (operation log, audit log and its verification, payments, tamper demo, security probes, Docker run) |
 
 ### What each scoring criterion rests on
 

@@ -139,7 +139,7 @@ tuning period, measured on the test period (`ai_risk_operating_points.json`):
 | Routing | Sent to a person | Accuracy | Precision | Recall |
 |---------|-----------------:|---------:|----------:|-------:|
 | Medium or high | 3,474 of 1,015,564 (0.34%) | 99.68% | 29.2% | 56.5% |
-| High only | 1,548 (0.15%) | 99.83% | 52.7% | 45.4% |
+| High only | 1,548 (0.15%) | 99.83% | 52.6% | 45.4% |
 | Medium or high, first payments to a receiver only | 3,416 of 40,349 (8.5%) | 93.0% | 29.2% | 70.4% |
 
 `MEDIUM` alone is weak (10.4% precision, 11.1% recall), which is why its hit rate is shown to the person.

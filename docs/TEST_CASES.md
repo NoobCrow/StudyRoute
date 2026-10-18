@@ -6,7 +6,7 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-- Backend: **1678 tests** in 109 files. Last run: `1677 passed, 1 skipped in 292.37s (0:04:52)`.
+- Backend: **1679 tests** in 109 files. Last run: `1678 passed, 1 skipped in 306.17s (0:05:06)`.
 - Frontend: **463 tests** in 41 files (Vitest).
 
 ```bash
@@ -135,7 +135,7 @@ python -m app.scripts.demo_flow   # end-to-end demo against a running API
 | `tests/test_nlu_quality.py` | 5 | A quality floor for the shipped reader, so a worse model cannot be swapped in quietly. The floors sit a few points below what ml/evaluate.py measured, on data the model never trained on (natural questions, held-out templates, out-of-scope questions). The full report is docs/AI_EVALUATION.md; this test only guards against a regression. |
 | `tests/test_nlu_tokenizer.py` | 10 | The tokenizer used both to train the reader and to run it, so the two cannot disagree. |
 | `tests/test_nlu_understanding.py` | 15 | How the trained reader and the rules are combined. A scripted reader stands in for the model, so these tests check the combining rules themselves, not the model's quality. |
-| `tests/test_preflight.py` | 27 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
+| `tests/test_preflight.py` | 28 | scripts/preflight.py and scripts/personalize.py: the final-readiness tools for the submission. |
 | `tests/test_rbac.py` | 7 | RBAC matrix from blueprint 12.2, checked permission by permission. |
 | `tests/test_release_hardening.py` | 6 | Regressions for the independently reviewed release; all credentials below are synthetic. |
 | `tests/test_repo_scan.py` | 3 | The pre-submission scanner catches planted secrets and accepts synthetic data. |

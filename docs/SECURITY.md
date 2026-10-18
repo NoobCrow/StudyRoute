@@ -49,7 +49,7 @@ test or demo step that proves it. Test names refer to `backend/tests/`. Demo ste
   `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, HSTS. Browser access tokens live in memory. Browser sessions use a hashed, server-revocable
   opaque HttpOnly/SameSite=Strict cookie, Secure in production, with an absolute expiry.
   The browser uses same-origin credentials; cookie-auth endpoints require an exact trusted
-  Origin and X-StudyRoute-Browser header. CSRF protection is required (see SESSION_FIX.bn.md).
+  Origin and X-StudyRoute-Browser header. CSRF protection is required (see `backend/app/api/` and `docs/SECURITY_TESTING.md`).
   No refresh token is kept in JavaScript storage. Legacy bearer API refresh tokens still rotate.
 - **nginx.** Serves the UI and proxies `/api` on the same origin, so no CORS is needed. It sets
   `X-Forwarded-For` from the real client address (overwriting any client value). Only nginx is

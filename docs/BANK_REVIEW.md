@@ -140,7 +140,7 @@ Measured on a later period of the data that the model never saw (`docs/AI_RISK.m
 | Routing rule | Payments sent to a person | Accuracy | Precision | Recall |
 |--------------|--------------------------:|---------:|----------:|-------:|
 | Medium or high (what the desk does) | 0.34% | 99.68% | 29.2% | 56.5% |
-| High only | 0.15% | 99.83% | 52.7% | 45.4% |
+| High only | 0.15% | 99.83% | 52.6% | 45.4% |
 
 Read this carefully: accuracy is high at every setting only because 99.8% of the data is not flagged
 (answering "not flagged" every time scores 99.82%). **Precision and recall cannot both pass 90% on this

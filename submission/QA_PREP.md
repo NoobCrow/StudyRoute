@@ -58,7 +58,7 @@ assistant work is final and update them to match.
   the provider's own retry time when it gives one) and nothing is done. `NLU_MODE=off` and
   `DIALOGUE_MODE=off` switch the trained parts off, and a changed model file is refused at start-up.
 - **Say plainly:** the Gemini, Groq and Hugging Face paths were tested with mocked HTTP only; none
-  has run against a real provider (risks R15 and R48, `docs/ASSISTANT_CLOUD_VERIFICATION.json`).
+  has run against a real provider (risks R15 and R48 in `docs/SECURITY_SELF_ASSESSMENT.md`).
   Update this line after a real run with `python -m app.scripts.check_ai`.
 
 ## 6. What is the strongest baseline you beat?
@@ -111,7 +111,7 @@ assistant work is final and update them to match.
 - **Is it legal?** We never say so. Every limit is a placeholder marked "Not verified".
 - **Is the AI risk model any good?** On a later period of IBM's public synthetic transaction data
   (never used to choose anything) it puts 63% of the flagged payments in its top 1% (random order finds
-  1%), and the desk's routing catches 56% of them with 29% precision. It learned the
+  1%), and the desk's rule sends 0.34% of payments to a person (99.68% of all payments handled correctly; never flagging anything scores 99.82%). It learned the
   generator's habits (the data has no laundering label on any wire or cross-currency payment, so we
   removed the channel and currencies as inputs), it was never run on real payments, and it only routes:
   a person decides. `docs/AI_RISK.md` shows every number including the bad ones.

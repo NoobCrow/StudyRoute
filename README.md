@@ -64,7 +64,7 @@ All of it is a sandbox: invented banks, synthetic data, no real money. More scre
 | F21 | **Student budget**: invented monthly costs (rent in a shared flat or a studio, food, transport, bills, phone, other) for 20 student cities in the six main countries. The engine adds a month up, converts it to taka (rounded up, so it never promises too little) and shows which cities fit your monthly budget, with the rent share and how much is spare or short. Marked not verified; compare with the university's own estimate | Student guide, Chat |
 | F22 | **Arrival guide**: what to do before you fly, in your first week and in your first month, for each of the six countries and a general list for any other, with a hint on every step and ticks saved in your browser. Indicative; visa, work and registration rules change | Student guide, Chat |
 | F23 | **Fewer clicks to a payment**: the one recipient you have already allowlisted is chosen for you, and **Create draft and request approval** does both steps at once. Approving still needs you and a fresh MFA code | Compare |
-| F24 | **AI risk score and the bank review desk**: a small neural network, trained on your GPU on IBM's public synthetic transactions, gives every payment a risk score out of 100 built from four factors (amount, frequency, timeline, person); a low score shows no warning and nobody waits, a medium or high score shows a warning and waits for a person at the sandbox bank, and every payment needs a person's authorization whatever its score. The reviewer answers yes, no or "tell me more" from one page, signed with MFA. A target-time clock and a reminder keep it moving, and a parent who has never dealt with an AD bank is told what is happening and what to prepare. The AI only routes: it cannot clear, decline or approve, and nothing says a payment is legal or illegal. Precision and recall cannot both pass 90% on this data and the document says so. See [docs/BANK_REVIEW.md](docs/BANK_REVIEW.md) and [docs/AI_RISK.md](docs/AI_RISK.md) | Payment, Bank review |
+| F24 | **AI risk score and the bank review desk**: a small neural network, trained on your GPU on IBM's public synthetic transactions, gives every payment a risk score out of 100 built from four factors (amount, frequency, timeline, person); a low score shows no warning and nobody waits, a medium or high score shows a warning and waits for a person at the sandbox bank, and every payment needs a person's authorization whatever its score. The reviewer answers yes, no or "tell me more" from one page, signed with MFA. A target-time clock and a reminder keep it moving, and a parent who has never dealt with an AD bank is told what is happening and what to prepare. The AI only routes: it cannot clear, decline or approve, and nothing says a payment is legal or illegal. It puts 63% of the flagged transactions in its top 1% (random order: 1%); as a yes/no flag it is modest, and the documents say so. See [docs/BANK_REVIEW.md](docs/BANK_REVIEW.md) and [docs/AI_RISK.md](docs/AI_RISK.md) | Payment, Bank review |
 | F25 | **A trained explainer**: a small language model (FLAN-T5-small, fine-tuned on your GPU on rewrites that a larger teacher model proposed and plain code verified, then pruned and quantised to 53 MB of ONNX) rewords the engine's answer on this machine, with no key and no network. It cannot add a number: 81% of its answers on 700 held-out questions pass every check, **99.8% of the figures it writes are the engine's and 97.5% of the engine's figures are kept**, and when a check fails the engine's own answer is shown. It rewords; it does not know more than the engine. See [docs/AI_EXPLAINER.md](docs/AI_EXPLAINER.md) | Chat |
 | F16 | **Smart escrow** on a simulated chain: Solidity contracts (a tokenised deposit, a tuition escrow, an audit anchor) lock tuition or living costs and pay them on their dates; MFA to lock, pay early or cancel; the bank's reviewer can freeze but never move funds; the audit log's head hash is anchored on the chain | Smart escrow |
 
@@ -230,29 +230,22 @@ config/bank_network.yaml  the invented banks, rails and demo accounts of the ban
 docs/                   BLUEPRINT.md (the spec), SECURITY.md, OPEN_QUESTIONS.md
 ```
 
-## Release notes and cautions
+## Notes and cautions
 
-> **Hardening v2:** See [verified changes and limitations](docs/HARDENING_V2.md).
-> The university-route catalogue is deliberately narrow; unknown routes are not verified.
-
-> **Saved API keys:** refresh/new tabs now restore your account’s saved Gemini/Groq connection.
-
-> **Reviewed repair release (17 Oct 2026).** Read [release fixes and limits](docs/RELEASE_FIXES.md),
-> [current verification evidence](submission/evidence/release/VERIFICATION.md), and
-> [নিরাপদ GitHub push নির্দেশনা](GITHUB_PUSH_BN.md) before uploading. Previously exposed credentials
-> still require owner-side revocation. No competition score is guaranteed.
-> Keys are encrypted on the backend, never stored in browser storage. Sign-out does not delete
-> the saved setting; use **Remove saved key**. Read [installation and safety](docs/SAVED_API_KEY.bn.md).
-
-> **Cloud assistant update:** Gemini/Groq encrypted account-linked saved-key controls and an owned Hugging Face
-> ZeroGPU Space adapter are now available. See [বাংলা setup guide](docs/ASSISTANT_CLOUD_SETUP.bn.md)
-> and [verification / limitations](docs/ASSISTANT_CLOUD_TESTS.md). **With no key and no Space the
-> assistant runs offline** (the engine's facts, reworded by a small trained model on this machine, or in labelled template mode with `EXPLAINER_MODE=off`): this is the default, so
-> `docker compose up` works with nothing configured. A person's own saved or per-request
-> Gemini or Groq key uses the cloud whatever the server setting is. To make your Hugging Face
-> Space the default instead, set `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN`
-> and `HF_SPACE_APP_SECRET`); an unreachable Space is then reported as not connected.
-> The cloud paths have **not** been live-tested with a real HF account or real provider keys.
+* The university-route catalogue is deliberately narrow; unknown routes are marked unverified, not guessed.
+* **With no key and no Space the assistant runs offline** (the engine's facts, reworded by a small trained
+  model on this machine, or in labelled template mode with `EXPLAINER_MODE=off`). This is the default, so
+  `docker compose up` works with nothing configured. A person's own saved or per-request Gemini or Groq key
+  uses the cloud whatever the server setting is. To make your Hugging Face Space the default instead, set
+  `ASSISTANT_CLOUD_ENABLED=true` (with `HF_SPACE_URL`, `HF_TOKEN` and `HF_SPACE_APP_SECRET`); an unreachable
+  Space is then reported as not connected. The cloud paths have **not** been live-tested with a real
+  provider key or account (risks R15 and R48 in [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md)).
+* Saved provider keys are encrypted on the backend and never kept in browser storage. Sign-out does not delete
+  the saved setting; use **Remove saved key**.
+* Browser sign-in uses an HttpOnly server session, not a token in `sessionStorage`; the bearer API is
+  unchanged.
+* The corridor checks against public sources, and what they do not prove, are in
+  [docs/CORRIDOR_VALIDATION.md](docs/CORRIDOR_VALIDATION.md).
 
 ## Security design in brief
 
@@ -328,7 +321,7 @@ built from engine output, so even a model cannot change them.
 ### The trained agent
 
 The assistant's "reader" is a fine-tuned `bge-small-en-v1.5` (33 million parameters, 34 MB as an int8
-ONNX file, about 7 ms a message on CPU, no network, no key). It was trained for a few minutes on an
+ONNX file, a median of 18 ms a message on CPU, no network, no key). It was trained for a few minutes on an
 NVIDIA RTX 5060 Ti with 35,588 messages: generated ones, plus real bank-customer questions from
 Banking77 (CC BY 4.0). It is **not** trusted with anything: it only proposes, and the engine, the
 deterministic parser and the human approval stay in charge.
@@ -534,17 +527,21 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 
 ## Competition deliverables (FinTechathon 2026, International Track, Topic C)
 
+Start with [submission/README_START_HERE.md](submission/README_START_HERE.md): it lists every deliverable, the
+file to open and how it was checked.
+
 | Official deliverable | Where |
 |----------------------|-------|
-| 01 Technical documentation (architecture, core algorithms, security design) | [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
+| 01 Technical documentation (architecture, core algorithms, security design) | [submission/StudyRoute_Technical_Documentation.pdf](submission/StudyRoute_Technical_Documentation.pdf); source: [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
 | 02 Presentation deck (10 minutes) | [submission/StudyRoute_Deck.pptx](submission/StudyRoute_Deck.pptx) (built by `submission/deck/build_deck.js`); outline in [submission/DECK_OUTLINE.md](submission/DECK_OUTLINE.md) |
 | 03 Demo video (under 5 minutes) | Script in [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md) |
-| 04 Source code, README, deployment instructions, test cases | This repository; [docs/TEST_CASES.md](docs/TEST_CASES.md); [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) |
-| 05 Security self-assessment (permission tiers, known risks) | [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
-| 06 Execution evidence (sandbox operation logs) | [submission/evidence/](submission/evidence/) |
+| 04 Source code, README, deployment instructions, test cases | This repository; [docs/DOCKER.md](docs/DOCKER.md); [docs/TEST_CASES.md](docs/TEST_CASES.md); [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) |
+| 05 Security self-assessment (permission tiers, known risks) | [submission/StudyRoute_Security_Self_Assessment.pdf](submission/StudyRoute_Security_Self_Assessment.pdf); working copy: [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
+| 06 Execution evidence (sandbox operation logs) | [submission/StudyRoute_Execution_Evidence_Report.pdf](submission/StudyRoute_Execution_Evidence_Report.pdf); the raw files and an index: [submission/evidence/](submission/evidence/README.md) |
 
 The official rules and our check against them: [docs/COMPETITION_RULES.md](docs/COMPETITION_RULES.md). The
-registration record: [submission/REGISTRATION.md](submission/REGISTRATION.md).
+registration record: [submission/REGISTRATION.md](submission/REGISTRATION.md). All documents are indexed in
+[docs/README.md](docs/README.md).
 
 Step by step: [submission/CHECKLIST.md](submission/CHECKLIST.md). Regenerate the evidence with
 `python -m app.scripts.export_evidence --tamper` against a running API with fresh demo data.
@@ -571,8 +568,3 @@ what only a person can supply (registration, video, deck).
 StudyRoute is a sandbox for a competition. It is not a bank, an Authorised Dealer or a financial
 adviser, gives no legal, tax or investment advice, and never moves real money. Regulatory figures
 are placeholders until checked against official sources.
-
-
-> **Cumulative assistant + session update:** See [বাংলা installation and session guide](docs/SESSION_FIX.bn.md).
-Browser login now uses an HttpOnly server session instead of a refresh token in sessionStorage;
-legacy bearer API rotation is unchanged. Preserve your existing `.env`, `.venv` and database.
