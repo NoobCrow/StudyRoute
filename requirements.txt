@@ -1,2 +1,0 @@
-# Managed Python profile installs from the repository root.
--r backend/requirements.txt

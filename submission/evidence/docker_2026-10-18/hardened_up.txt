@@ -1,8 +1,0 @@
- Volume studyroute_studyroute-data  Removed
- Network studyroute_default  Removed
- Container studyroute-backend-1  Waiting
- Container studyroute-web-1  Waiting
- Container studyroute-backend-1  Healthy
- Container studyroute-web-1  Healthy
-/studyroute-backend-1 ReadonlyRootfs=true CapDrop=[ALL] User=studyroute Health=healthy
-/studyroute-web-1 ReadonlyRootfs=true CapDrop=[ALL] User=101 Health=healthy

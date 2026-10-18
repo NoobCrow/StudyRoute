@@ -1,9 +1,0 @@
-{
-  "scope": "AI-authored synthetic English context-free intent challenge, not independent or user-tested.",
-  "frozen_before_first_run": true,
-  "dataset_sha256": "46450cbcae7cc1c9ae4bcc2a5050c14ebb4dc72f2d8a7c0c004658bf08bc8063",
-  "n": 60,
-  "reference_today": "2026-10-15",
-  "excluded": "No slot accuracy, multi-turn execution, cloud LLM, bank quote, student study or financial outcome is measured.",
-  "review_process": "Gold labels authored before first run, not altered to match outputs. No training or threshold adjustment on these cases."
-}
