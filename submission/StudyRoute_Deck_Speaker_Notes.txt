@@ -1,5 +1,5 @@
 StudyRoute: speaker notes for the 10-minute presentation
-20 slides, 1,274 words: about 8.5 minutes at 150 words a minute (9.8 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
+21 slides, 1,299 words: about 8.7 minutes at 150 words a minute (10.0 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
 Say it in your own words; the notes are a guide, not a script to read.
 ==============================================================================
 
@@ -27,59 +27,63 @@ SLIDE 6: Live: comparing providers   (about 61 words, 24 seconds; running total 
 
 This is the public site, studyroute dot bot-keep dot xyz, opened on the 19th: ten thousand pounds of UK tuition. The ranking is the one our test T01 asserts: Provider B at 1.58 percent, Provider C at 1.63 with a warning that the university would be 35 pounds short, Provider A at 2.16. The engine calculates; the screen only shows it.
 
-SLIDE 7: The engine does the maths   (about 68 words, 27 seconds; running total 2:52)
+SLIDE 7: The engine does the maths   (about 57 words, 23 seconds; running total 2:48)
 
-Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens.
+Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the send plan and the currency stress test.
 
-SLIDE 8: Live: one sentence, read back   (about 62 words, 25 seconds; running total 3:17)
+SLIDE 8: Live: one sentence, read back   (about 62 words, 25 seconds; running total 3:13)
 
 On the live site the parent types one sentence. The trained reader only proposes; plain code turns the words into values; and the assistant must read them back before it plans. Only after a yes does it plan. Beside it, the deadline planner works backwards: send by 22 October. The assistant cannot approve; only the parent can, with a fresh MFA code.
 
-SLIDE 9: An AI that cannot cheat   (about 68 words, 27 seconds; running total 3:44)
+SLIDE 9: An AI that cannot cheat   (about 57 words, 23 seconds; running total 3:36)
 
-The assistant follows a fixed pipeline: a policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. The model is the only step that is not deterministic, and any figure it invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.
+The assistant follows a fixed pipeline: policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. Any figure the model invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.
 
-SLIDE 10: Trained agents, measured   (about 62 words, 25 seconds; running total 4:09)
+SLIDE 10: Trained agents, measured   (about 62 words, 25 seconds; running total 4:01)
 
 The assistant has a trained part, and we measured it, but the envelope matters more than the benchmark. A small model reads the intent and marks amounts, currencies and dates. A reinforcement-learning policy decides when to ask, read back or plan. A third rewords the engine's answer, every rewrite checked in code; a fourth scores each payment for a person to review.
 
-SLIDE 11: Models against baselines   (about 67 words, 27 seconds; running total 4:36)
+SLIDE 11: Models against baselines   (about 67 words, 27 seconds; running total 4:28)
 
 The same numbers as a graph. Left: the trained reader against our old rules on 113 messages written after it was frozen. Top right: the risk router's top one percent holds 63.2% of flagged payments; random order finds 1.2%. Bottom right: the dialogue policy cut wrong plans from 2.8% to 0.8% on simulated parents. Small samples, and as a plain yes or no the router is modest.
 
-SLIDE 12: Proven, and not proven yet   (about 65 words, 26 seconds; running total 5:02)
+SLIDE 12: Risk score, human decision   (about 59 words, 24 seconds; running total 4:52)
+
+Every payment gets an AI risk score out of 100 from four factors: amount, frequency, timeline and person. Low means no warning and nobody waits. Medium or high shows a warning and sends the payment to a person at the bank, who answers yes, ask for more, or no, with MFA. The score never approves; the parent still authorizes.
+
+SLIDE 13: Proven, and not proven yet   (about 65 words, 26 seconds; running total 5:18)
 
 What we have shown: one engine for every number, a human-only approval, an audit log that fails Verify when one row is edited, a Docker run, and attack probes defended. What we have not shown: rates and costs are invented, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders. Both lists are in the repository.
 
-SLIDE 13: Every test we ran   (about 59 words, 24 seconds; running total 5:26)
+SLIDE 14: Every test we ran   (about 59 words, 24 seconds; running total 5:42)
 
 Everything we ran: 1,679 backend tests, one skipped on Windows; 463 web tests; 24 browser tests; all 24 scenarios mapped; 314 security probe records. On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests; a fresh clone runs 1,672 of 1,673, and no outside party has tested it.
 
-SLIDE 14: Security you can verify   (about 66 words, 26 seconds; running total 5:52)
+SLIDE 15: Security you can verify   (about 66 words, 26 seconds; running total 6:08)
 
 Security and compliance is thirty percent of the score, so we made it checkable. Permission tiers are enforced in the domain layer, not just the screens. Only a human parent with a fresh MFA proof, bound to that payment, can approve; the AI has no approve, cancel or limit permission. On the right, the live audit log says PASS, and one edited row makes it fail.
 
-SLIDE 15: Attacking our own app   (about 74 words, 30 seconds; running total 6:22)
+SLIDE 16: Attacking our own app   (about 74 words, 30 seconds; running total 6:38)
 
 We attacked our own application with six tools: access control, browser and XSS, planted secrets, hostile prompts, man-in-the-middle and replay, and login guessing. 314 records, all pass or informational. The man-in-the-middle test is the honest one: altered approvals, swapped MFA proofs, a stolen token and replayed webhooks were refused. But on plain HTTP a listener reads the password and token, and a stolen token can cancel a draft. We do not call that safe.
 
-SLIDE 16: Security problems we found   (about 71 words, 28 seconds; running total 6:50)
+SLIDE 17: Security problems we found   (about 71 words, 28 seconds; running total 7:06)
 
 We list our security problems because hiding them would cost more. On plain HTTP a listener reads the password and token; the public site uses HTTPS with HSTS, but nobody else has tested that. A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.
 
-SLIDE 17: Honest by design   (about 56 words, 22 seconds; running total 7:12)
+SLIDE 18: Honest by design   (about 56 words, 22 seconds; running total 7:28)
 
 Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.
 
-SLIDE 18: Why it can work   (about 68 words, 27 seconds; running total 7:39)
+SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 7:50)
 
-Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. A partner bank could pay a small fee for pre-checked, risk-routed files. We have no partner, pilot or real users yet; these are numbers to test.
+Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. We have no partner, pilot or real users yet; these are numbers to test.
 
-SLIDE 19: What the brief asked   (about 58 words, 23 seconds; running total 8:02)
+SLIDE 20: What the brief asked   (about 58 words, 23 seconds; running total 8:13)
 
 Back to the brief. The technical documentation, this ten-minute deck, the source on a public repository with CI green, the security self-assessment and the execution evidence are all in. The narrated demo video is optional and still pending. Everything is a sandbox with synthetic data. And for the three scoring criteria, here are the slides that show each.
 
-SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:28)
+SLIDE 21: What comes next   (about 65 words, 26 seconds; running total 8:39)
 
 Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.
 
@@ -132,4 +136,11 @@ A: Because the man-in-the-middle test showed that on plain HTTP a listener
    cancel a draft. Approval still needs a fresh MFA proof bound to the
    payment, and that held in every test. The security self-assessment lists
    every record with its raw-log hash. Saying so is cheaper than being found out.
-
+Q: Does the risk score decide anything, and is it accurate?
+A: It decides nothing. It orders payments for a person at the bank: its top 1%
+   holds 63.2% of the flagged payments in the test period, random order 1.2%.
+   As a plain yes or no it is modest: at the desk's rule it sends 0.34% of
+   payments to a person, with precision 29% and recall 56%, and flagging nothing
+   would already be 99.8% accurate. Precision and recall cannot both pass 90% on
+   this data. It learned from public synthetic data, only routes, and every
+   payment still needs the parent's fresh MFA code.

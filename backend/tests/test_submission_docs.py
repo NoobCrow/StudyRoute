@@ -79,15 +79,15 @@ def test_the_checklist_states_the_team_size_rule_and_the_deadline() -> None:
         assert f"| {number} |" in text
 
 
-def test_the_deck_is_a_real_twenty_slide_powerpoint_file_with_speaker_notes() -> None:
+def test_the_deck_is_a_real_twenty_one_slide_powerpoint_file_with_speaker_notes() -> None:
     import zipfile
 
     with zipfile.ZipFile(ROOT / "submission" / "StudyRoute_Deck.pptx") as deck:
         names = deck.namelist()
         slides = [n for n in names if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)]
         notes = [n for n in names if re.fullmatch(r"ppt/notesSlides/notesSlide\d+\.xml", n)]
-        assert len(slides) == 20, "about half a minute each, inside the 10-minute cap"
-        assert len(notes) == 20
+        assert len(slides) == 21, "about half a minute each, inside the 10-minute cap"
+        assert len(notes) == 21
         words = sum(
             len(" ".join(re.findall(r"<a:t>([^<]*)</a:t>", deck.read(n).decode("utf-8"))).split())
             - 1

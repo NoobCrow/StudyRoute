@@ -278,7 +278,7 @@ const split = [["FX margin", 16000, "accent1", 63], ["Fixed fee", 3000, "accent4
 slides.push({
   layout: "content", section: "The solution", title: "The engine does the maths",
   notes:
-    "Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens.",
+    "Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the send plan and the currency stress test.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -353,7 +353,7 @@ const guarantees = [
 slides.push({
   layout: "content", section: "Trust", title: "An AI that cannot cheat",
   notes:
-    "The assistant follows a fixed pipeline: a policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. The model is the only step that is not deterministic, and any figure it invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.",
+    "The assistant follows a fixed pipeline: policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. Any figure the model invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.",
   elements: [
     text(0.5, 1.16, 9, 0.3, "Our thesis: AI can participate only if it cannot be the financial authority.", { size: 13, bold: true, color: "accent1" }),
     ...pipeline.flatMap((label, i) => {
@@ -489,7 +489,7 @@ slides.push({
   layout: "content", section: "Close", title: "Why it can work",
   notes:
     "Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. " +
-    "If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. A partner bank could pay a small fee for pre-checked, risk-routed files. " +
+    "If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. " +
     "We have no partner, pilot or real users yet; these are numbers to test.",
   elements: [
     ...market.flatMap(([num, body], i) => {
@@ -751,7 +751,7 @@ slides.push({
   const done = { text: "Done", bold: true, color: "accent6" };
   const rows = [
     ["Technical documentation", "20-page PDF: architecture, algorithms, security design", done],
-    ["Deck of 10 minutes", "This deck: 20 slides, speaker notes about 9 minutes", done],
+    ["Deck of 10 minutes", "This deck: 21 slides, speaker notes about 9 minutes", done],
     ["Demo video, 5 minutes", "Script and a silent recording; narrated video pending", { text: "Pending", bold: true, color: "accent3" }],
     ["Source, README, GitHub link", "Public repository; docker compose up; CI green", done],
     ["Security self-assessment", "39 pages: 55 risks, 314 probe records, findings", done],
@@ -761,9 +761,9 @@ slides.push({
     { text: a, bold: true, fill: i % 2 === 0 ? "background2" : undefined }, { text: b, fill: i % 2 === 0 ? "background2" : undefined }, { ...c, fill: i % 2 === 0 ? "background2" : undefined },
   ]);
   const scoring = [
-    ["Task completion", "40%", "Slides 5 to 8 and 13"],
-    ["Security and compliance", "30%", "Slides 9 and 14 to 17"],
-    ["Innovation and interaction", "30%", "Slides 8 to 11 and 18"],
+    ["Task completion", "40%", "Slides 5 to 8 and 14"],
+    ["Security and compliance", "30%", "Slides 9 and 15 to 18"],
+    ["Innovation and interaction", "30%", "Slides 8 to 12 and 19"],
   ];
   slides.push({
     layout: "content", section: "Close", title: "What the brief asked",
@@ -786,8 +786,44 @@ slides.push({
   });
 }
 
+// 21: the AI risk score and the human decision ----------------------------------------------------
+{
+  const card1 = image("43-risk-score-card.png", 0.5, 1.35, 5.6, 1.89, "The parent's view: AI risk score 99 out of 100 with the four factors");
+  const card2 = image("44-review-decision.png", 0.5, 3.72, 2.7, 1.43, "The bank reviewer's decision: yes, ask for more or no, signed with MFA");
+  const steps = [
+    ["1  Score", "A small neural network rates each payment 0 to 100 from four factors: amount, frequency, timeline and person."],
+    ["2  Route", "Low: no warning, nobody waits. Medium or high: a warning, and a person at the bank looks."],
+    ["3  Decide", "The reviewer answers yes, ask for more or no, signed with a fresh MFA code. The parent still authorizes."],
+    ["4  Limits", `It never clears, declines or approves. Its top 1% holds ${pc(riskOrder.found_in_top_1_percent)} of flagged payments (random: ${pc(riskRandom.found_in_top_1_percent)}). Trained on public synthetic data.`],
+  ];
+  slides.push({
+    layout: "content", section: "Trust", title: "Risk score, human decision",
+    notes:
+      "Every payment gets an AI risk score out of 100 from four factors: amount, frequency, timeline and person. Low means no warning and nobody waits. " +
+      "Medium or high shows a warning and sends the payment to a person at the bank, who answers yes, ask for more, or no, with MFA. The score never approves; the parent still authorizes.",
+    elements: [
+      rect(0.42, 1.27, 5.76, 2.05, "background1", { round: 0.06, line: "accent5", shadow: true }),
+      card1,
+      text(0.5, 3.36, 5.6, 0.3, "The parent's view: score 99 of 100, medium risk, the four factors and a warning.", { size: 10, color: "text2" }),
+      rect(0.42, 3.64, 2.86, 1.59, "background1", { round: 0.06, line: "accent5", shadow: true }),
+      card2,
+      text(3.45, 3.8, 2.65, 1.3, "The bank reviewer's view: three answers, signed with a fresh MFA code. The AI cannot choose for them.", { size: 10, color: "text2" }),
+      ...steps.flatMap(([head, body], i) => {
+        const y = 1.35 + i * 0.97;
+        return [
+          card(6.4, y, 3.1, 0.89),
+          rect(6.4, y, 0.07, 0.89, i === 3 ? "accent3" : "accent1"),
+          text(6.58, y + 0.04, 2.85, 0.26, head, { size: 11.5, bold: true, color: "text1", valign: "middle" }),
+          text(6.58, y + 0.3, 2.85, 0.58, body, { size: 9, color: "text2" }),
+        ];
+      }),
+      text(0.5, 5.3, 9, 0.25, "Local sandbox screenshots, synthetic data. Indicative. Confirm with your AD bank.", { size: 9, color: "text2" }),
+    ],
+  });
+}
+
 // Final order: the live and chart slides sit beside the slides they support.
-const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 7, 17, 10, 18, 19, 11, 12, 20, 13];
+const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 21, 7, 17, 10, 18, 19, 11, 12, 20, 13];
 if (slides.length !== ORDER.length) throw new Error(`Expected ${ORDER.length} slides, found ${slides.length}.`);
 slides.splice(0, slides.length, ...ORDER.map((n) => slides[n - 1]));
 

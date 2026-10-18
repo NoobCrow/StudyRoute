@@ -11,7 +11,7 @@ The organiser's e-mail of 15 October 2026 makes items 1 and 2 mandatory and the 
 | # | Deliverable | Open this | Source or detail |
 |---|-------------|-----------|------------------|
 | 1 | Technical documentation: system architecture, core algorithms, security design (mandatory) | [StudyRoute_Technical_Documentation.pdf](StudyRoute_Technical_Documentation.pdf) (20 pages) | [docs/TECHNICAL_DOCUMENTATION.md](../docs/TECHNICAL_DOCUMENTATION.md) |
-| 2 | Presentation deck, 10 minutes (mandatory) | [StudyRoute_Deck.pptx](StudyRoute_Deck.pptx) (20 slides, speaker notes inside, about 8.5 minutes) | [deck/build_deck.js](deck/build_deck.js), [DECK_OUTLINE.md](DECK_OUTLINE.md) |
+| 2 | Presentation deck, 10 minutes (mandatory) | [StudyRoute_Deck.pptx](StudyRoute_Deck.pptx) (21 slides, speaker notes inside, about 8.7 minutes) | [deck/build_deck.js](deck/build_deck.js), [DECK_OUTLINE.md](DECK_OUTLINE.md) |
 | 3 | Demo video, under 5 minutes (optional) | Script: [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md). The final narrated video is not included. A supporting silent screen recording is [StudyRoute_Demo.mp4](StudyRoute_Demo.mp4) | |
 | 4 | Source code, README, deployment, test cases (optional) | [README.md](../README.md), then `docker compose up --build` and http://localhost:8080 | [docs/DOCKER.md](../docs/DOCKER.md), [docs/TEST_CASES.md](../docs/TEST_CASES.md) |
 | 5 | Security self-assessment: permission tiers and known risks (optional) | [StudyRoute_Security_Self_Assessment.pdf](StudyRoute_Security_Self_Assessment.pdf) (39 pages; edition 1.2, including attack/leakage/MITM evidence and all 314 recorded check labels) | [Expanded report Markdown](StudyRoute_Security_Self_Assessment.md); [original control assessment](../docs/SECURITY_SELF_ASSESSMENT.md) |

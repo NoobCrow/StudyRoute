@@ -50,7 +50,7 @@ PLACEHOLDER_FILES = (
     "submission/EMAIL_TEMPLATES.md",
 )
 # What `scripts/personalize.py` fills in. Anything else in square brackets is for you at send time.
-SLIDES = 20  # about 30 seconds each, inside the 10-minute cap
+SLIDES = 21  # about 30 seconds each, inside the 10-minute cap
 WORDS_PER_MINUTE = 150  # a normal speaking pace
 MAX_SPEECH_MINUTES = 10
 PLACEHOLDERS = ("[Team name]", "[team name]", "[repository link]", "[names and universities]")
