@@ -36,7 +36,11 @@ def trusted_browser(request: Request, ctx: AppContext) -> None:
         raise errors.Forbidden("Cross-site browser authentication is not allowed.")
     origin = request.headers.get("origin", "")
     own = f"{request.url.scheme}://{request.url.netloc}"
-    allowed = {own, *ctx.settings.cors_origin_list}
+    allowed = (
+        {ctx.settings.public_origin}
+        if ctx.settings.public_origin
+        else {own, *ctx.settings.cors_origin_list}
+    )
     if not origin or origin == "null" or origin not in allowed:
         raise errors.Forbidden("Browser authentication origin is not allowed.")
     parsed = urlsplit(origin)
@@ -45,7 +49,11 @@ def trusted_browser(request: Request, ctx: AppContext) -> None:
 
 
 def secure_cookie(request: Request, ctx: AppContext) -> bool:
-    return not ctx.settings.is_sandbox or request.url.scheme == "https"
+    return (
+        not ctx.settings.is_sandbox
+        or request.url.scheme == "https"
+        or ctx.settings.public_origin.startswith("https://")
+    )
 
 
 def set_cookie(response: Response, request: Request, ctx: AppContext, raw: str) -> None:

@@ -576,3 +576,10 @@ are placeholders until checked against official sources.
 > **Cumulative assistant + session update:** See [বাংলা installation and session guide](docs/SESSION_FIX.bn.md).
 Browser login now uses an HttpOnly server session instead of a refresh token in sessionStorage;
 legacy bearer API rotation is unchanged. Preserve your existing `.env`, `.venv` and database.
+
+## Botkeep GitHub branch deployment
+
+See [BOTKEEP_DEPLOY_BN.md](BOTKEEP_DEPLOY_BN.md). Use branch `botkeep`, repository root,
+Python requirements.txt, and `python main.py`. This branch contains the prebuilt public UI
+in `deploy/botkeep/site/` so no Node build is needed on the managed Python server.
+Preserve DATA_DIR and matching secrets; configure the exact HTTPS PUBLIC_ORIGIN.

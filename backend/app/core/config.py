@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     rules_file: Path | None = None
     bank_network_file: Path | None = None
+    public_origin: str = ""
     cors_origins: str = (
         "http://localhost:3000,http://127.0.0.1:3000,http://localhost:8080,http://127.0.0.1:8080"
     )
@@ -94,6 +95,20 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _finalise(self) -> Settings:
+        if self.public_origin:
+            from urllib.parse import urlsplit
+
+            parsed = urlsplit(self.public_origin)
+            if (
+                parsed.scheme not in {"http", "https"}
+                or not parsed.netloc
+                or parsed.path not in {"", "/"}
+                or parsed.query
+                or parsed.fragment
+                or parsed.username
+            ):
+                raise ValueError("PUBLIC_ORIGIN must be an http(s) origin without a path")
+            self.public_origin = self.public_origin.rstrip("/")
         if not self.database_url:
             self.database_url = f"sqlite:///{(self.data_dir / 'studyroute.db').as_posix()}"
         if self.app_env == "production":
