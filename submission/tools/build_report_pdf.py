@@ -117,7 +117,7 @@ def cover_html(items: list[tuple[str, str]]) -> str:
         f"<div class='toc'><div class='h'>REPORT CONTENTS</div><div class='cols'><div class='col'>{column(items[:half])}</div>"
         f"<div class='col'>{column(items[half:])}</div></div></div>"
         f"<div class='foot'><div class='a'><span>{DOC_ID} &nbsp;|&nbsp; {EDITION}</span><span>{DATE}</span></div>"
-        "<div class='b'>Prepared for StudyRoute submission review &bull; English edition &bull; Team TeamEkxin</div></div>"
+        "<div class='b'>Prepared for StudyRoute submission review &bull; Team TeamEkxin &bull; github.com/NoobCrow/StudyRoute</div></div>"
         "</body></html>"
     )
 
@@ -171,7 +171,7 @@ def main() -> int:
         writer.add_page(PdfReader(str(work / "cover.pdf")).pages[0])
         for page in PdfReader(str(work / "body.pdf")).pages:
             writer.add_page(page)
-        writer.add_metadata({"/Title": "StudyRoute | Technical Documentation", "/Subject": f"{DOC_ID} {EDITION}"})
+        writer.add_metadata({"/Title": "StudyRoute | Technical Documentation", "/Author": "TeamEkxin", "/Subject": f"{DOC_ID} {EDITION}"})
         with TARGET.open("wb") as handle:
             writer.write(handle)
     pages = len(PdfReader(str(TARGET)).pages)

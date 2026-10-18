@@ -1,6 +1,7 @@
 # StudyRoute: technical report
 
 International Track, Topic C: Cross-border and Student Finance Assistant. Team: TeamEkxin.
+Code and evidence: https://github.com/NoobCrow/StudyRoute (public; `docker compose up --build`, then http://localhost:8080).
 
 > StudyRoute is a sandbox. No real money moves and all data is synthetic. Guidance is indicative:
 > confirm with your Authorised Dealer (AD) bank.

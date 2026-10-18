@@ -193,6 +193,11 @@ def main() -> int:
                 i += 1
             add_inline(document.add_paragraph(), " ".join(parts))
     TARGET.parent.mkdir(parents=True, exist_ok=True)
+    properties = document.core_properties
+    properties.author = "TeamEkxin"
+    properties.last_modified_by = "TeamEkxin"
+    properties.title = "StudyRoute: technical documentation"
+    properties.subject = "FinTechathon 2026, International Track, Topic C"
     document.save(str(TARGET))
     print(f"wrote {TARGET.name}: {len(document.paragraphs)} paragraphs, {len(document.tables)} tables, "
           f"{len(document.inline_shapes)} images")
