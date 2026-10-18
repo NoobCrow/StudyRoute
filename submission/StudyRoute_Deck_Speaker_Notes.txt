@@ -1,0 +1,135 @@
+StudyRoute: speaker notes for the 10-minute presentation
+20 slides, 1,274 words: about 8.5 minutes at 150 words a minute (9.8 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
+Say it in your own words; the notes are a guide, not a script to read.
+==============================================================================
+
+SLIDE 1: StudyRoute   (about 59 words, 24 seconds; running total 0:24)
+
+Good morning. We are team TeamEkxin, and this is StudyRoute, our Topic C entry: a sandbox AI agent that helps a parent in Bangladesh pay tuition abroad. Everything is synthetic, no real money moves, and it runs live at studyroute dot bot-keep dot xyz. Our rule: the engine calculates, the AI explains, the human approves, every step is logged.
+
+SLIDE 2: The posted fee is not the price   (about 61 words, 24 seconds; running total 0:48)
+
+Parents compare banks by the fee they are shown. In our synthetic example, for ten thousand pounds with Provider B, 63 percent of the real cost is the hidden exchange-rate margin. Correspondent banks can deduct fees on the way, so the university may be paid short; the deadline spans two calendars; and the paperwork is unclear. Those five problems shape StudyRoute.
+
+SLIDE 3: A family carries the risk   (about 61 words, 24 seconds; running total 1:12)
+
+Two people feel this. The parent pays in taka, compares by the posted fee, and approves a large transfer with little to check it against. The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. StudyRoute gives both one plan; the parent decides, and the student can see but cannot approve.
+
+SLIDE 4: How money really moves   (about 60 words, 24 seconds; running total 1:36)
+
+This is the real chain: taka to an authorised dealer bank, a SWIFT instruction, a correspondent bank that may take a fee, a receiving bank that may take another, and the university matching by reference. Each step fails in a typical way, shown in red. We simulate the chain with invented banks and a double-entry ledger; no real money moves.
+
+SLIDE 5: From question to settled payment   (about 63 words, 25 seconds; running total 2:01)
+
+This is task completion. The parent types one sentence; the agent makes the quote, ranks providers, plans the deadline, checks KYC, and builds this plan card from engine output. A person creates the draft and approves with a fresh MFA code. The agent blocks the payment until KYC, allowlist and caps pass, then tracks it to settled. It never creates a payment itself.
+
+SLIDE 6: Live: comparing providers   (about 61 words, 24 seconds; running total 2:25)
+
+This is the public site, studyroute dot bot-keep dot xyz, opened on the 19th: ten thousand pounds of UK tuition. The ranking is the one our test T01 asserts: Provider B at 1.58 percent, Provider C at 1.63 with a warning that the university would be 35 pounds short, Provider A at 2.16. The engine calculates; the screen only shows it.
+
+SLIDE 7: The engine does the maths   (about 68 words, 27 seconds; running total 2:52)
+
+Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens.
+
+SLIDE 8: Live: one sentence, read back   (about 62 words, 25 seconds; running total 3:17)
+
+On the live site the parent types one sentence. The trained reader only proposes; plain code turns the words into values; and the assistant must read them back before it plans. Only after a yes does it plan. Beside it, the deadline planner works backwards: send by 22 October. The assistant cannot approve; only the parent can, with a fresh MFA code.
+
+SLIDE 9: An AI that cannot cheat   (about 68 words, 27 seconds; running total 3:44)
+
+The assistant follows a fixed pipeline: a policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. The model is the only step that is not deterministic, and any figure it invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.
+
+SLIDE 10: Trained agents, measured   (about 62 words, 25 seconds; running total 4:09)
+
+The assistant has a trained part, and we measured it, but the envelope matters more than the benchmark. A small model reads the intent and marks amounts, currencies and dates. A reinforcement-learning policy decides when to ask, read back or plan. A third rewords the engine's answer, every rewrite checked in code; a fourth scores each payment for a person to review.
+
+SLIDE 11: Models against baselines   (about 67 words, 27 seconds; running total 4:36)
+
+The same numbers as a graph. Left: the trained reader against our old rules on 113 messages written after it was frozen. Top right: the risk router's top one percent holds 63.2% of flagged payments; random order finds 1.2%. Bottom right: the dialogue policy cut wrong plans from 2.8% to 0.8% on simulated parents. Small samples, and as a plain yes or no the router is modest.
+
+SLIDE 12: Proven, and not proven yet   (about 65 words, 26 seconds; running total 5:02)
+
+What we have shown: one engine for every number, a human-only approval, an audit log that fails Verify when one row is edited, a Docker run, and attack probes defended. What we have not shown: rates and costs are invented, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders. Both lists are in the repository.
+
+SLIDE 13: Every test we ran   (about 59 words, 24 seconds; running total 5:26)
+
+Everything we ran: 1,679 backend tests, one skipped on Windows; 463 web tests; 24 browser tests; all 24 scenarios mapped; 314 security probe records. On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests; a fresh clone runs 1,672 of 1,673, and no outside party has tested it.
+
+SLIDE 14: Security you can verify   (about 66 words, 26 seconds; running total 5:52)
+
+Security and compliance is thirty percent of the score, so we made it checkable. Permission tiers are enforced in the domain layer, not just the screens. Only a human parent with a fresh MFA proof, bound to that payment, can approve; the AI has no approve, cancel or limit permission. On the right, the live audit log says PASS, and one edited row makes it fail.
+
+SLIDE 15: Attacking our own app   (about 74 words, 30 seconds; running total 6:22)
+
+We attacked our own application with six tools: access control, browser and XSS, planted secrets, hostile prompts, man-in-the-middle and replay, and login guessing. 314 records, all pass or informational. The man-in-the-middle test is the honest one: altered approvals, swapped MFA proofs, a stolen token and replayed webhooks were refused. But on plain HTTP a listener reads the password and token, and a stolen token can cancel a draft. We do not call that safe.
+
+SLIDE 16: Security problems we found   (about 71 words, 28 seconds; running total 6:50)
+
+We list our security problems because hiding them would cost more. On plain HTTP a listener reads the password and token; the public site uses HTTPS with HSTS, but nobody else has tested that. A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.
+
+SLIDE 17: Honest by design   (about 56 words, 22 seconds; running total 7:12)
+
+Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.
+
+SLIDE 18: Why it can work   (about 68 words, 27 seconds; running total 7:39)
+
+Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. A partner bank could pay a small fee for pre-checked, risk-routed files. We have no partner, pilot or real users yet; these are numbers to test.
+
+SLIDE 19: What the brief asked   (about 58 words, 23 seconds; running total 8:02)
+
+Back to the brief. The technical documentation, this ten-minute deck, the source on a public repository with CI green, the security self-assessment and the execution evidence are all in. The narrated demo video is optional and still pending. Everything is a sandbox with synthetic data. And for the three scoring criteria, here are the slides that show each.
+
+SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:28)
+
+Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.
+
+==============================================================================
+
+ANTICIPATED Q&A (keep this page; do not read it aloud)
+==========================================================================
+
+Q: Where is the AI? Your models are small and optional.
+A: That is the point. The AI's job is to read, explain and propose — not to
+   decide. We measured four small models against baselines we ran and
+   published the modest results. A bank will not deploy an AI that can
+   approve a payment; our architecture makes that impossible by
+   construction, not by prompt. The envelope is the contribution.
+
+Q: Why didn't you ship the 13-input risk model that scored higher?
+A: Time and re-testing cost, not concealment. It needs five more runtime
+   inputs and a bank-review re-test we did not finish before the freeze.
+   We published the comparison rather than omit it; it is the first
+   improvement on our list.
+
+Q: Are any of your numbers real?
+A: Yes, three: the problem framing, the Bangladesh Bank volume figure
+   (USD 881.7m, via The Observer) and four study-abroad rules read in the
+   official circular. Everything financial — rates, fees, providers, KYC,
+   banks, settlement — is synthetic, and the 8.8m figure is our
+   arithmetic. Every screen carries the banner.
+
+Q: Why do backend test counts differ between machines?
+A: 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
+   The execution evidence report and technical documentation explain the fixture gap.
+
+Q: You have no real users and no partner. Why should this win?
+A: Because it is the kind of AI a bank can actually deploy: every number
+   from a pure engine, every model behind a deterministic guard, every
+   payment approved by a human with a fresh MFA proof bound to the summary
+   they saw, and every step in a tamper-evident audit log. That is the
+   hard part. A pilot with one AD bank branch and a few dozen families is
+   the next step, and we say so.
+
+Q: The live site is a public deployment. Has it been tested?
+A: We checked three things on 19 Oct: it answers over HTTPS with a valid
+   certificate and an HSTS header, the sandbox banner and X-Sandbox header
+   are present, and the comparison matches our test T01. Our attack tools
+   ran against lab copies, not that host, and no outside party has tested it.
+
+Q: Why show your security problems on a slide?
+A: Because the man-in-the-middle test showed that on plain HTTP a listener
+   reads the password and token, and a stolen token can read payments and
+   cancel a draft. Approval still needs a fresh MFA proof bound to the
+   payment, and that held in every test. The security self-assessment lists
+   every record with its raw-log hash. Saying so is cheaper than being found out.
+

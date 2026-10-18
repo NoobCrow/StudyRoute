@@ -1,90 +1,41 @@
-# Deck outline (blueprint 19.2) as slide text
+# Deck outline as slide text
 
-Thirteen slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The
-rules cap the final presentation at **10 minutes**. The speaker notes in the file are about **8.4
-minutes** of speech at a normal 150 words a minute (about 9.7 at a slow 130), so keep any
-live demo to **1 minute** or none and point to the recorded video (`VIDEO_SCRIPT.md` is its scene
-list, 4:50). `python scripts/preflight.py` fails if the notes ever run past 10 minutes at 150 words a minute. Rehearse with a timer and trim a note if you run over. Screenshots come from the running app; they are
-in `submission/screenshots/`, or take fresh ones after `docker compose up --build`.
-Keep every figure synthetic and keep the sandbox banner visible in each screenshot.
+Twenty slides for the judges, built as `StudyRoute_Deck.pptx` (generator: `deck/build_deck.js`). The rules cap
+the final presentation at **10 minutes**. The speaker notes in the file are about **8.5 minutes** of speech at a
+normal 150 words a minute (about 9.8 at a slow 130), which is about half a minute a slide, so keep any live demo
+to nothing and point to the live site and the video (`VIDEO_SCRIPT.md` is its scene list). The notes are also in
+`StudyRoute_Deck_Speaker_Notes.txt` with a time for each slide and an anticipated Q&A page that is not read aloud.
+`python scripts/preflight.py` fails if the notes ever run past 10 minutes at 150 words a minute. Rehearse with a
+timer and trim a note if you run over.
 
-## 1. StudyRoute
-- Cross-border and Student Finance Assistant (Topic C). Team: TeamEkxin.
-- "The engine calculates, the AI explains, the human approves, and every step is logged."
-- Sandbox: synthetic data, no real money moves.
+Pictures marked **live** are screenshots of the public deployment (https://studyroute.bot-keep.xyz) taken on
+19 Oct 2026 and kept in `submission/screenshots/live/`. Everything shown is synthetic and the sandbox banner is
+visible in each screenshot.
 
-## 2. The problem
-- Hidden exchange-rate margin that hides the real price.
-- Fees taken on the way: correspondent and receiving banks.
-- Tuition that arrives short, so the university adds a late fee or cannot match it.
-- Missed deadlines (Bangladesh weekend is Friday and Saturday; the host country has its own days).
-- Weeks of paperwork with an unclear list of documents.
+| # | Slide | What it shows |
+|--:|-------|---------------|
+| 1 | StudyRoute | Topic C; "the engine calculates, the AI explains, the human approves, and every step is logged"; sandbox, synthetic data. Live pictures of the student guide, bank network and smart escrow. Team: TeamEkxin |
+| 2 | The posted fee is not the price | The hidden exchange-rate margin is 63% of the real cost in the worked example; fees on the way; short payment; two calendars; paperwork |
+| 3 | A family carries the risk | The parent who pays in BDT and the student who needs the university paid on time; one plan for both |
+| 4 | How money really moves | Parent, AD bank, correspondent bank, receiving bank, university; where each step fails; simulated with invented banks |
+| 5 | From question to settled payment | One sentence becomes a plan card; the agent does the steps, a person decides and approves with a fresh MFA code |
+| 6 | Live: comparing providers | **Live** quotes for GBP 10,000: B 1.58%, C 1.63% (GBP 35 short), A 2.16%, with a bar graph of the true total cost |
+| 7 | The engine does the maths | Integer-money cost formula, the three providers, the smart send plan, where Provider B's BDT 25,300 goes |
+| 8 | Live: one sentence, read back | **Live** assistant panel (mandatory read-back) and **live** deadline planner; the assistant cannot approve |
+| 9 | An AI that cannot cheat | The seven-step pipeline; only the optional model is not deterministic; number guard and tool guard |
+| 10 | Trained agents, measured | The reader against the old rules on 113 frozen messages; the dialogue policy; the explainer and risk router and their limits |
+| 11 | Models against baselines | Graphs: reader against rules, router top-1% against random, dialogue policy wrong plans before and after |
+| 12 | Proven, and not proven yet | What the tests and logs show, and the plain list of what they do not |
+| 13 | Every test we ran | 1,679 backend, 463 web, 24 browser tests, 24 of 24 scenarios, 314 security probe records, and **live** GitHub CI with all six jobs green |
+| 14 | Security you can verify | Permission tiers; **live** audit log with Verify giving PASS; the tamper test |
+| 15 | Attacking our own app | Graph of the 314 recorded checks by tool; the man-in-the-middle test: what held and what did not |
+| 16 | Security problems we found | Seven problems with their status (mitigated, open, fixed, partly), including plain HTTP and the stolen-token risk |
+| 17 | Honest by design | Banner and header on every response, the "Not verified" badge, the sealed compliance report |
+| 18 | Why it can work | USD 881.7m sent for overseas education in FY2025-26, the sums, who gains, and that there is no partner, pilot or user yet |
+| 19 | What the brief asked | The requirements table with status, and which slides show each scoring criterion |
+| 20 | What comes next | Verified rules, an AD bank partner, credit building (not built), a real chain; team and repository link |
 
-## 3. Who it helps
-- The parent in Bangladesh who pays in BDT and carries the risk.
-- The student abroad who needs the university paid on time.
-- Real pain points: unclear rules, surprise fees, repeated bank visits.
-
-## 4. How money really moves
-- Parent (BDT) to AD bank, which sells foreign currency and sends a SWIFT message with a UETR and a charge code.
-- Correspondent bank may deduct a lifting fee; the receiving bank may deduct a fee; the university matches by reference.
-- Diagram: blueprint section 3. SWIFT carries the instruction; banks settle between their accounts.
-- StudyRoute simulates the chain with invented banks, a correspondent and a double-entry ledger (screen: Bank network; guide: `docs/BANK_NETWORK.md`).
-
-## 5. Solution overview
-- **Agent task:** one sentence in the chat becomes a quote, a ranking, a deadline plan and a draft proposal; the human still creates the draft and approves.
-- Compare, plan, checklist, KYC gate, safe approval, tracker, compliance report, audit log.
-- Screenshot: the plan card in the chat (`17-agent-plan.png`).
-
-## 6. The engine
-- True total cost = FX margin + fixed fee + SWIFT fee + sender-paid fees + shortfall.
-- Worked example (synthetic, GBP 10,000, mid rate 160.00): B 1.58%, C 1.63% with a GBP 35 shortfall, A 2.16%.
-- Integer minor units and `Decimal` rates; no floats.
-- Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once, because fixed fees are paid on every transfer.
-- Student guide: which of 20 student cities a monthly budget in taka covers, and the steps for the first weeks abroad. Invented figures, marked not verified. One-click "create draft and request approval"; approval still needs MFA.
-- Deadline fit: the cheapest provider that ARRIVES before the due date (both countries' working days); if the cheapest would be late, the plan says so. Currency-drop stress test: the same quote priced again if the taka weakens 5, 10, 15 or 20%, a what-if on synthetic rates and not a forecast.
-
-## 7. Proven, and not proven yet
-- Proven by tests and logs: every number comes from one engine in integer money (all 24 scenarios mapped to tests); only a human with a fresh MFA code can approve, and the AI has no such permission; edit one audit row and Verify fails at that event; the stack starts from the zipped archive with docker compose (run for real on 15 and 17 October).
-- Not proven, and said so: rates, fees and city costs are invented and not yet compared with real quotes; no real parent has used it and the trained models saw synthetic data; no outside security review; Bangladesh Bank limits are placeholders marked Not verified.
-- Both lists are in the repository: `docs/OPEN_QUESTIONS.md` and `docs/SECURITY_SELF_ASSESSMENT.md`.
-- Smart escrow and the bank network are extras beyond Topic C. They are not slides; they get one sentence on slide 13 and a few seconds in the video. Screenshots stay in `submission/screenshots/` (`27-smart-escrow.png`, `29-escrow-schedule.png`).
-
-## 8. AI that cannot cheat
-- Pipeline: policy check, facts from the engine, masking, model (optional), number guard, tool guard, audit.
-- The number guard blocks any figure the engine did not produce. Template mode works with no key.
-- The AI proposes; it may make a quote, but it has no approve, submit, cancel, limit or config tool and cannot create a payment.
-
-## 9. A trained agent, measured
-- A small language model (bge-small-en-v1.5, fine-tuned on a GPU in a few minutes) reads what a parent types: the intent and the exact words that carry an amount, a currency or a date. It proposes; plain code checks; the engine calculates.
-- On 113 messages written by hand after the model was frozen (now reproduced; not a new blind study): right intent 88.5% against 61.1% for the old rules, a plan request read completely and exactly 100% against 57.6%, attacks blocked 92.9% against 28.6%. On real bank questions: 95% against 40%.
-- Reinforcement learning: a small policy trained with Double DQN decides when to ask, read back or plan. On simulated parents, wrong plans 0.8% against 2.8% for the old behaviour, 1.17 questions against 0.44. Plain code limits its legal moves; it never approves or moves money.
-- Honest limits on the slide: synthetic data, English, no real users, about plus or minus 7 points, about 1 attack in 14 still slips past it, and the simulated parents and rewards are our assumptions.
-- Numbers come from `ml/evaluate.py` (`docs/AI_EVALUATION.md`) and `ml/rl/evaluate_rl.py` (`docs/AI_RL_EVALUATION.md`); the designs are in `docs/AI_AGENT.md` and `docs/AI_RL.md`.
-
-## 10. Security and compliance
-- Threat and control matrix with a proof for every row (`docs/SECURITY.md`).
-- KYC gate, MFA-bound approval tied to a summary hash, idempotency, HMAC webhooks, rate limits, CSP.
-- Audit chain: Verify PASS, then Verify FAIL after an edit; the head of the chain is anchored on the simulated chain. Each payment has a compliance report whose hash the browser verifies.
-
-## 11. Sandbox honesty
-- Synthetic data everywhere, labelled on every screen.
-- Rules in config with source, last checked and a verified flag; yellow "Not verified" badges.
-- "Indicative. Confirm with your AD bank." Never "this is legal".
-
-## 12. Why it can work (the business case, `docs/BUSINESS_CASE.md`)
-- USD 881.7 million sent through Bangladeshi banks for overseas education in 2025-26, a record, up 32% (Bangladesh Bank data via The Observer, 24 July 2026).
-- 6.4% average cost of sending USD 200 worldwide (World Bank, Q3 2025) against a 3% goal: context, since tuition is priced differently.
-- Each point of cost removed from that volume is about USD 8.8 million a year for families: our arithmetic, not a forecast.
-- Who gains: family, bank (documents checked, risk-routed), university. Who could pay: a partner bank, at 0.2% of the volume a 5% share is about USD 88,000 a year: modest, a number to test.
-- Said on the slide: no partner, no pilot, no real users yet.
-
-## 13. Impact and next steps
-- Four study-abroad rules now rest on Bangladesh Bank's circular; verify the rest and add moon-dependent holidays.
-- A real AD bank partnership for quotes and KYC.
-- The escrow runs on a simulated chain in the sandbox; next, a permissioned chain with a bank-issued deposit token.
-- Regulator reporting built on the compliance report. Credit building (named in Topic C, not built).
-
-## Demo order (3 to 5 minutes)
-Follow blueprint 19.1 or run `python -m app.scripts.demo_flow` first to rehearse. Keep the security
-moment (replay, forged webhook, prompt injection, Verify PASS then FAIL) for the end.
+Sources and sums for slide 18: `docs/BUSINESS_CASE.md`. Figures on slides 10 and 11 come from
+`submission/evidence/ai_evaluation.json`, `ai_rl_evaluation.json`, `ai_explainer_evaluation.json` and
+`ai_risk_training.json`; the security figures on slides 15 and 16 from `submission/evidence/security_2026-10-18/`
+and the security self-assessment, sections 13 and 14.

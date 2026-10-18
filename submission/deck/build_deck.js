@@ -55,11 +55,11 @@ function facts() {
   const grab = (re, what) => {
     const m = re.exec(cases);
     if (!m) throw new Error(`docs/TEST_CASES.md has no "${what}". Run python scripts/gen_test_cases.py.`);
-    return Number(m[1]);
+    return Number(m[1].replace(/,/g, ""));
   };
   const assessment = read("docs/SECURITY_SELF_ASSESSMENT.md");
   return {
-    backendTests: grab(/Backend: \*\*(\d+) tests\*\*/, "backend count"),
+    backendTests: grab(/([\d,]+) backend tests/, "backend count"),
     frontendTests: grab(/Frontend: \*\*(\d+) tests\*\*/, "frontend count"),
     scenarios: (cases.match(/^\| T\d\d \|/gm) || []).length,
     risks: (assessment.match(/^\| R\d+ \|/gm) || []).length,
@@ -97,15 +97,51 @@ const shot = (file, x, y, w, h, alt) => [
   image(file, x, y, w, h, alt),
 ];
 
+
+// Screenshots of the public deployment (taken on 19 Oct 2026) live in submission/screenshots/live/.
+// liveShot keeps the picture's own proportions: give it the width and it returns the frame, the image and the height used.
+function pngSize(file) {
+  const bytes = fs.readFileSync(path.join(SHOTS, file));
+  return { w: bytes.readUInt32BE(16), h: bytes.readUInt32BE(20) };
+}
+function liveShot(file, x, y, w, alt) {
+  const size = pngSize(path.join("live", file));
+  const h = (w * size.h) / size.w;
+  return { h, els: shot(path.join("live", file), x, y, w, h, alt) };
+}
+
+// Horizontal bars drawn from plain shapes, so they look the same in every viewer.
+// rows: [{ label, parts: [{ value, fill, text }] }]; one part per row, or two for a pair of bars to compare.
+function hbars({ x, y, w, labelW, valueW, max, rows, rowH, barH, size = 11 }) {
+  const els = [];
+  const track = w - labelW - valueW;
+  rows.forEach((row, i) => {
+    const top = y + i * rowH;
+    const total = row.parts.length * barH + (row.parts.length - 1) * 0.05;
+    els.push(text(x, top, labelW - 0.1, rowH, row.label, { size, color: "text1", valign: "middle" }));
+    row.parts.forEach((part, j) => {
+      const by = top + (rowH - total) / 2 + j * (barH + 0.05);
+      const bw = Math.max(0.04, (track * part.value) / max);
+      els.push(rect(x + labelW, by, bw, barH, part.fill, { round: 0.03 }));
+      els.push(text(x + labelW + bw + 0.08, by, valueW + 0.2, barH, part.text, { size: size - 1, bold: true, color: "text1", valign: "middle" }));
+    });
+  });
+  return els;
+}
+const legend = (x, y, items) => items.flatMap(([label, fill], i) => [
+  rect(x + i * 1.7, y + 0.06, 0.16, 0.16, fill),
+  text(x + i * 1.7 + 0.24, y, 1.45, 0.28, label, { size: 10, color: "text2", valign: "middle" }),
+]);
+const bullets = (items) => items.map((t, i) => ({ text: t, bullet: true, breakLine: i < items.length - 1 }));
+
+const LIVE_SITE = "studyroute.bot-keep.xyz";
 const slides = [];
 
 // 1 ---------------------------------------------------------------------------------------------
 slides.push({
   layout: "title", section: "Opening", title: "StudyRoute",
   notes:
-    "Good morning. We are team " + TEAM + ", and this is StudyRoute, our entry for Topic C, the cross-border and student finance assistant. " +
-    "It is a sandbox AI agent that helps a parent in Bangladesh pay a student's tuition abroad. Everything you will see is synthetic and no real money moves. " +
-    "Our rule is on the slide: the engine calculates, the AI explains, the human approves, and every step is logged.",
+    "Good morning. We are team " + TEAM + ", and this is StudyRoute, our Topic C entry: a sandbox AI agent that helps a parent in Bangladesh pay tuition abroad. Everything is synthetic, no real money moves, and it runs live at studyroute dot bot-keep dot xyz. Our rule: the engine calculates, the AI explains, the human approves, every step is logged.",
   elements: [
     text(0.6, 0.55, 6.0, 0.3, "TOPIC C  ·  CROSS-BORDER AND STUDENT FINANCE ASSISTANT", { size: 12, bold: true, color: "accent2" }),
     text(0.6, 2.35, 5.7, 1.3,
@@ -115,8 +151,10 @@ slides.push({
       "The engine calculates. The AI explains. The human approves. Every step is logged.",
       { size: 16, italic: true, color: "accent2" }),
     text(0.6, 5.0, 5.8, 0.3, `${TEAM}  ·  Sandbox: synthetic data, no real money moves`, { size: 12, color: "accent5" }),
-    ...shot("02-compare.png", 6.8, 0.6, 2.8, 2.19, "StudyRoute compare screen ranking three providers"),
-    ...shot("12-audit-verify-pass.png", 6.8, 3.05, 2.8, 2.19, "Audit log with the hash chain verified"),
+    ...liveShot("live-06-student-guide.png", 6.9, 0.5, 2.6, "The live student guide finding cities that fit a budget").els,
+    ...liveShot("live-07-bank-network.png", 6.9, 2.2, 2.6, "The live bank network screen with invented banks").els,
+    ...liveShot("live-08-smart-escrow.png", 6.9, 3.9, 2.6, "The live smart escrow screen on a simulated chain").els,
+    text(0.6, 5.28, 5.8, 0.28, `Live: ${LIVE_SITE}`, { size: 11, bold: true, color: "accent2" }),
   ],
 });
 
@@ -131,9 +169,7 @@ const pains = [
 slides.push({
   layout: "content", section: "Opening", title: "The posted fee is not the price",
   notes:
-    "A parent in Bangladesh paying tuition abroad usually compares banks by the fee they are shown. But in our synthetic worked example, for GBP 10,000 with Provider B, " +
-    "63 percent of the real cost is the hidden exchange-rate margin, not the visible fees. On top of that, correspondent and receiving banks can deduct fees on the way, " +
-    "so the university may be paid short, and the deadline has to respect two calendars. Then there is the paperwork. These five problems are what StudyRoute is built around.",
+    "Parents compare banks by the fee they are shown. In our synthetic example, for ten thousand pounds with Provider B, 63 percent of the real cost is the hidden exchange-rate margin. Correspondent banks can deduct fees on the way, so the university may be paid short; the deadline spans two calendars; and the paperwork is unclear. Those five problems shape StudyRoute.",
   elements: [
     card(0.5, 1.35, 3.3, 3.75),
     text(0.7, 1.5, 2.9, 1.2, "63%", { size: 66, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
@@ -163,9 +199,7 @@ const people = [
 slides.push({
   layout: "content", section: "The problem", title: "A family carries the risk",
   notes:
-    "Two people feel this. The parent pays in taka, compares banks by the posted fee, approves a large transfer with little to check it against, and must prove where the money came from. " +
-    "The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. " +
-    "StudyRoute gives both one plan. The parent decides; the student can see the plan and follow the status, but cannot approve.",
+    "Two people feel this. The parent pays in taka, compares by the posted fee, and approves a large transfer with little to check it against. The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. StudyRoute gives both one plan; the parent decides, and the student can see but cannot approve.",
   elements: [
     ...people.flatMap((p) => [
       card(p.x, 1.35, 4.4, 3.2),
@@ -193,9 +227,7 @@ const chain = [
 slides.push({
   layout: "content", section: "The problem", title: "How money really moves",
   notes:
-    "This is the real chain. The parent pays in taka to an authorised dealer bank, which sells foreign currency and sends a SWIFT instruction. " +
-    "A correspondent bank may take a lifting fee, the receiving bank may take another, and the university matches the payment by reference. Each step has a typical failure, shown in red. " +
-    "StudyRoute simulates this chain with invented banks and a double-entry ledger, and returns a failed payment in full. It never moves real money.",
+    "This is the real chain: taka to an authorised dealer bank, a SWIFT instruction, a correspondent bank that may take a fee, a receiving bank that may take another, and the university matching by reference. Each step fails in a typical way, shown in red. We simulate the chain with invented banks and a double-entry ledger; no real money moves.",
   elements: [
     ...chain.flatMap(([head, sub, fill, risk], i) => {
       const x = 0.5 + i * 1.84;
@@ -225,10 +257,7 @@ const steps = [
 slides.push({
   layout: "content", section: "The solution", title: "From question to settled payment",
   notes:
-    "This is task completion. The parent typed one sentence: I need to pay ten thousand pounds of tuition by 28 October. " +
-    "The agent read it, made the quote, ranked the providers, planned the deadline, checked KYC and the documents, and built this plan card from the engine's output. " +
-    "The person creates the draft and approves with a fresh MFA code. The agent blocks the payment until KYC, the allowlist and the caps pass, then tracks it to settled and seals a compliance report. " +
-    "It created no payment itself: a person always clicks.",
+    "This is task completion. The parent types one sentence; the agent makes the quote, ranks providers, plans the deadline, checks KYC, and builds this plan card from engine output. A person creates the draft and approves with a fresh MFA code. The agent blocks the payment until KYC, allowlist and caps pass, then tracks it to settled. It never creates a payment itself.",
   elements: [
     ...shot("17-agent-plan.png", 0.58, 1.43, 4.34, 3.39, "The assistant's payment plan built from one sentence"),
     text(0.5, 4.95, 4.5, 0.3, "One sentence in the chat. Synthetic data.", { size: 11, color: "text2" }),
@@ -249,9 +278,7 @@ const split = [["FX margin", 16000, "accent1", 63], ["Fixed fee", 3000, "accent4
 slides.push({
   layout: "content", section: "The solution", title: "The engine does the maths",
   notes:
-    "Every number comes from a deterministic engine: integer money, decimal rates, no floats. Total cost is the FX margin plus the fixed fee, the SWIFT fee, any fees the sender pays, plus a shortfall when fees are deducted from the amount. " +
-    "In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap, but it is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16 percent. " +
-    "The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens. It does not predict exchange rates.",
+    "Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the smart send plan, the cheapest provider that arrives in time, and a stress test if the taka weakens.",
   elements: [
     {
       type: "table", x: 0.5, y: 1.4, colW: [0.95, 0.75, 1.1, 0.85, 1.65], rowH: 0.5, size: 14,
@@ -266,8 +293,8 @@ slides.push({
     text(0.5, 3.6, 5.3, 0.8,
       "Cost % = (FX margin + fixed fee + SWIFT fee + fees you pay + shortfall) / amount at the mid-market rate",
       { size: 12, color: "text2" }),
-    text(0.5, 4.45, 5.3, 0.65,
-      "Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once. Also: the cheapest that arrives before the due date, and a currency-drop stress test. Synthetic rates.",
+    text(0.5, 4.35, 5.3, 1.0,
+      "Smart send plan: the same GBP 12,000 costs BDT 68,400 sent monthly and BDT 28,500 sent at once. A saving of BDT 39,900 against sending monthly (synthetic). Also: the cheapest that arrives before the due date, and a currency-drop stress test. Synthetic rates.",
       { size: 12, bold: true, color: "text1" }),
     text(6.1, 1.35, 3.4, 0.5, "Where Provider B's BDT 25,300 goes", { size: 14, bold: true, color: "text1" }),
     { type: "doughnut", x: 6.6, y: 1.9, w: 2.1, h: 2.1, values: split.map((s) => s[1]), colors: split.map((s) => s[2]) },
@@ -282,7 +309,7 @@ slides.push({
 
 // 7 ---------------------------------------------------------------------------------------------
 const proven = [
-  `Every number comes from one engine, in integer money. ${F.backendTests} backend tests cover all ${F.scenarios} scenarios.`,
+  "Every number comes from one engine, in integer money. All 24 blueprint scenarios are mapped to tests (counts on the next slides).",
   "Only a human with a fresh MFA code can approve. The AI has no such permission, and a test enforces the table.",
   "Edit one audit row and Verify fails at that event. Audit-only rewrites are detected; both logs share SQLite, so a DB owner can rewrite both.",
   "The Docker stack passed its demo, 48 browser checks and the hardened overlay on 18 Oct; the attack probes defended 146 of 146.",
@@ -296,17 +323,14 @@ const notProven = [
 slides.push({
   layout: "content", section: "Trust", title: "Proven, and not proven yet",
   notes:
-    "Here is what we have shown and what we have not. " +
-    `Shown: every number comes from one deterministic engine, with ${F.backendTests} backend tests covering all ${F.scenarios} scenarios; only a human with a fresh MFA code can approve; change one audit row and Verify fails at that event; and the stack runs in Docker from the zipped archive. ` +
-    "Not shown: the rates, fees and city costs are invented and not compared with real quotes, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders marked Not verified. " +
-    "Both lists are in the repository, because we would rather you hear the limits from us.",
+    "What we have shown: one engine for every number, a human-only approval, an audit log that fails Verify when one row is edited, a Docker run, and attack probes defended. What we have not shown: rates and costs are invented, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders. Both lists are in the repository.",
   elements: [
     card(0.5, 1.35, 4.4, 3.45),
     rect(0.7, 1.5, 0.12, 0.4, "accent1"),
     text(0.92, 1.45, 3.8, 0.5, "Proven by tests and logs", { size: 18, bold: true, color: "accent1", valign: "middle" }),
-    text(0.7, 2.1, 4.0, 2.6,
+    text(0.7, 2.02, 4.0, 2.72,
       proven.map((t, i) => ({ text: t, bullet: true, breakLine: i < proven.length - 1 })),
-      { size: 12, color: "text1", paraAfter: 6 }),
+      { size: 11, color: "text1", paraAfter: 4 }),
     card(5.1, 1.35, 4.4, 3.45),
     rect(5.3, 1.5, 0.12, 0.4, "accent3"),
     text(5.52, 1.45, 3.8, 0.5, "Not proven, and we say so", { size: 18, bold: true, color: "accent3", valign: "middle" }),
@@ -314,7 +338,8 @@ slides.push({
       notProven.map((t, i) => ({ text: t, bullet: true, breakLine: i < notProven.length - 1 })),
       { size: 12, color: "text1", paraAfter: 6 }),
     text(0.5, 4.95, 9, 0.35, "Both lists are in the repository: docs/OPEN_QUESTIONS.md and docs/SECURITY_SELF_ASSESSMENT.md",
-      { size: 12, color: "text2" }),
+      { size: 11, color: "text2" }),
+    text(0.5, 5.32, 9, 0.22, "Raw logs and reproduction commands: submission/evidence/, docs/TEST_CASES.md.", { size: 10, color: "text2" }),
   ],
 });
 
@@ -328,16 +353,15 @@ const guarantees = [
 slides.push({
   layout: "content", section: "Trust", title: "An AI that cannot cheat",
   notes:
-    "The assistant follows a fixed pipeline. A policy check flags attempts to override rules, approve or reveal secrets. Facts come only from the engine, and personal data is masked before any model call. " +
-    "The model is the one step that is not deterministic, and it is optional. A number guard then checks every figure in the reply against the engine's facts and falls back to a template if anything is invented; a tool guard allows only proposals; everything is audited. " +
-    "So the AI can only propose, and it works with no API key.",
+    "The assistant follows a fixed pipeline: a policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. The model is the only step that is not deterministic, and any figure it invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.",
   elements: [
+    text(0.5, 1.16, 9, 0.3, "Our thesis: AI can participate only if it cannot be the financial authority.", { size: 13, bold: true, color: "accent1" }),
     ...pipeline.flatMap((label, i) => {
       const x = 0.5 + i * 1.3;
       const model = i === 3;
       return [
-        rect(x, 1.4, 1.15, 0.8, model ? "accent2" : "text1", { round: 0.08 }),
-        text(x + 0.05, 1.4, 1.05, 0.8, label, { size: 12, bold: true, color: model ? "text1" : "background1", align: "center", valign: "middle" }),
+        rect(x, 1.57, 1.15, 0.65, model ? "accent2" : "text1", { round: 0.08 }),
+        text(x + 0.05, 1.57, 1.05, 0.65, label, { size: 12, bold: true, color: model ? "text1" : "background1", align: "center", valign: "middle" }),
       ];
     }),
     text(0.5, 2.28, 9, 0.32, "Only step 4 is not deterministic, and it is optional. A flagged message never reaches it.", { size: 12, color: "text2" }),
@@ -368,13 +392,12 @@ const trained = [
 slides.push({
   layout: "content", section: "Trust", title: "Trained agents, measured",
   notes:
-    "The assistant has a trained part, and we measured it. A small language model reads what a parent types: the intent, and the exact words that carry an amount, a currency or a date. It never produces a number; plain code turns those words into values. " +
-    `On 113 messages written by hand after it was frozen, it chose the right intent ${pc(blind.agent.routing_accuracy)} of the time against ${pc(blind.rules.routing_accuracy)} for the old rules, and blocked ${pc(blind.agent.attack_blocked)} of attacks against ${pc(blind.rules.attack_blocked)}. The sample is small and the data is synthetic. ` +
-    `A second small policy, trained with reinforcement learning, decides whether to ask, read back or plan: on simulated parents, wrong plans fell from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)}. ` +
-    `Two more small models: one rewords the engine's answer, and a risk model scores each payment on amount, frequency, timeline and person. Its top one percent holds ${pc(riskOrder.found_in_top_1_percent)} of flagged payments; random order finds ${pc(riskRandom.found_in_top_1_percent)}. As a plain yes or no it is modest: flagging nothing is already ${pc(RISK["all payments"].never_flag_anything.accuracy)} accurate. It routes; a person decides.`,
+    "The assistant has a trained part, and we measured it, but the envelope matters more than the benchmark. A small model reads the intent and marks amounts, currencies and dates. " +
+    "A reinforcement-learning policy decides when to ask, read back or plan. A third rewords the engine's answer, every rewrite checked in code; a fourth scores each payment for a person to review.",
   elements: [
+    text(0.5, 1.18, 9, 0.32, "We measured the models against baselines we ran, and publish the modest results because the envelope, not the benchmark, is the contribution.", { size: 9.5, bold: true, color: "accent1" }),
     {
-      type: "table", x: 0.5, y: 1.4, colW: [2.1, 1.1, 1.1], rowH: 0.55, size: 14,
+      type: "table", x: 0.5, y: 1.65, colW: [4.8, 2.1, 2.1], rowH: 0.31, size: 11,
       rows: [
         ["On 113 frozen messages", "Rules", "Agent"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" })),
         [{ text: "Right intent", fill: "background2" }, { text: pc(blind.rules.routing_accuracy), fill: "background2" }, { text: pc(blind.agent.routing_accuracy), bold: true, color: "accent1", fill: "background2" }],
@@ -383,16 +406,17 @@ slides.push({
         [{ text: "Harmless blocked" }, { text: pc(blind.rules.benign_blocked) }, { text: pc(blind.agent.benign_blocked), bold: true }],
       ],
     },
-    text(0.5, 4.3, 4.4, 0.9,
+    text(0.5, 3.25, 9, 0.42,
       `Written by hand after the model was frozen, now reproduced; not a new blind study. A small sample: about plus or minus 7 points. Real bank questions: rules ${pc(AI.results.rules.natural.routing_accuracy)}, agent ${pc(AI.results.agent.natural.routing_accuracy)}.`,
-      { size: 12, color: "text2" }),
+      { size: 10, color: "text2" }),
     ...trained.flatMap(([head, body], i) => {
-      const y = 1.4 + i * 1.25;
-      const h = i === 2 ? 1.5 : 1.15; // the last card holds two models and needs more room
+      const x = 0.5 + i * 3.05;
+      const y = 3.83;
+      const h = 1.48;
       return [
-        card(5.3, y, 4.2, h),
-        text(5.45, y + 0.04, 3.9, 0.3, head, { size: 14, bold: true, color: "accent1" }),
-        text(5.45, y + 0.36, 3.95, h - 0.4, body, { size: 11, color: "text1" }),
+        card(x, y, 2.9, h),
+        text(x + 0.12, y + 0.04, 2.66, 0.28, head, { size: 11, bold: true, color: "accent1" }),
+        text(x + 0.12, y + 0.36, 2.66, h - 0.4, body, { size: 9.4, color: "text1" }),
       ];
     }),
   ],
@@ -407,17 +431,11 @@ const tiers = [
   ["Administer:", " reviewer rules and Verify", "background2", "text1"],
   ["Never for the AI:", " approve, cancel, limits", "accent3", "background1"],
 ];
-const stats = [
-  [String(F.backendTests), "backend tests, all passing"], [String(F.frontendTests), "frontend tests"],
-  [`${F.scenarios} of 24`, "blueprint scenarios mapped to tests"], [String(F.risks), "known risks listed openly"],
-];
 slides.push({
   layout: "content", section: "Trust", title: "Security you can verify",
   notes:
-    "Security and compliance is thirty percent of the score, so we made it checkable. On the left are the permission tiers, enforced in the domain layer, not just the screens. " +
-    "Approving a payment is only for a human parent with a fresh MFA proof bound to that payment and to the hash of the summary they saw. The AI has no approve, cancel, limit or config permission at all. " +
-    `On the right: ${F.backendTests} backend and ${F.frontendTests} frontend tests, all ${F.scenarios} scenarios mapped to tests, and ${F.risks} known risks listed openly. ` +
-    "We edit one audit row behind the application's back, and Verify fails at exactly that event.",
+    "Security and compliance is thirty percent of the score, so we made it checkable. Permission tiers are enforced in the domain layer, not just the screens. " +
+    "Only a human parent with a fresh MFA proof, bound to that payment, can approve; the AI has no approve, cancel or limit permission. On the right, the live audit log says PASS, and one edited row makes it fail.",
   elements: [
     ...tiers.flatMap(([lead, rest, fill, color], i) => {
       const y = 1.4 + i * 0.52;
@@ -426,18 +444,18 @@ slides.push({
         text(0.65, y, 4.15, 0.44, [{ text: lead, bold: true }, { text: rest }], { size: 14, color, valign: "middle" }),
       ];
     }),
-    ...stats.flatMap(([num, label], i) => {
-      const x = 5.1 + (i % 2) * 2.3;
-      const y = 1.4 + Math.floor(i / 2) * 1.5;
+    ...(() => {
+      const audit = liveShot("live-05-audit-verify.png", 5.1, 1.4, 4.4, "The live audit log: Verify the hash chain says PASS");
       return [
-        card(x, y, 2.1, 1.3),
-        text(x + 0.15, y + 0.1, 1.8, 0.65, num, { size: 32, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
-        text(x + 0.15, y + 0.75, 1.8, 0.5, label, { size: 12, color: "text2" }),
+        ...audit.els,
+        text(5.1, 1.4 + audit.h + 0.14, 4.4, 0.45, `Live, ${LIVE_SITE}, 19 Oct 2026: Verify the hash chain gives PASS on 40 events.`, { size: 10.5, color: "text2" }),
+        card(5.1, 3.35, 4.4, 0.85),
+        text(5.25, 3.4, 4.1, 0.75, [{ text: "Tamper test: ", bold: true }, { text: "edit one audit row behind the app's back and Verify fails at that event; restore it and Verify passes." }], { size: 11, color: "text1", valign: "middle" }),
+        card(5.1, 4.3, 4.4, 0.85),
+        text(5.25, 4.35, 4.1, 0.75, [{ text: "Also: ", bold: true }, { text: "each payment's compliance report carries a hash your browser can recompute. Every threat has a test: docs/SECURITY.md." }], { size: 11, color: "text1", valign: "middle" }),
       ];
-    }),
-    text(5.1, 4.45, 4.4, 0.75,
-      "Each payment has a compliance report with a hash your browser can check. Every threat has a test: docs/SECURITY.md",
-      { size: 12, color: "text2" }),
+    })(),
+    text(0.5, 5.32, 9, 0.22, "Raw logs: submission/evidence/.", { size: 10, color: "text2" }),
   ],
 });
 
@@ -445,9 +463,7 @@ slides.push({
 slides.push({
   layout: "content", section: "Trust", title: "Honest by design",
   notes:
-    "Honesty is a feature. A banner on every screen and an X-Sandbox header on every response say this is a sandbox. The Sandbox screen lists everything simulated and how to trigger edge cases. " +
-    "Any rule not checked against an official source carries a yellow Not verified badge and the line: indicative, confirm with your AD bank. " +
-    "On the right is a payment's compliance report, sealed with a hash that the browser recomputes. Change a copy and it says does not match.",
+    "Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.",
   elements: [
     text(0.5, 1.2, 9, 0.4, "Every simulated part is labelled. Every unverified rule carries a badge.", { size: 16, bold: true, color: "text1", valign: "middle" }),
     ...shot("15-sandbox-admin.png", 0.58, 1.78, 4.0, 3.12, "Sandbox screen listing what is simulated"),
@@ -472,10 +488,9 @@ const gains = [
 slides.push({
   layout: "content", section: "Close", title: "Why it can work",
   notes:
-    "Why would this matter outside a competition? Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education in the last fiscal year, a record, up 32 percent. " +
-    "The World Bank puts the average cost of sending small remittances near 6.4 percent, twice the 3 percent goal; tuition is priced differently, so that is context. " +
-    "If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars a year: our arithmetic, not a forecast. " +
-    "A partner bank could pay a small service fee for pre-checked, risk-routed files. We have no partner, no pilot and no real users yet, so these are numbers to test.",
+    "Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. " +
+    "If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. A partner bank could pay a small fee for pre-checked, risk-routed files. " +
+    "We have no partner, pilot or real users yet; these are numbers to test.",
   elements: [
     ...market.flatMap(([num, body], i) => {
       const y = 1.3 + i * 1.28;
@@ -495,8 +510,9 @@ slides.push({
     text(6.2, 4.05, 3.1, 0.9,
       "A partner bank pays a small service fee per assisted payment. At 0.2% of the volume, a 5% share is about USD 88,000 a year: modest, and a number to test.",
       { size: 11, color: "text1" }),
-    text(0.5, 5.07, 9, 0.3, "Illustrations, not forecasts. No partner, no pilot, no real users yet. Sources and sums: docs/BUSINESS_CASE.md",
-      { size: 11, color: "text2" }),
+    text(0.5, 5.32, 9, 0.22, "Illustrations, not forecasts. No partner, no pilot, no real users yet. Sources and sums: docs/BUSINESS_CASE.md",
+      { size: 10, color: "text2" }),
+    text(0.5, 5.06, 9, 0.24, "Volume is real (Bangladesh Bank, via The Observer). Rates, fees, city costs and the 8.8m figure are our arithmetic or invented for the sandbox.", { size: 9.5, color: "text2" }),
   ],
 });
 
@@ -510,9 +526,7 @@ const next = [
 slides.push({
   layout: "closing", section: "Close", title: "What comes next",
   notes:
-    "Next steps. Replace every placeholder rule with an official Bangladesh Bank source; we have started with four study-abroad rules. Partner with an authorised dealer bank for real quotes and real KYC. " +
-    "Move the escrow from our simulated chain to a permissioned one with a bank-issued deposit token. Topic C also mentions credit building; we have not built it, and we would rather say so. " +
-    "To close: StudyRoute is clear, cheap and safe, because the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
+    "Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.",
   elements: [
     ...next.flatMap(([head, body], i) => {
       const x = i % 2 === 0 ? 0.5 : 5.1;
@@ -527,6 +541,255 @@ slides.push({
     text(0.5, 4.85, 9, 0.35, `${TEAM}  ·  ${REPO}  ·  Sandbox: no real money moves`, { size: 12, color: "accent5" }),
   ],
 });
+
+
+// ---------------------------------------------------------------------------------------------
+// Added slides 14 to 20 (they are moved into place by ORDER below). Live pictures: 19 Oct 2026.
+// ---------------------------------------------------------------------------------------------
+const LIVE = "studyroute.bot-keep.xyz";
+
+// 14: live comparison ----------------------------------------------------------------------------
+{
+  const quotes = liveShot("live-01-compare-quotes.png", 0.5, 1.35, 5.7, "The live site ranking three providers for GBP 10,000 by true total cost");
+  const costs = [["B", 1.58, "accent1", "BDT 25,300"], ["C", 1.63, "accent3", "BDT 26,100"], ["A", 2.16, "accent4", "BDT 34,500"]];
+  slides.push({
+    layout: "content", section: "The solution", title: "Live: comparing providers",
+    notes:
+      "This is the public site, studyroute dot bot-keep dot xyz, opened on the 19th: ten thousand pounds of UK tuition. " +
+      "The ranking is the one our test T01 asserts: Provider B at 1.58 percent, Provider C at 1.63 with a warning that the university would be 35 pounds short, Provider A at 2.16. " +
+      "The engine calculates; the screen only shows it.",
+    elements: [
+      ...quotes.els,
+      text(0.5, 1.35 + quotes.h + 0.14, 5.7, 0.5, `${LIVE}, GBP 10,000 UK tuition, run on 19 Oct 2026. Synthetic rates and fees.`, { size: 10, color: "text2" }),
+      text(6.5, 1.35, 3.0, 0.5, "True total cost, as a share of the amount", { size: 13, bold: true, color: "text1" }),
+      ...hbars({
+        x: 6.5, y: 1.95, w: 3.0, labelW: 0.4, valueW: 1.0, max: 2.4, rowH: 0.62, barH: 0.3, size: 13,
+        rows: costs.map(([name, value, fill, bdt]) => ({ label: name, parts: [{ value, fill, text: `${value.toFixed(2)}%` }] })),
+      }),
+      text(6.5, 3.95, 3.0, 0.9,
+        [{ text: "C looks nearly as cheap, ", bold: true }, { text: "but it is quoted as SHA: the university would receive GBP 35 less than the invoice." }],
+        { size: 12, color: "text1" }),
+      text(6.5, 4.85, 3.0, 0.4, "Same figures as test T01.", { size: 10, color: "text2" }),
+    ],
+  });
+}
+
+// 15: live assistant -----------------------------------------------------------------------------
+{
+  const chat = liveShot("live-03-assistant-readback.png", 0.5, 1.35, 3.2, "The live assistant reading a request back before it plans");
+  const planner = liveShot("live-04-dashboard-planner.png", 3.95, 1.35, 2.85, "The live deadline planner working back from the due date");
+  const steps = [
+    ["1  The reader proposes", "It marks the amount, currency and date. Plain code turns them into values."],
+    ["2  You read it back", "Mandatory: say yes, or tell it what to change."],
+    ["3  Only then, a plan", "From engine facts. Only you can approve, with a fresh MFA code."],
+  ];
+  slides.push({
+    layout: "content", section: "The solution", title: "Live: one sentence, read back",
+    notes:
+      "On the live site the parent types one sentence. The trained reader only proposes; plain code turns the words into values; and the assistant must read them back before it plans. " +
+      "Only after a yes does it plan. Beside it, the deadline planner works backwards: send by 22 October. The assistant cannot approve; only the parent can, with a fresh MFA code.",
+    elements: [
+      ...chat.els,
+      text(0.5, 1.35 + chat.h + 0.14, 3.2, 0.3, `Live, 19 Oct 2026: the assistant panel`, { size: 10, color: "text2" }),
+      ...planner.els,
+      text(3.95, 1.35 + planner.h + 0.14, 2.85, 0.4, "Live deadline planner: due 1 Nov, send by 22 Oct, two calendars.", { size: 10, color: "text2" }),
+      ...steps.flatMap(([head, body], i) => {
+        const y = 1.35 + i * 1.2;
+        return [
+          card(7.1, y, 2.4, 1.1),
+          rect(7.1, y, 0.07, 1.1, i === 1 ? "accent2" : "accent1"),
+          text(7.28, y + 0.06, 2.16, 0.3, head, { size: 12, bold: true, color: "text1", valign: "middle" }),
+          text(7.28, y + 0.38, 2.16, 0.7, body, { size: 10, color: "text2" }),
+        ];
+      }),
+      text(7.1, 4.98, 2.4, 0.4, "The assistant cannot approve, submit or cancel.", { size: 10, bold: true, color: "accent3" }),
+    ],
+  });
+}
+
+// 16: models against baselines, as graphs ---------------------------------------------------------
+slides.push({
+  layout: "content", section: "Trust", title: "Models against baselines",
+  notes:
+    "The same numbers as a graph. Left: the trained reader against our old rules on 113 messages written after it was frozen. " +
+    `Top right: the risk router's top one percent holds ${pc(riskOrder.found_in_top_1_percent)} of flagged payments; random order finds ${pc(riskRandom.found_in_top_1_percent)}. ` +
+    `Bottom right: the dialogue policy cut wrong plans from ${pc(rlBefore.wrong_plan)} to ${pc(rlLearned.wrong_plan)} on simulated parents. Small samples, and as a plain yes or no the router is modest.`,
+  elements: [
+    card(0.5, 1.35, 5.3, 3.45),
+    text(0.7, 1.42, 4.9, 0.4, "Reader on 113 frozen messages (higher is better)", { size: 13, bold: true, color: "text1", valign: "middle" }),
+    ...hbars({
+      x: 0.7, y: 1.95, w: 4.9, labelW: 1.55, valueW: 0.6, max: 100, rowH: 0.72, barH: 0.26, size: 12,
+      rows: [
+        ["Right intent", blind.rules.routing_accuracy, blind.agent.routing_accuracy],
+        ["Plan read exactly", blind.rules.task_success, blind.agent.task_success],
+        ["Attacks blocked", blind.rules.attack_blocked, blind.agent.attack_blocked],
+      ].map(([label, rules, agent]) => ({
+        label,
+        parts: [{ value: 100 * rules, fill: "accent5", text: pc(rules) }, { value: 100 * agent, fill: "accent1", text: pc(agent) }],
+      })),
+    }),
+    ...legend(0.7, 4.2, [["Old rules", "accent5"], ["Trained reader", "accent1"]]),
+    card(6.0, 1.35, 3.5, 1.6),
+    text(6.15, 1.4, 3.2, 0.5, "Router: flagged payments found in its top 1%", { size: 12, bold: true, color: "text1", valign: "middle" }),
+    ...hbars({
+      x: 6.15, y: 1.95, w: 3.2, labelW: 0.95, valueW: 0.6, max: 100, rowH: 0.45, barH: 0.26, size: 11,
+      rows: [
+        { label: "Random", parts: [{ value: 100 * riskRandom.found_in_top_1_percent, fill: "accent5", text: pc(riskRandom.found_in_top_1_percent) }] },
+        { label: "Router", parts: [{ value: 100 * riskOrder.found_in_top_1_percent, fill: "accent1", text: pc(riskOrder.found_in_top_1_percent) }] },
+      ],
+    }),
+    card(6.0, 3.1, 3.5, 1.7),
+    text(6.15, 3.15, 3.2, 0.5, "Dialogue policy: wrong plans (lower is better)", { size: 12, bold: true, color: "text1", valign: "middle" }),
+    ...hbars({
+      x: 6.15, y: 3.7, w: 3.2, labelW: 0.95, valueW: 0.6, max: 4, rowH: 0.45, barH: 0.26, size: 11,
+      rows: [
+        { label: "Before", parts: [{ value: 100 * rlBefore.wrong_plan, fill: "accent5", text: pc(rlBefore.wrong_plan) }] },
+        { label: "Learned", parts: [{ value: 100 * rlLearned.wrong_plan, fill: "accent1", text: pc(rlLearned.wrong_plan) }] },
+      ],
+    }),
+    text(6.15, 4.55, 3.2, 0.25, `${rlLearned.turns.toFixed(2)} questions on average, up from ${rlBefore.turns.toFixed(2)}`, { size: 9, color: "text2" }),
+    text(0.5, 4.95, 9, 0.5, "Small samples; simulated parents; synthetic data. As a plain yes or no the router is modest: flagging nothing is already 99.8% accurate, so we show how it orders payments.",
+      { size: 10.5, color: "text2" }),
+  ],
+});
+
+// 17: tests --------------------------------------------------------------------------------------
+{
+  const ci = liveShot("live-09-github-ci.png", 5.55, 1.35, 3.95, "GitHub Actions: all six CI jobs green on the latest commit");
+  const tiles = [
+    ["1,679", "backend tests (1,678 pass, 1 skipped)"], ["463", "web tests"],
+    ["24", "browser tests"], ["314", "security probe records (308 PASS, 6 INFO)"],
+    ["24 of 24", "blueprint scenarios mapped to tests"], ["6 of 6", "CI jobs green on GitHub"],
+  ];
+  slides.push({
+    layout: "content", section: "Trust", title: "Every test we ran",
+    notes:
+      "Everything we ran: 1,679 backend tests, one skipped on Windows; 463 web tests; 24 browser tests; all 24 scenarios mapped; 314 security probe records. " +
+      "On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests; a fresh clone runs 1,672 of 1,673, and no outside party has tested it.",
+    elements: [
+      ...tiles.flatMap(([num, label], i) => {
+        const x = 0.5 + (i % 2) * 2.4;
+        const y = 1.35 + Math.floor(i / 2) * 1.15;
+        return [
+          card(x, y, 2.3, 1.05),
+          text(x + 0.12, y + 0.03, 2.06, 0.5, num, { size: 24, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
+          text(x + 0.12, y + 0.55, 2.06, 0.46, label, { size: 10.5, color: "text2" }),
+        ];
+      }),
+      ...ci.els,
+      text(5.55, 1.35 + ci.h + 0.14, 3.95, 0.6, "GitHub Actions, latest commit: backend, web, contracts, secret-scan, dependency-audit and docker all green.", { size: 10, color: "text2" }),
+      text(0.5, 4.95, 9, 0.5, "Our own tests. A fresh clone runs 1,672 of 1,673 (one module needs an excluded fixture). No independent test yet.", { size: 11, color: "text2" }),
+    ],
+  });
+}
+
+// 18: attack families and the man-in-the-middle test -----------------------------------------------
+{
+  const families = [
+    ["Access control, injection", 146, "146"], ["Browser, CSP, XSS", 48, "48"], ["Leak canaries (+2 info)", 50, "50"],
+    ["Hostile assistant prompts", 42, "42"], ["Man-in-the-middle (+4 info)", 14, "14"], ["Login and MFA guessing", 8, "8"],
+  ];
+  slides.push({
+    layout: "content", section: "Trust", title: "Attacking our own app",
+    notes:
+      "We attacked our own application with six tools: access control, browser and XSS, planted secrets, hostile prompts, man-in-the-middle and replay, and login guessing. 314 records, all pass or informational. " +
+      "The man-in-the-middle test is the honest one: altered approvals, swapped MFA proofs, a stolen token and replayed webhooks were refused. " +
+      "But on plain HTTP a listener reads the password and token, and a stolen token can cancel a draft. We do not call that safe.",
+    elements: [
+      card(0.5, 1.35, 5.2, 3.5),
+      text(0.7, 1.42, 4.8, 0.4, "Recorded checks by tool (all pass)", { size: 13, bold: true, color: "text1", valign: "middle" }),
+      ...hbars({
+        x: 0.7, y: 1.9, w: 4.8, labelW: 2.15, valueW: 0.55, max: 146, rowH: 0.43, barH: 0.24, size: 11,
+        rows: families.map(([label, value, shown]) => ({ label, parts: [{ value, fill: "accent1", text: shown }] })),
+      }),
+      text(0.7, 4.5, 4.8, 0.3, "314 records: 308 PASS, 6 INFO. Team-run lab results; not 314 different attacks.", { size: 10, color: "text2" }),
+      card(5.9, 1.35, 3.6, 3.5),
+      text(6.05, 1.42, 3.3, 0.4, "The man-in-the-middle test", { size: 13, bold: true, color: "text1", valign: "middle" }),
+      text(6.05, 1.85, 3.3, 0.3, "Held (14 of 14)", { size: 12, bold: true, color: "accent6" }),
+      text(6.05, 2.15, 3.3, 1.4,
+        bullets(["Altered or redirected approval: refused", "Stripped or swapped MFA proof: refused", "Stolen token cannot approve or allowlist", "Webhook tamper and replay: refused"]),
+        { size: 10.5, color: "text1", paraAfter: 2 }),
+      text(6.05, 3.5, 3.3, 0.3, "Did not hold", { size: 12, bold: true, color: "accent3" }),
+      text(6.05, 3.8, 3.3, 1.0,
+        bullets(["Plain HTTP: a listener reads the password and token", "A stolen token reads payments and cancels a draft for 15 minutes"]),
+        { size: 10.5, color: "text1", paraAfter: 2 }),
+      text(0.5, 4.95, 9, 0.3, "Raw logs and hashes: submission/evidence/security_2026-10-18/ and the security self-assessment, sections 13 and 14.", { size: 10, color: "text2" }),
+    ],
+  });
+}
+
+// 19: the security problems ----------------------------------------------------------------------
+{
+  const head = ["Problem found", "Status", "What we did, or still need"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" }));
+  const status = (label, color) => ({ text: label, bold: true, color });
+  const rows = [
+    ["Plain HTTP exposes the password and token", status("Mitigated", "accent1"), "The public site answers over HTTPS with an HSTS header (seen 19 Oct). The local demo is HTTP by design. Not independently tested."],
+    ["A stolen token reads payments, cancels a draft (15 min)", status("Open", "accent3"), "Approval still needs a fresh MFA proof bound to the payment. Cancel rights are under review."],
+    ["Account names guessable after repeated failures", status("Fixed", "accent6"), "Uniform lockout and failure tracking, with tests."],
+    ["Model runtime phoned a public telemetry host", status("Fixed", "accent6"), "Switched off; a new capture found no packet to a public address."],
+    ["Document text, with a planted passport, was readable", status("Partly", "accent4"), "New rows use AES-256-GCM. Old rows, names and file names stay readable."],
+    ["Nine high advisories in development tools", status("Open", "accent3"), "Dev tools only; upgrade deferred. Not a clean bill of health."],
+    ["No independent penetration test; simulated chain", status("Open", "accent3"), "Every attack tool was written by the team. The chain is a simulation."],
+  ].map(([problem, st, note], i) => [
+    { text: problem, bold: true, fill: i % 2 === 0 ? "background2" : undefined }, { ...st, fill: i % 2 === 0 ? "background2" : undefined }, { text: note, fill: i % 2 === 0 ? "background2" : undefined },
+  ]);
+  slides.push({
+    layout: "content", section: "Trust", title: "Security problems we found",
+    notes:
+      "We list our security problems because hiding them would cost more. On plain HTTP a listener reads the password and token; the public site uses HTTPS with HSTS, but nobody else has tested that. " +
+      "A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.",
+    elements: [
+      { type: "table", x: 0.5, y: 1.3, colW: [3.1, 0.95, 4.95], rowH: 0.45, size: 10, rows: [head, ...rows] },
+      text(0.5, 5.0, 9, 0.3, "Source: security self-assessment, edition 1.2, sections 13 and 14: every record, the raw-log hashes and what each fix did and did not show.", { size: 10, color: "text2" }),
+    ],
+  });
+}
+
+// 20: the requirements and where they are shown ------------------------------------------------------
+{
+  const head = ["What the brief asked", "Where it is", "Status"].map((t) => ({ text: t, bold: true, color: "background1", fill: "text1" }));
+  const done = { text: "Done", bold: true, color: "accent6" };
+  const rows = [
+    ["Technical documentation", "20-page PDF: architecture, algorithms, security design", done],
+    ["Deck of 10 minutes", "This deck: 20 slides, speaker notes about 9 minutes", done],
+    ["Demo video, 5 minutes", "Script and a silent recording; narrated video pending", { text: "Pending", bold: true, color: "accent3" }],
+    ["Source, README, GitHub link", "Public repository; docker compose up; CI green", done],
+    ["Security self-assessment", "39 pages: 55 risks, 314 probe records, findings", done],
+    ["Execution evidence", "Operation logs, audit verify, tamper and restore", done],
+    ["Sandbox, synthetic data, English", "Banner on every screen; no real money moves", done],
+  ].map(([a, b, c], i) => [
+    { text: a, bold: true, fill: i % 2 === 0 ? "background2" : undefined }, { text: b, fill: i % 2 === 0 ? "background2" : undefined }, { ...c, fill: i % 2 === 0 ? "background2" : undefined },
+  ]);
+  const scoring = [
+    ["Task completion", "40%", "Slides 5 to 8 and 13"],
+    ["Security and compliance", "30%", "Slides 9 and 14 to 17"],
+    ["Innovation and interaction", "30%", "Slides 8 to 11 and 18"],
+  ];
+  slides.push({
+    layout: "content", section: "Close", title: "What the brief asked",
+    notes:
+      "Back to the brief. The technical documentation, this ten-minute deck, the source on a public repository with CI green, the security self-assessment and the execution evidence are all in. " +
+      "The narrated demo video is optional and still pending. Everything is a sandbox with synthetic data. And for the three scoring criteria, here are the slides that show each.",
+    elements: [
+      { type: "table", x: 0.5, y: 1.3, colW: [2.2, 3.35, 0.75], rowH: 0.43, size: 10.5, rows: [head, ...rows] },
+      ...scoring.flatMap(([name, pct, where], i) => {
+        const y = 1.3 + i * 1.22;
+        return [
+          card(7.05, y, 2.45, 1.12),
+          text(7.2, y + 0.05, 1.2, 0.5, pct, { size: 26, bold: true, font: "+mj-lt", color: "accent1", valign: "middle" }),
+          text(7.2, y + 0.55, 2.2, 0.28, name, { size: 11, bold: true, color: "text1" }),
+          text(7.2, y + 0.8, 2.2, 0.28, where, { size: 10, color: "text2" }),
+        ];
+      }),
+      text(0.5, 5.12, 9, 0.3, "Eligibility and registration are the team's to confirm with the organiser; nothing here certifies them.", { size: 10, color: "text2" }),
+    ],
+  });
+}
+
+// Final order: the live and chart slides sit beside the slides they support.
+const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 7, 17, 10, 18, 19, 11, 12, 20, 13];
+if (slides.length !== ORDER.length) throw new Error(`Expected ${ORDER.length} slides, found ${slides.length}.`);
+slides.splice(0, slides.length, ...ORDER.map((n) => slides[n - 1]));
 
 // ---------------------------------------------------------------------------------------------
 // Renderer 1: PowerPoint

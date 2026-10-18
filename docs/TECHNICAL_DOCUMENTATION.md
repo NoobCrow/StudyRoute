@@ -18,7 +18,7 @@ evidence stops.
 | --- | --- |
 | Architecture | A pure engine computes every number. A domain layer enforces a state machine whose approval step needs a role, a token scope, ownership, a fresh MFA proof and the hash of the summary the person saw. Models sit behind deterministic checks and are optional. |
 | Core algorithms | Exact integer-money cost ranking, a two-calendar deadline planner, a send-plan optimiser and a stress test, each asserted by tests. |
-| Learned components | Four small models: a reader, a dialogue policy, an explainer and a review router. Each is measured against a baseline we ran, none is a payment authority, and the modest results are stated (sections 2.7 to 2.12). |
+| Learned components | Four small models: a reader, a dialogue policy, an explainer and a review router. Each is measured against a baseline we ran, none is a payment authority, and the modest results are stated (sections 2.7 to 2.12). The contribution is the safety envelope around them, not the models. |
 | Security | Human-only, MFA-bound approval; idempotency; signed webhooks; a hash-chained audit log; a 146-attack self-run probe. Self-assessed: no outside test. |
 | Readiness | A controlled, synthetic-data sandbox demonstration. Not production assurance. |
 
@@ -44,13 +44,15 @@ escrow on a simulated chain, and a bank review desk that routes unusual payments
 HMAC, hash chains, ONNX, Double DQN and distillation are all established. The contribution is how they are put
 together and how well the result is checked.
 
-1. *An architecture in which a language model can help without being able to hurt.* Every number comes from a
+Our thesis: AI can participate in a financial decision only if it cannot be the financial authority. We built the envelope that makes that true, and then measured four small models inside it.
+
+1. **The envelope.** An architecture in which a language model can help without being able to hurt. Every number comes from a
    pure engine. Each learned component has a deterministic check or a fallback around it. Only a person with a
    fresh MFA proof can approve a payment, and a permission table in code, not a prompt, enforces that.
 2. *Four small trained models, each built for one job, each measured against a baseline we actually ran, each
    with its limits published:* a reader of untidy requests, a dialogue policy, an explainer that rewords the
    engine's answers, and a router that decides which payments a bank reviewer looks at first.
-3. *Evidence a reviewer can re-run, and a list of what it does not show:* 1,679 tests mapped to 24 scenarios, a
+3. *Evidence a reviewer can re-run, and a list of what it does not show:* 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests. Mapped to 24 scenarios; a
    146-attack black-box probe, a run in Docker, and a record of what the runs found, including a defect.
 
 **Evidence at a glance** (sources in section 5 and in `submission/evidence/`):
@@ -58,7 +60,7 @@ together and how well the result is checked.
 | What was measured | Result | Reads as |
 |-------------------|--------|----------|
 | Cost ranking, worked example | B 1.58%, C 1.63% (university GBP 35 short), A 2.16% | Exact; asserted in `test_engine_quote.py` |
-| Backend tests | 1,679 (1,678 pass, 1 skipped on Windows) | One or more tests for each of 24 scenarios |
+| Backend tests | 1,679 on a fixture-complete machine (1,678 pass, 1 skipped); fresh clone: 1,673 collected, 1,672 pass, 1 skip | One or more tests for each of 24 scenarios; the fixture gap is explained in §5 |
 | Black-box attack probe | 146 of 146 defended; real-browser audit 48 of 48 | Written by the team, not independent |
 | Reader against rules, 113 frozen hand-written messages | Intent 88.5% against 61.1%; plan read exactly 100% against 57.6%; attacks blocked 92.9% against 28.6% | Small sample, about plus or minus 7 points |
 | Dialogue policy against plan-at-once, simulated parents | Wrong plans 0.8% against 2.8%; 1.17 questions against 0.44 | Simulator is our assumption |
@@ -88,6 +90,8 @@ Five pains drive the design, and each maps to a component:
 
 The design principle is four sentences: **the engine calculates, the AI explains, the human approves, and
 every step is logged.** Each is a mechanism with a test:
+
+**What is real and what is not.** Real: the problem framing, the Bangladesh Bank volume figure (USD 881.7m, via The Observer, 24 July 2026), and four study-abroad rules read in Bangladesh Bank circular FEPD-1 No. 40 (no lawyer or AD bank reviewed them). Synthetic: every rate, fee, margin, provider, KYC result, sanction, bank, settlement and student-city cost. Simulated: the chain (in-memory py-evm), the escrow and the bank network. The USD 8.8m saving figure is our arithmetic, not a forecast. Read every number in this document with that box in mind.
 
 | Statement | Mechanism | Test |
 |-----------|-----------|------|
@@ -468,6 +472,8 @@ baselines, on the eight shipped inputs or thirteen):
 | Rule: a new receiver | 0.073 | 0.114 |
 | Random order | 0.001 | 0.002 |
 
+A reviewer may reasonably ask why the better-ranked 13-input variants were not shipped. The answer is time and re-testing cost, not concealment: five more runtime inputs and a bank-review re-test were not completed before the freeze, and we chose to publish the comparison rather than omit it. Adopting them is the first improvement on our list.
+
 By our own rule (choose on the tuning period only) XGBoost on thirteen inputs ranks first, yet on the test
 period it is no better than the shipped network within noise (0.448 against 0.437); neighbouring models differ
 by about 0.02 average precision, which is within noise with 1,797 flagged transactions. The thirteen-input variants score higher than the shipped network on both
@@ -644,23 +650,20 @@ including Bengali text.
 
 | Layer | What was done | Result | Where |
 |-------|---------------|--------|-------|
-| Automated tests | One or more tests for each of 24 blueprint scenarios; a test fails if one is missing | 1,679 backend tests (1,678 pass, 1 skipped on Windows); 463 web tests; 24 browser tests | `docs/TEST_CASES.md` |
+| Automated tests | One or more tests for each of 24 blueprint scenarios; a test fails if one is missing | 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests. | `docs/TEST_CASES.md` |
 | Demo flow | Fourteen-step run against a live API | 66 checks OK, none failed | `submission/evidence/sandbox_operation_log.txt` |
 | Black-box attacks | Forged tokens, cross-household access, injection, hostile input, webhooks, the bank review desk | 146 of 146 defended | `security_2026-10-18/attack_probe.txt` |
 | Other probes | Brute force, data-leak scan, man in the middle, hostile prompts, real Chrome | 8/8, all clear (50 checks), 14/14, 42/42, 48/48 | `security_2026-10-18/` |
 | Docker | Ubuntu 24.04 VM; smoke, demo, bank review demo, browser audit, hardened overlay | All passed after one fix (below) | `docker_2026-10-18/` |
 | Continuous integration | Six jobs: docker, contracts, web, secret-scan, backend, dependency-audit | All succeeded on the final commit | GitHub Actions |
 
+*A reproducibility gap the verification found.* One test module, the explainer quality floor, needs backend/tests/data/explainer_cases.json, which .gitignore excludes. A fresh clone therefore collects 1,673 tests, runs 1,672 and skips that module; the 1,679 figure is for a machine that has the file. This explains every test count in this document and in the deck. Adding it to the repository is on our list.
+
 *A defect the verification found.* The first Docker run failed three demo checks, and the same step had failed
 four in CI. The trained explainer is on by default in a container and had never run in one before. It reworded
 the assistant's questions and read-backs badly, and the demo's checks assumed a rewrite is always accepted. We
 fixed both: questions and read-backs are now shown word for word, and the checks look at the engine's figures
 instead of exact words. The failing run is kept as evidence.
-
-*A reproducibility gap the verification found.* One test module, the explainer quality floor, needs the file
-`backend/tests/data/explainer_cases.json`. A rule in `.gitignore` excludes it, so a fresh clone collects 1,674
-tests and skips that module. The 1,679 figure is for a machine that has the file. Adding it to the repository
-is on our list.
 
 *What the evidence does not show.* The attack tools were written by the team that wrote the application; no
 outside penetration test has been done. No real user has used the system. The rates and fees are not compared
@@ -681,9 +684,7 @@ To reproduce: `cd backend && pytest -q`; start the API and run `python -m app.sc
    settlement are invented. Step one is to compare with real dated quotes for one corridor and publish the gap.
 2. **No real users and no partner.** The one-sentence flow has not been timed against a spreadsheet with real
    parents. A pilot with one bank branch and a few dozen families would test it.
-3. **Models are small and trained on synthetic data.** The reader's blind set is small. The policy learned from a
-   simulator of our own making. The explainer mostly paraphrases. As a yes/no flag the router is modest. The
-   thirteen-input variants should be adopted and re-tested.
+3. Models are small and trained on synthetic data — a deliberate design choice for the envelope, because a small, fallback-backed model cannot block a payment. The price is modest model quality, which we publish rather than hide. The reader's blind set is small; the policy learned from a simulator of our own making; the explainer mostly paraphrases; as a yes/no flag the router is modest. The thirteen-input variants should be adopted and re-tested.
 4. **Security assurance is self-made.** An independent penetration test is the largest missing item. The audit
    chain needs an externally held checkpoint in any real deployment. Rate limits are per process. The fixed
    sandbox MFA code must go.
