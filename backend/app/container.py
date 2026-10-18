@@ -1,0 +1,107 @@
+"""Wires settings, database and services together."""
+
+from __future__ import annotations
+
+from app.ai.dialogue.policy import load_policy
+from app.ai.llm import build_llm_client
+from app.ai.nlu.runtime import load_reader
+from app.ai.orchestrator import Orchestrator
+from app.ai.risk.scorer import load_scorer
+from app.api.context import AppContext
+from app.api.rate_limit import RateLimiter
+from app.audit.service import AuditService
+from app.core.clock import Clock, SystemClock
+from app.core.config import Settings
+from app.core.crypto import FieldCipher
+from app.core.db import Database
+from app.core.secret_store import SecretStore
+from app.domain.auth import FailedLoginTracker, PasswordService, TokenService
+from app.domain.bank_directory import load_directory
+from app.domain.bank_network import BankNetworkService
+from app.domain.bank_review import BankReviewService
+from app.domain.chain_service import ChainService
+from app.domain.compliance_report import ReportService
+from app.domain.config_service import ConfigService
+from app.domain.documents import DocumentService
+from app.domain.escrow import EscrowService
+from app.domain.kyc import KycService
+from app.domain.ledger import Ledger
+from app.domain.payments import PaymentService
+from app.domain.quotes import QuoteService
+from app.domain.recipients import RecipientService
+from app.domain.rules import load_rules, sync_rules_from_file
+from app.domain.sandbox import SandboxService
+from app.providers.registry import ProviderRegistry
+from app.providers.simulator import HttpWebhookDispatcher, ProviderSimulator, WebhookDispatcher
+from app.worker import BackgroundWorker
+
+
+def build_context(
+    settings: Settings, clock: Clock | None = None, dispatcher: WebhookDispatcher | None = None
+) -> AppContext:
+    clock = clock or SystemClock()
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
+    secrets = SecretStore(settings)
+    db = Database(settings.database_url)
+    db.create_schema()
+    audit = AuditService(clock)
+    with db.write() as session:
+        audit.ensure_head(session)
+        sync_rules_from_file(session, settings.resolve_rules_file(), clock.now())
+        provider_ids = load_rules(session).provider_ids()
+    secrets.assert_ready(provider_ids)
+
+    cipher = FieldCipher(secrets.encryption_key())
+    tokens = TokenService(
+        secrets.jwt_private_pem(),
+        secrets.jwt_public_pem(),
+        settings.jwt_issuer,
+        settings.jwt_audience,
+        settings.access_token_ttl_seconds,
+    )
+    providers = ProviderRegistry(settings)
+    recipients = RecipientService(clock, audit, cipher)
+    quotes = QuoteService(clock, audit, recipients)
+    kyc = KycService(clock, audit)
+    payments = PaymentService(clock, audit, recipients, quotes, kyc, providers)
+    dispatcher = dispatcher or HttpWebhookDispatcher(settings.webhook_base_url)
+    ctx = AppContext(
+        settings=settings,
+        clock=clock,
+        db=db,
+        secrets=secrets,
+        cipher=cipher,
+        audit=audit,
+        passwords=PasswordService(
+            settings.argon2_time_cost, settings.argon2_memory_kib, settings.argon2_parallelism
+        ),
+        tokens=tokens,
+        limiter=RateLimiter(clock, settings.rate_limit_enabled),
+        providers=providers,
+        simulator=ProviderSimulator(db, clock, secrets, dispatcher),
+        recipients=recipients,
+        quotes=quotes,
+        payments=payments,
+        kyc=kyc,
+        documents=DocumentService(clock, audit, cipher),
+        config=ConfigService(clock, audit),
+    )
+    ctx.worker = BackgroundWorker(ctx)
+    ctx.sandbox = SandboxService(clock, audit, payments)
+    ctx.reports = ReportService(clock, audit, payments, recipients)
+    ctx.reviews = BankReviewService(
+        clock, audit, payments, recipients, cipher, load_scorer(settings.risk_mode)
+    )
+    payments.attach_reviews(ctx.reviews)
+    ctx.bank = BankNetworkService(
+        clock, audit, Ledger(clock), load_directory(settings.resolve_bank_network_file())
+    )
+    ctx.chain = ChainService(clock, audit)
+    ctx.login_attempts = FailedLoginTracker(
+        clock, settings.max_failed_logins, settings.lockout_seconds
+    )
+    ctx.escrow = EscrowService(clock, audit, recipients, ctx.chain)
+    reader = load_reader(settings.nlu_mode)
+    policy = load_policy(settings.dialogue_mode) if reader else None
+    ctx.assistant = Orchestrator(ctx, build_llm_client(settings), reader, policy)
+    return ctx

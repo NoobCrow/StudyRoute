@@ -1,0 +1,1042 @@
+# StudyRoute rules configuration (blueprint section 13).
+#
+# Every rule that can change lives here or in the config_rules table, never in code.
+# A node that has a `value` key is a rule. Each rule carries:
+#   value         the setting
+#   kind          sandbox_design | synthetic | regulatory
+#   verified      true only when the value was checked against an official source
+#   source_url    where it was (or must be) checked
+#   last_checked  date of the last check (YYYY-MM-DD)
+#   note          free text shown next to the rule
+# Rules with verified: false are shown with a yellow "Not verified" badge in the app and
+# always carry the sentence "Indicative. Confirm with your AD bank."
+# The file seeds the database once. After that the database is authoritative and admins
+# change rules through PUT /api/v1/config/rules (audited).
+
+schema_version: 1
+
+engine:
+  quote_ttl_seconds:
+    value: 300
+    kind: sandbox_design
+    verified: true
+    note: "How long a quote stays valid (blueprint 6.5)."
+  mfa_proof_ttl_seconds:
+    value: 300
+    kind: sandbox_design
+    verified: true
+    note: "A fresh MFA proof is valid for five minutes."
+  settlement_business_days:
+    value: 3
+    kind: sandbox_design
+    verified: true
+    note: "Typical SWIFT settlement is same day to about T+3 (blueprint 5.4)."
+  planner_buffer_days:
+    value: 2
+    kind: sandbox_design
+    verified: true
+    note: "Safety buffer added by the deadline planner."
+  bank_cutoff_local:
+    value: "15:00"
+    kind: sandbox_design
+    verified: false
+    source_url: "https://example.org/replace-with-your-ad-bank-cutoff"
+    last_checked: "2026-10-13"
+    note: "Assumed AD bank cut-off in Dhaka time. Confirm with your AD bank."
+  ben_deducts_fixed_fee:
+    value: true
+    kind: sandbox_design
+    verified: true
+    note: "Under BEN the provider fixed fee is deducted from the beneficiary (blueprint 6.2)."
+  idempotency_ttl_hours:
+    value: 24
+    kind: sandbox_design
+    verified: true
+    note: "How long a stored Idempotency-Key response is kept (blueprint 8.4)."
+
+limits:
+  per_transaction_usd_equivalent:
+    value: 50000
+    kind: sandbox_design
+    verified: true
+    note: "Sandbox cap, our own choice. Not a legal limit."
+  daily_usd_equivalent:
+    value: 100000
+    kind: sandbox_design
+    verified: true
+    note: "Sandbox cap, our own choice. Not a legal limit."
+
+compliance:
+  sanctions_test_token:
+    value: "SANCTION_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text is blocked (mock sanctions screening)."
+  fail_test_token:
+    value: "FAIL_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text makes the simulator send provider_failed."
+  slow_test_token:
+    value: "SLOW_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text delays simulated settlement."
+
+review:
+  large_amount_usd_equivalent:
+    value: 40000
+    kind: sandbox_design
+    verified: false
+    note: "Sandbox design: a payment at or above this goes to a human bank reviewer first. Not a legal threshold. Confirm with your AD bank."
+  split_window_days:
+    value: 7
+    kind: sandbox_design
+    verified: false
+    note: "Look-back window for several smaller payments that together pass the large-amount line."
+  split_min_payments:
+    value: 3
+    kind: sandbox_design
+    verified: false
+    note: "How many payments in the window (this one included) count as a possible split."
+  review_test_token:
+    value: "REVIEW_TEST"
+    kind: sandbox_design
+    verified: true
+    note: "A recipient name containing this text is sent to a human reviewer (simulated name check)."
+  bank_authorizes_every_payment:
+    value: false
+    kind: sandbox_design
+    verified: true
+    note: "When true, every payment waits for the bank's yes, low risk or high. When false, only payments the AI rates medium or higher do. The parent's own MFA authorization is needed for every payment either way."
+  decision_target_hours:
+    value: 24
+    kind: sandbox_design
+    verified: false
+    note: "How long the sandbox bank reviewer aims to take. A real bank sets its own time."
+  reminder_cooldown_hours:
+    value: 4
+    kind: sandbox_design
+    verified: false
+    note: "A parent may send one reminder this often."
+  decline_reason_codes:
+    value: [UNCLEAR_PURPOSE, DOCUMENTS_MISSING, NAME_MISMATCH, OVER_BANK_POLICY, OTHER]
+    kind: sandbox_design
+    verified: false
+    note: "Reasons a reviewer may give. They are shown to the parent in plain words."
+
+kyc:
+  required_documents:
+    value: [passport, parent_id, source_of_funds]
+    kind: sandbox_design
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-kyc-list"
+    last_checked: "2026-10-13"
+    note: "Mock KYC checklist. Real banks decide their own list."
+  mock_review_seconds:
+    value: 8
+    kind: sandbox_design
+    verified: true
+    note: "How long the simulated KYC review takes before status becomes VERIFIED."
+
+bangladesh_rules:
+  living_expense_usd_per_month:
+    value: 2000
+    kind: regulatory
+    verified: false
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "NOT in the official text. Section 10 of FEPD-1 Circular No. 40 (30 Sep 2026) has no monthly USD figure: the AD bank releases what the institution's own estimate says (tuition, board and lodging, insurance, incidentals). This number comes from a secondary source (LegalSeba, 2025). Confirm with your AD bank."
+  living_expense_high_cost_uplift_pct:
+    value: 50
+    kind: regulatory
+    verified: false
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "NOT in the official text (same reading as the monthly figure above). Secondary source only. Confirm with your AD bank."
+  single_ad_branch_rule:
+    value: "One AD bank branch for the whole course of study"
+    kind: regulatory
+    verified: true
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "FEPD-1 Circular No. 40 (30 Sep 2026), section 10(1)(b)(viii): all purchases of foreign exchange for the course come from one AD branch; a change moves the student's file branch to branch. Read in the official PDF. Confirm with your AD bank."
+  release_period_limit:
+    value: "One academic year at a time"
+    kind: regulatory
+    verified: true
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "Section 10(1)(b)(vi): foreign exchange for study is not released for more than one academic year at a time. Later releases consider the progress report and the institution's current estimate (vii). Confirm with your AD bank."
+  release_basis:
+    value: "The educational institution's estimate (I-20 or equivalent), paid to the institution"
+    kind: regulatory
+    verified: true
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "Section 10(1)(a)(iii) and (b)(i), (iv): the AD bank issues foreign exchange as per the institution's estimate and releases it in favour of the institution. Board, lodging and incidentals may go to the student as an international card when the institution does not require them to be paid to it. Confirm with your AD bank."
+  education_remittance_circular_2026_09_30:
+    value: "FEPD-1 Circular No. 40, 30 Sep 2026 (consolidated Foreign Exchange Circular)"
+    kind: regulatory
+    verified: true
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "Section 10 (study abroad) was read in the official PDF on 18 Oct 2026. A circular can be replaced at any time; confirm with your AD bank."
+  international_card_for_education:
+    value: "Allowed for education-related payments, issued by the AD bank after KYC and AML checks"
+    kind: regulatory
+    verified: true
+    source_url: "https://www.bb.org.bd/mediaroom/circulars/fepd/sep302026fepd-140e.pdf"
+    last_checked: "2026-10-18"
+    note: "Section 10(4), which cites FEPD-1 Circular No. 29 of 10 Aug 2026: designated debit, prepaid or credit card used only for education payments; it does not count against travel quota; the card may be in the student's name or in the name of the person bearing the costs; the loaded amount is valid only for a period the AD bank sets. Confirm with your AD bank."
+  iso_purpose_code:
+    value: null
+    kind: regulatory
+    verified: false
+    source_url: "https://www.iso20022.org/catalogue-messages/additional-content-messages/external-code-lists"
+    last_checked: "2026-10-13"
+    note: "Do not show a purpose code (for example STDY or EDUC) before checking the ISO list."
+
+calendars:
+  weekend:
+    BD: {value: [Fri, Sat], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13", note: "Bangladesh weekend is Friday and Saturday."}
+    GB: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    US: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    DE: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    AU: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    CA: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13"}
+    MY: {value: [Sat, Sun], kind: regulatory, verified: false, source_url: "https://example.org/replace-with-official-calendar", last_checked: "2026-10-13", note: "Some Malaysian states use Friday and Saturday."}
+  holidays:
+    BD:
+      value:
+        "2026-02-21": "International Mother Language Day"
+        "2026-03-26": "Independence Day"
+        "2026-04-14": "Bengali New Year"
+        "2026-05-01": "May Day"
+        "2026-12-16": "Victory Day"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-bangladesh-gazette"
+      last_checked: "2026-10-13"
+      note: "Fixed-date holidays only. Eid, Puja and other moon-dependent holidays must be added from the official gazette."
+    GB:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-05-04": "Early May bank holiday"
+        "2026-05-25": "Spring bank holiday"
+        "2026-08-31": "Summer bank holiday"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://www.gov.uk/bank-holidays"
+      last_checked: "2026-10-13"
+      note: "England and Wales. Confirm against gov.uk before relying on it."
+    US:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-01-19": "Martin Luther King Jr. Day"
+        "2026-02-16": "Presidents Day"
+        "2026-05-25": "Memorial Day"
+        "2026-06-19": "Juneteenth"
+        "2026-07-03": "Independence Day (observed)"
+        "2026-09-07": "Labor Day"
+        "2026-10-12": "Columbus Day"
+        "2026-11-11": "Veterans Day"
+        "2026-11-26": "Thanksgiving"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/"
+      last_checked: "2026-10-13"
+    DE:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-05-01": "Labour Day"
+        "2026-05-14": "Ascension Day"
+        "2026-05-25": "Whit Monday"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "National holidays only. State holidays differ."
+    AU:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-01-26": "Australia Day"
+        "2026-04-03": "Good Friday"
+        "2026-04-06": "Easter Monday"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "National holidays only. State holidays differ."
+    CA:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-04-03": "Good Friday"
+        "2026-05-18": "Victoria Day"
+        "2026-07-01": "Canada Day"
+        "2026-09-07": "Labour Day"
+        "2026-10-12": "Thanksgiving"
+        "2026-12-25": "Christmas Day"
+        "2026-12-28": "Boxing Day (substitute)"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+    MY:
+      value:
+        "2026-01-01": "New Year's Day"
+        "2026-05-01": "Labour Day"
+        "2026-08-31": "National Day"
+        "2026-09-16": "Malaysia Day"
+        "2026-12-25": "Christmas Day"
+      kind: regulatory
+      verified: false
+      source_url: "https://example.org/replace-with-official-calendar"
+      last_checked: "2026-10-13"
+      note: "Fixed-date holidays only. Moon-dependent holidays must be added."
+
+fx:
+  mid_rates:
+    GBP: {value: "160.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 GBP. Not a live feed."}
+    USD: {value: "122.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 USD. Not a live feed."}
+    EUR: {value: "140.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 EUR. Not a live feed."}
+    AUD: {value: "80.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 AUD. Not a live feed."}
+    CAD: {value: "89.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 CAD. Not a live feed."}
+    MYR: {value: "26.000000", kind: synthetic, verified: true, note: "Synthetic mid-market BDT per 1 MYR. Not a live feed."}
+  history_days:
+    value: 30
+    kind: synthetic
+    verified: true
+    note: "Length of the synthetic rate history used by the best-day hint."
+
+providers:
+  prov_a:
+    value:
+      name: "Provider A (synthetic)"
+      margin_pct: "2.00"
+      fixed_fee_bdt_minor: 150000
+      swift_fee_bdt_minor: 100000
+      intermediary_fee_major: "0"
+      receiving_fee_major: "0"
+      supported_charge_codes: [OUR, SHA, BEN]
+      default_charge_code: OUR
+      eta_business_days: 1
+    kind: synthetic
+    verified: true
+    note: "Fees bundled: no intermediary or receiving fee. All numbers are invented."
+  prov_b:
+    value:
+      name: "Provider B (synthetic)"
+      margin_pct: "1.00"
+      fixed_fee_bdt_minor: 300000
+      swift_fee_bdt_minor: 150000
+      intermediary_fee_major: "30"
+      receiving_fee_major: "0"
+      supported_charge_codes: [OUR, SHA, BEN]
+      default_charge_code: OUR
+      eta_business_days: 2
+    kind: synthetic
+    verified: true
+    note: "All numbers are invented."
+  prov_c:
+    value:
+      name: "Provider C (synthetic)"
+      margin_pct: "1.25"
+      fixed_fee_bdt_minor: 50000
+      swift_fee_bdt_minor: 0
+      intermediary_fee_major: "25"
+      receiving_fee_major: "10"
+      supported_charge_codes: [SHA]
+      default_charge_code: SHA
+      eta_business_days: 3
+    kind: synthetic
+    verified: true
+    note: "Only offers SHA, so charges are deducted from the amount. All numbers are invented."
+
+corridors:
+  GB:
+    value: {name: "United Kingdom", currency: GBP, account_scheme: IBAN_OR_UK_DOMESTIC, host_rail: "UK Faster Payments or CHAPS"}
+    kind: sandbox_design
+    verified: true
+    note: "MVP corridor. The sandbox does not simulate the host rail; it only shows its name."
+  US:
+    value: {name: "United States", currency: USD, account_scheme: ABA_ACCOUNT, host_rail: "US ACH or wire"}
+    kind: sandbox_design
+    verified: true
+  DE:
+    value: {name: "Germany", currency: EUR, account_scheme: IBAN, host_rail: "SEPA"}
+    kind: sandbox_design
+    verified: true
+  AU:
+    value: {name: "Australia", currency: AUD, account_scheme: ACCOUNT, host_rail: "Australian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+  CA:
+    value: {name: "Canada", currency: CAD, account_scheme: ACCOUNT, host_rail: "Canadian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+  MY:
+    value: {name: "Malaysia", currency: MYR, account_scheme: ACCOUNT, host_rail: "Malaysian domestic transfer"}
+    kind: sandbox_design
+    verified: true
+
+checklist_labels:
+  value:
+    offer_letter: {label: "Offer or admission letter", hint: "From the university, showing the course and start date."}
+    fee_demand_note: {label: "Fee demand note or annual estimate", hint: "Tuition, board, lodging and incidentals. Some banks ask for the original and a photocopy."}
+    passport: {label: "Student passport (bio page)", hint: "Use a mock file in this sandbox. Never upload a real passport."}
+    visa: {label: "Visa or entry permission", hint: "If the destination country requires one."}
+    parent_id: {label: "Parent national ID", hint: "The payer's identity document."}
+    source_of_funds: {label: "Source of funds evidence", hint: "For example salary or business income records."}
+    ad_bank_form: {label: "AD bank remittance application form", hint: "Your Authorised Dealer bank provides the form."}
+    receiving_account_details: {label: "Receiving account details", hint: "University payment instructions: account or IBAN, BIC and the reference format."}
+    enrolment_proof: {label: "Proof of enrolment", hint: "Shows the student is in a regular course."}
+    cas_number: {label: "CAS statement (UK)", hint: "Confirmation of Acceptance for Studies, if the university issues one."}
+    i20_form: {label: "Form I-20 (US)", hint: "Certificate of Eligibility issued by the US school."}
+    coe: {label: "Confirmation of Enrolment (Australia)", hint: "Issued by the Australian provider."}
+  kind: sandbox_design
+  verified: false
+  source_url: "https://example.org/replace-with-ad-bank-checklist"
+  last_checked: "2026-10-13"
+  note: "Indicative list of what the bank may ask for. Confirm with your AD bank."
+
+checklists:
+  GB_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details, cas_number]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Confirm with your AD bank."
+  GB_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Living-expense limits are not verified."
+  US_TUITION:
+    value: [offer_letter, fee_demand_note, i20_form, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+    note: "Indicative. Confirm with your AD bank."
+  US_LIVING:
+    value: [enrolment_proof, i20_form, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  DE_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  DE_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  AU_TUITION:
+    value: [offer_letter, fee_demand_note, coe, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  AU_LIVING:
+    value: [enrolment_proof, coe, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  CA_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  CA_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  MY_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  MY_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-13"
+  GENERIC_TUITION:
+    value: [offer_letter, fee_demand_note, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-15"
+    note: "A general list for countries without their own. Indicative. Confirm with your AD bank."
+  GENERIC_LIVING:
+    value: [enrolment_proof, passport, visa, parent_id, source_of_funds, ad_bank_form, receiving_account_details]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-ad-bank-checklist"
+    last_checked: "2026-10-15"
+    note: "A general list for countries without their own. Indicative. Living-expense limits are not verified."
+
+# --- student help (F21 budget, F22 arrival guide): synthetic or indicative, never verified ---
+student_costs:
+  GB:
+    value:
+      currency: GBP
+      cities:
+        London: {rent_shared: 850, rent_studio: 1500, food: 280, transport: 160, utilities: 90, phone_internet: 25, other: 200}
+        Manchester: {rent_shared: 600, rent_studio: 950, food: 240, transport: 70, utilities: 80, phone_internet: 25, other: 180}
+        Birmingham: {rent_shared: 520, rent_studio: 850, food: 230, transport: 65, utilities: 75, phone_internet: 25, other: 170}
+        Glasgow: {rent_shared: 480, rent_studio: 800, food: 230, transport: 60, utilities: 70, phone_internet: 25, other: 165}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented GBP figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+  US:
+    value:
+      currency: USD
+      cities:
+        "New York": {rent_shared: 1400, rent_studio: 2400, food: 450, transport: 130, utilities: 120, phone_internet: 50, other: 300}
+        Boston: {rent_shared: 1200, rent_studio: 2000, food: 420, transport: 90, utilities: 110, phone_internet: 50, other: 280}
+        Austin: {rent_shared: 850, rent_studio: 1400, food: 380, transport: 80, utilities: 110, phone_internet: 50, other: 260}
+        Columbus: {rent_shared: 650, rent_studio: 1050, food: 340, transport: 70, utilities: 100, phone_internet: 50, other: 240}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented USD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+  DE:
+    value:
+      currency: EUR
+      cities:
+        Berlin: {rent_shared: 500, rent_studio: 850, food: 260, transport: 40, utilities: 70, phone_internet: 20, other: 150}
+        Munich: {rent_shared: 700, rent_studio: 1100, food: 280, transport: 45, utilities: 80, phone_internet: 20, other: 170}
+        Leipzig: {rent_shared: 380, rent_studio: 600, food: 230, transport: 40, utilities: 65, phone_internet: 20, other: 140}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented EUR figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+  AU:
+    value:
+      currency: AUD
+      cities:
+        Sydney: {rent_shared: 1100, rent_studio: 1900, food: 450, transport: 180, utilities: 110, phone_internet: 40, other: 300}
+        Melbourne: {rent_shared: 950, rent_studio: 1600, food: 420, transport: 160, utilities: 105, phone_internet: 40, other: 280}
+        Adelaide: {rent_shared: 750, rent_studio: 1200, food: 390, transport: 130, utilities: 100, phone_internet: 40, other: 250}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented AUD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+  CA:
+    value:
+      currency: CAD
+      cities:
+        Toronto: {rent_shared: 1000, rent_studio: 1700, food: 420, transport: 150, utilities: 100, phone_internet: 60, other: 250}
+        Vancouver: {rent_shared: 1100, rent_studio: 1800, food: 430, transport: 110, utilities: 100, phone_internet: 60, other: 250}
+        Montreal: {rent_shared: 700, rent_studio: 1100, food: 380, transport: 90, utilities: 90, phone_internet: 55, other: 220}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented CAD figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+  MY:
+    value:
+      currency: MYR
+      cities:
+        "Kuala Lumpur": {rent_shared: 600, rent_studio: 1200, food: 700, transport: 150, utilities: 150, phone_internet: 50, other: 400}
+        Penang: {rent_shared: 500, rent_studio: 950, food: 600, transport: 100, utilities: 120, phone_internet: 50, other: 350}
+        "Johor Bahru": {rent_shared: 450, rent_studio: 850, food: 550, transport: 90, utilities: 110, phone_internet: 50, other: 320}
+    kind: synthetic
+    verified: false
+    source_url: "https://example.org/replace-with-cost-of-living-source"
+    last_checked: "2026-10-17"
+    note: "Invented MYR figures for the sandbox, not a survey. Indicative. Confirm with your AD bank."
+
+arrival_labels:
+  value:
+    accommodation: {label: "Book a place to live before you fly", hint: "Start with your university's own halls or accommodation office. Never pay a landlord you have not checked, and keep every receipt."}
+    arrival_money: {label: "Plan the first month's money", hint: "The first month costs more than the rest: deposit, bedding and a travel pass. Use the Budget tab and send the money early."}
+    health_cover: {label: "Arrange health cover", hint: "Check what your visa and university require. Keep the policy number on your phone."}
+    travel_documents: {label: "Pack your documents", hint: "Passport, visa papers, offer letter and your address in hand luggage, with copies kept somewhere else."}
+    bank_letter: {label: "Ask your university for a bank letter", hint: "Many banks want a letter that confirms you are a student before they open an account."}
+    student_account: {label: "Open a student bank account", hint: "Take your passport, visa papers and the university letter. Ask about fees and about receiving money from abroad."}
+    local_sim: {label: "Get a local SIM or eSIM", hint: "Your bank and university send security codes by phone. Compare student plans before you sign."}
+    enrol: {label: "Finish enrolment and collect your student card", hint: "Register with the university in the first week. The card often brings discounts and library access."}
+    emergency_numbers: {label: "Save the emergency numbers", hint: "Police, ambulance, your embassy and your university's help line."}
+    transport_card: {label: "Get a student travel card", hint: "Ask the university which student transport discounts apply."}
+    scams: {label: "Learn the common student scams", hint: "Fake rental adverts, fake visa agents and fake fee-collection calls target new students. Check any request for money with the university first."}
+    work_rules: {label: "Know how much you may work", hint: "Check the official visa page for work limits. Breaking them can end your visa."}
+    register_address: {label: "Register your address if required", hint: "Some countries ask students to register where they live. Your international office will say whether yours does."}
+    budget_check: {label: "Check your first month against your budget", hint: "Compare what you spent with the Budget tab. If it is higher, tell your family early."}
+    link_account: {label: "Share your new account with your family", hint: "Send the bank details through a safe channel. Never share passwords, card numbers or one-time codes."}
+    gb_visa_documents: {label: "Check how you receive your visa documents", hint: "The international office will explain whether you collect a card or use an online account. Do it in the first days."}
+    gb_doctor: {label: "Register with a local doctor (GP)", hint: "Registering while you are well is easier than when you are ill. Ask your university how."}
+    us_i20: {label: "Keep your I-20 with your passport", hint: "You will be asked for it at the border and by your university. Keep it in your hand luggage."}
+    us_work_permission: {label: "Ask before you take any job", hint: "Work permission for students is limited. Speak to your international student office first."}
+    de_blocked_account: {label: "Check the blocked-account step for your visa", hint: "Many student visas ask you to show funds in a blocked account. Check the embassy page; your university can help."}
+    de_register_address: {label: "Register your address (Anmeldung)", hint: "Germany usually asks you to register where you live soon after you move in. Ask your city office or university."}
+    au_oshc: {label: "Keep your student health cover active (OSHC)", hint: "Your visa normally requires health cover for the whole stay. Keep the card and the policy number."}
+    ca_study_permit: {label: "Keep your study permit papers safe", hint: "Carry the letter you receive at the border together with your passport. Your university can explain the next steps."}
+    ca_sin: {label: "Ask about a Social Insurance Number", hint: "You normally need one before you can work. Ask the international office when and how."}
+    my_student_pass: {label: "Complete your student pass steps with the university", hint: "Universities usually guide new students through the immigration steps. Follow their instructions and keep copies."}
+  kind: regulatory
+  verified: false
+  source_url: "https://example.org/replace-with-official-student-guidance"
+  last_checked: "2026-10-17"
+  note: "Indicative first-weeks advice. Visa and work rules change: check the official page."
+
+arrival_guide:
+  GENERIC:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "A general list for countries without their own. Indicative."
+  GB:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams, gb_visa_documents]
+      first_month: [work_rules, register_address, budget_check, link_account, gb_doctor]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+  US:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, us_i20]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account, us_work_permission]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+  DE:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, de_blocked_account]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, budget_check, link_account, de_register_address]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+  AU:
+    value:
+      before: [accommodation, arrival_money, travel_documents, bank_letter, au_oshc]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+  CA:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter, ca_study_permit]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams]
+      first_month: [work_rules, register_address, budget_check, link_account, ca_sin]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+  MY:
+    value:
+      before: [accommodation, arrival_money, health_cover, travel_documents, bank_letter]
+      first_week: [student_account, local_sim, enrol, emergency_numbers, transport_card, scams, my_student_pass]
+      first_month: [work_rules, register_address, budget_check, link_account]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-official-student-guidance"
+    last_checked: "2026-10-17"
+    note: "Indicative. Confirm with your university and the official government page."
+
+# --- generated by scripts/gen_countries.py: do not edit by hand, run the script ---
+countries:
+  directory:
+    value:
+      "AD": {name: "Andorra", currency: EUR, weekend: [Sat, Sun]}
+      "AE": {name: "United Arab Emirates", currency: AED, weekend: [Sat, Sun]}
+      "AF": {name: "Afghanistan", currency: AFN, weekend: [Thu, Fri]}
+      "AG": {name: "Antigua and Barbuda", currency: XCD, weekend: [Sat, Sun]}
+      "AL": {name: "Albania", currency: ALL, weekend: [Sat, Sun]}
+      "AM": {name: "Armenia", currency: AMD, weekend: [Sat, Sun]}
+      "AO": {name: "Angola", currency: AOA, weekend: [Sat, Sun]}
+      "AR": {name: "Argentina", currency: ARS, weekend: [Sat, Sun]}
+      "AT": {name: "Austria", currency: EUR, weekend: [Sat, Sun]}
+      "AU": {name: "Australia", currency: AUD, weekend: [Sat, Sun]}
+      "AZ": {name: "Azerbaijan", currency: AZN, weekend: [Sat, Sun]}
+      "BA": {name: "Bosnia and Herzegovina", currency: BAM, weekend: [Sat, Sun]}
+      "BB": {name: "Barbados", currency: BBD, weekend: [Sat, Sun]}
+      "BE": {name: "Belgium", currency: EUR, weekend: [Sat, Sun]}
+      "BF": {name: "Burkina Faso", currency: XOF, weekend: [Sat, Sun]}
+      "BG": {name: "Bulgaria", currency: BGN, weekend: [Sat, Sun]}
+      "BH": {name: "Bahrain", currency: BHD, weekend: [Fri, Sat]}
+      "BI": {name: "Burundi", currency: BIF, weekend: [Sat, Sun]}
+      "BJ": {name: "Benin", currency: XOF, weekend: [Sat, Sun]}
+      "BN": {name: "Brunei", currency: BND, weekend: [Sat, Sun]}
+      "BO": {name: "Bolivia", currency: BOB, weekend: [Sat, Sun]}
+      "BR": {name: "Brazil", currency: BRL, weekend: [Sat, Sun]}
+      "BS": {name: "Bahamas", currency: BSD, weekend: [Sat, Sun]}
+      "BT": {name: "Bhutan", currency: BTN, weekend: [Sat, Sun]}
+      "BW": {name: "Botswana", currency: BWP, weekend: [Sat, Sun]}
+      "BY": {name: "Belarus", currency: BYN, weekend: [Sat, Sun]}
+      "BZ": {name: "Belize", currency: BZD, weekend: [Sat, Sun]}
+      "CA": {name: "Canada", currency: CAD, weekend: [Sat, Sun]}
+      "CD": {name: "DR Congo", currency: CDF, weekend: [Sat, Sun]}
+      "CF": {name: "Central African Republic", currency: XAF, weekend: [Sat, Sun]}
+      "CG": {name: "Republic of the Congo", currency: XAF, weekend: [Sat, Sun]}
+      "CH": {name: "Switzerland", currency: CHF, weekend: [Sat, Sun]}
+      "CI": {name: "Côte d’Ivoire", currency: XOF, weekend: [Sat, Sun]}
+      "CL": {name: "Chile", currency: CLP, weekend: [Sat, Sun]}
+      "CM": {name: "Cameroon", currency: XAF, weekend: [Sat, Sun]}
+      "CN": {name: "China", currency: CNY, weekend: [Sat, Sun]}
+      "CO": {name: "Colombia", currency: COP, weekend: [Sat, Sun]}
+      "CR": {name: "Costa Rica", currency: CRC, weekend: [Sat, Sun]}
+      "CU": {name: "Cuba", currency: CUP, weekend: [Sat, Sun]}
+      "CV": {name: "Cabo Verde", currency: CVE, weekend: [Sat, Sun]}
+      "CY": {name: "Cyprus", currency: EUR, weekend: [Sat, Sun]}
+      "CZ": {name: "Czechia", currency: CZK, weekend: [Sat, Sun]}
+      "DE": {name: "Germany", currency: EUR, weekend: [Sat, Sun]}
+      "DJ": {name: "Djibouti", currency: DJF, weekend: [Sat, Sun]}
+      "DK": {name: "Denmark", currency: DKK, weekend: [Sat, Sun]}
+      "DM": {name: "Dominica", currency: XCD, weekend: [Sat, Sun]}
+      "DO": {name: "Dominican Republic", currency: DOP, weekend: [Sat, Sun]}
+      "DZ": {name: "Algeria", currency: DZD, weekend: [Fri, Sat]}
+      "EC": {name: "Ecuador", currency: USD, weekend: [Sat, Sun]}
+      "EE": {name: "Estonia", currency: EUR, weekend: [Sat, Sun]}
+      "EG": {name: "Egypt", currency: EGP, weekend: [Fri, Sat]}
+      "ER": {name: "Eritrea", currency: ERN, weekend: [Sat, Sun]}
+      "ES": {name: "Spain", currency: EUR, weekend: [Sat, Sun]}
+      "ET": {name: "Ethiopia", currency: ETB, weekend: [Sat, Sun]}
+      "FI": {name: "Finland", currency: EUR, weekend: [Sat, Sun]}
+      "FJ": {name: "Fiji", currency: FJD, weekend: [Sat, Sun]}
+      "FM": {name: "Micronesia", currency: USD, weekend: [Sat, Sun]}
+      "FR": {name: "France", currency: EUR, weekend: [Sat, Sun]}
+      "GA": {name: "Gabon", currency: XAF, weekend: [Sat, Sun]}
+      "GB": {name: "United Kingdom", currency: GBP, weekend: [Sat, Sun]}
+      "GD": {name: "Grenada", currency: XCD, weekend: [Sat, Sun]}
+      "GE": {name: "Georgia", currency: GEL, weekend: [Sat, Sun]}
+      "GH": {name: "Ghana", currency: GHS, weekend: [Sat, Sun]}
+      "GM": {name: "Gambia", currency: GMD, weekend: [Sat, Sun]}
+      "GN": {name: "Guinea", currency: GNF, weekend: [Sat, Sun]}
+      "GQ": {name: "Equatorial Guinea", currency: XAF, weekend: [Sat, Sun]}
+      "GR": {name: "Greece", currency: EUR, weekend: [Sat, Sun]}
+      "GT": {name: "Guatemala", currency: GTQ, weekend: [Sat, Sun]}
+      "GW": {name: "Guinea-Bissau", currency: XOF, weekend: [Sat, Sun]}
+      "GY": {name: "Guyana", currency: GYD, weekend: [Sat, Sun]}
+      "HK": {name: "Hong Kong", currency: HKD, weekend: [Sat, Sun]}
+      "HN": {name: "Honduras", currency: HNL, weekend: [Sat, Sun]}
+      "HR": {name: "Croatia", currency: EUR, weekend: [Sat, Sun]}
+      "HT": {name: "Haiti", currency: HTG, weekend: [Sat, Sun]}
+      "HU": {name: "Hungary", currency: HUF, weekend: [Sat, Sun]}
+      "ID": {name: "Indonesia", currency: IDR, weekend: [Sat, Sun]}
+      "IE": {name: "Ireland", currency: EUR, weekend: [Sat, Sun]}
+      "IL": {name: "Israel", currency: ILS, weekend: [Fri, Sat]}
+      "IN": {name: "India", currency: INR, weekend: [Sun]}
+      "IQ": {name: "Iraq", currency: IQD, weekend: [Fri, Sat]}
+      "IR": {name: "Iran", currency: IRR, weekend: [Fri]}
+      "IS": {name: "Iceland", currency: ISK, weekend: [Sat, Sun]}
+      "IT": {name: "Italy", currency: EUR, weekend: [Sat, Sun]}
+      "JM": {name: "Jamaica", currency: JMD, weekend: [Sat, Sun]}
+      "JO": {name: "Jordan", currency: JOD, weekend: [Fri, Sat]}
+      "JP": {name: "Japan", currency: JPY, weekend: [Sat, Sun]}
+      "KE": {name: "Kenya", currency: KES, weekend: [Sat, Sun]}
+      "KG": {name: "Kyrgyzstan", currency: KGS, weekend: [Sat, Sun]}
+      "KH": {name: "Cambodia", currency: KHR, weekend: [Sat, Sun]}
+      "KI": {name: "Kiribati", currency: AUD, weekend: [Sat, Sun]}
+      "KM": {name: "Comoros", currency: KMF, weekend: [Sat, Sun]}
+      "KN": {name: "Saint Kitts and Nevis", currency: XCD, weekend: [Sat, Sun]}
+      "KP": {name: "North Korea", currency: KPW, weekend: [Sat, Sun]}
+      "KR": {name: "South Korea", currency: KRW, weekend: [Sat, Sun]}
+      "KW": {name: "Kuwait", currency: KWD, weekend: [Fri, Sat]}
+      "KZ": {name: "Kazakhstan", currency: KZT, weekend: [Sat, Sun]}
+      "LA": {name: "Laos", currency: LAK, weekend: [Sat, Sun]}
+      "LB": {name: "Lebanon", currency: LBP, weekend: [Sat, Sun]}
+      "LC": {name: "Saint Lucia", currency: XCD, weekend: [Sat, Sun]}
+      "LI": {name: "Liechtenstein", currency: CHF, weekend: [Sat, Sun]}
+      "LK": {name: "Sri Lanka", currency: LKR, weekend: [Sat, Sun]}
+      "LR": {name: "Liberia", currency: LRD, weekend: [Sat, Sun]}
+      "LS": {name: "Lesotho", currency: LSL, weekend: [Sat, Sun]}
+      "LT": {name: "Lithuania", currency: EUR, weekend: [Sat, Sun]}
+      "LU": {name: "Luxembourg", currency: EUR, weekend: [Sat, Sun]}
+      "LV": {name: "Latvia", currency: EUR, weekend: [Sat, Sun]}
+      "LY": {name: "Libya", currency: LYD, weekend: [Fri, Sat]}
+      "MA": {name: "Morocco", currency: MAD, weekend: [Sat, Sun]}
+      "MC": {name: "Monaco", currency: EUR, weekend: [Sat, Sun]}
+      "MD": {name: "Moldova", currency: MDL, weekend: [Sat, Sun]}
+      "ME": {name: "Montenegro", currency: EUR, weekend: [Sat, Sun]}
+      "MG": {name: "Madagascar", currency: MGA, weekend: [Sat, Sun]}
+      "MH": {name: "Marshall Islands", currency: USD, weekend: [Sat, Sun]}
+      "MK": {name: "North Macedonia", currency: MKD, weekend: [Sat, Sun]}
+      "ML": {name: "Mali", currency: XOF, weekend: [Sat, Sun]}
+      "MM": {name: "Myanmar", currency: MMK, weekend: [Sat, Sun]}
+      "MN": {name: "Mongolia", currency: MNT, weekend: [Sat, Sun]}
+      "MO": {name: "Macao", currency: MOP, weekend: [Sat, Sun]}
+      "MR": {name: "Mauritania", currency: MRU, weekend: [Sat, Sun]}
+      "MT": {name: "Malta", currency: EUR, weekend: [Sat, Sun]}
+      "MU": {name: "Mauritius", currency: MUR, weekend: [Sat, Sun]}
+      "MV": {name: "Maldives", currency: MVR, weekend: [Sat, Sun]}
+      "MW": {name: "Malawi", currency: MWK, weekend: [Sat, Sun]}
+      "MX": {name: "Mexico", currency: MXN, weekend: [Sat, Sun]}
+      "MY": {name: "Malaysia", currency: MYR, weekend: [Sat, Sun]}
+      "MZ": {name: "Mozambique", currency: MZN, weekend: [Sat, Sun]}
+      "NA": {name: "Namibia", currency: NAD, weekend: [Sat, Sun]}
+      "NE": {name: "Niger", currency: XOF, weekend: [Sat, Sun]}
+      "NG": {name: "Nigeria", currency: NGN, weekend: [Sat, Sun]}
+      "NI": {name: "Nicaragua", currency: NIO, weekend: [Sat, Sun]}
+      "NL": {name: "Netherlands", currency: EUR, weekend: [Sat, Sun]}
+      "NO": {name: "Norway", currency: NOK, weekend: [Sat, Sun]}
+      "NP": {name: "Nepal", currency: NPR, weekend: [Sat, Sun]}
+      "NR": {name: "Nauru", currency: AUD, weekend: [Sat, Sun]}
+      "NZ": {name: "New Zealand", currency: NZD, weekend: [Sat, Sun]}
+      "OM": {name: "Oman", currency: OMR, weekend: [Fri, Sat]}
+      "PA": {name: "Panama", currency: USD, weekend: [Sat, Sun]}
+      "PE": {name: "Peru", currency: PEN, weekend: [Sat, Sun]}
+      "PG": {name: "Papua New Guinea", currency: PGK, weekend: [Sat, Sun]}
+      "PH": {name: "Philippines", currency: PHP, weekend: [Sat, Sun]}
+      "PK": {name: "Pakistan", currency: PKR, weekend: [Sat, Sun]}
+      "PL": {name: "Poland", currency: PLN, weekend: [Sat, Sun]}
+      "PS": {name: "Palestine", currency: ILS, weekend: [Sat, Sun]}
+      "PT": {name: "Portugal", currency: EUR, weekend: [Sat, Sun]}
+      "PW": {name: "Palau", currency: USD, weekend: [Sat, Sun]}
+      "PY": {name: "Paraguay", currency: PYG, weekend: [Sat, Sun]}
+      "QA": {name: "Qatar", currency: QAR, weekend: [Fri, Sat]}
+      "RO": {name: "Romania", currency: RON, weekend: [Sat, Sun]}
+      "RS": {name: "Serbia", currency: RSD, weekend: [Sat, Sun]}
+      "RU": {name: "Russia", currency: RUB, weekend: [Sat, Sun]}
+      "RW": {name: "Rwanda", currency: RWF, weekend: [Sat, Sun]}
+      "SA": {name: "Saudi Arabia", currency: SAR, weekend: [Fri, Sat]}
+      "SB": {name: "Solomon Islands", currency: SBD, weekend: [Sat, Sun]}
+      "SC": {name: "Seychelles", currency: SCR, weekend: [Sat, Sun]}
+      "SD": {name: "Sudan", currency: SDG, weekend: [Fri, Sat]}
+      "SE": {name: "Sweden", currency: SEK, weekend: [Sat, Sun]}
+      "SG": {name: "Singapore", currency: SGD, weekend: [Sat, Sun]}
+      "SI": {name: "Slovenia", currency: EUR, weekend: [Sat, Sun]}
+      "SK": {name: "Slovakia", currency: EUR, weekend: [Sat, Sun]}
+      "SL": {name: "Sierra Leone", currency: SLE, weekend: [Sat, Sun]}
+      "SM": {name: "San Marino", currency: EUR, weekend: [Sat, Sun]}
+      "SN": {name: "Senegal", currency: XOF, weekend: [Sat, Sun]}
+      "SO": {name: "Somalia", currency: SOS, weekend: [Sat, Sun]}
+      "SR": {name: "Suriname", currency: SRD, weekend: [Sat, Sun]}
+      "SS": {name: "South Sudan", currency: SSP, weekend: [Sat, Sun]}
+      "ST": {name: "São Tomé and Príncipe", currency: STN, weekend: [Sat, Sun]}
+      "SV": {name: "El Salvador", currency: USD, weekend: [Sat, Sun]}
+      "SY": {name: "Syria", currency: SYP, weekend: [Fri, Sat]}
+      "SZ": {name: "Eswatini", currency: SZL, weekend: [Sat, Sun]}
+      "TD": {name: "Chad", currency: XAF, weekend: [Sat, Sun]}
+      "TG": {name: "Togo", currency: XOF, weekend: [Sat, Sun]}
+      "TH": {name: "Thailand", currency: THB, weekend: [Sat, Sun]}
+      "TJ": {name: "Tajikistan", currency: TJS, weekend: [Sat, Sun]}
+      "TL": {name: "Timor-Leste", currency: USD, weekend: [Sat, Sun]}
+      "TM": {name: "Turkmenistan", currency: TMT, weekend: [Sat, Sun]}
+      "TN": {name: "Tunisia", currency: TND, weekend: [Sat, Sun]}
+      "TO": {name: "Tonga", currency: TOP, weekend: [Sat, Sun]}
+      "TR": {name: "Türkiye", currency: TRY, weekend: [Sat, Sun]}
+      "TT": {name: "Trinidad and Tobago", currency: TTD, weekend: [Sat, Sun]}
+      "TV": {name: "Tuvalu", currency: AUD, weekend: [Sat, Sun]}
+      "TW": {name: "Taiwan", currency: TWD, weekend: [Sat, Sun]}
+      "TZ": {name: "Tanzania", currency: TZS, weekend: [Sat, Sun]}
+      "UA": {name: "Ukraine", currency: UAH, weekend: [Sat, Sun]}
+      "UG": {name: "Uganda", currency: UGX, weekend: [Sun]}
+      "US": {name: "United States", currency: USD, weekend: [Sat, Sun]}
+      "UY": {name: "Uruguay", currency: UYU, weekend: [Sat, Sun]}
+      "UZ": {name: "Uzbekistan", currency: UZS, weekend: [Sat, Sun]}
+      "VA": {name: "Vatican City", currency: EUR, weekend: [Sat, Sun]}
+      "VC": {name: "Saint Vincent and Grenadines", currency: XCD, weekend: [Sat, Sun]}
+      "VE": {name: "Venezuela", currency: VES, weekend: [Sat, Sun]}
+      "VN": {name: "Vietnam", currency: VND, weekend: [Sat, Sun]}
+      "VU": {name: "Vanuatu", currency: VUV, weekend: [Sat, Sun]}
+      "WS": {name: "Samoa", currency: WST, weekend: [Sat, Sun]}
+      "XK": {name: "Kosovo", currency: EUR, weekend: [Sat, Sun]}
+      "YE": {name: "Yemen", currency: YER, weekend: [Fri, Sat]}
+      "ZA": {name: "South Africa", currency: ZAR, weekend: [Sat, Sun]}
+      "ZM": {name: "Zambia", currency: ZMW, weekend: [Sat, Sun]}
+      "ZW": {name: "Zimbabwe", currency: USD, weekend: [Sat, Sun]}
+    kind: regulatory
+    verified: false
+    source_url: "https://cldr.unicode.org/"
+    last_checked: "2026-10-15"
+    note: "Every country as a sandbox destination. Names, currencies and weekends come from Unicode CLDR through Babel and are not checked against each country's banks. Public holidays are not loaded for these countries. Indicative. Confirm with your AD bank."
+  rates:
+    value:
+      "AED": "33.219877"
+      "AFN": "1.742857"
+      "ALL": "1.326087"
+      "AMD": "0.316883"
+      "AOA": "0.133772"
+      "ARS": "0.101667"
+      "AZN": "71.764706"
+      "BAM": "71.764706"
+      "BBD": "61.000000"
+      "BGN": "71.345029"
+      "BHD": "324.468085"
+      "BIF": "0.041356"
+      "BND": "93.846154"
+      "BOB": "17.681159"
+      "BRL": "22.181818"
+      "BSD": "122.000000"
+      "BTN": "1.418605"
+      "BWP": "9.037037"
+      "BYN": "36.969697"
+      "BZD": "61.000000"
+      "CDF": "0.042807"
+      "CHF": "152.500000"
+      "CLP": "0.128421"
+      "CNY": "17.062937"
+      "COP": "0.029756"
+      "CRC": "0.241584"
+      "CUP": "5.083333"
+      "CVE": "1.270833"
+      "CZK": "5.674419"
+      "DJF": "0.686550"
+      "DKK": "18.769231"
+      "DOP": "1.967742"
+      "DZD": "0.917293"
+      "EGP": "2.489796"
+      "ERN": "8.133333"
+      "ETB": "0.903704"
+      "FJD": "54.222222"
+      "GEL": "45.185185"
+      "GHS": "10.166667"
+      "GMD": "1.694444"
+      "GNF": "0.014104"
+      "GTQ": "15.844156"
+      "GYD": "0.583732"
+      "HKD": "15.641026"
+      "HNL": "4.692308"
+      "HTG": "0.931298"
+      "HUF": "0.353623"
+      "IDR": "0.007485"
+      "ILS": "34.857143"
+      "INR": "1.418605"
+      "IQD": "0.093130"
+      "IRR": "0.002905"
+      "ISK": "0.976000"
+      "JMD": "0.772152"
+      "JOD": "172.073343"
+      "JPY": "0.813333"
+      "KES": "0.945736"
+      "KGS": "1.402299"
+      "KHR": "0.030500"
+      "KMF": "0.283721"
+      "KPW": "0.135556"
+      "KRW": "0.087143"
+      "KWD": "397.394137"
+      "KZT": "0.234615"
+      "LAK": "0.005622"
+      "LBP": "0.001363"
+      "LKR": "0.406667"
+      "LRD": "0.642105"
+      "LSL": "6.777778"
+      "LYD": "22.592593"
+      "MAD": "13.260870"
+      "MDL": "7.176471"
+      "MGA": "0.027111"
+      "MKD": "2.259259"
+      "MMK": "0.058095"
+      "MNT": "0.033889"
+      "MOP": "15.250000"
+      "MRU": "3.050000"
+      "MUR": "2.711111"
+      "MVR": "7.922078"
+      "MWK": "0.070317"
+      "MXN": "6.256410"
+      "MZN": "1.906250"
+      "NAD": "6.777778"
+      "NGN": "0.081333"
+      "NIO": "3.315217"
+      "NOK": "11.619048"
+      "NPR": "0.890511"
+      "NZD": "71.764706"
+      "OMR": "316.883117"
+      "PEN": "33.424658"
+      "PGK": "29.756098"
+      "PHP": "2.140351"
+      "PKR": "0.435714"
+      "PLN": "32.972973"
+      "PYG": "0.015641"
+      "QAR": "33.516484"
+      "RON": "27.727273"
+      "RSD": "1.196078"
+      "RUB": "1.525000"
+      "RWF": "0.085315"
+      "SAR": "32.533333"
+      "SBD": "14.523810"
+      "SCR": "8.413793"
+      "SDG": "0.203333"
+      "SEK": "12.448980"
+      "SGD": "93.846154"
+      "SLE": "5.422222"
+      "SOS": "0.213660"
+      "SRD": "3.297297"
+      "SSP": "0.027111"
+      "STN": "5.700935"
+      "SYP": "0.009385"
+      "SZL": "6.777778"
+      "THB": "3.696970"
+      "TJS": "11.619048"
+      "TMT": "34.857143"
+      "TND": "39.354839"
+      "TOP": "50.833333"
+      "TRY": "3.050000"
+      "TTD": "17.941176"
+      "TWD": "3.935484"
+      "TZS": "0.046923"
+      "UAH": "2.975610"
+      "UGX": "0.033889"
+      "UYU": "3.050000"
+      "UZS": "0.009531"
+      "VES": "1.220000"
+      "VND": "0.004692"
+      "VUV": "1.016667"
+      "WST": "43.571429"
+      "XAF": "0.214035"
+      "XCD": "45.185185"
+      "XOF": "0.214035"
+      "YER": "0.488000"
+      "ZAR": "6.777778"
+      "ZMW": "4.880000"
+    kind: synthetic
+    verified: true
+    note: "Synthetic mid-market BDT per 1 unit, invented for the sandbox. Not a live feed and not a forecast. A rule in fx.mid_rates, when it exists, wins."
+  restricted:
+    value: [CU, IR, KP, SY]
+    kind: regulatory
+    verified: false
+    source_url: "https://example.org/replace-with-bangladesh-bank-restricted-destinations"
+    last_checked: "2026-10-15"
+    note: "Destinations the sandbox will not quote, because banks often refuse them. This list is a placeholder from public sanctions news, not legal advice. Confirm with your AD bank."

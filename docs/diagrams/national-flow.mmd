@@ -1,0 +1,12 @@
+flowchart LR
+  P["Payer's account<br/>at the sending bank"] -->|"confirm with MFA<br/>amount + fee"| F["In flight<br/>(funds reserved)"]
+  F --> S["<b>Sending bank</b><br/>takes its fee, pays from<br/>its reserve at the clearing house"]
+  S --> C["<b>Clearing house</b><br/>settles between the<br/>two banks' reserves"]
+  C --> R["<b>Receiving bank</b><br/>credits its customer"]
+  R --> B["Beneficiary's account<br/>at the receiving bank"]
+  F -.->|"same bank: one step,<br/>no clearing, no fee"| B
+  Rails["<b>Three rails (all simulated)</b><br/>Instant: about 3 seconds<br/>Next batch: waits for its window<br/>High value: higher minimum and fee"]
+  Rails -.->|"the payer picks one,<br/>or the cheapest is chosen"| S
+
+  classDef sim fill:#fff4cc,stroke:#c28b00,color:#3d2c00
+  class Rails sim

@@ -1,0 +1,41 @@
+[project]
+name = "studyroute-backend"
+version = "1.0.0"
+description = "StudyRoute sandbox: cross-border student payment assistant (synthetic data, no real money)."
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "C4", "PT", "RUF"]
+ignore = [
+  "S311",    # random is only used for synthetic data, never for security
+  "RUF012",  # SQLAlchemy / pydantic class attributes are not mutable-default bugs
+  "B008",    # FastAPI Depends() in argument defaults is the idiomatic pattern
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S108", "PT011", "PT012", "PT018", "E501"]
+"app/ai/templates.py" = ["E501"]
+"app/ai/tools.py" = ["E501"]
+"app/ai/tasks.py" = ["E501"]
+"app/domain/compliance_report.py" = ["E501"]  # evidence sentences
+"app/engine/mt103.py" = ["E501"]
+"app/scripts/**" = ["S101"]
+"app/scripts/export_evidence.py" = ["S101", "E501"]  # the README text is prose in a string
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+filterwarnings = [
+  "error::DeprecationWarning:app.*",
+  "ignore:Using .httpx. with .starlette.testclient.:DeprecationWarning",
+  "ignore::DeprecationWarning:fastapi.testclient",
+]

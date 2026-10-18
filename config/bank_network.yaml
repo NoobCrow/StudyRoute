@@ -1,0 +1,77 @@
+# StudyRoute sandbox bank network: invented banks, rails and accounts for the bank simulation.
+#
+# EVERYTHING HERE IS SYNTHETIC. The banks, BIC-style codes (all start with EXMP, which we reserve
+# for the sandbox), account numbers, fees, limits and timings are invented for the demo. They are
+# NOT the rules of any real bank, scheme or regulator, and nothing here is verified against one.
+# The rails only copy the *shape* of real payment systems (instant, next-batch, high-value, and
+# SWIFT through a correspondent) so that a judge can watch money move between banks.
+#
+# Money is integer minor units (BDT 500.00 = 50000). Fees are fixed minor units plus basis points.
+# Delays are seconds of simulated time; the worker advances a transfer one step per delay.
+
+schema_version: 1
+
+# Rails are priced and limited per currency. `delays` are the seconds before each step runs.
+# SLOW_TEST in the beneficiary name multiplies every delay by `slow_factor`.
+timing:
+  slow_factor: 6
+  on_us_delays: [1]
+  international_delays: [4, 4, 4]   # originating bank, correspondent, beneficiary bank
+
+banks:
+  EXMPBDA1: {name: "Example Bank A (sandbox)", country: BD, currency: BDT, role: AD_BANK, provider_id: prov_a}
+  EXMPBDB1: {name: "Example Bank B (sandbox)", country: BD, currency: BDT, role: AD_BANK, provider_id: prov_b}
+  EXMPBDC1: {name: "Example Bank C (sandbox)", country: BD, currency: BDT, role: AD_BANK, provider_id: prov_c}
+  EXMPUS6C: {name: "Example Correspondent Bank (sandbox)", country: US, currency: USD, role: CORRESPONDENT}
+  EXMPGB2L: {name: "University Bank of Example (sandbox)", country: GB, currency: GBP, role: HOST_BANK}
+  EXMPGB2X: {name: "Sample Bank London (sandbox)", country: GB, currency: GBP, role: HOST_BANK}
+  EXMPUS33: {name: "Example Bank US (sandbox)", country: US, currency: USD, role: HOST_BANK}
+  EXMPDEFF: {name: "Example Bank Germany (sandbox)", country: DE, currency: EUR, role: HOST_BANK}
+  EXMPAU2S: {name: "Example Bank Australia (sandbox)", country: AU, currency: AUD, role: HOST_BANK}
+  EXMPCATT: {name: "Example Bank Canada (sandbox)", country: CA, currency: CAD, role: HOST_BANK}
+  EXMPMYKL: {name: "Example Bank Malaysia (sandbox)", country: MY, currency: MYR, role: HOST_BANK}
+
+# One clearing house per country that has two or more banks. Banks keep a reserve account there.
+clearing_houses:
+  CLR-BD: {name: "Sandbox Clearing House Dhaka", country: BD, currency: BDT}
+  CLR-GB: {name: "Sandbox Clearing House London", country: GB, currency: GBP}
+
+# National rails by currency. A transfer inside one bank (ON_US) is free and needs no rail.
+rails:
+  BDT:
+    INSTANT:    {label: "Instant payment (simulated)", fee_fixed_minor: 500, fee_bps: 0, min_minor: 100, max_minor: 50000000, delays: [1, 1, 1]}
+    BATCH:      {label: "Next-batch transfer (simulated)", fee_fixed_minor: 200, fee_bps: 0, min_minor: 100, max_minor: 500000000, delays: [20, 3, 3]}
+    HIGH_VALUE: {label: "High-value real-time transfer (simulated)", fee_fixed_minor: 10000, fee_bps: 0, min_minor: 50000000, max_minor: null, delays: [3, 3, 3]}
+  GBP:
+    INSTANT:    {label: "Instant payment (simulated)", fee_fixed_minor: 0, fee_bps: 0, min_minor: 1, max_minor: 10000000, delays: [1, 1, 1]}
+    BATCH:      {label: "Next-batch transfer (simulated)", fee_fixed_minor: 0, fee_bps: 0, min_minor: 1, max_minor: 100000000, delays: [20, 3, 3]}
+    HIGH_VALUE: {label: "High-value real-time transfer (simulated)", fee_fixed_minor: 2000, fee_bps: 0, min_minor: 10000000, max_minor: null, delays: [3, 3, 3]}
+
+# Opening liquidity, in major units of each currency, for every pair of banks that hold accounts
+# with each other (nostro/vostro) and for every bank's reserve at a clearing house.
+liquidity:
+  nostro_major: 10000000
+  reserve_major: 100000000
+  cash_major: 0
+
+# Synthetic customers. `owner` links the account to the demo household (parent or student);
+# null means a third party (a university, a landlord, a relative) that the household can pay.
+# Names carrying FAIL_TEST, SLOW_TEST or SANCTION_TEST trigger the sandbox scenarios.
+demo_accounts:
+  - {key: parent_a, bank: EXMPBDA1, number: "SBX-A-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent salary account"}
+  - {key: parent_b, bank: EXMPBDB1, number: "SBX-B-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent savings account"}
+  - {key: parent_c, bank: EXMPBDC1, number: "SBX-C-0001", holder: "Demo Parent (synthetic)", currency: BDT, opening_minor: 500000000, owner: parent, label: "Parent business account"}
+  - {key: student_gbp, bank: EXMPGB2X, number: "SBX-X-0001", holder: "Demo Student (synthetic)", currency: GBP, opening_minor: 80000, owner: student, label: "Student UK current account"}
+  - {key: relative_a, bank: EXMPBDA1, number: "SBX-A-0002", holder: "Demo Cousin (synthetic)", currency: BDT, opening_minor: 1500000, owner: null, label: "Cousin, same bank as the parent"}
+  - {key: relative_b, bank: EXMPBDB1, number: "SBX-B-0002", holder: "Demo Relative (synthetic)", currency: BDT, opening_minor: 2500000, owner: null, label: "Relative in Dhaka"}
+  - {key: relative_c, bank: EXMPBDC1, number: "SBX-C-0002", holder: "Demo Aunt (synthetic)", currency: BDT, opening_minor: 1000000, owner: null, label: "Aunt in Chattogram"}
+  - {key: landlord, bank: EXMPGB2X, number: "SBX-X-0002", holder: "Example Landlord (synthetic)", currency: GBP, opening_minor: 200000, owner: null, label: "Student landlord"}
+  - {key: slow_landlord, bank: EXMPGB2X, number: "SBX-X-0003", holder: "SLOW_TEST Rentals (synthetic)", currency: GBP, opening_minor: 0, owner: null, label: "Slow-settling landlord"}
+  - {key: university, bank: EXMPGB2L, number: "GB08EXMP12345612344821", holder: "University of Example (synthetic)", currency: GBP, opening_minor: 120000000, owner: null, label: "University tuition account"}
+  - {key: fail_university, bank: EXMPGB2L, number: "GB13EXMP12345600005555", holder: "FAIL_TEST University (synthetic)", currency: GBP, opening_minor: 0, owner: null, label: "University that rejects the payment"}
+  - {key: sanctioned, bank: EXMPGB2L, number: "SBX-L-0099", holder: "SANCTION_TEST Trading (synthetic)", currency: GBP, opening_minor: 0, owner: null, label: "Blocked by mock screening"}
+  - {key: university_us, bank: EXMPUS33, number: "SBX-US-0001", holder: "University of Example US (synthetic)", currency: USD, opening_minor: 50000000, owner: null, label: "US university"}
+  - {key: university_de, bank: EXMPDEFF, number: "SBX-DE-0001", holder: "University of Example DE (synthetic)", currency: EUR, opening_minor: 50000000, owner: null, label: "German university"}
+  - {key: university_au, bank: EXMPAU2S, number: "SBX-AU-0001", holder: "University of Example AU (synthetic)", currency: AUD, opening_minor: 50000000, owner: null, label: "Australian university"}
+  - {key: university_ca, bank: EXMPCATT, number: "SBX-CA-0001", holder: "University of Example CA (synthetic)", currency: CAD, opening_minor: 50000000, owner: null, label: "Canadian university"}
+  - {key: university_my, bank: EXMPMYKL, number: "SBX-MY-0001", holder: "University of Example MY (synthetic)", currency: MYR, opening_minor: 50000000, owner: null, label: "Malaysian university"}

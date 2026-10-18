@@ -1,0 +1,34 @@
+name: Rebuild Botkeep frontend
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: npm ci --no-audit --no-fund
+        working-directory: web
+      - run: npm run typecheck && npm test && npm run build
+        working-directory: web
+      - run: python scripts/prepare_botkeep.py
+      - name: Commit generated public frontend only
+        run: |
+          git config user.name "Botkeep build"
+          git config user.email "botkeep-build@automation.test"
+          git add deploy/botkeep/site deploy/botkeep/site-manifest.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Rebuild Botkeep frontend"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

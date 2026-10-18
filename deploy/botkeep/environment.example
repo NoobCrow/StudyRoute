@@ -1,0 +1,19 @@
+# Fill private values only in the hosting panel, never in Git.
+APP_ENV=sandbox
+ASSISTANT_CLOUD_ENABLED=false
+NLU_MODE=auto
+DIALOGUE_MODE=auto
+EXPLAINER_MODE=auto
+RISK_MODE=auto
+BOTKEEP_SEED_DEMO=true
+MODEL_GITHUB_REPO=redwan786/StudyRoute-botkeep
+MODEL_GITHUB_TOKEN=
+# Use the actual assigned application port, HTTPS origin and persistent path.
+SERVER_PORT=
+PUBLIC_ORIGIN=
+CORS_ORIGINS=
+DATA_DIR=
+DATA_ENCRYPTION_KEY=
+# Optional operator cloud provider; blank keeps the local explainer selected.
+LLM_PROVIDER=
+LLM_API_KEY=

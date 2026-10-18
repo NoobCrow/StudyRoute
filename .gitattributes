@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.png binary
+*.docx binary
+*.onnx binary
+*.gz binary
+*.pptx binary
+
+# Keep model artifacts and the verified deployed assets byte-exact on every OS.
+backend/app/ai/**/model/** -text
+deploy/botkeep/site/** -text

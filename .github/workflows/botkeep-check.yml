@@ -1,0 +1,19 @@
+name: Botkeep GitHub and local-model deployment checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python scripts/check_github_limits.py
+      - run: python scripts/prepare_botkeep.py --check
+      - run: python scripts/scan_repo.py
+      - run: pip install -r backend/requirements-dev.txt
+      - run: python -m unittest discover -s tests_deployment -v
+      - run: python -m pytest -o addopts='' -q tests/test_botkeep_hosting.py tests/test_browser_session.py tests/test_ai_cloud.py tests/test_response_language.py
+        working-directory: backend

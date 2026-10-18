@@ -1,0 +1,6 @@
+# These packages install on the HF server ONLY, not on the user's PC.
+spaces==0.51.3
+transformers==5.0.0
+accelerate==1.10.1
+torch==2.8.0
+safetensors==0.6.2
