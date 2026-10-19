@@ -12,9 +12,9 @@ SR-SEC-2026-01 | Recorded evidence: 15–18 October 2026
 
 *Decision & assurance*
 
-**Final-submission security-evidence update.** Section 7 and Appendix A itemize the recorded attack, brute-force, data-leakage, MITM, adversarial-assistant and browser-security probes. These are supplied team-run lab results, not a new independent pentest or public-deployment assessment.
+**Final-submission update.** Section 7 and Appendix A list every recorded attack, brute-force, data-leakage, MITM, adversarial-assistant and browser-security check. The team ran them in its own lab. They are not an independent pentest and do not cover the public deployment.
 
-StudyRoute is a synthetic-data demonstrator for cross-border student payments. Its security design separates deterministic financial calculations, AI-assisted preparation and human authorization. The reviewed source enforces significant safeguards, but the evidence supports a controlled sandbox demonstration—not production payment processing or a regulatory compliance claim. [C01–C10]
+StudyRoute is a synthetic-data sandbox for cross-border student payments. It keeps deterministic financial calculations, AI-assisted preparation and human authorization separate. The code enforces many real safeguards, but the evidence supports only a controlled sandbox demo, not production payments or a regulatory compliance claim. [C01–C10]
 
 **Table 1. Executive assessment by area**
 
@@ -22,7 +22,7 @@ StudyRoute is a synthetic-data demonstrator for cross-border student payments. I
 | --- | --- |
 | Authorization | Role + token scope + ownership checks; human-only payment approval with action-bound step-up. |
 | Transactional integrity | Idempotency, state-machine guards, summary hashes and audit records tested locally. |
-| Data protection | Field-level authenticated encryption and session controls are implemented; operator key custody remains a trust boundary. |
+| Data protection | Sensitive fields are encrypted and sessions are protected. Whoever holds the keys must still be trusted. |
 | AI safety | AI is constrained by domain permissions and tool restrictions. Model accuracy is not treated as authorization. |
 | Deployment readiness | Conditional for isolated synthetic demonstration. Public HTTPS, operational hardening and live rails are not verified. |
 
@@ -30,7 +30,7 @@ StudyRoute is a synthetic-data demonstrator for cross-border student payments. I
 
 Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fresh HTTP API demonstration: **66 checks passed, 0 failed**. The local audit verified **76 events**; editing event 75 was detected and restoration returned PASS. All four local model components loaded. These are local results on the supplied main-branch archive, not Botkeep deployment results. [E01–E06]
 
-> **No independent certification** — This is a source-based self-assessment and reproducibility review. It is not an independent penetration test, banking authorization, ISO certification or guarantee that no vulnerabilities exist. No project owner has signed a risk acceptance as part of this report.
+> **Not independently certified.** This is a self-assessment based on the source code and our own tests. It is not an independent pentest, banking authorization or ISO certification, and it does not guarantee the absence of vulnerabilities. No project owner has signed a risk acceptance.
 
 ## 2. Background
 
@@ -54,9 +54,9 @@ Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fr
 
 #### Attacker assumptions
 
-Consider unauthenticated clients, authenticated users from another household, compromised parent/student sessions, malicious prompt/document content, forged provider events, and an operator or database owner with privileged filesystem access. These attackers do not have equal capabilities; in particular, a database-owner limitation is not evidence of an unauthenticated remote exploit. [C01–C09]
+We considered unauthenticated clients, users from another household, hijacked parent or student sessions, malicious prompt or document content, forged provider events, and an operator or database owner with filesystem access. These attackers differ in power: a weakness only a database owner can use is not a remote exploit. [C01–C09]
 
-> **Important exception** — The reviewer/admin is intentionally cross-household for review and administration. Parent, student and delegated AI access are household-scoped. A reviewer cannot replace the parent’s payment approval. [C01; C03]
+> **Exception.** The reviewer/admin role sees across households on purpose, for review and administration. Parent, student and delegated AI access stay within one household. A reviewer cannot replace the parent’s payment approval. [C01; C03]
 
 ## 3. Assessment Scope
 
@@ -84,13 +84,13 @@ Consider unauthenticated clients, authenticated users from another household, co
 
 #### Explicit exclusions
 
-No external penetration testing, internet-facing TLS assessment, load testing, new vulnerability-advisory database scan, clean-machine dependency installation, model retraining, new blind study, real provider call, real KYC/sanctions integration or actual financial settlement was performed. Docker, frontend builds and browser probes were not rerun for this report. [E01–E06; H01–H04]
+Not done: external penetration testing, TLS assessment of an internet-facing host, load testing, a new advisory scan, a clean-machine dependency install, model retraining, a new blind study, real provider calls, real KYC or sanctions integration and real financial settlement. Docker, frontend builds and browser probes were not rerun. [E01–E06; H01–H04]
 
-> **Branch and deployment boundary** — The Botkeep branch uses a separate packaging/bootstrap path and was still being imported during this work. This report assesses the supplied main archive; it does not certify that deployment, its Release downloader, environment variables or public domain.
+> **Branch and deployment.** The Botkeep branch has its own packaging and bootstrap path and was still being imported while we worked. This report covers the supplied main archive only, not the Botkeep deployment, its Release downloader, environment variables or public domain.
 
 ## 4. Summary of Findings
 
-**Findings at a glance.** Counts are taken from the risk register (section 9) and the recorded check catalogue (Appendix A); nothing here is a new test.
+**Findings at a glance.** Counts come from the risk register (section 9) and the check catalogue (Appendix A). Nothing here is a new test.
 
 **Table 4. Findings at a glance: prioritized risks**
 
@@ -106,7 +106,7 @@ No external penetration testing, internet-facing TLS assessment, load testing, n
 
 ### 4.1 Verification results & evidence limits
 
-*What was actually checked*
+*What we checked*
 
 **Table 6. Verification results and evidence limits**
 
@@ -121,11 +121,11 @@ No external penetration testing, internet-facing TLS assessment, load testing, n
 | Inherited probes | 146/146; 8/8; 42/42; 14 defended; 48/48 | Team-authored historical tools; not rerun or independent pentest. |
 | Inherited data-leak scan | 50 PASS; 2 informational metadata findings | Canary checks in disposable database, logs, audit and responses; raw S03. Not rerun; see section 7 and Appendix A. |
 
-#### Do not add overlapping test counts
+#### Overlapping test counts
 
-The supplied release record contains 1,542 backend cases, plus focused 42-case and 53-case runs. These runs overlap and represent different snapshots/scopes; older summaries also cite other backend counts. This report uses the fresh complete-suite JUnit result as its primary backend count, and keeps inherited results separate. [E01; H01; C10]
+The supplied release record contains 1,542 backend cases plus focused 42-case and 53-case runs. These overlap and come from different snapshots, and older summaries cite other backend counts. This report uses the fresh full-suite JUnit result as its backend count and keeps inherited results separate. [E01; H01; C10]
 
-> **Sampling and assumptions** — The explainer quality-floor module was skipped because its cases fixture is absent; model loadability was checked separately. Positive tests and limited hostile-input corpora do not establish exhaustive safety. The test harness is team-authored; representative user studies, independent attack testing and verification of the actual public deployment remain open.
+> **Sampling and limits.** The explainer quality-floor module was skipped because its cases fixture is missing. Model loading was checked separately. Passing tests and small hostile-input sets do not prove safety. The test harness is team-written. Representative user studies, independent attack testing and a check of the real public deployment are still open.
 
 ### 4.2 Findings and remediation recorded by the team
 
@@ -141,9 +141,9 @@ The supplied release record contains 1,542 backend cases, plus focused 42-case a
 | F04 — MFA dialog accessibility | A form carried inappropriate dialog semantics. | Team records a fix. This is an accessibility finding, not a security compromise. [S08] |
 | F05 — plaintext document text | A synthetic passport embedded in an uploaded document was readable from the database in the earlier leak test. | Team records AES-256-GCM for document text, bound to its row; S03 now passes those canary checks. Legacy plaintext rows remain readable by the app; migration/backup retention remain open. Names/filenames stay plaintext. [S03; S08] |
 | F06 — development dependencies | The earlier advisory snapshot records nine high-severity advisories in dev-only tooling. | Not fixed in that record; major upgrade deferred (R50). Historical production zero-advisory checks are not a current clean bill of health. [S08] |
-| F07 — MITM probe precondition | An initial rerun produced five failures because bank-review gating returned 409 before the MFA step the probe intended to test. | Team records correcting the probe setup to clear the review with a reviewer’s bound MFA proof, then retesting M1–M14. It was not evidence that approval bypass succeeded. The supplied final S04 log alone is not the initial-failure log. [S04; S08] |
+| F07 — MITM probe precondition | A first rerun failed five checks because bank-review gating returned 409 before the MFA step being tested. | Team corrected the probe setup to clear the review with a reviewer’s bound MFA proof, then retested M1–M14. The failures did not show an approval bypass. The supplied final S04 log is not the log of the first run. [S04; S08] |
 
-No runtime changes are made by this report update. Fix descriptions are inherited from the supplied security-testing record and capture, not newly implemented or independently retested here. Regression references include test_security_leaks.py, test_documents_at_rest.py, test_security_thief.py, test_ai_hostile_prompts.py, household-isolation tests and authentication lockout tests. The original source archive contains these unchanged files. [S08]
+This update changes no runtime code. The fix descriptions come from the supplied security-testing record and capture; we did not reimplement or independently retest them. Related regression tests: test_security_leaks.py, test_documents_at_rest.py, test_security_thief.py, test_ai_hostile_prompts.py, household-isolation tests and authentication lockout tests, unchanged in the original archive. [S08]
 
 ## 5. Summary of Recommendations
 
@@ -171,7 +171,7 @@ No runtime changes are made by this report update. Fix descriptions are inherite
 - Check audit prefixes against an independently held checkpoint; reconcile simulated/real financial records using the correct integration boundary.
 - Restore from a verified backup in an isolated environment; retest controls and record the operator’s release decision.
 
-> **Disposition** — Proceed only as a controlled synthetic-data evaluation subject to operator approval. This report does not approve public production operation, real payment processing or legal compliance.
+> **Recommendation.** Proceed only as a controlled evaluation on synthetic data, with operator approval. This report does not approve public production use, real payment processing or legal compliance.
 
 ## 6. Introduction
 
@@ -179,30 +179,30 @@ No runtime changes are made by this report update. Fix descriptions are inherite
 
 *Verified after the original assessment*
 
-The original assessment in this document (18 October 2026) is unchanged: every result, count and risk below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes the original statement that the remote repository was not checked. The final submission adds the attack-testing evidence and complete recorded case catalogue in section 7 and Appendix A; the original assessment boundary remains unchanged. The skipped-test-module row below was revised on 19 October 2026.
+The original assessment (18 October 2026) is unchanged; every result, count and risk below stands as written. This section adds read-only checks made later that day (E07, validation/final-verification.json, produced by tools/final_verification.py) and replaces the original statement that the remote repository was not checked. The final submission also adds the attack-testing evidence and case catalogue (section 7, Appendix A). The skipped-test-module row was revised on 19 October 2026.
 
 **Table 9. Results of the final-submission checks**
 
 | Item | Result |
 | --- | --- |
-| Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. The original assessment could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
-| Repository access | Public; default branch main. The README, the technical-documentation PDF and the deck load anonymously (HTTP 200). [E07] |
-| Continuous integration | GitHub reports the workflow "ci" on that commit as success: docker, contracts, web, secret-scan, backend and dependency-audit all succeeded (run 39081290614). The job logs were not re-reviewed here. [E07] |
-| Other branches | A branch named botkeep (3 commits, head e2c28a0c74b6) is on the remote and is not part of main. It was not assessed; this document still covers main only. [E07] |
-| The skipped test module (closed) | Closed on 19 October 2026. The missing file, backend/tests/data/explainer_cases.json, is now committed to the repository and included in the offline source archive, so a fresh clone runs every test: 1,705 backend tests (1,704 pass, 1 skipped on Windows, a symlink test), including a new 25-prompt assistant suite. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests are supplied counts, not re-run by this report update. The fresh run recorded in section 4.1 (1,672 passed, 1 skipped, made before the file was added) stands as written. |
-| Regulatory assumptions (SR-04) | Four study-abroad rules (one AD bank branch for the whole course, one academic year at a time, release per the institution's estimate, international cards for education) were read in the official Bangladesh Bank circular FEPD-1 No. 40 of 30 September 2026, section 10, and are marked verified in config/rules.yaml. The USD 2,000 a month living-cost figure is not in that text and stays unverified. This is the team's reading and no lawyer or AD bank has reviewed it, so SR-04 otherwise stands. |
-| The team's Docker run (inherited, not re-run here) | Same day, in an Ubuntu 24.04 VM with Docker 29.1.3: the smoke checks, the 14-step demo (66 checks OK), the bank-review demo, a real-Chrome audit (48 of 48) and the hardened overlay (read-only filesystem, all capabilities dropped) passed. The run used the archive of commit 8d91cc8 with the two files of the later fix c9d044b copied in; it was not a fresh archive of bcce930. It first found that the trained explainer reworded the assistant's questions (3 demo checks failed; the CI docker job had failed 4); the fix is part of bcce930. Raw output: inherited/submission/evidence/docker_2026-10-18/ and docker_run.txt (H04). |
-| Corrections to the original assessment | The current submission reconciles the counts in the preceding row. Section 4.1 keeps inherited run scopes separate; no historical raw test output has been rewritten. The new section 7 and Appendix A itemize the previously summarized team-run security probes. |
+| Source identity | The remote main branch of NoobCrow/StudyRoute is at commit bcce930ae0974712e922245878fd976b03a8938a, the one this document covers. The original assessment could not check the remote; this replaces that statement. [E07] |
+| Repository access | Public; default branch main. The README, technical-documentation PDF and deck load without signing in (HTTP 200). [E07] |
+| Continuous integration | GitHub reports the “ci” workflow on that commit as success: docker, contracts, web, secret-scan, backend and dependency-audit all passed (run 39081290614). Job logs were not re-reviewed. [E07] |
+| Other branches | A branch named botkeep (3 commits, head e2c28a0c74b6) exists on the remote and is not part of main. It was not assessed; this document covers main only. [E07] |
+| The skipped test module (closed) | Closed on 19 October 2026. The missing file, backend/tests/data/explainer_cases.json, is now committed and included in the offline source archive, so a fresh clone runs every test: 1,705 backend tests (1,704 pass, 1 skipped on Windows, a symlink test), including a new 25-prompt assistant suite. The 463 web tests (439 in an earlier pre-merge log) and 24 browser tests are supplied counts, not rerun here. The fresh run in section 4.1 (1,672 passed, 1 skipped) predates the file and stands as written. |
+| Regulatory assumptions (SR-04) | We read four study-abroad rules (one AD bank branch for the whole course, one academic year at a time, release per the institution’s estimate, international cards for education) in section 10 of Bangladesh Bank circular FEPD-1 No. 40 of 30 September 2026 and marked them verified in config/rules.yaml. The USD 2,000 a month living-cost figure is not in that text and stays unverified. This is the team’s own reading; no lawyer or AD bank has reviewed it, so SR-04 otherwise stands. |
+| The team's Docker run (inherited, not re-run here) | Same day, in an Ubuntu 24.04 VM with Docker 29.1.3, these passed: the smoke checks, the 14-step demo (66 checks OK), the bank-review demo, a real-Chrome audit (48 of 48) and the hardened overlay (read-only filesystem, all capabilities dropped). The run used the archive of commit 8d91cc8 with the two files of the later fix c9d044b copied in, not a fresh archive of bcce930. It first found that the trained explainer reworded the assistant’s questions (3 demo checks failed; the CI docker job had failed 4). The fix is part of bcce930. Raw output: inherited/submission/evidence/docker_2026-10-18/ and docker_run.txt (H04). |
+| Corrections to the original assessment | The counts in the previous row are now reconciled. Section 4.1 keeps inherited run scopes separate, and no historical raw output was rewritten. Section 7 and Appendix A now itemize the team-run probes that were only summarized before. |
 
-> **Not changed by this update** — The permission tiers, the control review, the risk register SR-01 to SR-10, the release gates G1 to G8, every count and result in section 4.1, and the conclusion that the evidence supports a controlled synthetic-data demonstration only.
+> **Unchanged.** The permission tiers, control review, risk register (SR-01 to SR-10), release gates (G1 to G8), every count and result in section 4.1, and the conclusion that the evidence supports only a controlled synthetic-data demonstration.
 
 ## 7. Assessment Methodology
 
 ### 7.1 Attack testing, leakage and MITM: scope & results
 
-*Team-run security evidence — not a new test run*
+*Team-run security evidence, not a new test run*
 
-Purpose. This addition makes the previously compressed security evidence explicit. The six raw files from 18 October 2026 were inspected and their check labels counted for this report; the tools themselves were not re-executed. The team ran them against synthetic-data lab instances using throwaway databases, not against a third-party target or the current public Botkeep deployment. [S01–S06; S08]
+Purpose. Earlier versions only summarized the security evidence; this section spells it out. We inspected the six raw files from 18 October 2026 and counted their check labels, but did not rerun the tools. The team ran them against synthetic-data lab instances with throwaway databases, not a third-party target or the public Botkeep deployment. [S01–S06; S08]
 
 **Table 10. Team-run probe results**
 
@@ -215,9 +215,9 @@ Purpose. This addition makes the previously compressed security evidence explici
 | Adversarial assistant prompts | 42 PASS | S05; assistant_probe.py |
 | Browser / CSP / stored XSS | 48 PASS | S06; browser_audit.mjs |
 
-How to read PASS. It means the recorded check met its expected outcome; some checks are positive controls, not blocked attacks. The attack log also records 343 captured responses and a grouped anonymous-access check across 87 routes. A grouped check is not 87 additional independent tests. The catalogue contains all 308 PASS records and all 6 INFO records; these are not an aggregate count of unique attacks and must not be added to backend/web/browser suite totals. [S01–S06]
+How to read PASS. A PASS means the check gave its expected result; some are positive controls, not blocked attacks. The attack log also records 343 captured responses and one grouped anonymous-access check across 87 routes, which counts as one check, not 87. The catalogue holds all 308 PASS and 6 INFO records. They are not a count of unique attacks and must not be added to backend, web or browser suite totals. [S01–S06]
 
-Evidence class. All probe outcomes below are inherited/team-authored evidence. This editorial pass checked case-label counts and file consistency only. It did not reproduce the network lab, establish exhaustive coverage or provide independent certification. Appendix A reproduces every PASS/INFO label, including the failures that the controls do not prevent. [S01–S06]
+Evidence class. All results below were written and run by the team; this pass only checked label counts and file consistency, not coverage. Appendix A lists every PASS and INFO label, including exposures the controls do not prevent. [S01–S06]
 
 ### 7.2 Attack families and expected safeguards
 
@@ -241,7 +241,7 @@ Evidence class. All probe outcomes below are inherited/team-authored evidence. T
 | Adversarial assistant | 20 hostile prompts as parent and student plus a post-prompt state check for each role: 42 recorded checks. Prompts seek secrets, instructions or forbidden financial actions. | S05 |
 | Browser injection / privacy | Stored and hostile-URL markup, reviewer note/reply, CSP, framing, cookie access, storage, asset/source-map secrets and third-party requests. | S06 |
 
-The catalogue preserves the raw labels; labels such as “2.x” and “4.x” repeat in the original file. Report-local IDs AP-001, BF-001 and so on disambiguate them without inventing new test results. [S01–S06]
+Raw labels are kept as they are, and labels like “2.x” and “4.x” repeat in the original file. Report-local IDs (AP-001, BF-001 and so on) tell the rows apart. They add no test results. [S01–S06]
 
 ## 8. Detailed Findings
 
@@ -249,7 +249,7 @@ The catalogue preserves the raw labels; labels such as “2.x” and “4.x” r
 
 *Authorization*
 
-Effective authorization requires the intersection of role permissions, issued token scopes and object ownership, plus action-specific guards. UI hiding is not the authority boundary. The domain layer provides a separate explicit AI approval refusal. [C01; C03]
+A request needs role permission, a token scope and object ownership, plus any action-specific guard. Hiding a button in the UI is not access control. The domain layer also refuses AI approval separately. [C01; C03]
 
 **Table 12. Permission tiers by role**
 
@@ -270,11 +270,11 @@ Effective authorization requires the intersection of role permissions, issued to
 | Escrow freeze / unfreeze | No | No | Yes | No |
 | Submit review response | Yes | No | No | No |
 
-**HH** = household. *The AI service role contains draft/request permissions; the conversational tool path is narrower and proposes drafts rather than exposing all role capabilities. Do not describe the entire AI role as read-only. **A bank review decision requires its own payment-bound MFA scope; a positive review does not itself approve or settle a payment. [C01; C07]
+**HH** = household. *\*The AI service role includes draft and request permissions, but the conversational tool path is narrower and only proposes drafts. Do not describe the whole AI role as read-only.* \*\*A bank review decision needs its own payment-bound MFA scope; a positive review does not approve or settle a payment. [C01; C07]
 
 #### Full machine-derived permission matrix
 
-The evidence bundle includes validation/rbac-matrix.json, generated directly from ROLE_PERMISSIONS. This compact report highlights decision-critical permissions rather than reproducing a potentially stale hand-maintained matrix. Relevant checks include test_rbac.py, test_api_roles.py, test_api_ai_rbac.py, test_security_households.py and test_bank_review.py. [E01; E06]
+The evidence bundle includes validation/rbac-matrix.json, generated directly from ROLE_PERMISSIONS. This report shows only the decision-critical permissions instead of a hand-kept matrix that could go stale. Related tests: test_rbac.py, test_api_roles.py, test_api_ai_rbac.py, test_security_households.py and test_bank_review.py. [E01; E06]
 
 ### 8.2 Identity & transaction safeguards
 
@@ -292,7 +292,7 @@ The evidence bundle includes validation/rbac-matrix.json, generated directly fro
 | Duplicate prevention | Caller-scoped UUID idempotency keys; same-body replay returns prior result; different body conflicts; optimistic locking and concurrency regression. | C03; E01: test_api_idempotency.py |
 | Provider callback | HMAC-SHA256 over timestamp and raw body; constant-time comparison; 300-second freshness; event de-duplication; provider/payment matching. | C04; E01: test_api_webhooks.py |
 
-> **Interpretation** — A passing guard test demonstrates the tested branch and fixture, not every deployment configuration. Many regression fixtures use a fake clock, reduced password-hash cost and disabled background/network behavior; they are not latency or brute-force performance benchmarks. [E01; backend/tests/helpers.py]
+> **How to read this.** A passing guard test shows only that the tested branch works with that fixture, not every deployment configuration. Many fixtures use a fake clock, reduced password-hash cost and disabled background and network behavior, so they say nothing about latency or brute-force speed. [E01; backend/tests/helpers.py]
 
 ### 8.3 Data, AI & artifact protection
 
@@ -300,21 +300,21 @@ The evidence bundle includes validation/rbac-matrix.json, generated directly fro
 
 #### Sensitive data at rest
 
-FieldCipher uses AES-256-GCM, fresh 12-byte random nonces and context-bound authenticated data. Selected sensitive fields, document text and saved AI credentials use this helper; this is not whole-database encryption. Some display metadata stays plaintext, and legacy plaintext document rows remain readable. Possession of both the database and encryption key defeats confidentiality. [C05; E01: test_documents_at_rest.py, test_saved_ai_connection.py]
+FieldCipher uses AES-256-GCM with fresh 12-byte random nonces and context-bound authenticated data. It covers selected sensitive fields, document text and saved AI credentials, not the whole database. Some display metadata stays in plaintext and legacy plaintext document rows remain readable. Anyone with both the database and the key can read everything. [C05; E01: test_documents_at_rest.py, test_saved_ai_connection.py]
 
 #### AI cannot be the payment authority
 
-Message/document policy checks, restricted tools, deterministic calculations, fact/number validation and guarded local explanations form layered controls. The local reader and dialogue policy propose; the risk model routes to human review; only a human parent approves a payment. No model benchmark is substituted for the domain authorization checks. [C01; C07–C08]
+Several layers work together: message and document policy checks, restricted tools, deterministic calculations, fact and number validation, and guarded local explanations. The local reader and dialogue policy propose, the risk model routes to human review, and only a human parent approves a payment. No model benchmark replaces the domain authorization checks. [C01; C07–C08]
 
 #### Optional external AI
 
-The fresh demonstration used local components with ASSISTANT_CLOUD_ENABLED=false. Optional user/provider connections create a separate egress boundary: masking lowers exposure but cannot prove that all sensitive context has been removed or control provider retention. Consent, provider terms, data minimization and outbound restrictions require operator review. Live provider calls were not tested. [C05; C07; E06]
+The fresh demonstration used local components with ASSISTANT_CLOUD_ENABLED=false. Optional user or provider connections send data outside the system. Masking lowers exposure but cannot prove all sensitive context was removed or control provider retention. The operator must review consent, provider terms, data minimization and outbound restrictions. Live provider calls were not tested. [C05; C07; E06]
 
 #### Model supply chain
 
-Model and policy manifests use SHA-256 checks. These establish consistency with a trusted manifest, not publisher authenticity: an attacker able to replace both artifacts and manifests can substitute them. ONNX avoids pickle-style object deserialization but still relies on native parsers/runtime code; it is not a guarantee that arbitrary model files are safe. [C08; C10]
+Model and policy manifests are checked with SHA-256. That shows a file matches a trusted manifest, not who published it: an attacker who can replace both files and manifests can substitute them. ONNX avoids pickle-style deserialization but still relies on native parsers and runtime code, so an arbitrary model file is not guaranteed safe. [C08; C10]
 
-> **Deployment consideration — separate from this scope** — The planned GitHub Release download needs its own pinned-hash verification, trusted source configuration, resource limits and failure handling. It requires startup egress even when later inference is local. No such remote download was executed for this main-source assessment.
+> **Outside this scope.** The planned GitHub Release download needs its own pinned-hash verification, trusted-source configuration, resource limits and failure handling. It needs outbound access at startup even when inference is local. No such download was run for this assessment.
 
 ### 8.4 Audit integrity: the exact guarantee
 
@@ -324,16 +324,16 @@ Model and policy manifests use SHA-256 checks. These establish consistency with 
 
 **Figure 2. Audit integrity experiments**
 
-Each audit event covers the preceding hash and canonical event fields. Application/database triggers restrict ordinary updates and deletes. Fresh verification returned PASS for 76 events; a deliberate edit to amount_minor at sequence 75 returned HASH_MISMATCH, and restoring the row returned PASS. Independent offline recomputation agreed with both the supplied 75-event chain and fresh 76-event chain. [C06; E03; E05]
+Each audit event hashes the previous hash plus its canonical fields. Triggers restrict ordinary updates and deletes. Verification passed for 76 events; a deliberate edit to amount_minor at sequence 75 returned HASH_MISMATCH, and restoring the row returned PASS. Independent offline recomputation agreed with both the supplied 75-event chain and the fresh 76-event chain. [C06; E03; E05]
 
 #### Where the guarantee stops
 
-- A local audit hash chain detects inconsistent alteration. It does not prove that the underlying economic event was truthful.
-- The audit events and replayable simulated-chain log share SQLite. A privileged owner can rewrite and rehash both consistently.
-- The existing coordinated-rewrite regression intentionally demonstrates that both local checks can pass. This is an acknowledged trust limitation, not a failed claim of external immutability.
-- A separately retained trusted-prefix checkpoint can expose rewrite or truncation of the recorded prefix only if the attacker cannot replace that checkpoint. A different directory or read-only mode on the same administrator-controlled host does not establish independence.
+- A local hash chain detects inconsistent edits. It does not prove the underlying financial event was true.
+- Audit events and the simulated-chain log share one SQLite database, so a privileged owner can rewrite and rehash both consistently.
+- The existing coordinated-rewrite regression deliberately shows that both local checks can still pass. This is a known trust limit; we never claimed external immutability.
+- A separately kept trusted checkpoint can expose a rewrite or truncation of the recorded prefix, but only if the attacker cannot replace it. A different directory or read-only mode on the same administrator-controlled host is not independent.
 
-> **No blockchain overclaim** — The sandbox uses an in-memory py-evm chain with persisted replay. No external validator set, public/consortium deployment or independently immutable timestamp service was verified. Production controls should use independently administered checkpoint retention and monitoring. [C06; H01]
+> **No blockchain claim.** The sandbox uses an in-memory py-evm chain with persisted replay. No external validator set, public or consortium deployment, or independently immutable timestamp service was verified. Production should keep checkpoints and monitoring under independent administration. [C06; H01]
 
 ### 8.5 Data-leakage scope and MITM exposure
 
@@ -341,9 +341,9 @@ Each audit event covers the preceding hash and canonical event fields. Applicati
 
 #### Data leakage: what the 50 checks actually scanned
 
-S03 reports a 3,136,304-byte database, a 74,685-byte server log, 47 audit events and 13 captured responses. These figures describe that leak-scan run, not the separate fresh 76-event audit experiment. Checks search planted synthetic secrets across the relevant sinks: passwords (including an incorrect typed password), access/refresh tokens, browser cookie, MFA proof/code, full IBAN, chat email/phone/passport, document text, a passport inside a document, and password-hash/private-key/header-shaped leakage. [S03]
+S03 reports a 3,136,304-byte database, a 74,685-byte server log, 47 audit events and 13 captured responses. These figures describe that run, not the separate 76-event audit experiment. The checks search for planted synthetic secrets: passwords (including a wrong one), access and refresh tokens, browser cookie, MFA proof and code, full IBAN, chat email, phone and passport, document text, a passport inside a document, and password-hash, private-key or header-shaped leakage. [S03]
 
-Recorded result: all 50 PASS checks were clear in their tested sinks. Two INFO records explicitly retain plaintext metadata: the recipient display name and uploaded document filename are stored in the database. This is not a claim that every database field is encrypted, that historical backups are clean, or that untested secrets cannot leak. [S03]
+Recorded result: all 50 PASS checks were clear in the sinks tested. Two INFO records show plaintext metadata: the recipient display name and uploaded document filename are stored in the database. This does not mean every field is encrypted, that old backups are clean, or that untested secrets cannot leak. [S03]
 
 #### MITM: protected actions are not transport confidentiality
 
@@ -357,7 +357,7 @@ The 14 PASS records cover altered approval summary/hash, redirect to another pay
 | Captured-token reads | A captured bearer token could read the family’s payments until its expiry (15 minutes in the probe). | Protect bearer/session secrets; revoke compromised sessions. |
 | Captured-token cancellation | The thief could cancel a pending draft (no money moved). Approval and allowlist protections still held in the tested paths. | Review cancellation permissions/risk; transport secrecy remains necessary. |
 
-Four MITM INFO lines are retained in the catalogue, including the statement that TLS closes passive reading. Do not describe this result as “MITM-proof”: transaction binding prevented tested unauthorized approvals, but plain HTTP confidentiality demonstrably failed. [S04]
+All four MITM INFO lines are kept in the catalogue, including that TLS closes passive reading. Do not call this result “MITM-proof”: transaction binding stopped the tested unauthorized approvals, but plain HTTP confidentiality clearly failed. [S04]
 
 ## 9. Risk Methodology
 
@@ -365,7 +365,7 @@ Four MITM INFO lines are retained in the catalogue, including the statement that
 
 *High-priority production gates*
 
-Priorities are qualitative judgments of what must be resolved before real-money or real-person deployment. They are not CVSS scores, independent vulnerability ratings or evidence that each scenario was exploited. Cross-references preserve continuity with the supplied R1–R55 register. Proposed owners have not formally accepted these actions. [C10]
+Priorities are qualitative judgments of what must be resolved before real-money or real-person use. They are not CVSS scores or independent vulnerability ratings, and do not show any scenario was exploited. Cross-references link to the supplied R1–R55 register. Proposed owners have not formally accepted these actions. [C10]
 
 #### SR-01 | Demo identity and environment misuse — High
 
@@ -387,7 +387,7 @@ Priorities are qualitative judgments of what must be resolved before real-money 
 
 **Residual exposure:** TLS, reverse-proxy trust, cookie origin, data persistence, restore and operational controls were not verified on Botkeep. **Required action:** Review ingress; verify HTTPS and CSRF end to end; test restore; restrict demonstration access. **Proposed owner:** Deployment operator. Original register: R4, R5, R30, R31.
 
-> **Risk disposition** — Controls in the sandbox lower ordinary application-level risk; they do not close these production gates. No risk acceptance signature or production go-live approval is implied.
+> **Risk status.** Sandbox controls lower everyday application risk but do not close these production gates. No risk acceptance or production go-live approval has been given.
 
 ### 9.2 Residual risk & remediation
 
@@ -415,7 +415,7 @@ Priorities are qualitative judgments of what must be resolved before real-money 
 
 #### Assessment corrections carried into this report
 
-The inherited “AI can only quote” wording is distinguished from the broader AI service-role permission set. ONNX is not described as immune to runtime vulnerabilities. Prompt filtering is not described as guaranteeing harmless output. Historical zero-advisory checks are not presented as a current clean dependency bill of health. [C01; C08; C10; H01]
+The inherited “AI can only quote” wording is kept apart from the broader AI service-role permissions. ONNX is not described as immune to runtime vulnerabilities, prompt filtering is not described as guaranteeing harmless output, and historical zero-advisory checks are not presented as a current clean bill of health. [C01; C08; C10; H01]
 
 ## 10. Documentation Lists
 
@@ -423,7 +423,7 @@ The inherited “AI can only quote” wording is distinguished from the broader 
 
 *Traceability*
 
-Bracketed identifiers link claims to source paths or bundled raw evidence. The original repository source is the supplied archive; the final-submission update verified that the remote main branch is the same commit (E07). Fresh results are located under validation/ in the companion evidence bundle. The full catalogue and per-file hashes are in EVIDENCE_INDEX.md and SHA256SUMS.txt.
+Bracketed IDs link claims to source paths or bundled raw evidence. The original source is the supplied archive; the remote main branch was later confirmed to be the same commit (E07). Fresh results are under validation/ in the companion evidence bundle; EVIDENCE_INDEX.md and SHA256SUMS.txt hold the full catalogue and per-file hashes.
 
 **Table 15. References and evidence locator**
 
@@ -440,9 +440,9 @@ Bracketed identifiers link claims to source paths or bundled raw evidence. The o
 | C09 | Runtime and deployment configuration — backend/app/core/config.py; docker-compose.yml; docker-compose.hardened.yml; web/nginx.conf; backend/app/api/middleware.py |
 | C10 | Original risk register and design — docs/SECURITY_SELF_ASSESSMENT.md; docs/SECURITY.md; docs/SECURITY_TESTING.md |
 
-Primary fresh references: E01 regression; E02 local API run; E03 audit/tamper; E04 financial/escrow; E05 provenance/recomputation; E06 source scan/model loading. Historical references H01–H04 remain explicitly inherited. See the companion Execution Evidence Report for their exact scope.
+Fresh references: E01 regression; E02 local API run; E03 audit/tamper; E04 financial/escrow; E05 provenance/recomputation; E06 source scan/model loading. H01–H04 are inherited from earlier work. The companion Execution Evidence Report gives their exact scope.
 
-> **Source identity** — Archive SHA-256: 4e6ce74cdafa51e4fa577813444d1f52c7d1d0098a7338b176005b415574134a. Source identifier: bcce930ae0974712e922245878fd976b03a8938a. These identifiers bind the assessment to this archive—not to subsequent commits or a different deployment branch.
+> **Source identity.** Archive SHA-256: 4e6ce74cdafa51e4fa577813444d1f52c7d1d0098a7338b176005b415574134a. Source identifier: bcce930ae0974712e922245878fd976b03a8938a. These tie the assessment to this archive only, not to later commits or to a different deployment branch.
 
 ### 10.2 Evidence references and assessment limits
 
@@ -450,9 +450,9 @@ Primary fresh references: E01 regression; E02 local API run; E03 audit/tamper; E
 
 #### Keep the dates and assurance levels separate
 
-The supplied 17 October record lists 122 attack checks and 42 browser checks; the 18 October files expand those to 146 and 48. They are different snapshots, not additive achievements. The 17 October record also lists TLS 8/8 (old protocol refusal, TLS 1.2/1.3, HSTS, Secure cookie and HTTP-on-TLS-port), but there is no corresponding TLS raw log in the supplied 18 October folder. Treat that TLS result as a source-document historical claim, not a new raw-log-verified 18 October run. It used application TLS, not a validation of nginx or the public Botkeep domain. [S08]
+The supplied 17 October record lists 122 attack checks and 42 browser checks; the 18 October files expand these to 146 and 48. They are different snapshots, not additive. The 17 October record also lists TLS 8/8 (old protocol refusal, TLS 1.2/1.3, HSTS, Secure cookie, HTTP on the TLS port), but the supplied 18 October folder has no matching TLS raw log. Treat it as a historical claim from the source document, not a verified 18 October run. It used application TLS and does not validate nginx or the public Botkeep domain. [S08]
 
-The older network-connection samples, Git-history scans, advisory checks and static rules are likewise historical snapshots; they do not prove current dependency safety, absence of every secret in every revision, or safe public ingress. S07 is a hand-recorded packet-capture transcript, not a new packet capture or the binary PCAP itself. [S07; S08]
+The older network-connection samples, Git-history scans, advisory checks and static rules are also historical snapshots. They do not prove current dependency safety, that no secret exists in any revision, or that public ingress is safe. S07 is a hand-recorded packet-capture transcript, not a new capture or the binary PCAP. [S07; S08]
 
 **Table 16. Security evidence items and SHA-256 hashes**
 
@@ -469,13 +469,13 @@ The older network-connection samples, Git-history scans, advisory checks and sta
 
 Evidence-pack paths: S01–S06 are under inherited/submission/evidence/security_2026-10-18/; S07 is inherited/submission/evidence/docker_telemetry_capture.txt; S08 is security_appendix/SECURITY_TESTING_RECORD.md. The machine-readable full catalogue is security_appendix/PROBE_CASE_CATALOGUE.csv. In the source archive, the original records are under submission/evidence/ and docs/SECURITY_TESTING.md. File hashes provide consistency, not proof of author identity.
 
-Reproduction entry points: read scripts/security/README.md and use the supplied attack_probe.py, brute_probe.py, leak_scan.py, mitm_probe.py, assistant_probe.py and browser_audit.mjs only against a separately authorized disposable sandbox. No commands or targets were executed in this editorial update. A fresh deployed-HTTPS review, external pentest, real-provider testing and broader model-adversarial assessment remain open.
+To reproduce, read scripts/security/README.md and run the supplied attack_probe.py, brute_probe.py, leak_scan.py, mitm_probe.py, assistant_probe.py and browser_audit.mjs only against a separately authorized disposable sandbox. None were run in this update. Still open: a fresh deployed-HTTPS review, an external pentest, real-provider testing and a broader model-adversarial assessment.
 
 ## Appendix A. Complete Recorded Check Catalogue
 
 ### Recorded security checks — attack surface
 
-Every PASS and INFO line from S01–S06 is listed below in original order within its file. Case labels are copied verbatim; raw labels may already truncate payloads/URLs, and this report does not reconstruct omitted strings. “PASS” preserves the source status, including successful positive controls. An INFO row is an exposure or observation, not an attack that was necessarily blocked. No original raw file was edited.
+Every PASS and INFO line from S01–S06 is listed below in its original order. Labels are copied verbatim; some raw labels already truncate payloads or URLs, and we did not reconstruct them. “PASS” keeps the source status, including successful positive controls. INFO is an exposure or observation, not necessarily a blocked attack. No raw file was edited.
 
 S01 | attack_probe.txt | Records 1–18 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
@@ -941,4 +941,4 @@ S06 | browser_audit.txt | Records 37–48 of 48 in this file. Case IDs are local
 | BR-047 L47 | none of 42 downloaded assets reference a source map | PASS |
 | BR-048 L48 | none of the downloaded JavaScript or CSS contains a key, token or password | PASS |
 
-Catalogue acceptance boundary. This is a complete transcription of the supplied PASS/INFO labels for the six listed files, not proof of complete attack coverage. Absence of FAIL lines in these final logs does not mean no issue was ever found; section 4.2 records the documented findings and the MITM probe-precondition correction. No overall vulnerability-free or production-safe conclusion is asserted.
+Catalogue boundary. This is a complete transcription of the PASS and INFO labels in the six files. It does not prove complete attack coverage, and the absence of FAIL lines in these final logs does not mean no issue was ever found (section 4.2 records the findings and the MITM probe-setup correction). No vulnerability-free or production-safe conclusion is claimed.

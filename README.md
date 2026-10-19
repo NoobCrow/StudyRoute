@@ -534,7 +534,7 @@ file to open and how it was checked.
 |----------------------|-------|
 | 01 Technical documentation (architecture, core algorithms, security design) | [submission/StudyRoute_Technical_Documentation.pdf](submission/StudyRoute_Technical_Documentation.pdf); source: [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
 | 02 Presentation deck (10 minutes) | [submission/StudyRoute_Deck.pptx](submission/StudyRoute_Deck.pptx) (built by `submission/deck/build_deck.js`); outline in [submission/DECK_OUTLINE.md](submission/DECK_OUTLINE.md) |
-| 03 Demo video (under 5 minutes) | Script in [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md) |
+| 03 Demo video (4:40, narrated) | Sent with the submission package (`TeamEkxin_Demo_Video.mp4`); script in [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md); the footage is rebuilt by `python scripts/demo_video/make_video.py` |
 | 04 Source code, README, deployment instructions, test cases | This repository; [docs/DOCKER.md](docs/DOCKER.md); [docs/TEST_CASES.md](docs/TEST_CASES.md); [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) |
 | 05 Security self-assessment (permission tiers, known risks) | [submission/StudyRoute_Security_Self_Assessment.pdf](submission/StudyRoute_Security_Self_Assessment.pdf); working copy: [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
 | 06 Execution evidence (sandbox operation logs) | [submission/StudyRoute_Execution_Evidence_Report.pdf](submission/StudyRoute_Execution_Evidence_Report.pdf); the raw files and an index: [submission/evidence/](submission/evidence/README.md) |
