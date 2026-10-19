@@ -1,7 +1,7 @@
 """Front pages for the submission reports: the team's cover, then contents laid out like a report template.
 
 A title page, a table of contents, a list of tables and a list of figures. Each front page carries
-the synthetic-data banner and a roman page number; the body keeps its own layout and starts again at page 1.
+a roman page number; the body keeps its own layout and starts again at page 1.
 The page numbers in the lists are read from the rendered body PDF, so they always match it.
 
 Captions are Markdown paragraphs of the form **Table 3. Title** (above a table) or **Figure 2. Title** (below
@@ -19,7 +19,6 @@ import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 
-BANNER = "SYNTHETIC DATA – NOT PRODUCTION ASSURANCE"
 CAPTION = re.compile(r"^\*\*((?:Table|Figure) \d+\. .+?)\*\*$")
 CAPTION_HTML = re.compile(r"<p><strong>((Table|Figure) \d+\. [^<]+)</strong></p>")
 NUMBERED = re.compile(r"^(\d+(?:\.\d+)*\.?)\s+(.*)$")
@@ -39,11 +38,9 @@ html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 body { margin: 0; font-family: "Times New Roman", Times, serif; color: #000; }
 .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; break-after: page; }
 .page:last-child { break-after: auto; }
-.banner { position: absolute; left: 25mm; right: 25mm; top: 13mm; padding-bottom: 1.6mm; text-align: center;
-  color: #e00000; font-weight: 700; font-size: 11.5pt; border-bottom: 1.3pt solid #000; }
 .foot { position: absolute; left: 25mm; right: 25mm; bottom: 13mm; padding-top: 1.4mm; border-top: 1pt solid #000;
   display: flex; justify-content: space-between; font: 8.5pt "Arial Narrow", Arial, sans-serif; }
-.content { position: absolute; left: 25mm; right: 25mm; top: 30mm; bottom: 24mm; }
+.content { position: absolute; left: 25mm; right: 25mm; top: 22mm; bottom: 24mm; }
 h1 { font: 700 15pt "Arial Narrow", Arial, sans-serif; margin: 0 0 4mm; }
 h1.next { margin-top: 7mm; }
 .cover { width: 210mm; height: 297mm; overflow: hidden; break-after: page; padding: 32mm 24.5mm 0;
@@ -205,7 +202,7 @@ def _row(entry: Entry, page: int, first: bool) -> tuple[str, float]:
 
 def _page(cover: Cover, number: int, content: str) -> str:
     return (
-        f"<section class='page'><div class='banner'>{html.escape(BANNER)}</div><div class='content'>{content}</div>"
+        f"<section class='page'><div class='content'>{content}</div>"
         f"<div class='foot'><span>{html.escape(cover.footer)}</span><span>Page {roman(number)}</span></div></section>"
     )
 

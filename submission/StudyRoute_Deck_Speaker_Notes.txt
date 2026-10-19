@@ -108,9 +108,11 @@ A: Yes, three: the problem framing, the Bangladesh Bank volume figure
    banks, settlement — is synthetic, and the 8.8m figure is our
    arithmetic. Every screen carries the banner.
 
-Q: Why do backend test counts differ between machines?
-A: 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
-   The execution evidence report and technical documentation explain the fixture gap.
+Q: How many tests are there, and does a fresh clone run all of them?
+A: 1,705 backend tests (1,704 pass, 1 skipped on Windows, a symlink test), 463 web tests
+   and 24 browser tests. The explainer's test questions are committed, so a fresh clone
+   runs the same tests. The older Linux run in the execution evidence report (1,672
+   passed, 1 skipped) was made before that file was added.
 
 Q: You have no real users and no partner. Why should this win?
 A: Because it is the kind of AI a bank can actually deploy: every number
