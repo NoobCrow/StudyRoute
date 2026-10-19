@@ -71,7 +71,7 @@ table { border-collapse: collapse; width: 100%%; margin: 3mm 0 4.5mm; font-size:
 th { background: #0e2a47; color: #fff; text-align: left; padding: 1.8mm 2.6mm; }
 td { padding: 1.7mm 2.6mm; vertical-align: top; border-bottom: 1px solid #dde4ea; overflow-wrap: break-word; }
 tr:nth-child(even) td { background: #f0f5f8; } tr { page-break-inside: avoid; }
-code { font-family: Consolas, "Courier New", monospace; font-size: 8.4pt; background: #eef2f5; padding: 0 .8mm; overflow-wrap: anywhere; }
+code { font-family: Consolas, "Courier New", monospace; font-size: 8.4pt; background: #eef2f5; padding: 0; overflow-wrap: anywhere; }
 pre { background: #f0f5f8; border: 1px solid #dde4ea; padding: 2.6mm; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; page-break-inside: avoid; }
 pre code { background: none; padding: 0; }
 img { max-width: 100%%; height: auto; display: block; margin: 3mm auto; page-break-inside: avoid; }
