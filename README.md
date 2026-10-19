@@ -527,17 +527,16 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 
 ## Competition deliverables (FinTechathon 2026, International Track, Topic C)
 
-Start with [submission/README_START_HERE.md](submission/README_START_HERE.md): it lists every deliverable, the
-file to open and how it was checked.
+The final submission by Team TeamEkxin is in [FINAL_SUBMISSION/](FINAL_SUBMISSION/). These are the files we sent.
 
 | Official deliverable | Where |
 |----------------------|-------|
-| 01 Technical documentation (architecture, core algorithms, security design) | [submission/StudyRoute_Technical_Documentation.pdf](submission/StudyRoute_Technical_Documentation.pdf); source: [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
-| 02 Presentation deck (10 minutes) | [submission/StudyRoute_Deck.pptx](submission/StudyRoute_Deck.pptx) (built by `submission/deck/build_deck.js`); outline in [submission/DECK_OUTLINE.md](submission/DECK_OUTLINE.md) |
-| 03 Demo video (4:40, narrated) | Sent with the submission package (`TeamEkxin_Demo_Video.mp4`); script in [submission/VIDEO_SCRIPT.md](submission/VIDEO_SCRIPT.md); the footage is rebuilt by `python scripts/demo_video/make_video.py` |
+| 01 Technical documentation (architecture, core algorithms, security design) | [PDF](FINAL_SUBMISSION/01_Technical_Documentation/TeamEkxin_Technical_Documentation.pdf), [Word](FINAL_SUBMISSION/01_Technical_Documentation/TeamEkxin_Technical_Documentation.docx); source: [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) |
+| 02 Presentation deck (10 minutes) | [FINAL_SUBMISSION/02_Presentation_Deck/TeamEkxin_Presentation_Deck.pptx](FINAL_SUBMISSION/02_Presentation_Deck/TeamEkxin_Presentation_Deck.pptx) |
+| 03 Demo video (4:40, narrated) | `TeamEkxin_Demo_Video.mp4` in the submission package (too large for git); script: [PDF](FINAL_SUBMISSION/03_Demo_Video/TeamEkxin_Video_Script.pdf); the footage is rebuilt by `python scripts/demo_video/make_video.py` |
 | 04 Source code, README, deployment instructions, test cases | This repository; [docs/DOCKER.md](docs/DOCKER.md); [docs/TEST_CASES.md](docs/TEST_CASES.md); [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) |
-| 05 Security self-assessment (permission tiers, known risks) | [submission/StudyRoute_Security_Self_Assessment.pdf](submission/StudyRoute_Security_Self_Assessment.pdf); working copy: [docs/SECURITY_SELF_ASSESSMENT.md](docs/SECURITY_SELF_ASSESSMENT.md) |
-| 06 Execution evidence (sandbox operation logs) | [submission/StudyRoute_Execution_Evidence_Report.pdf](submission/StudyRoute_Execution_Evidence_Report.pdf); the raw files and an index: [submission/evidence/](submission/evidence/README.md) |
+| 05 Security self-assessment (permission tiers, known risks) | [PDF](FINAL_SUBMISSION/05_Security_Self_Assessment/TeamEkxin_Security_Self_Assessment.pdf), [Word](FINAL_SUBMISSION/05_Security_Self_Assessment/TeamEkxin_Security_Self_Assessment.docx) |
+| 06 Execution evidence (sandbox operation logs) | [PDF](FINAL_SUBMISSION/06_Execution_Evidence/TeamEkxin_Execution_Evidence_Report.pdf), [Word](FINAL_SUBMISSION/06_Execution_Evidence/TeamEkxin_Execution_Evidence_Report.docx); raw files and an index: [submission/evidence/](submission/evidence/README.md) |
 
 The official rules and our check against them: [docs/COMPETITION_RULES.md](docs/COMPETITION_RULES.md). The
 registration record: [submission/REGISTRATION.md](submission/REGISTRATION.md). All documents are indexed in
