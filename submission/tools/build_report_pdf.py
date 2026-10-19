@@ -75,6 +75,7 @@ code { font-family: Consolas, "Courier New", monospace; font-size: 8.4pt; backgr
 pre { background: #f0f5f8; border: 1px solid #dde4ea; padding: 2.6mm; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 8pt; page-break-inside: avoid; }
 pre code { background: none; padding: 0; }
 img { max-width: 100%%; height: auto; display: block; margin: 3mm auto; page-break-inside: avoid; }
+p:has(+ p img) { break-after: avoid; page-break-after: avoid; }
 blockquote { margin: 3mm 0 4mm; padding: 2.4mm 3.6mm; border-left: 3px solid #0b8a86; background: #eaf4f4; font-size: 9.2pt; }
 blockquote p { margin: 0; }
 a { color: #0b5cad; text-decoration: none; }

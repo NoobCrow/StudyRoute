@@ -201,6 +201,20 @@ kyc_records, documents, mfa_proofs, refresh_tokens and provider_ledger. The bank
 bank_transfers, bank_transfer_events, ledger_journals and ledger_entries. A CHECK constraint limits the payment
 state, and triggers block UPDATE and DELETE on audit_events, ledger_journals and ledger_entries.
 
+### 1.7 The product on the live site
+
+We also run the sandbox publicly at https://studyroute.bot-keep.xyz, with synthetic data only. We took the two
+screenshots below there on 19 October 2026.
+
+*The comparison a parent sees for GBP 10,000 of UK tuition. The ranking is the one our test T01 asserts: B at
+1.58%, C at 1.63% with a GBP 35 shortfall warning, and A at 2.16%.*
+
+![The live comparison for GBP 10,000 of UK tuition](../submission/screenshots/live/live-01-compare-quotes.png)
+
+*The reviewer's audit log. Verify the hash chain recomputes every event and reports PASS.*
+
+![The live audit log after Verify the hash chain](../submission/screenshots/live/live-05-audit-verify.png)
+
 ---
 
 ## 2. Core algorithms and trained components
