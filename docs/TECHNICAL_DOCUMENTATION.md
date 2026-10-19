@@ -54,7 +54,7 @@ financial authority. We built the envelope that makes that true, and then we mea
 2. **Four small models, each with one job.** A reader for untidy requests, a dialogue policy, an explainer
    that rewords the engine's answers, and a router that decides which payments a bank reviewer should look at
    first. We measured each against a baseline we actually ran, and we publish the limits.
-3. **Evidence you can re-run, and an honest list of what it does not show.** On a machine that has the
+3. **Evidence you can re-run.** On a machine that has the
    explainer fixture there are 1,679 backend tests (1,678 pass, 1 skipped). A fresh clone collects 1,673,
    runs 1,672 and skips one module, because .gitignore excludes that module's fixture. There are also 463 web
    tests (439 in an earlier pre-merge log) and 24 browser tests, all mapped to 24 scenarios, plus a 146-attack
@@ -100,8 +100,7 @@ every step is logged.** Each part of that line is a real mechanism with a test b
 via The Observer, 24 July 2026), and four study-abroad rules we read in Bangladesh Bank circular FEPD-1 No. 40
 (no lawyer or AD bank has reviewed our reading). Synthetic: every rate, fee, margin, provider, KYC result,
 sanction, bank, settlement and student-city cost. Simulated: the chain (in-memory py-evm), the escrow and the
-bank network. The USD 8.8m saving is our own arithmetic, not a forecast. Please read every number in this
-report with that in mind.
+bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
 
 | What we promise | How it works | Where it is tested |
 |-----------|-----------|------|
@@ -341,7 +340,9 @@ minor units, a real date) and refuses anything it cannot read exactly. When the 
 field differently, we leave the field empty and the assistant asks. We use the model's intent only when its
 confidence is at least 0.8, and a confident ATTACK can only add a block, never remove one. Three intents
 (stress test, student costs, arrival guide) are decided by exact rules, because the model never saw those
-questions in training. The model has no permissions of its own.
+questions in training. The model has no permissions of its own. On a CPU it takes a median of 18 ms and a
+95th percentile of 57 ms per message. If the model file is missing, fails its integrity check or is switched
+off (NLU_MODE=off), the assistant runs on the rules alone.
 
 *How we trained it.* 35,588 messages, mostly generated from templates, plus real bank-customer questions
 (Banking77 [2], CC BY 4.0). Six epochs on an RTX 5060 Ti took 238 seconds. The results below come from our
@@ -354,14 +355,8 @@ evaluation script (ai_evaluation.json), on data the model never trained on:
 | Held-out template wording | 11,004 | 62.0% | **90.2%** | 52.1% | **85.1%** |
 
 On the hand-written set the model also reads a plan request exactly right 100% of the time, against 57.6% for
-the rules; harmless messages blocked by mistake are 2.0% for both.
-
-*What this does not show.* The 113-message set is small (about plus or minus 7 points), and because we
-reproduced it several times it is no longer a fresh blind test. The training and generated test data are
-mostly synthetic, and no real parent's messages were used. About one attack in fourteen still gets past the
-model and receives a harmless answer. On a CPU the reader takes a median of 18 ms and a 95th percentile of 57 ms
-per message in our last evaluation run. If the model file is missing, fails its integrity check or is switched
-off (NLU_MODE=off), the assistant runs on the rules alone.
+the rules; harmless messages blocked by mistake are 2.0% for both. The hand-written set is small (about plus or
+minus 7 points) and the other sets are mostly synthetic.
 
 ### 2.9 The dialogue policy (reinforcement learning)
 
@@ -387,10 +382,8 @@ its five actions moves money.
 | Best hand-written rule (ask everything, confirm every time) | 1.343 | 1.97 | 0% |
 
 The trained policy matches the best hand-written rule's return with about 40% fewer questions, at the price of
-0.8% wrong plans in simulation. Whether that trade is worth it is a product decision, not a result. The
-simulated parents and the rewards are our own assumptions, the policy has never met a real person, and under
-a harsher penalty for a wrong amount it did not quite match "always confirm". That is why the API wraps it in
-a mandatory read-back that the policy cannot override. With DIALOGUE_MODE=off, the assistant plans as soon as
+0.8% wrong plans in simulation. Under a harsher penalty for a wrong amount it did not quite match "always
+confirm", so the API wraps it in a mandatory read-back that the policy cannot override. With DIALOGUE_MODE=off, the assistant plans as soon as
 the amount is known.
 
 ### 2.10 The explainer: rewording the engine's answer
@@ -405,6 +398,7 @@ teacher output failed (7,785 of 18,000 proposals passed, 43.3%), which is exactl
 learns from a raw proposal. The student (flan-t5-small [7], 77M parameters) was fine-tuned on the verified
 rewrites in 12 minutes. We pruned its vocabulary from 32,000 to 5,124 pieces and exported it to int8 ONNX
 (53 MB). At run time every rewrite is checked again; if it fails, we throw it away and show the engine's own text.
+Drafts over 120 words skip the model, because it cannot finish long structured answers.
 
 *Results on 700 held-out questions* (ai_explainer_evaluation.json):
 
@@ -415,12 +409,6 @@ rewrites in 12 minutes. We pruned its vocabulary from 32,000 to 5,124 pieces and
 | Answers identical to the engine's draft | 48.6% | 0.4% |
 | Figure precision, raw output / what a person reads | 99.8% / **100%** | 96.1% (raw) |
 | Figure recall, raw output / what a person reads | 97.5% / 98.8% | 21.3% (raw) |
-
-*What this does not show.* It mostly paraphrases: about half of its accepted answers are the draft itself. It
-cannot finish long structured answers (stress tests 0% shown, arrival guides 21%), so drafts over 120 words
-skip the model. The checks look at figures, disclaimers and claims, not at style, so it can still word an
-answer clumsily. It was trained and tested on synthetic questions. Its real value is that the safe path costs
-nothing: the engine's own answer is always one failed check away.
 
 ### 2.11 The review router: which payments a person looks at first
 
@@ -439,7 +427,7 @@ each payment, the model hides each group of inputs in turn to show which factors
 HIGH rating opens a bank review; LOW takes the fast lane. The model never clears, declines or approves
 anything, and every payment still needs the parent's MFA authorisation.
 
-*What we left out, and how we found out.* Our first version also used the payment channel, the currencies and
+*Inputs we removed.* Our first version also used the payment channel, the currencies and
 the hour, and it scored higher. When we counted labels per channel, we found that in this data no wire and no
 cross-currency transfer is ever labelled as laundering. A model with those inputs would learn that a
 cross-currency wire, which is exactly what every StudyRoute payment is, is the safest thing there is. That is a
@@ -487,10 +475,9 @@ random baselines, on the eight shipped inputs or thirteen):
 By our own rule (choose on the tuning period only), XGBoost on thirteen inputs comes first, yet on the test
 period it is no better than the network we shipped, within noise (0.448 against 0.437); neighbouring models
 differ by about 0.02 average precision, which is within noise with 1,797 flagged transactions. The
-thirteen-input variants do score higher than our shipped network on both periods, so why did we not ship one?
-Honestly, time. They need five more inputs computed from payment history at run time, and the review desk
-would have needed re-testing, which we could not finish before the freeze. We chose to publish the comparison
-rather than leave it out, and adopting them is first on our list of improvements.
+thirteen-input variants score higher than our shipped network on both periods. We did not ship one because they
+need five more inputs computed from payment history at run time, and the review desk would have needed
+re-testing before the freeze. Adopting them is first on our list of improvements.
 
 ### 2.12 The bank review desk
 
@@ -571,7 +558,7 @@ a recorded run we changed one amount in event 74 behind the application's back, 
 exactly that event; when we put the amount back, it passed again. The evidence is the tamper_demo.json file in
 submission/evidence.
 
-We want to be clear that the chain is tamper-evident, not tamper-proof. The audit events and the simulated
+The chain is tamper-evident rather than tamper-proof. The audit events and the simulated
 chain's log live in the same SQLite file, so someone who owns that file could rewrite and re-hash both
 consistently, and one of our regression tests shows exactly that. What catches it is a checkpoint stored outside
 the database (the audit_checkpoint.py script). The simulated chain gives us a second anchor and lets us explore
@@ -622,8 +609,7 @@ same commit and cross-references the full 55-item register in SECURITY_SELF_ASSE
 
 Eight gates stand between this sandbox and any use with real money or real people: secret custody, real
 identity and access, HTTPS and ingress, persistence and restore, independently held integrity checkpoints,
-supply-chain checks, licensed real-world integration, and independent assurance. We have not established any of
-them yet, and we say so plainly.
+supply-chain checks, licensed real-world integration, and independent assurance. None of them is in place yet.
 
 ---
 
@@ -686,11 +672,9 @@ assistant's questions and read-backs badly, and our demo checks wrongly assumed 
 fixed both: questions and read-backs are now shown word for word, and the checks look at the engine's figures
 instead of exact wording. We kept the failing run as evidence.
 
-*What our evidence does not show.* We wrote the attack tools ourselves, and no outside penetration test has been
-done. No real user has used the system. We have not compared our rates and fees with real quotes. The Docker run
-used the archive of an earlier commit with the two fixed files copied in. The trained models were measured on
-synthetic or mapped data. A separately prepared execution evidence report repeats the backend run on Linux
-(1,672 passed on the downloaded main archive) and recomputes the audit chain outside the application.
+The Docker run used the archive of an earlier commit with the two fixed files copied in. A separately prepared
+execution evidence report repeats the backend run on Linux (1,672 passed on the downloaded main archive) and
+recomputes the audit chain outside the application. Section 6 lists what this evidence does not cover.
 
 To reproduce our results: run pytest -q in the backend folder; start the API and run the demo_flow script; and
 run ml/evaluate.py for the reader. The retraining commands are in AI_AGENT.md, AI_RL.md, AI_EXPLAINER.md and
