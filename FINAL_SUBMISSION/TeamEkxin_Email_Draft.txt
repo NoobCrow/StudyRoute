@@ -1,0 +1,20 @@
+Subject: TeamEkxin - Submission - 2026 Shenzhen International FinTech Competition (International Track, Topic C)
+
+Dear Organizing Committee,
+
+Team TeamEkxin submits StudyRoute, a sandbox AI assistant for cross-border and student finance (a parent in Bangladesh paying tuition and living costs abroad). All data is synthetic; no real money moves.
+
+Download (public link): <PASTE LINK HERE>
+
+Inside the ZIP:
+1. Technical documentation (mandatory): 01_Technical_Documentation (PDF and Word)
+2. Presentation deck, 10-minute (mandatory): 02_Presentation_Deck
+3. Demo video, 4:40: 03_Demo_Video (with the script)
+4. Source code with README: 04_Source_Code. GitHub: https://github.com/NoobCrow/StudyRoute
+5. Security self-assessment: 05_Security_Self_Assessment
+6. Execution evidence report: 06_Execution_Evidence
+
+Team members: Farhan Labib, Md Redwan Hossen, Alim Bin Yeasin, Kalvin Chakma.
+
+Kind regards,
+TeamEkxin
