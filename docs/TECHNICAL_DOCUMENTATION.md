@@ -54,18 +54,18 @@ financial authority. We built the envelope that makes that true, and then we mea
 2. **Four small models, each with one job.** A reader for untidy requests, a dialogue policy, an explainer
    that rewords the engine's answers, and a router that decides which payments a bank reviewer should look at
    first. We measured each against a baseline we actually ran, and we publish the limits.
-3. **Evidence you can re-run.** On a machine that has the
-   explainer fixture there are 1,679 backend tests (1,678 pass, 1 skipped). A fresh clone collects 1,673,
-   runs 1,672 and skips one module, because .gitignore excludes that module's fixture. There are also 463 web
-   tests (439 in an earlier pre-merge log) and 24 browser tests, all mapped to 24 scenarios, plus a 146-attack
-   black-box probe, a run in Docker, and a record of what those runs found, including a defect.
+3. **Evidence you can re-run.** 1,705 backend tests (1,704 pass on Windows, where one symlink test is
+   skipped), including a 25-prompt assistant suite; 463 web tests and 24 browser tests; all 24 blueprint
+   scenarios pass. On top of that come a 146-attack black-box probe, a run in Docker, and a record of what
+   those runs found, including a defect.
 
 **Evidence at a glance** (sources in section 5 and in the submission/evidence folder):
 
 | What we measured | Result | How to read it |
 |-------------------|--------|----------|
 | Cost ranking, worked example | B 1.58%, C 1.63% (university GBP 35 short), A 2.16% | Exact; asserted in test_engine_quote.py |
-| Backend tests | 1,679 on a fixture-complete machine (1,678 pass, 1 skipped); fresh clone: 1,673 collected, 1,672 pass, 1 skip | One or more tests for each of 24 scenarios; section 5 explains the fixture gap |
+| Backend tests | 1,705 (1,704 pass, 1 skipped on Windows); 24 of 24 blueprint scenarios pass | The same count on a fresh clone |
+| Assistant prompt suite, 25 prompts | 25 of 25 give the expected intent, tool and safety outcome (6 attacks blocked, nothing proposed) | Our own prompts (test_prompt_suite.py) |
 | Black-box attack probe | 146 of 146 defended; real-browser audit 48 of 48 | We wrote these tools ourselves; not independent |
 | Reader against rules, 113 frozen hand-written messages | Intent 88.5% against 61.1%; plan read exactly 100% against 57.6%; attacks blocked 92.9% against 28.6% | Small sample, about plus or minus 7 points |
 | Dialogue policy against plan-at-once, simulated parents | Wrong plans 0.8% against 2.8%; 1.17 questions against 0.44 | The simulator is our own assumption |
@@ -336,6 +336,11 @@ The next six subsections cover the assistant pipeline and the four trained model
    facts.
 6. **Tool guard.** The model may only propose create_draft or request_approval. Approving, submitting,
    cancelling, changing a limit, allowlisting and editing configuration are simply not available to it.
+   The read-only tools are get_quotes, explain_cost, get_deadline_plan and get_checklist. In our plan they
+   were named get_quotes, check_deadlines, compute_runway, create_proposal and execute_in_sandbox: check_deadlines
+   became get_deadline_plan, compute_runway is the engine's runway calculation (read-only, no tool of its own),
+   create_proposal became create_draft and request_approval, and execute_in_sandbox is deliberately not an AI
+   tool, because only the parent's MFA approval and the provider simulator can move a payment forward.
 7. **Audit.** One event records the prompt hash, output hash, model version and guard result.
 
 Questions to the parent, and read-backs of what the assistant understood, are always shown word for word. We
@@ -357,6 +362,13 @@ confidence is at least 0.8, and a confident ATTACK can only add a block, never r
 questions in training. The model has no permissions of its own. On a CPU it takes a median of 18 ms and a
 95th percentile of 57 ms per message. If the model file is missing, fails its integrity check or is switched
 off (NLU_MODE=off), the assistant runs on the rules alone.
+
+*Bangla and Banglish.* The reply language is chosen for each message: Bengali script, common Banglish words
+(Bengali written in Latin letters) or an explicit "reply in Bengali" switch the reply language, and "reply in
+English" switches it back. Greetings and the app overview have Bengali versions in every mode. Other answers
+are in Bengali or Banglish only when a cloud model is configured, which we have not yet tested against a real
+provider; the offline templates answer in English. The trained reader is an English model, so payment requests
+are read most reliably in English, and the assistant asks for any value it cannot read.
 
 *How we trained it.* 35,588 messages, mostly generated from templates, plus real bank-customer questions
 (Banking77 [2], CC BY 4.0). Six epochs on an RTX 5060 Ti took 238 seconds. The results below come from our
@@ -489,9 +501,12 @@ random baselines, on the eight shipped inputs or thirteen):
 By our own rule (choose on the tuning period only), XGBoost on thirteen inputs comes first, yet on the test
 period it is no better than the network we shipped, within noise (0.448 against 0.437); neighbouring models
 differ by about 0.02 average precision, which is within noise with 1,797 flagged transactions. The
-thirteen-input variants score higher than our shipped network on both periods. We did not ship one because they
-need five more inputs computed from payment history at run time, and the review desk would have needed
-re-testing before the freeze. Adopting them is first on our list of improvements.
+thirteen-input variants score higher than our shipped network on both periods. Their five extra inputs all come
+from the household's payment history: payments to the same receiver in the last 24 hours, new receivers in
+the last 24 hours and in the last 7 days, hours since the same receiver was last paid, and this amount compared
+with the previous one. None of them is a channel, currency or time-of-day input, so adopting them does not bring
+back the generator artifacts we removed. We did not ship one because those inputs must be computed from payment
+history at run time, and the review desk would have needed re-testing before the freeze. Adopting them is first on our list of improvements.
 
 ### 2.12 The bank review desk
 
@@ -668,17 +683,13 @@ including Bengali text.
 
 | Layer | What we did | Result | Where to find it |
 |-------|---------------|--------|-------|
-| Automated tests | One or more tests for each of 24 blueprint scenarios; a test fails if any scenario is missing | 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests. | TEST_CASES.md (docs folder) |
+| Automated tests | One or more tests for each of 24 blueprint scenarios; a test fails if any scenario is missing | 1,705 backend tests (1,704 pass, 1 skipped on Windows); 24 of 24 scenarios pass; 463 web tests (439 in an earlier pre-merge log) and 24 browser tests | TEST_CASES.md (docs folder) |
+| Assistant prompts | 25 prompts with the intent, tool proposal and safety outcome each must produce | 25 of 25 pass | test_prompt_suite.py |
 | Demo flow | A fourteen-step run against a live API | 66 checks OK, none failed | sandbox_operation_log.txt |
 | Black-box attacks | Forged tokens, cross-household access, injection, hostile input, webhooks, the bank review desk | 146 of 146 defended | attack_probe.txt |
 | Other probes | Brute force, data-leak scan, man in the middle, hostile prompts, real Chrome | 8/8, all clear (50 checks), 14/14, 42/42, 48/48 | the security_2026-10-18 folder |
 | Docker | Ubuntu 24.04 VM: smoke, demo, bank review demo, browser audit, hardened overlay | All passed after one fix (below) | the docker_2026-10-18 folder |
 | Continuous integration | Six jobs: docker, contracts, web, secret-scan, backend, dependency-audit | All succeeded on the final commit | GitHub Actions |
-
-*A reproducibility gap we found.* One test module, the explainer quality floor, needs a fixture file
-(explainer_cases.json) that our .gitignore excludes. A fresh clone therefore collects 1,673 tests, runs 1,672
-and skips that module; the 1,679 figure is for a machine that has the file. This explains every test count in
-this report and in the deck. Adding the file to the repository is on our list.
 
 *A defect we found.* Our first Docker run failed three demo checks, and the same step had failed four in CI. The
 trained explainer is switched on by default in a container, and it had never run in one before. It reworded the
@@ -687,8 +698,8 @@ fixed both: questions and read-backs are now shown word for word, and the checks
 instead of exact wording. We kept the failing run as evidence.
 
 The Docker run used the archive of an earlier commit with the two fixed files copied in. A separately prepared
-execution evidence report repeats the backend run on Linux (1,672 passed on the downloaded main archive) and
-recomputes the audit chain outside the application. Section 6 lists what this evidence does not cover.
+execution evidence report repeated the backend run on Linux on an earlier archive (1,672 passed; the explainer's
+test questions were not in the repository yet) and recomputes the audit chain outside the application. Section 6 lists what this evidence does not cover.
 
 To reproduce our results: run pytest -q in the backend folder; start the API and run the demo_flow script; and
 run ml/evaluate.py for the reader. The retraining commands are in AI_AGENT.md, AI_RL.md, AI_EXPLAINER.md and
@@ -720,8 +731,9 @@ AI_RISK.md in the docs folder.
 ## 7. Provenance, licences and AI assistance
 
 We used AI coding assistants for large parts of the code, tests and documents, working under our direction;
-the repair release is recorded in PROVENANCE.md. This report does not break down the work of
-individual team members.
+the repair release is recorded in PROVENANCE.md. Within the team, Farhan Labib (lead) owned the product, the
+engine, the AI components and the documents; Md Redwan Hossen the release hardening, the institution-route checks
+and the deployment; Kalvin Chakma the interface design; and Alim Bin Yeasin the demo recording.
 
 | Component | Licence | How we use it |
 |-----------|---------|-----|

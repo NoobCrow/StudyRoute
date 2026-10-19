@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "docs" / "TECHNICAL_DOCUMENTATION.md"
 TARGET = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / "submission" / "StudyRoute_Technical_Documentation.pdf"
 DOC_ID = "SR-TEC-2026-01"
-DATE = "18 October 2026"
+DATE = "19 October 2026"
 USUAL_CHROME = (
     "C:/Program Files/Google/Chrome/Application/chrome.exe",
     "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",

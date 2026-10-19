@@ -1,0 +1,342 @@
+[
+ {
+  "intent": "CADENCE",
+  "question": "Hi, frequency of remittance: 2850/month for 6 months, what do you recommend? Thank you!",
+  "draft": "To plan how often to send I still need an amount and a currency. For example: How often should I send GBP 800 a month for 9 months?."
+ },
+ {
+  "intent": "CADENCE",
+  "question": "please help me decide how often to send money for stipend for 5 months.",
+  "draft": "To plan how often to send I still need an amount and a currency. For example: How often should I send GBP 800 a month for 9 months?."
+ },
+ {
+  "intent": "CADENCE",
+  "question": "Sir, how much living expense can I send in a month Thanks.",
+  "draft": "To plan how often to send I still need an amount and a currency. For example: How often should I send GBP 800 a month for 9 months?."
+ },
+ {
+  "intent": "CADENCE",
+  "question": "Hi StudyRoute, help me decide how often to send moneey for food and rent for 7 months Thank you!",
+  "draft": "To plan how often to send I still need an amount and a currency. For example: How often should I send GBP 800 a month for 9 months?."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "Hi, is there an extra fee the receiving bank takes? thanks in advance?",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider C (synthetic) uses SHA charges, so the university may receive AUD 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "Assalamu alaikum, why would the university be short-paid? Thank you!",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider C (synthetic) uses SHA charges, so the university may receive GBP 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "Kindly why would the university be short-paid? Thank you!",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider C (synthetic) uses SHA charges, so the university may receive EUR 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "Dear sir, is there an extra fee the receiving bank takes? please help.",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider C (synthetic) uses SHA charges, so the university may receive USD 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "Kindly explain OUR, SHA and BEN like I'm new to this Thank you!",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider B (synthetic) uses SHA charges, so the university may receive GBP 30.00 less than the invoice. Provider C (synthetic) uses SHA charges, so the university may receive GBP 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHARGES",
+  "question": "dear sir, is there an extra fee the receiving bank takes?",
+  "draft": "OUR means the sender pays all charges, so the university should receive the full amount. SHA shares them: you pay your bank and the university bears the receiving and intermediary charges. BEN makes the beneficiary pay everything, which carries the highest risk of a short payment. For tuition I recommend OUR, because a short payment can mean a late fee or an invoice that cannot be matched. Check the university's own payment instructions. Provider B (synthetic) uses SHA charges, so the university may receive EUR 30.00 less than the invoice. Provider C (synthetic) uses SHA charges, so the university may receive EUR 35.00 less than the invoice. OUR avoids that for tuition."
+ },
+ {
+  "intent": "CHECKLIST",
+  "question": "Dear sir, what do I need to give the AD bank for a student remittance!",
+  "draft": "For CA tuition the bank may ask for: Offer or admission letter, Fee demand note or annual estimate, Student passport (bio page), Visa or entry permission, Parent national ID, Source of funds evidence, AD bank remittance application form, Receiving account details. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "CHECKLIST",
+  "question": "Dear sir, what documents are needed for a tuition fees payment? asap",
+  "draft": "For CA tuition the bank may ask for: Offer or admission letter, Fee demand note or annual estimate, Student passport (bio page), Visa or entry permission, Parent national ID, Source of funds evidence, AD bank remittance application form, Receiving account details. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "CHECKLIST",
+  "question": "what do I need to give the AD bank for a student remittance Thank you!",
+  "draft": "For MY tuition the bank may ask for: Offer or admission letter, Fee demand note or annual estimate, Student passport (bio page), Visa or entry permission, Parent national ID, Source of funds evidence, AD bank remittance application form, Receiving account details. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "CHECKLIST",
+  "question": "Hi, what documents are needed for a living expenses payment?",
+  "draft": "For US tuition the bank may ask for: Offer or admission letter, Fee demand note or annual estimate, Form I-20 (US), Student passport (bio page), Visa or entry permission, Parent national ID, Source of funds evidence, AD bank remittance application form, Receiving account details. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "HEY, WHAT IS THE TRUE TOTAL COST OF PROVIDER C?",
+  "draft": "The advertised fee is not the whole cost. A provider can also add an exchange-rate margin and intermediary charges. Compare shows the parent's total outlay, hidden margin, recipient shortfall risk and arrival time together. Run a quote for an actual comparison; I cannot name the cheapest provider or invent a live rate without engine results."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "Is a studio or a shared flat cheaper in Johor Bahru?",
+  "draft": "Ranked by true total cost, cheapest first: Provider B (synthetic) 1.33% (BDT 35,077.32); Provider C (synthetic) 1.45% (BDT 38,371.65); Provider A (synthetic) 2.09% (BDT 55,254.63). The ranking includes the hidden FX margin and every fee. Provider C (synthetic) uses SHA charges, so the university may receive EUR 35.00 less than the invoice. OUR avoids that for tuition. This is a sandbox with synthetic numbers, so treat it as indicative."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "hey, i see three prvoiders. which should i use and what is the catch? thank you!",
+  "draft": "Ranked by true total cost, cheapest first: Provider B (synthetic) 1.42% (BDT 23,502.02); Provider C (synthetic) 1.45% (BDT 24,052.52); Provider A (synthetic) 2.15% (BDT 35,704.03). The ranking includes the hidden FX margin and every fee. Provider C (synthetic) uses SHA charges, so the university may receive AUD 35.00 less than the invoice. OUR avoids that for tuition. This is a sandbox with synthetic numbers, so treat it as indicative."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "How much more would I pay if the exchange rate gets worse?",
+  "draft": "Ranked by true total cost, cheapest first: Provider B (synthetic) 1.13% (BDT 77,330.14); Provider C (synthetic) 1.33% (BDT 91,187.68); Provider A (synthetic) 2.04% (BDT 139,760.28). The ranking includes the hidden FX margin and every fee. Provider C (synthetic) uses SHA charges, so the university may receive EUR 35.00 less than the invoice. OUR avoids that for tuition. This is a sandbox with synthetic numbers, so treat it as indicative."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "which provider will leave the university short Thank you!",
+  "draft": "Ranked by true total cost, cheapest first: Provider B (synthetic) 1.41% (BDT 24,622.97); Provider C (synthetic) 1.46% (BDT 25,431.21); Provider A (synthetic) 2.14% (BDT 37,405.94). The ranking includes the hidden FX margin and every fee. Provider B (synthetic) uses SHA charges, so the university may receive CAD 30.00 less than the invoice. Provider C (synthetic) uses SHA charges, so the university may receive CAD 35.00 less than the invoice. OUR avoids that for tuition. This is a sandbox with synthetic numbers, so treat it as indicative."
+ },
+ {
+  "intent": "COMPARE",
+  "question": "Kindly I see three providers. Which should I use and what is the catch? thanks in advance?",
+  "draft": "Ranked by true total cost, cheapest first: Provider B (synthetic) 1.22% (BDT 38,456.17); Provider C (synthetic) 1.35% (BDT 42,745.21); Provider A (synthetic) 2.08% (BDT 65,612.34). The ranking includes the hidden FX margin and every fee. Provider B (synthetic) uses BEN charges, so the university may receive AUD 67.50 less than the invoice. Provider C (synthetic) uses SHA charges, so the university may receive AUD 35.00 less than the invoice. Provider A (synthetic) uses BEN charges, so the university may receive AUD 18.75 less than the invoice. OUR avoids that for tuition. This is a sandbox with synthetic numbers, so treat it as indicative."
+ },
+ {
+  "intent": "COSTS",
+  "question": "Which city fits a budget of BDT 130,000 a month?",
+  "draft": "With a monthly budget of BDT 130,000.00, 4 of 20 cities fit (a room in a shared flat). Cheapest first: Johor Bahru MYR 1,570.00 (BDT 40,820.00), Penang MYR 1,720.00 (BDT 44,720.00), Kuala Lumpur MYR 2,050.00 (BDT 53,300.00), Leipzig EUR 875.00 (BDT 122,500.00). Invented figures for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "COSTS",
+  "question": "Which city fits a budget of BDT 130,000 a month?",
+  "draft": "With a monthly budget of BDT 130,000.00, 4 of 20 cities fit (a room in a shared flat). Cheapest first: Johor Bahru MYR 1,570.00 (BDT 40,820.00), Penang MYR 1,720.00 (BDT 44,720.00), Kuala Lumpur MYR 2,050.00 (BDT 53,300.00), Leipzig EUR 875.00 (BDT 122,500.00). Invented figures for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "COSTS",
+  "question": "Which cities are cheapest to study in?",
+  "draft": "Student costs across the cities I know, from the cheapest month (a room in a shared flat): Johor Bahru MYR 1,570.00 (BDT 40,820.00), Penang MYR 1,720.00 (BDT 44,720.00), Kuala Lumpur MYR 2,050.00 (BDT 53,300.00), Leipzig EUR 875.00 (BDT 122,500.00), Adelaide AUD 1,660.00 (BDT 132,800.00). Name a city for the full month, or give me a monthly budget in taka and I will say which cities fit. Invented figures for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "COSTS",
+  "question": "Which cities are cheapest to study in?",
+  "draft": "Student costs across the cities I know, from the cheapest month (a room in a shared flat): Johor Bahru MYR 1,570.00 (BDT 40,820.00), Penang MYR 1,720.00 (BDT 44,720.00), Kuala Lumpur MYR 2,050.00 (BDT 53,300.00), Leipzig EUR 875.00 (BDT 122,500.00), Adelaide AUD 1,660.00 (BDT 132,800.00). Name a city for the full month, or give me a monthly budget in taka and I will say which cities fit. Invented figures for the sandbox, not a survey. Compare them with your university's own estimate. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "Hey, how long before Feb 20 should I pay? Thanks.",
+  "draft": "To reach the university by 2026-12-01, send by 2026-11-23 at the latest. I suggest 2026-11-19. The plan skips weekends and public holidays in Bangladesh and Canada, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: ON_TRACK. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "Hey, by when do I have to act so that in 5 weeks works? Thank you!",
+  "draft": "To reach the university by 2026-12-12, send by 2026-12-03 at the latest. I suggest 2026-12-02. The plan skips weekends and public holidays in Bangladesh and Germany, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: ON_TRACK. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "kindly do public holidays in the uk delay settlement urgent.",
+  "draft": "To reach the university by 2026-11-16, send by 2026-11-05 at the latest. I suggest 2026-11-04. The plan skips weekends and public holidays in Bangladesh and Malaysia, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: ON_TRACK. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "how long before 29 december 2026 should i pay?",
+  "draft": "To reach the university by 2026-10-22, send by 2026-10-14 at the latest. I suggest 2026-10-13. The plan skips weekends and public holidays in Bangladesh and United States, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: TIGHT. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "assalamu alaikum, i'm worried about the tenth of november deadline, when should i send please help!",
+  "draft": "To reach the university by 2026-11-07, send by 2026-10-29 at the latest. I suggest 2026-10-28. The plan skips weekends and public holidays in Bangladesh and United States, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: ON_TRACK. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DEADLINE",
+  "question": "Sir, by when do I have to act so that 2026-11-18 works?",
+  "draft": "To reach the university by 2026-12-13, send by 2026-12-03 at the latest. I suggest 2026-12-02. The plan skips weekends and public holidays in Bangladesh and United States, assumes 3 business days to settle plus 2 days of buffer, and a bank cut-off at 15:00 Dhaka time. Status: ON_TRACK. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "DRAFT",
+  "question": "Dear sir, turn this quote into a draft with Provider A asap.",
+  "draft": "I can propose a draft with Provider A (synthetic), total cost BDT 4,929.47. I only propose it: you confirm the draft in the app and add the recipient and the reference. Approval is a separate step that only you can do, with a fresh MFA code."
+ },
+ {
+  "intent": "DRAFT",
+  "question": "Assalamu alaikum, turn this qute into a draft with B asap!",
+  "draft": "I can propose a draft with Provider B (synthetic), total cost BDT 24,760.39. I only propose it: you confirm the draft in the app and add the recipient and the reference. Approval is a separate step that only you can do, with a fresh MFA code."
+ },
+ {
+  "intent": "DRAFT",
+  "question": "turn this quote into a draft with prov_b?",
+  "draft": "I can propose a draft with Provider B (synthetic), total cost BDT 13,147.28. I only propose it: you confirm the draft in the app and add the recipient and the reference. Approval is a separate step that only you can do, with a fresh MFA code."
+ },
+ {
+  "intent": "DRAFT",
+  "question": "Excuse me, turn this quote into a draft with Provider B Thank you!",
+  "draft": "I can propose a draft with Provider B (synthetic), total cost BDT 75,002.25. I only propose it: you confirm the draft in the app and add the recipient and the reference. Approval is a separate step that only you can do, with a fresh MFA code."
+ },
+ {
+  "intent": "HELP",
+  "question": "can you explain what pay_846690 refers to!",
+  "draft": "I'm not sure which part you mean. Are you asking about StudyRoute itself, provider costs, a payment deadline, documents, or your mock KYC? Name the screen or describe the problem and I will focus on that."
+ },
+ {
+  "intent": "HELP",
+  "question": "Please thanks, that's helpful Thank you!",
+  "draft": "I'm not sure which part you mean. Are you asking about StudyRoute itself, provider costs, a payment deadline, documents, or your mock KYC? Name the screen or describe the problem and I will focus on that."
+ },
+ {
+  "intent": "HELP",
+  "question": "sir, what kinds of questions can i ask you please advise.",
+  "draft": "I'm not sure which part you mean. Are you asking about StudyRoute itself, provider costs, a payment deadline, documents, or your mock KYC? Name the screen or describe the problem and I will focus on that."
+ },
+ {
+  "intent": "HELP",
+  "question": "Kindly what is the minimum wage in Canada? Please advise.",
+  "draft": "That is outside StudyRoute's education-payment scope. I can help with provider comparisons, deadlines, documents and simulated payment tracking, but I cannot reliably answer that general question in offline mode. What would you like to check in StudyRoute?"
+ },
+ {
+  "intent": "HELP",
+  "question": "Please will weekends delay the payment? Thank you!",
+  "draft": "That is outside StudyRoute's education-payment scope. I can help with provider comparisons, deadlines, documents and simulated payment tracking, but I cannot reliably answer that general question in offline mode. What would you like to check in StudyRoute?"
+ },
+ {
+  "intent": "HELP",
+  "question": "Hello, should I invest in crypto? thanks in advance.",
+  "draft": "That is outside StudyRoute's education-payment scope. I can help with provider comparisons, deadlines, documents and simulated payment tracking, but I cannot reliably answer that general question in offline mode. What would you like to check in StudyRoute?"
+ },
+ {
+  "intent": "KYC",
+  "question": "KYC STATUS PLEASE THANKS.",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "KYC",
+  "question": "assalamu alaikum, is my kyc approved? urgent.",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "KYC",
+  "question": "assalamu alaikum, kyc status please thanks in advance.",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "KYC",
+  "question": "assalamu alaikum, is my kyc approved? thanks in advance.",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "KYC",
+  "question": "I won't verify my identity.",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "KYC",
+  "question": "please kyc status please",
+  "draft": "Your mock KYC status is VERIFIED. KYC verified (simulated). Approval is available. This is simulated: no real identity data is used."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "Sir, will £37,200 breach any limit? Thank you!",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "will 26,350 us dollars breach any limit? thank you!",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "Hi StudyRoute, will 28,350 breach any limit? asap?",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "Hey, show me my current limits.",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "Hello, show me my current limits.",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "LIMITS",
+  "question": "show me my current limits?",
+  "draft": "The sandbox applies its own caps: USD 50,000.00 per transaction and USD 100,000.00 per day. These are our choices for the demo, not legal limits. The only Bangladesh figure I hold is USD 2,000.00 a month for living costs, with 50% more for high-cost places. It comes from a secondary source and is NOT verified. Indicative. Confirm with your AD bank."
+ },
+ {
+  "intent": "PLAN",
+  "question": "Please plan my semester fees payment due 09/11/2026 asap.",
+  "draft": "To plan your payment I still need an amount and a currency. For example: Plan GBP 10,000 tuition due 28 October."
+ },
+ {
+  "intent": "PLAN",
+  "question": "walk me through paying 25,350 as living expenses to westbrook university (due 5 nov) thanks in advance?",
+  "draft": "To plan your payment I still need an amount and a currency. For example: Plan GBP 10,000 tuition due 28 October."
+ },
+ {
+  "intent": "PLAN",
+  "question": "Dear sir, I would like to pay my fees Urgent.",
+  "draft": "To plan your payment I still need an amount and a currency. For example: Plan GBP 10,000 tuition due 28 October."
+ },
+ {
+  "intent": "PLAN",
+  "question": "I need to pay my tuition fees soon.",
+  "draft": "To plan your payment I still need an amount and a currency. For example: Plan GBP 10,000 tuition due 28 October."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "Assalamu alaikum, please put the payment up for approval?",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "Hi StudyRoute, send this to the parent for approval Thank you!",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "I'm ready, request approval please help!",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "send this to the parent for approval",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "Hello, I'm ready, request approval Urgent.",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "REQUEST_APPROVAL",
+  "question": "I'm ready, request approval thanks in advance",
+  "draft": "Open the payment first, then ask me to request approval."
+ },
+ {
+  "intent": "STATUS",
+  "question": "did the money reach the university thanks in advance.",
+  "draft": "The payment to deliver GBP 19,963.45 is QUOTED. Everything here is simulated."
+ },
+ {
+  "intent": "STATUS",
+  "question": "excuse me, did the money reach the university please help?",
+  "draft": "Open a payment on the Tracker screen and ask again, so I know which one you mean."
+ },
+ {
+  "intent": "STATUS",
+  "question": "did the money reach the university Thank you!",
+  "draft": "Open a payment on the Tracker screen and ask again, so I know which one you mean."
+ },
+ {
+  "intent": "STATUS",
+  "question": "hello, show me where the payment is in the process!",
+  "draft": "Open a payment on the Tracker screen and ask again, so I know which one you mean."
+ },
+ {
+  "intent": "STATUS",
+  "question": "Kindly is pay_603231 settled? Thank you!",
+  "draft": "Open a payment on the Tracker screen and ask again, so I know which one you mean."
+ },
+ {
+  "intent": "STATUS",
+  "question": "I would like to know why my transfer was declined.",
+  "draft": "Open a payment on the Tracker screen and ask again, so I know which one you mean."
+ }
+]

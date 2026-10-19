@@ -1,5 +1,5 @@
 StudyRoute: speaker notes for the 10-minute presentation
-20 slides, 1,241 words: about 8.3 minutes at 150 words a minute (9.5 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
+20 slides, 1,248 words: about 8.3 minutes at 150 words a minute (9.6 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
 Say it in your own words; the notes are a guide, not a script to read.
 ==============================================================================
 
@@ -55,31 +55,31 @@ SLIDE 13: Proven, and not proven yet   (about 65 words, 26 seconds; running tota
 
 What we have shown: one engine for every number, a human-only approval, an audit log that fails Verify when one row is edited, a Docker run, and attack probes defended. What we have not shown: rates and costs are invented, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders. Both lists are in the repository.
 
-SLIDE 14: Every test we ran   (about 59 words, 24 seconds; running total 5:42)
+SLIDE 14: Every test we ran   (about 66 words, 26 seconds; running total 5:44)
 
-Everything we ran: 1,679 backend tests, one skipped on Windows; 463 web tests; 24 browser tests; all 24 scenarios mapped; 314 security probe records. On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests; a fresh clone runs 1,672 of 1,673, and no outside party has tested it.
+Everything we ran: 1,705 backend tests, one skipped on Windows, including 25 assistant prompts that all give the expected tool and safety outcome; 463 web tests; 24 browser tests; all 24 scenarios pass; 314 security probe records. On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests, and no outside party has tested it yet.
 
-SLIDE 15: Security you can verify   (about 66 words, 26 seconds; running total 6:08)
+SLIDE 15: Security you can verify   (about 66 words, 26 seconds; running total 6:10)
 
 Security and compliance is thirty percent of the score, so we made it checkable. Permission tiers are enforced in the domain layer, not just the screens. Only a human parent with a fresh MFA proof, bound to that payment, can approve; the AI has no approve, cancel or limit permission. On the right, the live audit log says PASS, and one edited row makes it fail.
 
-SLIDE 16: Attacking our own app   (about 74 words, 30 seconds; running total 6:38)
+SLIDE 16: Attacking our own app   (about 74 words, 30 seconds; running total 6:40)
 
 We attacked our own application with six tools: access control, browser and XSS, planted secrets, hostile prompts, man-in-the-middle and replay, and login guessing. 314 records, all pass or informational. The man-in-the-middle test is the honest one: altered approvals, swapped MFA proofs, a stolen token and replayed webhooks were refused. But on plain HTTP a listener reads the password and token, and a stolen token can cancel a draft. We do not call that safe.
 
-SLIDE 17: Security problems we found   (about 71 words, 28 seconds; running total 7:06)
+SLIDE 17: Security problems we found   (about 71 words, 28 seconds; running total 7:08)
 
 We list our security problems because hiding them would cost more. On plain HTTP a listener reads the password and token; the public site uses HTTPS with HSTS, but nobody else has tested that. A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.
 
-SLIDE 18: Honest by design   (about 56 words, 22 seconds; running total 7:28)
+SLIDE 18: Honest by design   (about 56 words, 22 seconds; running total 7:30)
 
 Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.
 
-SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 7:50)
+SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 7:52)
 
 Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. We have no partner, pilot or real users yet; these are numbers to test.
 
-SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:16)
+SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:18)
 
 Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.
 

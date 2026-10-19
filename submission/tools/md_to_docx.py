@@ -173,7 +173,7 @@ def main() -> int:
                 document.add_paragraph("Technical Documentation", style="Title")
                 p = document.add_paragraph("Architecture, core algorithms, trained components and security design")
                 p.runs[0].font.size = Pt(12)
-                document.add_paragraph("SR-TEC-2026-01  |  18 October 2026  |  Team TeamEkxin")
+                document.add_paragraph("SR-TEC-2026-01  |  19 October 2026  |  Team TeamEkxin")
                 document.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
             else:
                 document.add_heading(text, level=min(level - 1, 3) if level > 1 else 1)

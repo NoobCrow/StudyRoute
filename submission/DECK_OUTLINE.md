@@ -27,7 +27,7 @@ visible in each screenshot.
 | 11 | Models against baselines | Graphs: reader against rules, router top-1% against random, dialogue policy wrong plans before and after |
 | 12 | Risk score, human decision | The AI risk score (0 to 100) from four factors, the warning, the bank reviewer's yes, ask for more or no with MFA; it never approves. Local sandbox screenshots |
 | 13 | Proven, and not proven yet | What the tests and logs show, and the plain list of what they do not |
-| 14 | Every test we ran | 1,679 backend, 463 web, 24 browser tests, 24 of 24 scenarios, 314 security probe records, and **live** GitHub CI with all six jobs green |
+| 14 | Every test we ran | 1,705 backend (including a 25-prompt assistant suite, 25 of 25 pass), 463 web, 24 browser tests, 24 of 24 scenarios, 314 security probe records, and **live** GitHub CI with all six jobs green |
 | 15 | Security you can verify | Permission tiers; **live** audit log with Verify giving PASS; the tamper test |
 | 16 | Attacking our own app | Graph of the 314 recorded checks by tool; the man-in-the-middle test: what held and what did not |
 | 17 | Security problems we found | Seven problems with their status (mitigated, open, fixed, partly), including plain HTTP and the stolen-token risk |

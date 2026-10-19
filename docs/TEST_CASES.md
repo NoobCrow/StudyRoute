@@ -6,9 +6,9 @@ Test-case deliverable for StudyRoute (sandbox, synthetic data). Every scenario i
 blueprint section 16 (T01 to T24) is implemented by at least one automated test, and
 `backend/tests/test_blueprint_coverage.py` fails if one is missing.
 
-1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
+1,705 backend tests (1,704 pass, 1 skipped on Windows); a fresh clone has the same tests now that the explainer's test questions are in the repository. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
 
-The fixture-complete backend result and the 463-web / 24-browser counts are supplied results, not newly executed by this documentation pass. The separate execution report records the fresh-clone result. The module is skipped because `backend/tests/data/explainer_cases.json` is excluded by `.gitignore`. The scenario table below is unchanged.
+The backend count is from a full run on 19 October 2026, which includes the 25-prompt assistant suite (test_prompt_suite.py). The one skip is a symlink test that Windows cannot run. The separate execution report records an earlier Linux run on an archive that did not yet include the explainer's test questions (1,672 passed, 1 skipped).
 
 - Frontend: **463 tests** in 41 files (Vitest).
 

@@ -657,15 +657,15 @@ slides.push({
 {
   const ci = liveShot("live-09-github-ci.png", 5.55, 1.35, 3.95, "GitHub Actions: all six CI jobs green on the latest commit");
   const tiles = [
-    ["1,679", "backend tests (1,678 pass, 1 skipped)"], ["463", "web tests"],
+    ["1,705", "backend tests, incl. 25 assistant prompts (25 of 25 pass)"], ["463", "web tests"],
     ["24", "browser tests"], ["314", "security probe records (308 PASS, 6 INFO)"],
     ["24 of 24", "blueprint scenarios mapped to tests"], ["6 of 6", "CI jobs green on GitHub"],
   ];
   slides.push({
     layout: "content", section: "Trust", title: "Every test we ran",
     notes:
-      "Everything we ran: 1,679 backend tests, one skipped on Windows; 463 web tests; 24 browser tests; all 24 scenarios mapped; 314 security probe records. " +
-      "On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests; a fresh clone runs 1,672 of 1,673, and no outside party has tested it.",
+      "Everything we ran: 1,705 backend tests, one skipped on Windows, including 25 assistant prompts that all give the expected tool and safety outcome; 463 web tests; 24 browser tests; all 24 scenarios pass; 314 security probe records. " +
+      "On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests, and no outside party has tested it yet.",
     elements: [
       ...tiles.flatMap(([num, label], i) => {
         const x = 0.5 + (i % 2) * 2.4;
@@ -678,7 +678,7 @@ slides.push({
       }),
       ...ci.els,
       text(5.55, 1.35 + ci.h + 0.14, 3.95, 0.6, "GitHub Actions, latest commit: backend, web, contracts, secret-scan, dependency-audit and docker all green.", { size: 10, color: "text2" }),
-      text(0.5, 4.95, 9, 0.5, "Our own tests. A fresh clone runs 1,672 of 1,673 (one module needs an excluded fixture). No independent test yet.", { size: 11, color: "text2" }),
+      text(0.5, 4.95, 9, 0.5, "Our own tests: a fresh clone runs the same 1,705. No independent test yet.", { size: 11, color: "text2" }),
     ],
   });
 }

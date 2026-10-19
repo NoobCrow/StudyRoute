@@ -10,7 +10,7 @@ The organiser's e-mail of 15 October 2026 makes items 1 and 2 mandatory and the 
 
 | # | Deliverable | Open this | Source or detail |
 |---|-------------|-----------|------------------|
-| 1 | Technical documentation: system architecture, core algorithms, security design (mandatory) | [StudyRoute_Technical_Documentation.pdf](StudyRoute_Technical_Documentation.pdf) (20 pages) | [docs/TECHNICAL_DOCUMENTATION.md](../docs/TECHNICAL_DOCUMENTATION.md) |
+| 1 | Technical documentation: system architecture, core algorithms, security design (mandatory) | [StudyRoute_Technical_Documentation.pdf](StudyRoute_Technical_Documentation.pdf) (21 pages) | [docs/TECHNICAL_DOCUMENTATION.md](../docs/TECHNICAL_DOCUMENTATION.md) |
 | 2 | Presentation deck, 10 minutes (mandatory) | [StudyRoute_Deck.pptx](StudyRoute_Deck.pptx) (20 slides, speaker notes inside, about 8.3 minutes) | [deck/build_deck.js](deck/build_deck.js), [DECK_OUTLINE.md](DECK_OUTLINE.md) |
 | 3 | Demo video, under 5 minutes (optional) | Script: [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md). The final narrated video is not included. A supporting silent screen recording is [StudyRoute_Demo.mp4](StudyRoute_Demo.mp4) | |
 | 4 | Source code, README, deployment, test cases (optional) | [README.md](../README.md), then `docker compose up --build` and http://localhost:8080 | [docs/DOCKER.md](../docs/DOCKER.md), [docs/TEST_CASES.md](../docs/TEST_CASES.md) |
@@ -32,8 +32,7 @@ The organiser's e-mail of 15 October 2026 makes items 1 and 2 mandatory and the 
 
 ```bash
 cd backend && pytest -q
-# 1,679 backend tests on a machine that has the explainer fixture (1,678 pass, 1 skipped); a fresh clone collects 1,673, runs 1,672 and skips one module whose fixture is excluded by .gitignore. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
-# Fixture details: technical documentation, section 5.
+# 1,705 backend tests (1,704 pass, 1 skipped on Windows); a fresh clone has the same tests now that the explainer's test questions are in the repository. 463 web tests (439 in an earlier pre-merge log) and 24 browser tests.
 ```
 
 **Real vs synthetic.** Real: the problem framing and the Bangladesh Bank volume figure (USD 881.7m, via The Observer). Synthetic: every rate, fee, provider, KYC result, bank and settlement. Simulated: the chain, the escrow and the bank network. The USD 8.8m figure is our arithmetic. Confirm every financial rule with your AD bank.
