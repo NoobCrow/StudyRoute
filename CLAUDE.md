@@ -77,6 +77,7 @@ config/rules.yaml       limits, checklists, calendars (blueprint 13)
 - Retrain the reader on a GPU: docs/AI_AGENT.md section 7
 - Retrain / re-evaluate the RL dialogue policy: docs/AI_RL.md section 8 (ml/rl/)
 - Retake the README screenshots (fresh demo data, API and built web UI running): python -m app.scripts.gallery
+- Make the demo-video footage for a voice-over (loopback sandbox only; silent video, narrator's guide, captions, cue sheet): python scripts/demo_video/make_video.py (see scripts/demo_video/README.md)
 - Build the submission archive: python scripts/make_submission.py
 - Rebuild the technical documentation PDF (needs Chrome; pip install markdown pypdf) and re-check its figures: python submission/tools/build_report_pdf.py && python submission/tools/verify_report_numbers.py (Word copy: submission/tools/md_to_docx.py)
 - Rebuild the deck (always with the team values): cd submission/deck && TEAM_NAME="TeamEkxin" REPO_LINK="https://github.com/NoobCrow/StudyRoute" node build_deck.js

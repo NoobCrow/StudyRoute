@@ -100,7 +100,7 @@ The repository is public at https://github.com/NoobCrow/StudyRoute. Scan before 
       (needs a running API with fresh demo data).
 - [ ] Confirm the retained team name, members, contact, registration and ownership in `PROJECT_DESCRIPTION.md`, `REGISTRATION.md` and `DECK_OUTLINE.md`; a private fork does not transfer authorship.
 - [ ] **Make the GitHub repository public** (Settings, then Danger Zone, then Change visibility) before submitting, and open the link in a private browser window to check it loads without signing in. The team will do this.
-- [ ] **Record the voiced pitch video** (5 minutes at most) from `submission/VIDEO_SCRIPT.md`, including the AI risk score and bank review scene. The team will do this. The interim `StudyRoute_Demo.mp4` has no voiceover.
+- [ ] **Record the voiced pitch video** (5 minutes at most) from `submission/VIDEO_SCRIPT.md`, including the AI risk score and bank review scene. The team will do this. The silent footage for it (4:40, parent, bank reviewer and student), a guide video with the words lighting up, captions and a cue sheet are built by `python scripts/demo_video/make_video.py` (see `scripts/demo_video/README.md`); only the voice is missing. The interim `StudyRoute_Demo.mp4` has no voiceover.
 - [ ] Send the organiser the eligibility question (draft 1b in `submission/EMAIL_TEMPLATES.md`) and keep their reply: an IEEE page describes the track as limited to 21 APEC economies, which the official PDF does not say.
 - [ ] Freeze the code. Commit. Tag the commit you submit.
 
