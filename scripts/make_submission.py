@@ -33,7 +33,7 @@ def archive_members() -> list[Path]:
     files = []
     for path in scan_repo.tracked_files():
         relative = path.relative_to(ROOT)
-        if not path.is_file() or scan_repo.excluded(path) or relative.parts[0] == "dist" or path.name == "RELEASE_MANIFEST.sha256":
+        if not path.is_file() or scan_repo.excluded(path) or relative.parts[0] in ("dist", "FINAL_SUBMISSION") or relative.name == "TeamEkxin_Submission.zip" or path.name == "RELEASE_MANIFEST.sha256":
             continue
         if (path.name in NEVER or (path.name.startswith(".env.") and path.name != ".env.example")
                 or path.suffix.lower() in {".db", ".sqlite", ".sqlite3", ".pem", ".key", ".p12", ".pfx"}):
