@@ -80,9 +80,9 @@ def test_the_deck_text_includes_slides_and_speaker_notes(tmp_path: Path) -> None
 
 
 @pytest.mark.parametrize(
-    ("slides", "notes", "status"), [(20, 20, "OK"), (19, 20, "FAIL"), (20, 0, "FAIL")]
+    ("slides", "notes", "status"), [(21, 21, "OK"), (20, 21, "FAIL"), (21, 0, "FAIL")]
 )
-def test_the_deck_must_have_twenty_slides_with_notes(
+def test_the_deck_must_have_21_slides_with_notes(
     tmp_path: Path, slides: int, notes: int, status: str
 ) -> None:
     (tmp_path / "submission").mkdir()
@@ -94,9 +94,9 @@ def test_speaker_notes_that_run_past_ten_minutes_fail(tmp_path: Path) -> None:
     (tmp_path / "submission").mkdir()
     deck = tmp_path / "submission" / "StudyRoute_Deck.pptx"
     with zipfile.ZipFile(deck, "w") as archive:
-        for number in range(1, 21):
+        for number in range(1, preflight.SLIDES + 1):
             archive.writestr(f"ppt/slides/slide{number}.xml", f"<p><a:t>Slide {number}</a:t></p>")
-            words = "word " * 80  # 20 x 80 = 1,600 words: about 11 minutes at 150 a minute
+            words = "word " * 80  # 21 x 80 = 1,680 words: about 11 minutes at 150 a minute
             archive.writestr(
                 f"ppt/notesSlides/notesSlide{number}.xml", f"<p><a:t>{words}</a:t></p>"
             )
