@@ -501,14 +501,14 @@ ASK_INFO or DECLINE with a single-use MFA proof under the scope review_payment. 
 rejection, so the state machine itself does not change. The parent's short reply is stored sealed with the
 field cipher. A clock (on time, due soon, overdue) and a reminder with a cool-down make slow reviews visible.
 Plain rules (a large amount, several payments that add up to one, a new receiver, no fee demand note) give the
-reviewer context, and they decide on their own only when the model is not loaded. BANK_REVIEW.md in the docs
-folder has the details.
+reviewer context, and they decide on their own only when the model is not loaded. BANK_REVIEW.md describes the
+desk in full.
 
 ---
 
 ## 3. Security design
 
-The full threat and control matrix, with the test that proves each row, is in SECURITY.md in the docs folder.
+The full threat and control matrix, with the test that proves each row, is in SECURITY.md.
 The permission tiers and our 55 known risks are in SECURITY_SELF_ASSESSMENT.md.
 
 ### 3.1 Identity and sessions
@@ -641,7 +641,7 @@ result, so the customer's debit equals what the parent pays and the beneficiary'
 beneficiary receives. The ledger applies journals, refuses any that would overdraw an account, and unwinds a
 failed transfer by posting the exact opposite of every journal, newest first. Three checks hold at every moment:
 the trial balance, the mirror accounts (each nostro equals its vostro) and the entry sums. All of the
-configuration is invented. BANK_NETWORK.md in the docs folder has the details.
+configuration is invented. BANK_NETWORK.md describes the network in full.
 
 ### 4.2 Smart escrow and the audit anchor
 
@@ -652,7 +652,7 @@ hash-chained log and replayed to rebuild the chain. A parent locks an escrow wit
 escrow (three transactions, one audit event); a worker pays each tranche on its date; paying early or cancelling
 needs MFA again; and the reviewer can only freeze or unfreeze. The AuditAnchor contract stores audit head hashes,
 and the chain check reports MISMATCH when the database no longer agrees with it. It is a simulation, not a
-network. SMART_ESCROW.md in the docs folder has the details.
+network. SMART_ESCROW.md covers the contracts and their limits.
 
 ### 4.3 The compliance report
 
@@ -722,7 +722,7 @@ AI_RISK.md in the docs folder.
 ## 7. Provenance, licences and AI assistance
 
 We used AI coding assistants for large parts of the code, tests and documents, working under our direction;
-the repair release is recorded in PROVENANCE.md in the docs folder. This report does not break down the work of
+the repair release is recorded in PROVENANCE.md. This report does not break down the work of
 individual team members.
 
 | Component | Licence | How we use it |
@@ -734,7 +734,7 @@ individual team members.
 | IBM AML transactions, HI-Small | CDLA-Sharing-1.0 | Trained the review router; development only, the data is not in the repository |
 | py-evm, onnxruntime | MIT | Run-time dependencies |
 
-The full inventory is in THIRD_PARTY.md in the docs folder. The market figures in the summary come from The
+The full inventory is in THIRD_PARTY.md. The market figures in the summary come from The
 Observer (24 July 2026, citing Bangladesh Bank); our sums and the limits of that business case are in
 BUSINESS_CASE.md.
 
