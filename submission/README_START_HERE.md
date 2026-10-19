@@ -15,7 +15,7 @@ The organiser's e-mail of 15 October 2026 makes items 1 and 2 mandatory and the 
 | 3 | Demo video, under 5 minutes (optional) | Script: [VIDEO_SCRIPT.md](VIDEO_SCRIPT.md). The final narrated video is not included. A supporting silent screen recording is [StudyRoute_Demo.mp4](StudyRoute_Demo.mp4) | |
 | 4 | Source code, README, deployment, test cases (optional) | [README.md](../README.md), then `docker compose up --build` and http://localhost:8080 | [docs/DOCKER.md](../docs/DOCKER.md), [docs/TEST_CASES.md](../docs/TEST_CASES.md) |
 | 5 | Security self-assessment: permission tiers and known risks (optional) | [StudyRoute_Security_Self_Assessment.pdf](StudyRoute_Security_Self_Assessment.pdf) (32 pages, including attack/leakage/MITM evidence and all 314 recorded check labels) | [Expanded report Markdown](StudyRoute_Security_Self_Assessment.md); [original control assessment](../docs/SECURITY_SELF_ASSESSMENT.md) |
-| 6 | Execution evidence: operation logs, audit log and verification, tamper and restore (optional) | [StudyRoute_Execution_Evidence_Report.pdf](StudyRoute_Execution_Evidence_Report.pdf) (14 pages) | [evidence/README.md](evidence/README.md) indexes the raw files |
+| 6 | Execution evidence: operation logs, audit log and verification, tamper and restore (optional) | [StudyRoute_Execution_Evidence_Report.pdf](StudyRoute_Execution_Evidence_Report.pdf) (15 pages) | [evidence/README.md](evidence/README.md) indexes the raw files |
 
 ## How the claims were checked
 

@@ -1,7 +1,7 @@
 """Convert the technical documentation (Markdown) to an editable Word file.
 
     pip install python-docx
-    python submission/tools/md_to_docx.py [source.md [target.docx]]
+    python submission/tools/md_to_docx.py [source.md [target.docx [footer label]]]
 
 Headings, paragraphs (bold, italic, code), bullet and numbered lists, tables, code blocks, call-outs and
 images are kept. The layout is simpler than the PDF's; the PDF is the version to send.
@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 
 from docx import Document
-from docx.enum.text import WD_BREAK
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
@@ -27,7 +26,9 @@ TARGET = (
     if len(sys.argv) > 2
     else ROOT / "submission" / "StudyRoute_Technical_Documentation.docx"
 )
+FOOTER = sys.argv[3] if len(sys.argv) > 3 else "SR-TEC-2026-01  |  Synthetic data, not production assurance"
 NAVY, TEAL, ZEBRA = "0E2A47", "0B8A86", "F0F5F8"
+MARKER = re.compile(r"(#|\||>|```|!\[|- |\* |\d+\. )")
 INLINE = re.compile(r"(\*\*.+?\*\*|`[^`]+`|(?<![\w*])\*[^*\s][^*]*?\*(?![\w*]))")
 
 
@@ -110,6 +111,16 @@ def add_footer(section, label: str) -> None:
         field._r.append(element)
 
 
+def list_item(lines: list[str], i: int) -> tuple[str, int]:
+    """One list item with its wrapped (indented) lines joined; returns the text and the next line index."""
+    parts = [lines[i].strip()]
+    i += 1
+    while i < len(lines) and lines[i].strip() and lines[i][:1] in " \t" and not MARKER.match(lines[i].strip()):
+        parts.append(lines[i].strip())
+        i += 1
+    return " ".join(parts), i
+
+
 def main() -> int:
     lines = SOURCE.read_text(encoding="utf-8").splitlines()
     document = Document()
@@ -122,7 +133,7 @@ def main() -> int:
     section = document.sections[0]
     section.left_margin = section.right_margin = Inches(0.8)
     section.top_margin = section.bottom_margin = Inches(0.8)
-    add_footer(section, "SR-TEC-2026-01  |  Synthetic data, not production assurance")
+    add_footer(section, FOOTER)
 
     i = 0
     seen_title = False
@@ -169,27 +180,25 @@ def main() -> int:
             text = stripped[level + 1:]
             if level == 1 and not seen_title:
                 seen_title = True
-                document.add_paragraph("STUDYROUTE  /  INTERNATIONAL TRACK  /  TOPIC C").runs[0].font.color.rgb = RGBColor.from_string(TEAL)
-                document.add_paragraph("Technical Documentation", style="Title")
-                p = document.add_paragraph("Architecture, core algorithms, trained components and security design")
-                p.runs[0].font.size = Pt(12)
-                document.add_paragraph("SR-TEC-2026-01  |  19 October 2026  |  Team TeamEkxin")
-                document.add_paragraph().add_run().add_break(WD_BREAK.PAGE)
+                document.add_paragraph(text, style="Title")
             else:
                 document.add_heading(text, level=min(level - 1, 3) if level > 1 else 1)
             i += 1
-        elif re.match(r"(- |\* )", stripped):
-            paragraph = document.add_paragraph(style="List Bullet")
-            add_inline(paragraph, stripped[2:])
-            i += 1
-        elif re.match(r"\d+\. ", stripped):
-            paragraph = document.add_paragraph(style="List Number")
-            add_inline(paragraph, re.sub(r"^\d+\.\s+", "", stripped))
-            i += 1
+        elif re.match(r"(- |\* |\d+\. )", stripped):
+            text, i = list_item(lines, i)
+            if stripped[0] in "-*":
+                add_inline(document.add_paragraph(style="List Bullet"), text[2:])
+            else:
+                number, _, rest = text.partition(" ")
+                paragraph = document.add_paragraph()
+                paragraph.paragraph_format.left_indent = Inches(0.3)
+                paragraph.paragraph_format.first_line_indent = Inches(-0.3)
+                paragraph.add_run(number + "\t")
+                add_inline(paragraph, rest.strip())
         else:
             parts = [stripped]
             i += 1
-            while i < len(lines) and lines[i].strip() and not re.match(r"(#|\||>|```|!\[|- |\* |\d+\. )", lines[i].strip()):
+            while i < len(lines) and lines[i].strip() and not MARKER.match(lines[i].strip()):
                 parts.append(lines[i].strip())
                 i += 1
             add_inline(document.add_paragraph(), " ".join(parts))

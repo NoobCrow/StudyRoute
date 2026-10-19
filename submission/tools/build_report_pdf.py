@@ -3,7 +3,7 @@
     pip install markdown pypdf          # dev tools only
     python submission/tools/build_report_pdf.py [source.md [target.pdf]]  # needs Google Chrome (set CHROME_PATH if it is not in the usual place)
 
-Front pages in the layout of a security assessment report template (front_matter.py): a bordered title page,
+Front pages (front_matter.py): the team's title page,
 a table of contents, a list of tables and a list of figures, numbered i, ii, ... Then the body: a running header
 and footer, a numbered kicker above each section title, navy table headers and teal call-out boxes, numbered
 from page 1. The page numbers in the lists are read from the rendered body.
@@ -26,13 +26,14 @@ TARGET = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / "submissio
 DOC_ID = "SR-TEC-2026-01"
 DATE = "19 October 2026"
 COVER = Cover(
-    top=("StudyRoute / International Track", "FinTechathon 2026, Topic C", "Prepared by TeamEkxin"),
-    title="Technical Documentation",
-    subtitle="StudyRoute Technical Documentation",
-    tagline="Architecture, core algorithms, trained components and security design",
-    note="Synthetic data • Not production assurance",
-    bottom=(f"Document {DOC_ID}", DATE, "github.com/NoobCrow/StudyRoute"),
-    footer=f"StudyRoute – Technical Documentation ({DOC_ID})",
+    kind="Technical Documentation",
+    description=(
+        "Architecture, algorithms, security design and verification of an AI agent that helps a parent pay tuition "
+        "and living costs abroad, on time, at the lowest true cost, with a payment risk score and a student guide, "
+        "and only with the parent\u2019s approval."
+    ),
+    facts=(("Document", DOC_ID), ("Date", DATE)),
+    footer=f"StudyRoute \u2013 Technical Documentation ({DOC_ID})",
 )
 BODY_CSS = """
 @page { size: A4; margin: 22mm 16mm 18mm 16mm;

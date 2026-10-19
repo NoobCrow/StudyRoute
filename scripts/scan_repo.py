@@ -70,15 +70,18 @@ IGNORED_DIRS = {
 
 
 GENERATED_FILES = {"next-env.d.ts", "security_headers.conf"}
+VERSIONED_DATA = (("ml", "data"), ("backend", "tests", "data"))
 
 
 def excluded(path: Path) -> bool:
     """Generated artifacts and dependency trees, never source, even if accidentally tracked."""
     relative = path.relative_to(ROOT)
-    # ml/data is versioned benchmark input, unlike the runtime's data directory.
+    # ml/data (benchmarks) and backend/tests/data (explainer test questions) are versioned input,
+    # unlike the runtime's data directory.
     parts = relative.parts
     ignored = any(part in IGNORED_DIRS - {"data"} for part in parts)
-    runtime_data = "data" in parts and not (len(parts) > 1 and parts[:2] == ("ml", "data"))
+    versioned = any(parts[: len(kept)] == kept for kept in VERSIONED_DATA)
+    runtime_data = "data" in parts and not versioned
     return (ignored or runtime_data or path.is_symlink() or path.name in GENERATED_FILES
             or path.name.endswith(".tsbuildinfo"))
 

@@ -46,6 +46,8 @@ def test_fallback_prunes_builds_but_keeps_benchmark_data(tmp_path, monkeypatch):
         "web/out/index.html",
         "web/node_modules/x.js",
         "ml/data/a.txt",
+        "backend/tests/data/cases.json",
+        "backend/data/runtime.json",
         "app.py",
         ".env",
     ):
@@ -53,7 +55,7 @@ def test_fallback_prunes_builds_but_keeps_benchmark_data(tmp_path, monkeypatch):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("synthetic")
     found = {p.relative_to(tmp_path).as_posix() for p in scanner._walk()}
-    assert found == {"ml/data/a.txt", "app.py", ".env"}
+    assert found == {"ml/data/a.txt", "backend/tests/data/cases.json", "app.py", ".env"}
     assert scanner.scan_file(tmp_path / ".env")
 
 

@@ -1,6 +1,6 @@
-"""Front pages for the submission reports, laid out like a security assessment report template.
+"""Front pages for the submission reports: the team's cover, then contents laid out like a report template.
 
-A bordered title page, a table of contents, a list of tables and a list of figures. Each front page carries
+A title page, a table of contents, a list of tables and a list of figures. Each front page carries
 the synthetic-data banner and a roman page number; the body keeps its own layout and starts again at page 1.
 The page numbers in the lists are read from the rendered body PDF, so they always match it.
 
@@ -46,15 +46,27 @@ body { margin: 0; font-family: "Times New Roman", Times, serif; color: #000; }
 .content { position: absolute; left: 25mm; right: 25mm; top: 30mm; bottom: 24mm; }
 h1 { font: 700 15pt "Arial Narrow", Arial, sans-serif; margin: 0 0 4mm; }
 h1.next { margin-top: 7mm; }
-.box { position: absolute; left: 25mm; right: 22mm; top: 27mm; bottom: 29mm; border: 2.1mm solid #000; }
-.box > div { position: absolute; left: 6mm; right: 6mm; text-align: center; font-size: 12pt; line-height: 1.3; }
-.box .top { top: 28%%; }
-.box .mid { top: 56%%; }
-.box .bot { top: 80%%; line-height: 1.5; }
-.mid .t1 { font-size: 21pt; font-weight: 700; }
-.mid .t2 { font-size: 15pt; font-weight: 700; margin-top: 1.5mm; }
-.mid .t3 { font-style: italic; margin-top: 2.2mm; }
-.mid .t4 { margin-top: 1.4mm; }
+.cover { width: 210mm; height: 297mm; overflow: hidden; break-after: page; padding: 32mm 24.5mm 0;
+  font-family: Arial, Helvetica, sans-serif; color: #0f1f3d; }
+.cover:last-child { break-after: auto; }
+.cover .band { height: 12mm; background: #0f1f3d; color: #fff; font-size: 9.6pt; font-weight: 700;
+  letter-spacing: .2em; display: flex; align-items: center; justify-content: center; white-space: pre; }
+.cover .strip { height: 5.3mm; background: #00a5a3; }
+.cover .titles { margin-left: -2mm; border-left: 2.1mm solid #00a5a3; padding: 9mm 0 1.5mm 5.3mm; }
+.cover .name { font-size: 62pt; font-weight: 700; line-height: 1; letter-spacing: -.01em; }
+.cover .kind { font-size: 25pt; font-weight: 700; color: #00a5a3; margin-top: 2.2mm; }
+.cover .desc { font-size: 12pt; font-style: italic; color: #6b7480; line-height: 1.3; margin-top: 2.6mm; }
+.cover .label { font-size: 9pt; font-weight: 700; letter-spacing: .28em; color: #00a5a3; }
+.cover .who { margin-top: 10mm; }
+.cover .team { font-size: 20pt; font-weight: 700; margin: 1mm 0 3.4mm; }
+.cover .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4mm; }
+.cover .tile { background: #e6f4f3; border-left: 1.1mm solid #00a5a3; padding: 3.3mm 4mm; font-size: 12.6pt; font-weight: 700; }
+.cover .repo { margin-top: 8.5mm; }
+.cover .repo a { display: block; margin-top: 1.6mm; font-size: 13pt; font-weight: 700; color: #1155cc; text-decoration: underline; }
+.cover .facts { margin-top: 10mm; height: 16mm; background: #0f1f3d; display: flex; padding: 0 4.2mm; align-items: center; }
+.cover .facts > div { flex: 1; }
+.cover .facts .label { font-size: 7.6pt; color: #5fd0cc; }
+.cover .facts .v { color: #fff; font-size: 10.6pt; font-weight: 700; margin-top: .8mm; }
 .e { display: flex; align-items: baseline; font-size: 11.5pt; line-height: 5.6mm; }
 .e.l1 { margin-top: 2.6mm; }
 .e.first, .e.flat { margin-top: 0; }
@@ -75,13 +87,14 @@ table.dc td.k { width: 46mm; font-weight: 700; background: #f0f0f0; }
 
 @dataclass(frozen=True)
 class Cover:
-    top: tuple[str, ...]
-    title: str
-    subtitle: str
-    tagline: str
-    note: str
-    bottom: tuple[str, ...]
+    kind: str  # the document's name under "StudyRoute", e.g. "Technical Documentation"
+    description: str
+    facts: tuple[tuple[str, str], ...]  # the bottom band, e.g. (("Document", "SR-TEC-2026-01"), ("Date", "19 October 2026"))
     footer: str  # the running footer label of the front pages
+    band: str = "FINTECHATHON 2026   |   INTERNATIONAL TRACK   |   TOPIC C"
+    team: str = "TeamEkxin"
+    members: tuple[str, ...] = ("Farhan Labib", "Md Redwan Hossen", "Alim Bin Yeasin", "Kalvin Chakma")
+    repository: str = "https://github.com/NoobCrow/StudyRoute"
 
 
 @dataclass(frozen=True)
@@ -198,13 +211,18 @@ def _page(cover: Cover, number: int, content: str) -> str:
 
 
 def _cover_page(cover: Cover) -> str:
-    lines = lambda items: "<br>".join(html.escape(item) for item in items)  # noqa: E731
+    """The title page: a navy band, the product name, the document, the team, the repository, the facts."""
+    e = html.escape
+    tiles = "".join(f"<div class='tile'>{e(member)}</div>" for member in cover.members)
+    facts = "".join(f"<div><div class='label'>{e(k.upper())}</div><div class='v'>{e(v)}</div></div>" for k, v in cover.facts)
     return (
-        f"<section class='page'><div class='banner'>{html.escape(BANNER)}</div><div class='box'>"
-        f"<div class='top'>{lines(cover.top)}</div>"
-        f"<div class='mid'><div class='t1'>{html.escape(cover.title)}</div><div class='t2'>{html.escape(cover.subtitle)}</div>"
-        f"<div class='t3'>{html.escape(cover.tagline)}</div><div class='t4'>{html.escape(cover.note)}</div></div>"
-        f"<div class='bot'>{lines(cover.bottom)}</div></div></section>"
+        f"<section class='cover'><div class='band'>{e(cover.band)}</div><div class='strip'></div>"
+        f"<div class='titles'><div class='name'>StudyRoute</div><div class='kind'>{e(cover.kind)}</div>"
+        f"<div class='desc'>{e(cover.description)}</div></div>"
+        f"<div class='who'><div class='label'>PREPARED BY</div><div class='team'>{e(cover.team)}</div>"
+        f"<div class='tiles'>{tiles}</div><div class='repo'><div class='label'>REPOSITORY</div>"
+        f"<a href='{e(cover.repository)}'>{e(cover.repository)}</a></div></div>"
+        f"<div class='facts'>{facts}</div><div class='strip'></div></section>"
     )
 
 
@@ -223,7 +241,7 @@ def _flow(blocks: list[tuple[str, float]], first_capacity: float, capacity: floa
 
 
 def front_html(
-    cover: Cover, items: list[Entry], pages: list[int], extra: tuple[tuple[str, str], ...] = ()
+    cover: Cover, items: list[Entry], pages: list[int], extra: tuple[tuple[str, str], ...] = (), toc: bool = True
 ) -> tuple[str, dict[str, int]]:
     """The front pages as one HTML document, and the front page index (from 0) of each list."""
     toc = [(e, p) for e, p in zip(items, pages, strict=True) if e.kind == "toc"]
@@ -233,9 +251,10 @@ def front_html(
     marks = {"Title page": 0}
 
     toc_blocks = [("<h1>Table of Contents</h1>", 2.6)] + [_row(e, p, i == 0) for i, (e, p) in enumerate(toc)]
-    marks["Table of Contents"] = len(out)
-    for body in _flow(toc_blocks, TOC_FIRST + 2.6, TOC_NEXT):
-        out.append(_page(cover, len(out) + 1, body))
+    if toc:
+        marks["Table of Contents"] = len(out)
+        for body in _flow(toc_blocks, TOC_FIRST + 2.6, TOC_NEXT):
+            out.append(_page(cover, len(out) + 1, body))
 
     list_blocks: list[tuple[str, float]] = []
     if tables:
@@ -259,7 +278,7 @@ def front_html(
 
 def assemble(
     front_pdf: Path, body_pdf: Path, target: Path, items: list[Entry], pages: list[int],
-    marks: dict[str, int], metadata: dict[str, str],
+    marks: dict[str, int], metadata: dict[str, str], start: int = 1,
 ) -> int:
     """Front pages, then the body; bookmarks for the lists and every heading; roman then arabic page labels."""
     from pypdf import PdfReader, PdfWriter
@@ -278,10 +297,10 @@ def assemble(
         if entry.kind != "toc":
             continue
         parent = parents.get(entry.level - 1) if entry.level > 1 else None
-        parents[entry.level] = writer.add_outline_item(entry.text, offset + page - 1, parent=parent)
+        parents[entry.level] = writer.add_outline_item(entry.text, offset + page - start, parent=parent)
     if hasattr(writer, "set_page_label"):
         writer.set_page_label(0, offset - 1, style="/r")
-        writer.set_page_label(offset, len(writer.pages) - 1, style="/D", start=1)
+        writer.set_page_label(offset, len(writer.pages) - 1, style="/D", start=start)
     writer.add_metadata(metadata)
     with target.open("wb") as handle:
         writer.write(handle)
