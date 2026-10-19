@@ -1,59 +1,39 @@
-"""Build submission/StudyRoute_Technical_Documentation.pdf in the house format of the evidence-pack reports.
+"""Build submission/StudyRoute_Technical_Documentation.pdf.
 
     pip install markdown pypdf          # dev tools only
     python submission/tools/build_report_pdf.py [source.md [target.pdf]]  # needs Google Chrome (set CHROME_PATH if it is not in the usual place)
 
-The format follows the teammate's Security Self-Assessment and Execution Evidence Report: a full-page navy
-cover with a document id, a contents list and a not-production box; then pages with a running header and
-footer, a numbered kicker above each section title, navy table headers and teal call-out boxes.
+Front pages in the layout of a security assessment report template (front_matter.py): a bordered title page,
+a table of contents, a list of tables and a list of figures, numbered i, ii, ... Then the body: a running header
+and footer, a numbered kicker above each section title, navy table headers and teal call-out boxes, numbered
+from page 1. The page numbers in the lists are read from the rendered body.
 """
 
 from __future__ import annotations
 
 import html
-import os
 import re
-import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from front_matter import Cover, assemble, caption_classes, entries, find_chrome, front_html, locate, print_pdf  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else ROOT / "docs" / "TECHNICAL_DOCUMENTATION.md"
 TARGET = Path(sys.argv[2]).resolve() if len(sys.argv) > 2 else ROOT / "submission" / "StudyRoute_Technical_Documentation.pdf"
 DOC_ID = "SR-TEC-2026-01"
 DATE = "19 October 2026"
-USUAL_CHROME = (
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "/usr/bin/google-chrome",
-    "/usr/bin/chromium",
-    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+COVER = Cover(
+    top=("StudyRoute / International Track", "FinTechathon 2026, Topic C", "Prepared by TeamEkxin"),
+    title="Technical Documentation",
+    subtitle="StudyRoute Technical Documentation",
+    tagline="Architecture, core algorithms, trained components and security design",
+    note="Synthetic data • Not production assurance",
+    bottom=(f"Document {DOC_ID}", DATE, "github.com/NoobCrow/StudyRoute"),
+    footer=f"StudyRoute – Technical Documentation ({DOC_ID})",
 )
-
-COVER_CSS = """
-@page { size: A4; margin: 0; }
-* { box-sizing: border-box; }
-html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { margin: 0; width: 210mm; height: 297mm; background: #0f2a47; color: #fff; font-family: Arial, Helvetica, sans-serif; position: relative; }
-.rule { position: absolute; left: 24mm; top: 40mm; width: 17mm; height: 1.4mm; background: #0b8a86; }
-.kicker { position: absolute; left: 24mm; top: 50mm; font-size: 9.5pt; font-weight: 700; letter-spacing: .09em; color: #8fd8d3; }
-h1 { position: absolute; left: 24mm; top: 70mm; margin: 0; font-size: 38pt; line-height: 1.12; font-weight: 700; width: 160mm; }
-.sub { position: absolute; left: 24mm; top: 112mm; font-size: 12.5pt; color: #c9d6e3; width: 150mm; }
-.box { position: absolute; left: 24mm; top: 140mm; width: 162mm; background: #173b5c; border-radius: 3mm; padding: 6mm 7mm; }
-.box .t { font-size: 9pt; font-weight: 700; letter-spacing: .06em; color: #8fd8d3; }
-.box .m { font-size: 12pt; margin-top: 3mm; } .box .s { font-size: 9.5pt; color: #c9d6e3; margin-top: 2mm; }
-.toc { position: absolute; left: 24mm; top: 176mm; width: 162mm; }
-.toc .h { font-size: 9pt; font-weight: 700; letter-spacing: .09em; color: #8fd8d3; margin-bottom: 4mm; }
-.cols { display: flex; gap: 8mm; } .col { flex: 1; }
-.item { font-size: 9.6pt; color: #dbe6f2; margin-bottom: 3.1mm; display: flex; gap: 4mm; }
-.item b { color: #5cc9c3; width: 6mm; flex: none; }
-.foot { position: absolute; left: 24mm; right: 24mm; bottom: 24mm; border-top: 1px solid #3c5878; padding-top: 4mm; }
-.foot .a { display: flex; justify-content: space-between; font-size: 9.5pt; color: #dbe6f2; }
-.foot .b { font-size: 8.8pt; color: #9db2c7; margin-top: 2.5mm; }
-"""
-
 BODY_CSS = """
 @page { size: A4; margin: 22mm 16mm 18mm 16mm;
   @top-left { content: "STUDYROUTE"; font: 700 8pt Arial, Helvetica, sans-serif; color: #0b8a86; vertical-align: bottom; padding-bottom: 2.5mm; width: 50%%; border-bottom: 1px solid #cfd8e0; }
@@ -79,47 +59,16 @@ p:has(+ p img) { break-after: avoid; page-break-after: avoid; }
 blockquote { margin: 3mm 0 4mm; padding: 2.4mm 3.6mm; border-left: 3px solid #0b8a86; background: #eaf4f4; font-size: 9.2pt; }
 blockquote p { margin: 0; }
 a { color: #0b5cad; text-decoration: none; }
+p.cap { font-weight: 700; font-size: 8.6pt; color: #0e2a47; margin: 4mm 0 1.4mm; break-after: avoid; page-break-after: avoid; }
+p.fcap { text-align: center; margin: 0 0 4.5mm; break-before: avoid; page-break-before: avoid; }
+p:has(> img) { margin-bottom: 1mm; break-after: avoid; page-break-after: avoid; }
 """
 
 
-def find_chrome() -> str:
-    for candidate in (os.environ.get("CHROME_PATH", ""), *USUAL_CHROME):
-        if candidate and Path(candidate).exists():
-            return candidate
-    found = shutil.which("google-chrome") or shutil.which("chromium") or shutil.which("chrome")
-    if not found:
-        raise SystemExit("Google Chrome not found: set CHROME_PATH to its executable")
-    return found
 
 
-def sections(text: str) -> list[tuple[str, str]]:
-    """(number, title) of every level-two heading: 'Summary' is 00, '## 3. Core ...' is 03."""
-    found = []
-    for title in re.findall(r"^## (.+)$", text, flags=re.M):
-        match = re.match(r"(\d+)\.\s+(.*)", title)
-        found.append((f"{int(match.group(1)):02d}", match.group(2)) if match else ("00", title))
-    return found
 
 
-def cover_html(items: list[tuple[str, str]]) -> str:
-    half = (len(items) + 1) // 2
-    column = lambda part: "".join(  # noqa: E731
-        f"<div class='item'><b>{number}</b><span>{html.escape(title)}</span></div>" for number, title in part
-    )
-    return (
-        f"<!doctype html><html><head><meta charset='utf-8'><style>{COVER_CSS}</style></head><body>"
-        "<div class='rule'></div><div class='kicker'>STUDYROUTE &nbsp;/&nbsp; INTERNATIONAL TRACK &nbsp;/&nbsp; TOPIC C</div>"
-        "<h1>Technical Documentation</h1>"
-        "<div class='sub'>Architecture, core algorithms, trained components and security design</div>"
-        "<div class='box'><div class='t'>SANDBOX &nbsp;/&nbsp; SYNTHETIC DATA &nbsp;/&nbsp; NOT PRODUCTION ASSURANCE</div>"
-        "<div class='m'>System description with measured evidence and stated limits</div>"
-        "<div class='s'>No real money, live bank, real users or independent certification</div></div>"
-        f"<div class='toc'><div class='h'>REPORT CONTENTS</div><div class='cols'><div class='col'>{column(items[:half])}</div>"
-        f"<div class='col'>{column(items[half:])}</div></div></div>"
-        f"<div class='foot'><div class='a'><span>{DOC_ID}</span><span>{DATE}</span></div>"
-        "<div class='b'>Prepared for StudyRoute submission review &bull; Team TeamEkxin &bull; github.com/NoobCrow/StudyRoute</div></div>"
-        "</body></html>"
-    )
 
 
 def kicker(match: re.Match[str]) -> str:
@@ -135,7 +84,7 @@ def body_html(markdown_module: object, text: str) -> str:
     body = markdown_module.markdown(  # type: ignore[attr-defined]
         text[start:], extensions=["tables", "fenced_code", "sane_lists"]
     )
-    body = re.sub(r"(<h2[^>]*>(.*?)</h2>)", kicker, body)
+    body = caption_classes(re.sub(r"(<h2[^>]*>(.*?)</h2>)", kicker, body))
     css = BODY_CSS % {"doc_id": DOC_ID}
     return (
         f"<!doctype html><html lang='en'><head><meta charset='utf-8'><title>StudyRoute: technical documentation</title>"
@@ -143,41 +92,31 @@ def body_html(markdown_module: object, text: str) -> str:
     )
 
 
-def print_pdf(chrome: str, page: Path, target: Path) -> None:
-    subprocess.run(  # noqa: S603
-        [chrome, "--headless=new", "--disable-gpu", "--no-sandbox", "--no-pdf-header-footer",
-         "--allow-file-access-from-files", f"--print-to-pdf={target}", page.as_uri()],
-        check=True, capture_output=True,
-    )
 
 
 def main() -> int:
     try:
         import markdown
-        from pypdf import PdfReader, PdfWriter
+        import pypdf  # noqa: F401
     except ImportError:
         print("Install the tools first: pip install markdown pypdf", file=sys.stderr)
         return 1
     text = SOURCE.read_text(encoding="utf-8")
     TARGET.parent.mkdir(parents=True, exist_ok=True)
     chrome = find_chrome()
+    items = entries(text[text.index("## Summary"):], {"##": 1, "###": 2})
     with tempfile.TemporaryDirectory() as folder:
         work = Path(folder)
-        (work / "cover.html").write_text(cover_html(sections(text)), encoding="utf-8")
         (work / "body.html").write_text(body_html(markdown, text), encoding="utf-8")
-        print_pdf(chrome, work / "cover.html", work / "cover.pdf")
         print_pdf(chrome, work / "body.html", work / "body.pdf")
-        writer = PdfWriter()
-        writer.add_page(PdfReader(str(work / "cover.pdf")).pages[0])
-        for page in PdfReader(str(work / "body.pdf")).pages:
-            writer.add_page(page)
-        writer.add_metadata({"/Title": "StudyRoute | Technical Documentation", "/Author": "TeamEkxin", "/Subject": DOC_ID})
-        with TARGET.open("wb") as handle:
-            writer.write(handle)
-    pages = len(PdfReader(str(TARGET)).pages)
-    print(f"wrote {TARGET.name}: {pages} pages, {TARGET.stat().st_size // 1024} KB")
+        pages = locate(work / "body.pdf", items)
+        front, marks = front_html(COVER, items, pages)
+        (work / "front.html").write_text(front, encoding="utf-8")
+        print_pdf(chrome, work / "front.html", work / "front.pdf")
+        total = assemble(work / "front.pdf", work / "body.pdf", TARGET, items, pages, marks,
+                         {"/Title": "StudyRoute | Technical Documentation", "/Author": "TeamEkxin", "/Subject": DOC_ID})
+    print(f"wrote {TARGET.name}: {total} pages, {TARGET.stat().st_size // 1024} KB")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

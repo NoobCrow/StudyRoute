@@ -14,6 +14,8 @@ We built StudyRoute because paying a university abroad from Bangladesh is harder
 types one sentence, and StudyRoute turns it into a ranked, deadline-aware payment plan that only that parent
 can approve. In this report we explain how we built it, how we tested it, and where our evidence stops.
 
+**Table 1. Where we stand, by area**
+
 | Area | Where we stand |
 | --- | --- |
 | Architecture | A pure engine calculates every number. A domain layer enforces a state machine, and approving a payment needs the right role, token scope and ownership, a fresh MFA proof and the hash of the summary the parent actually saw. The models sit behind deterministic checks, and each one can be switched off. |
@@ -61,6 +63,8 @@ financial authority. We built the envelope that makes that true, and then we mea
 
 **Evidence at a glance** (sources in section 5 and in the submission/evidence folder):
 
+**Table 2. Evidence at a glance**
+
 | What we measured | Result | How to read it |
 |-------------------|--------|----------|
 | Cost ranking, worked example | B 1.58%, C 1.63% (university GBP 35 short), A 2.16% | Exact; asserted in test_engine_quote.py |
@@ -85,6 +89,8 @@ in-memory simulation. Most Bangladesh Bank figures are still unverified placehol
 
 We started from five problems families actually face, and each one maps to a part of the system:
 
+**Table 3. Five problems families face and where we handle them**
+
 | Problem | Where we handle it |
 |------|---------------------|
 | The posted fee hides the exchange-rate margin | True-total-cost ranking (2.1) |
@@ -102,6 +108,8 @@ via The Observer, 24 July 2026), and four study-abroad rules we read in Banglade
 sanction, bank, settlement and student-city cost. Simulated: the chain (in-memory py-evm), the escrow and the
 bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
 
+**Table 4. What we promise, how it works and where it is tested**
+
 | What we promise | How it works | Where it is tested |
 |-----------|-----------|------|
 | The engine calculates | A pure engine with no database, clock or network access; money as integers; a number guard rejects any figure in a reply that the engine did not produce | test_engine_quote.py, test_ai_number_guard.py |
@@ -112,6 +120,8 @@ bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
 ### 1.2 Components
 
 ![Architecture diagram](diagrams/architecture.png)
+
+**Figure 1. System architecture**
 
 ```
  Browser (Next.js static export, React + TypeScript)
@@ -135,6 +145,8 @@ bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
  SQLite (Postgres optional), foreign keys on, CHECK constraints, audit triggers
 ```
 
+**Table 5. Components by layer**
+
 | Layer | Folder | What it does | I/O |
 |-------|--------|----------------|-----|
 | Engine | backend/app/engine/ | Every number: costs, ranking, deadline, runway, student budget, bank-transfer journals | None (pure) |
@@ -147,6 +159,8 @@ bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
 | Web | web/ | Dashboard, compare, payments, recipients, documents, student guide, audit, rules, bank network, escrow, bank review, sandbox, assistant | HTTP |
 
 ### 1.3 Design decisions and what they cost us
+
+**Table 6. Design decisions and what they cost**
 
 | Decision | Why we made it | What it costs |
 |----------|-----|---------------|
@@ -161,6 +175,8 @@ bank network. The USD 8.8m saving is our own arithmetic, not a forecast.
 ### 1.4 Payment lifecycle
 
 ![Payment state machine](diagrams/payment-lifecycle.png)
+
+**Figure 2. Payment lifecycle**
 
 ```
 DRAFT -> QUOTED -> PENDING_APPROVAL -> APPROVED -> SUBMITTED -> SETTLED
@@ -211,9 +227,13 @@ screenshots below there on 19 October 2026.
 
 ![The live comparison for GBP 10,000 of UK tuition](../submission/screenshots/live/live-01-compare-quotes.png)
 
+**Figure 3. The live comparison for GBP 10,000 of UK tuition**
+
 *The reviewer's audit log. Verify the hash chain recomputes every event and reports PASS.*
 
 ![The live audit log after Verify the hash chain](../submission/screenshots/live/live-05-audit-verify.png)
+
+**Figure 4. The live audit log after hash-chain verification**
 
 ---
 
@@ -243,6 +263,8 @@ disappears?", and comparing flat fees can never show the margin. If a provider c
 charge code, we quote it with its default code and show both codes and a warning.
 
 **Worked example** (synthetic; GBP 10,000; mid rate 160.00):
+
+**Table 7. Worked example: true total cost (synthetic)**
 
 | Provider | Rate | Fixed + SWIFT | Charge | Shortfall | Total cost | Cost % | Parent pays |
 |----------|------|---------------|--------|-----------|------------|--------|-------------|
@@ -318,6 +340,8 @@ The next six subsections cover the assistant pipeline and the four trained model
 
 ![AI pipeline](diagrams/ai-pipeline.png)
 
+**Figure 5. The assistant pipeline**
+
 ```
  user message --> 1 policy check --> 2 facts from the engine --> 3 mask personal data
               --> 4 model (optional) --> 5 number guard --> 6 tool guard --> 7 un-mask --> 8 audit
@@ -374,6 +398,8 @@ are read most reliably in English, and the assistant asks for any value it canno
 (Banking77 [2], CC BY 4.0). Six epochs on an RTX 5060 Ti took 238 seconds. The results below come from our
 evaluation script (ai_evaluation.json), on data the model never trained on:
 
+**Table 8. The reader against the rules on held-out data**
+
 | Evaluation set | n | Right intent: rules | Right intent: model | Attacks blocked: rules | Attacks blocked: model |
 |----------------|--:|--------------------:|--------------------:|-----------------------:|-----------------------:|
 | Frozen hand-written holdout (now reproduced) | 113 | 61.1% | **88.5%** | 28.6% | **92.9%** |
@@ -399,6 +425,8 @@ never decides what is allowed: plain code works out the legal actions and the ne
 its five actions moves money.
 
 *Results* (6,000 simulated conversations per policy; ai_rl_evaluation.json):
+
+**Table 9. Dialogue policy results in simulation**
 
 | Policy | Mean return | Questions asked | Wrong plans |
 |--------|------------:|----------------:|------------:|
@@ -427,6 +455,8 @@ rewrites in 12 minutes. We pruned its vocabulary from 32,000 to 5,124 pieces and
 Drafts over 120 words skip the model, because it cannot finish long structured answers.
 
 *Results on 700 held-out questions* (ai_explainer_evaluation.json):
+
+**Table 10. Explainer results on held-out questions**
 
 | | Trained explainer | Same model, untrained |
 |---|---:|---:|
@@ -465,6 +495,8 @@ ai_risk_operating_points.json).
 
 **Ordering.** How many of the flagged payments are among the 1% of payments with the highest score?
 
+**Table 11. Review router: ordering**
+
 | Ordering | Flagged payments found in the top 1% | Average precision |
 |----------|-------------------------------------:|------------------:|
 | Random order | 1.2% | 0.0018 |
@@ -472,6 +504,8 @@ ai_risk_operating_points.json).
 
 **As a yes/no flag.** The desk sends a payment to a person when its band is medium or high. Accuracy here is
 the share of all payments handled correctly: a flagged one sent to a person, or an unflagged one left alone.
+
+**Table 12. Review router: routing**
 
 | Routing | Sent to a person | Accuracy | Precision | Recall |
 |---------|-----------------:|---------:|----------:|-------:|
@@ -487,6 +521,8 @@ evaluation set or the threshold to get a bigger number.
 
 *Model comparison* (AI_RISK_MODELS.md in the docs folder; 24 configurations: ten learned models and four rule or
 random baselines, on the eight shipped inputs or thirteen):
+
+**Table 13. Review router: model comparison**
 
 | Configuration | Tuning AP | Test AP |
 |---------------|----------:|--------:|
@@ -547,6 +583,8 @@ account's refusals (test_rbac.py and test_api_ai_rbac.py).
 
 ![Safe approval sequence](diagrams/safe-approval.png)
 
+**Figure 6. Safe approval sequence**
+
 *MFA step-up.* A fresh proof is needed to approve a payment, allowlist a recipient, confirm an escrow, make a
 bank transfer and answer a bank review. Each proof is valid for 5 minutes, works once, and is bound to the user,
 the scope and the object id, so a proof for one payment can never approve another. TOTP (RFC 6238 [4]) works in
@@ -569,6 +607,8 @@ JSON. Every rejection writes an audit event and changes nothing else.
 ### 3.4 The audit log: what it guarantees and where it stops
 
 ![Audit hash chain](diagrams/audit-chain.png)
+
+**Figure 7. Audit hash chain**
 
 ```
 GENESIS             = "0" * 64
@@ -623,6 +663,8 @@ lawyer or AD bank has reviewed it.
 These are the ten residual risks that matter most, taken from our Security Self-Assessment, which covers the
 same commit and cross-references the full 55-item register in SECURITY_SELF_ASSESSMENT.md:
 
+**Table 14. Ten residual risks and their priority**
+
 | ID | Residual risk | Priority |
 |----|---------------|----------|
 | SR-01 | Shared demo accounts, public hints and a fixed MFA code: deliberate sandbox shortcuts | High |
@@ -647,6 +689,8 @@ supply-chain checks, licensed real-world integration, and independent assurance.
 ### 4.1 The bank network
 
 ![International transfer through the bank network](diagrams/money-flow.png)
+
+**Figure 8. International transfer through the bank network**
 
 The engine turns a transfer request into a plan: a hold journal and an ordered list of steps, each with the
 institution that acts, the simulated message and a balanced journal. For every currency, debits must equal
@@ -680,6 +724,8 @@ including Bengali text.
 ---
 
 ## 5. Verification and evidence
+
+**Table 15. Verification and evidence by layer**
 
 | Layer | What we did | Result | Where to find it |
 |-------|---------------|--------|-------|
@@ -734,6 +780,8 @@ We used AI coding assistants for large parts of the code, tests and documents, w
 the repair release is recorded in PROVENANCE.md. Within the team, Farhan Labib (lead) owned the product, the
 engine, the AI components and the documents; Md Redwan Hossen the release hardening, the institution-route checks
 and the deployment; Kalvin Chakma the interface design; and Alim Bin Yeasin the demo recording.
+
+**Table 16. Components, licences and how we use them**
 
 | Component | Licence | How we use it |
 |-----------|---------|-----|

@@ -16,6 +16,8 @@ SR-SEC-2026-01 | Recorded evidence: 15–18 October 2026
 
 StudyRoute is a synthetic-data demonstrator for cross-border student payments. Its security design separates deterministic financial calculations, AI-assisted preparation and human authorization. The reviewed source enforces significant safeguards, but the evidence supports a controlled sandbox demonstration—not production payment processing or a regulatory compliance claim. [C01–C10]
 
+**Table 1. Executive assessment by area**
+
 | Assessment area | Conclusion |
 | --- | --- |
 | Authorization | Role + token scope + ownership checks; human-only payment approval with action-bound step-up. |
@@ -38,6 +40,10 @@ Fresh backend regression: **1,672 passed / 0 failed / 0 errors / 1 skipped**. Fr
 
 ![Trust-boundary diagram](assets/architecture.png)
 
+**Figure 1. System and trust boundaries**
+
+**Table 2. Protected assets and principal threats**
+
 | Protected asset | Principal threats / boundary |
 | --- | --- |
 | Identity and sessions | Credential guessing, stolen bearer tokens, session replay and cross-site requests. Browser → API. |
@@ -57,6 +63,8 @@ Consider unauthenticated clients, authenticated users from another household, co
 ### 3.1 Scope, provenance & method
 
 *Assessment boundary*
+
+**Table 3. Reviewed scope**
 
 | Item | Reviewed scope |
 | --- | --- |
@@ -84,9 +92,13 @@ No external penetration testing, internet-facing TLS assessment, load testing, n
 
 **Findings at a glance.** Counts are taken from the risk register (section 9) and the recorded check catalogue (Appendix A); nothing here is a new test.
 
+**Table 4. Findings at a glance: prioritized risks**
+
 | Measure | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | Prioritized risks in the register (SR-01 to SR-10) | 5 | 5 | 10 |
+
+**Table 5. Findings at a glance: recorded security checks**
 
 | Recorded security checks (Appendix A) | PASS | INFO | Total |
 | --- | ---: | ---: | ---: |
@@ -95,6 +107,8 @@ No external penetration testing, internet-facing TLS assessment, load testing, n
 ### 4.1 Verification results & evidence limits
 
 *What was actually checked*
+
+**Table 6. Verification results and evidence limits**
 
 | Evidence class | Observed result | Interpretation |
 | --- | --- | --- |
@@ -117,6 +131,8 @@ The supplied release record contains 1,542 backend cases, plus focused 42-case a
 
 *Findings, fixes & open risks*
 
+**Table 7. Findings and remediation recorded by the team**
+
 | Finding | Observed / documented issue | Recorded remediation and limits |
 | --- | --- | --- |
 | F01 — account enumeration | Real and unknown accounts previously diverged after repeated failures. | Team records uniform failure tracking/lockout; S02 now includes same-answer and timing checks. Residual: intentional lockout can deny access temporarily. [S02; S08] |
@@ -134,6 +150,8 @@ No runtime changes are made by this report update. Fix descriptions are inherite
 ### 5.1 Release gates & incident readiness
 
 *Before any public or real-data use*
+
+**Table 8. Release gates**
 
 | Gate | Acceptance evidence required | Status in this review |
 | --- | --- | --- |
@@ -163,6 +181,8 @@ No runtime changes are made by this report update. Fix descriptions are inherite
 
 The original assessment in this document (18 October 2026) is unchanged: every result, count and risk below stands as written. This page adds read-only checks made later the same day, recorded in validation/final-verification.json (E07, produced by tools/final_verification.py), and supersedes the original statement that the remote repository was not checked. The final submission adds the attack-testing evidence and complete recorded case catalogue in section 7 and Appendix A; the original assessment boundary remains unchanged.
 
+**Table 9. Results of the final-submission checks**
+
 | Item | Result |
 | --- | --- |
 | Source identity | The remote main branch of NoobCrow/StudyRoute is commit bcce930ae0974712e922245878fd976b03a8938a, the commit this document covers. The original assessment could not check the remote; this supersedes its statements that the remote HEAD was not checked. [E07] |
@@ -184,6 +204,8 @@ The original assessment in this document (18 October 2026) is unchanged: every r
 
 Purpose. This addition makes the previously compressed security evidence explicit. The six raw files from 18 October 2026 were inspected and their check labels counted for this report; the tools themselves were not re-executed. The team ran them against synthetic-data lab instances using throwaway databases, not against a third-party target or the current public Botkeep deployment. [S01–S06; S08]
 
+**Table 10. Team-run probe results**
+
 | Probe family | Recorded outcome | Raw evidence / tool |
 | --- | --- | --- |
 | Attack surface / access control | 146 PASS | S01; attack_probe.py |
@@ -200,6 +222,8 @@ Evidence class. All probe outcomes below are inherited/team-authored evidence. T
 ### 7.2 Attack families and expected safeguards
 
 *Attack surface & authorization*
+
+**Table 11. Attack families and expected safeguards**
 
 | Area | Recorded case coverage | Evidence |
 | --- | --- | --- |
@@ -227,6 +251,8 @@ The catalogue preserves the raw labels; labels such as “2.x” and “4.x” r
 
 Effective authorization requires the intersection of role permissions, issued token scopes and object ownership, plus action-specific guards. UI hiding is not the authority boundary. The domain layer provides a separate explicit AI approval refusal. [C01; C03]
 
+**Table 12. Permission tiers by role**
+
 | Capability | Parent | Student | Reviewer | AI |
 | --- | --- | --- | --- | --- |
 | Create / read quotes | Yes | Yes | Read | Yes |
@@ -253,6 +279,8 @@ The evidence bundle includes validation/rbac-matrix.json, generated directly fro
 ### 8.2 Identity & transaction safeguards
 
 *Control review — part i*
+
+**Table 13. Identity and transaction safeguards**
 
 | Control | Implementation / boundary | Evidence |
 | --- | --- | --- |
@@ -294,6 +322,8 @@ Model and policy manifests use SHA-256 checks. These establish consistency with 
 
 ![Trust-boundary diagram](assets/audit.png)
 
+**Figure 2. Audit integrity experiments**
+
 Each audit event covers the preceding hash and canonical event fields. Application/database triggers restrict ordinary updates and deletes. Fresh verification returned PASS for 76 events; a deliberate edit to amount_minor at sequence 75 returned HASH_MISMATCH, and restoring the row returned PASS. Independent offline recomputation agreed with both the supplied 75-event chain and fresh 76-event chain. [C06; E03; E05]
 
 #### Where the guarantee stops
@@ -318,6 +348,8 @@ Recorded result: all 50 PASS checks were clear in their tested sinks. Two INFO r
 #### MITM: protected actions are not transport confidentiality
 
 The 14 PASS records cover altered approval summary/hash, redirect to another payment, stripped/swapped MFA proof, stolen-token approval and allowlist attempts, a thief-controlled recipient, a valid approval control, approval replay/single-use proof, and changed/stale/cross-provider/replayed webhooks. The complete M1–M14 labels are in Appendix A. [S04]
+
+**Table 14. Informational MITM exposures**
 
 | Informational exposure | What the raw record says | Required boundary |
 | --- | --- | --- |
@@ -393,6 +425,8 @@ The inherited “AI can only quote” wording is distinguished from the broader 
 
 Bracketed identifiers link claims to source paths or bundled raw evidence. The original repository source is the supplied archive; the final-submission update verified that the remote main branch is the same commit (E07). Fresh results are located under validation/ in the companion evidence bundle. The full catalogue and per-file hashes are in EVIDENCE_INDEX.md and SHA256SUMS.txt.
 
+**Table 15. References and evidence locator**
+
 | ID | Reference |
 | --- | --- |
 | C01 | Authorization and household isolation — backend/app/domain/rbac.py; backend/app/api/deps.py; backend/app/domain/auth.py |
@@ -420,6 +454,8 @@ The supplied 17 October record lists 122 attack checks and 42 browser checks; th
 
 The older network-connection samples, Git-history scans, advisory checks and static rules are likewise historical snapshots; they do not prove current dependency safety, absence of every secret in every revision, or safe public ingress. S07 is a hand-recorded packet-capture transcript, not a new packet capture or the binary PCAP itself. [S07; S08]
 
+**Table 16. Security evidence items and SHA-256 hashes**
+
 | ID | Evidence item | SHA-256 |
 | --- | --- | --- |
 | S01 | attack_probe.txt — 18 October team-run log | 76437f9cfd5bac4b48fad0c3762e7ebdf5770105758c124b5fd3f2c00e2849bc |
@@ -442,6 +478,8 @@ Reproduction entry points: read scripts/security/README.md and use the supplied 
 Every PASS and INFO line from S01–S06 is listed below in original order within its file. Case labels are copied verbatim; raw labels may already truncate payloads/URLs, and this report does not reconstruct omitted strings. “PASS” preserves the source status, including successful positive controls. An INFO row is an exposure or observation, not an attack that was necessarily blocked. No original raw file was edited.
 
 S01 | attack_probe.txt | Records 1–18 of 146 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
+
+**Table 17. Recorded checks: attack surface / authorization (S01)**
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -652,6 +690,8 @@ S01 | attack_probe.txt | Records 145–146 of 146 in this file. Case IDs are loc
 
 S02 | brute_probe.txt | Records 1–8 of 8 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
+**Table 18. Recorded checks: brute force / account enumeration (S02)**
+
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
 | BF-001 L1 | 1 unknown user and wrong password return the same status and message | PASS |
@@ -666,6 +706,8 @@ S02 | brute_probe.txt | Records 1–8 of 8 in this file. Case IDs are local to t
 ### Data leakage / planted canaries
 
 S03 | leak_scan.txt | Records 1–18 of 52 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
+
+**Table 19. Recorded checks: data leakage / planted canaries (S03)**
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -740,6 +782,8 @@ S03 | leak_scan.txt | Records 37–52 of 52 in this file. Case IDs are local to 
 
 S04 | mitm_probe.txt | Records 1–18 of 18 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
 
+**Table 20. Recorded checks: man-in-the-middle / replay (S04)**
+
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
 | MM-001 L1 | a passive listener on plain HTTP reads the sign-in password and every bearer token  -> 1 login(s) and 9 authorised request(s) were readable | INFO |
@@ -764,6 +808,8 @@ S04 | mitm_probe.txt | Records 1–18 of 18 in this file. Case IDs are local to 
 ### Adversarial assistant prompts
 
 S05 | assistant_probe.txt | Records 1–18 of 42 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
+
+**Table 21. Recorded checks: adversarial assistant prompts (S05)**
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
@@ -827,6 +873,8 @@ S05 | assistant_probe.txt | Records 37–42 of 42 in this file. Case IDs are loc
 ### Browser / CSP / XSS / tracking
 
 S06 | browser_audit.txt | Records 1–18 of 48 in this file. Case IDs are local to this report; line numbers refer to the original raw log.
+
+**Table 22. Recorded checks: browser / CSP / XSS / tracking (S06)**
 
 | Case / line | Recorded check label | Status |
 | --- | --- | --- |
