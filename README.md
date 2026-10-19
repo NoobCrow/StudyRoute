@@ -527,7 +527,7 @@ The deadline-aware choice and the currency-drop stress test (synthetic rates, re
 
 ## Competition deliverables (FinTechathon 2026, International Track, Topic C)
 
-The final submission by Team TeamEkxin is in [FINAL_SUBMISSION/](FINAL_SUBMISSION/). These are the files we sent.
+The final submission by Team TeamEkxin: [download the whole package (Google Drive)](https://drive.google.com/file/d/1YV7-a3Db-5EOLkESWCIwfx8Dt4ESAGAl/view?usp=sharing), or open the same files in [FINAL_SUBMISSION/](FINAL_SUBMISSION/).
 
 | Official deliverable | Where |
 |----------------------|-------|

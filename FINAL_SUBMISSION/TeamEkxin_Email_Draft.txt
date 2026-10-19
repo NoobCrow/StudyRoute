@@ -4,7 +4,7 @@ Dear Organizing Committee,
 
 Team TeamEkxin submits StudyRoute, a sandbox AI assistant for cross-border and student finance (a parent in Bangladesh paying tuition and living costs abroad). All data is synthetic; no real money moves.
 
-Download (public link): <PASTE LINK HERE>
+Download (public link): https://drive.google.com/file/d/1YV7-a3Db-5EOLkESWCIwfx8Dt4ESAGAl/view?usp=sharing
 
 Inside the ZIP:
 1. Technical documentation (mandatory): 01_Technical_Documentation (PDF and Word)
