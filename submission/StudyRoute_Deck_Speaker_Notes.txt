@@ -1,5 +1,5 @@
 StudyRoute: speaker notes for the 10-minute presentation
-20 slides, 1,248 words: about 8.3 minutes at 150 words a minute (9.6 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
+20 slides, 1,268 words: about 8.5 minutes at 150 words a minute (9.8 at a slow 130). The organisers' limit is 10 minutes. About half a minute a slide: keep moving. The anticipated Q&A appendix is separate and is not read aloud.
 Say it in your own words; the notes are a guide, not a script to read.
 ==============================================================================
 
@@ -11,75 +11,75 @@ SLIDE 2: The posted fee is not the price   (about 61 words, 24 seconds; running 
 
 Parents compare banks by the fee they are shown. In our synthetic example, for ten thousand pounds with Provider B, 63 percent of the real cost is the hidden exchange-rate margin. Correspondent banks can deduct fees on the way, so the university may be paid short; the deadline spans two calendars; and the paperwork is unclear. Those five problems shape StudyRoute.
 
-SLIDE 3: A family carries the risk   (about 61 words, 24 seconds; running total 1:12)
-
-Two people feel this. The parent pays in taka, compares by the posted fee, and approves a large transfer with little to check it against. The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. StudyRoute gives both one plan; the parent decides, and the student can see but cannot approve.
-
-SLIDE 4: How money really moves   (about 60 words, 24 seconds; running total 1:36)
+SLIDE 3: How money really moves   (about 60 words, 24 seconds; running total 1:12)
 
 This is the real chain: taka to an authorised dealer bank, a SWIFT instruction, a correspondent bank that may take a fee, a receiving bank that may take another, and the university matching by reference. Each step fails in a typical way, shown in red. We simulate the chain with invented banks and a double-entry ledger; no real money moves.
 
-SLIDE 5: From question to settled payment   (about 63 words, 25 seconds; running total 2:01)
+SLIDE 4: From question to settled payment   (about 63 words, 25 seconds; running total 1:37)
 
 This is task completion. The parent types one sentence; the agent makes the quote, ranks providers, plans the deadline, checks KYC, and builds this plan card from engine output. A person creates the draft and approves with a fresh MFA code. The agent blocks the payment until KYC, allowlist and caps pass, then tracks it to settled. It never creates a payment itself.
 
-SLIDE 6: Live: comparing providers   (about 61 words, 24 seconds; running total 2:25)
+SLIDE 5: Live: comparing providers   (about 61 words, 24 seconds; running total 2:01)
 
 This is the public site, studyroute dot bot-keep dot xyz, opened on the 19th: ten thousand pounds of UK tuition. The ranking is the one our test T01 asserts: Provider B at 1.58 percent, Provider C at 1.63 with a warning that the university would be 35 pounds short, Provider A at 2.16. The engine calculates; the screen only shows it.
 
-SLIDE 7: The engine does the maths   (about 57 words, 23 seconds; running total 2:48)
+SLIDE 6: The engine does the maths   (about 57 words, 23 seconds; running total 2:24)
 
 Every number comes from a deterministic engine: integer money, no floats. In our synthetic example Provider B is first at 1.58 percent. Provider C looks cheap but is quoted as SHA, so the university would receive 35 pounds less. Provider A is third at 2.16. The same engine drives the send plan and the currency stress test.
 
-SLIDE 8: Live: one sentence, read back   (about 62 words, 25 seconds; running total 3:13)
+SLIDE 7: Live: one sentence, read back   (about 62 words, 25 seconds; running total 2:49)
 
 On the live site the parent types one sentence. The trained reader only proposes; plain code turns the words into values; and the assistant must read them back before it plans. Only after a yes does it plan. Beside it, the deadline planner works backwards: send by 22 October. The assistant cannot approve; only the parent can, with a fresh MFA code.
 
-SLIDE 9: An AI that cannot cheat   (about 57 words, 23 seconds; running total 3:36)
+SLIDE 8: Everything a parent can do   (about 65 words, 26 seconds; running total 3:15)
+
+Everything a parent can do is here. Compare providers by true cost, plan the date across two calendars, choose how often to send, and test a falling taka. Prepare documents and recipients, then approve with one MFA code that only the parent can give. Track it to settled with a sealed compliance report, or lock tuition in smart escrow. The assistant helps; it never approves.
+
+SLIDE 9: A guide for the student   (about 72 words, 29 seconds; running total 3:44)
+
+The student gets a guide, not a payment button. Set a monthly budget in taka and twenty cities show rent, a month in local money and in taka, and whether it fits, rounded up so never too low. An arrival checklist covers before flying, the first week and the first month. The student can look and ask the assistant, but only the parent approves. City costs are invented and marked Not verified.
+
+SLIDE 10: An AI that cannot cheat   (about 57 words, 23 seconds; running total 4:07)
 
 The assistant follows a fixed pipeline: policy check, engine facts, masking of personal data, an optional model, a number guard, a tool guard and the audit log. Any figure the model invents is rejected, then a template answers. So the AI can only propose: it cannot approve, submit or cancel, and it works with no API key.
 
-SLIDE 10: Trained agents, measured   (about 62 words, 25 seconds; running total 4:01)
+SLIDE 11: Trained agents, measured   (about 62 words, 25 seconds; running total 4:32)
 
 The assistant has a trained part, and we measured it, but the envelope matters more than the benchmark. A small model reads the intent and marks amounts, currencies and dates. A reinforcement-learning policy decides when to ask, read back or plan. A third rewords the engine's answer, every rewrite checked in code; a fourth scores each payment for a person to review.
 
-SLIDE 11: Models against baselines   (about 67 words, 27 seconds; running total 4:28)
+SLIDE 12: Models against baselines   (about 67 words, 27 seconds; running total 4:59)
 
 The same numbers as a graph. Left: the trained reader against our old rules on 113 messages written after it was frozen. Top right: the risk router's top one percent holds 63.2% of flagged payments; random order finds 1.2%. Bottom right: the dialogue policy cut wrong plans from 2.8% to 0.8% on simulated parents. Small samples, and as a plain yes or no the router is modest.
 
-SLIDE 12: Risk score, human decision   (about 59 words, 24 seconds; running total 4:52)
+SLIDE 13: Risk score, human decision   (about 59 words, 24 seconds; running total 5:23)
 
 Every payment gets an AI risk score out of 100 from four factors: amount, frequency, timeline and person. Low means no warning and nobody waits. Medium or high shows a warning and sends the payment to a person at the bank, who answers yes, ask for more, or no, with MFA. The score never approves; the parent still authorizes.
 
-SLIDE 13: Proven, and not proven yet   (about 65 words, 26 seconds; running total 5:18)
+SLIDE 14: Proven, and not proven yet   (about 65 words, 26 seconds; running total 5:49)
 
 What we have shown: one engine for every number, a human-only approval, an audit log that fails Verify when one row is edited, a Docker run, and attack probes defended. What we have not shown: rates and costs are invented, no real parent has used it, there was no outside penetration test, and most Bangladesh Bank figures are placeholders. Both lists are in the repository.
 
-SLIDE 14: Every test we ran   (about 66 words, 26 seconds; running total 5:44)
+SLIDE 15: Every test we ran   (about 66 words, 26 seconds; running total 6:15)
 
 Everything we ran: 1,705 backend tests, one skipped on Windows, including 25 assistant prompts that all give the expected tool and safety outcome; 463 web tests; 24 browser tests; all 24 scenarios pass; 314 security probe records. On the right is GitHub's own page for our latest commit: all six CI jobs green. These are our own tests, and no outside party has tested it yet.
 
-SLIDE 15: Security you can verify   (about 66 words, 26 seconds; running total 6:10)
+SLIDE 16: Security you can verify   (about 66 words, 26 seconds; running total 6:41)
 
 Security and compliance is thirty percent of the score, so we made it checkable. Permission tiers are enforced in the domain layer, not just the screens. Only a human parent with a fresh MFA proof, bound to that payment, can approve; the AI has no approve, cancel or limit permission. On the right, the live audit log says PASS, and one edited row makes it fail.
 
-SLIDE 16: Attacking our own app   (about 74 words, 30 seconds; running total 6:40)
+SLIDE 17: Attacking our own app   (about 74 words, 30 seconds; running total 7:11)
 
 We attacked our own application with six tools: access control, browser and XSS, planted secrets, hostile prompts, man-in-the-middle and replay, and login guessing. 314 records, all pass or informational. The man-in-the-middle test is the honest one: altered approvals, swapped MFA proofs, a stolen token and replayed webhooks were refused. But on plain HTTP a listener reads the password and token, and a stolen token can cancel a draft. We do not call that safe.
 
-SLIDE 17: Security problems we found   (about 71 words, 28 seconds; running total 7:08)
+SLIDE 18: Security problems we found   (about 71 words, 28 seconds; running total 7:39)
 
 We list our security problems because hiding them would cost more. On plain HTTP a listener reads the password and token; the public site uses HTTPS with HSTS, but nobody else has tested that. A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.
 
-SLIDE 18: Honest by design   (about 56 words, 22 seconds; running total 7:30)
-
-Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.
-
-SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 7:52)
+SLIDE 19: Why it can work   (about 56 words, 22 seconds; running total 8:01)
 
 Bangladesh Bank data show 881.7 million dollars sent through banks for overseas education last year, a record, up 32 percent. If a comparison took one percentage point off that volume, families would keep about 8.8 million dollars: our arithmetic, not a forecast. We have no partner, pilot or real users yet; these are numbers to test.
 
-SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:18)
+SLIDE 20: What comes next   (about 65 words, 26 seconds; running total 8:27)
 
 Next: replace placeholder rules with official Bangladesh Bank sources, partner with an authorised dealer bank for real quotes and KYC, and move the escrow from our simulated chain to a permissioned one. Credit building is in the brief and not built, and we would rather say so. To close: the engine calculates, the AI explains, the human approves, and every step is logged. Thank you.
 
@@ -142,3 +142,19 @@ A: It decides nothing. It orders payments for a person at the bank: its top 1%
    would already be 99.8% accurate. Precision and recall cannot both pass 90% on
    this data. It learned from public synthetic data, only routes, and every
    payment still needs the parent's fresh MFA code.
+
+Q: What does the student get, and can the student pay?
+A: A guide, not a payment button. Set a monthly budget in taka and twenty cities
+   show rent, a month in local money and in taka, and whether it fits; costs are
+   rounded up so a month is never shown cheaper than it is. An arrival checklist
+   covers before flying, the first week and the first month. The student can look
+   at the household's payments and ask the assistant, but only the parent approves.
+   The city costs are invented and marked Not verified.
+
+Q: What can a parent do in the app, end to end?
+A: Compare providers by true total cost, plan the date across two calendars,
+   compare send plans and test a falling taka, prepare documents and recipients
+   (allowlisted with a fresh MFA code), approve with one MFA code bound to the
+   payment, track it to settled with a sealed compliance report, or lock tuition
+   in smart escrow on a simulated chain. The assistant helps at each step but never
+   approves, and a flagged payment goes to a person at the bank.

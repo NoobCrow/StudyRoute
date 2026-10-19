@@ -189,32 +189,48 @@ slides.push({
   ],
 });
 
-// 3 ---------------------------------------------------------------------------------------------
-const people = [
-  { x: 0.5, letter: "P", fill: "accent4", head: "The parent in Bangladesh", sub: "Pays in BDT and carries the risk",
-    items: ["Compares banks by the posted fee only", "Approves a large transfer with little to check it against", "Must prove source of funds and gather documents"] },
-  { x: 5.1, letter: "S", fill: "accent1", head: "The student abroad", sub: "Needs the university paid on time",
-    items: ["Tuition arrives short or cannot be matched", "Late fees, or a payment the university cannot match", "Weeks of waiting with no status"] },
+// 3: everything a parent can do (moved after the live assistant by ORDER) -----------------------
+const parentFeatures = [
+  ["Compare", "Providers by true total cost, with a short-payment warning"],
+  ["Plan the date", "Two calendars and a latest send-by date"],
+  ["Send plan", "Monthly, quarterly or all at once: the cheapest way"],
+  ["Stress test", "The same payment if the taka drops 5 to 20%"],
+  ["Documents", "What the bank may ask for, by destination"],
+  ["Recipients", "Allowlisted with a fresh MFA code first"],
+  ["Approve", "One MFA code bound to this payment. Only the parent."],
+  ["Track and report", "To SETTLED, then a sealed compliance report"],
+  ["Smart escrow", "Tranches paid on dates, on a simulated chain"],
+  ["Bank network", "The simulated hops of an international transfer"],
+  ["Assistant", "One sentence in, a plan out. It never approves."],
+  ["The bank's question", "Answer a reviewer when a payment is flagged"],
 ];
-slides.push({
-  layout: "content", section: "The problem", title: "A family carries the risk",
-  notes:
-    "Two people feel this. The parent pays in taka, compares by the posted fee, and approves a large transfer with little to check it against. The student needs the university paid on time: a short or unmatched payment means late fees and weeks of waiting. StudyRoute gives both one plan; the parent decides, and the student can see but cannot approve.",
-  elements: [
-    ...people.flatMap((p) => [
-      card(p.x, 1.35, 4.4, 3.2),
-      oval(p.x + 0.2, 1.55, 0.5, 0.5, p.fill),
-      text(p.x + 0.2, 1.55, 0.5, 0.5, p.letter, { size: 18, bold: true, color: "background1", align: "center", valign: "middle" }),
-      text(p.x + 0.85, 1.5, 3.4, 0.6, p.head, { size: 18, bold: true, color: "text1", valign: "middle" }),
-      text(p.x + 0.2, 2.2, 4.0, 0.4, p.sub, { size: 14, italic: true, color: "text2" }),
-      text(p.x + 0.2, 2.7, 4.0, 1.75,
-        p.items.map((t, i) => ({ text: t, bullet: true, breakLine: i < p.items.length - 1 })),
-        { size: 14, color: "text1", paraAfter: 6 }),
-    ]),
-    text(0.5, 4.75, 9, 0.45, "StudyRoute gives both one plan: the parent decides, the student can see.",
-      { size: 16, bold: true, color: "accent1", valign: "middle" }),
-  ],
-});
+{
+  const approvalSize = pngSize("05-pending-approval.png");
+  const approvalW = 2.7;
+  const approvalH = (approvalW * approvalSize.h) / approvalSize.w;
+  slides.push({
+    layout: "content", section: "The solution", title: "Everything a parent can do",
+    notes:
+      "Everything a parent can do is here. Compare providers by true cost, plan the date across two calendars, choose how often to send, and test a falling taka. " +
+      "Prepare documents and recipients, then approve with one MFA code that only the parent can give. " +
+      "Track it to settled with a sealed compliance report, or lock tuition in smart escrow. The assistant helps; it never approves.",
+    elements: [
+      ...parentFeatures.flatMap(([head, body], i) => {
+        const x = 0.5 + (i % 2) * 3.0;
+        const y = 1.32 + Math.floor(i / 2) * 0.64;
+        return [
+          card(x, y, 2.9, 0.56),
+          rect(x, y, 0.06, 0.56, "accent1"),
+          text(x + 0.16, y + 0.03, 2.68, 0.22, head, { size: 11, bold: true, color: "text1", valign: "middle" }),
+          text(x + 0.16, y + 0.25, 2.68, 0.3, body, { size: 9, color: "text2" }),
+        ];
+      }),
+      ...shot("05-pending-approval.png", 6.8, 1.4, approvalW, approvalH, "The payment screen: approval summary, approve with MFA, and the status tracker"),
+      text(6.7, 1.4 + approvalH + 0.14, 2.8, 0.45, "The approval screen: summary, one MFA code, status tracker. Sandbox, synthetic data.", { size: 9.5, color: "text2" }),
+      text(0.5, 5.2, 9, 0.3, "Every screen carries the sandbox banner, and every unverified rule a Not verified badge. Each screen has axe accessibility checks; reduced motion is respected.", { size: 9.5, color: "text2" }),
+    ],
+  });
+}
 
 // 4 ---------------------------------------------------------------------------------------------
 const chain = [
@@ -459,19 +475,36 @@ slides.push({
   ],
 });
 
-// 11 --------------------------------------------------------------------------------------------
-slides.push({
-  layout: "content", section: "Trust", title: "Honest by design",
-  notes:
-    "Honesty is a feature. A banner on every screen and a sandbox header on every response say this is a sandbox. Any rule not checked against an official source carries a Not verified badge and the line: indicative, confirm with your AD bank. A payment's compliance report is sealed with a hash that the browser recomputes.",
-  elements: [
-    text(0.5, 1.2, 9, 0.4, "Every simulated part is labelled. Every unverified rule carries a badge.", { size: 16, bold: true, color: "text1", valign: "middle" }),
-    ...shot("15-sandbox-admin.png", 0.58, 1.78, 4.0, 3.12, "Sandbox screen listing what is simulated"),
-    ...shot("20-compliance-report.png", 5.42, 1.78, 4.0, 3.12, "Compliance report whose hash verifies in the browser"),
-    text(0.5, 5.02, 4.16, 0.3, "Sandbox screen: what is simulated, how to test it", { size: 11, color: "text2" }),
-    text(5.34, 5.02, 4.16, 0.3, "Compliance report: the hash verifies in the browser", { size: 11, color: "text2" }),
-  ],
-});
+// 11: a guide for the student (moved after the parent's slide by ORDER) ----------------------------
+{
+  const guide = liveShot("live-06-student-guide.png", 0.5, 1.35, 5.3, "The live student guide: a monthly budget and the cities that fit it");
+  const parts = [
+    ["Budget finder", "Set a monthly budget in taka. Twenty cities show rent, a month in local money and in taka, and what is left."],
+    ["City details", "Rent, food, transport, bills, phone, study and leisure. Rounded up, so a month is never shown cheaper than it is."],
+    ["Arrival checklist", "By country: before you fly, in the first week, in the first month. Ticks stay in your browser."],
+    ["Look and ask, not approve", "The student sees the household's payments and can ask the assistant, for example the rent in Manchester. Only the parent approves."],
+  ];
+  slides.push({
+    layout: "content", section: "The solution", title: "A guide for the student",
+    notes:
+      "The student gets a guide, not a payment button. Set a monthly budget in taka and twenty cities show rent, a month in local money and in taka, and whether it fits, rounded up so never too low. " +
+      "An arrival checklist covers before flying, the first week and the first month. The student can look and ask the assistant, but only the parent approves. City costs are invented and marked Not verified.",
+    elements: [
+      ...guide.els,
+      text(0.5, 1.35 + guide.h + 0.14, 5.3, 0.5, `Live, ${LIVE_SITE}, 19 Oct 2026: type a budget or drag the slider and the list refits.`, { size: 10, color: "text2" }),
+      ...parts.flatMap(([head, body], i) => {
+        const y = 1.35 + i * 0.97;
+        return [
+          card(6.05, y, 3.45, 0.89),
+          rect(6.05, y, 0.07, 0.89, i === 3 ? "accent3" : "accent1"),
+          text(6.23, y + 0.04, 3.2, 0.26, head, { size: 11.5, bold: true, color: "text1", valign: "middle" }),
+          text(6.23, y + 0.3, 3.2, 0.58, body, { size: 9.5, color: "text2" }),
+        ];
+      }),
+      text(0.5, 5.32, 9, 0.22, "City costs are invented for the sandbox, and every figure carries a Not verified badge. Indicative. Confirm with your AD bank.", { size: 10, color: "text2" }),
+    ],
+  });
+}
 
 // 12 --------------------------------------------------------------------------------------------
 // Every figure here is sourced (see docs/BUSINESS_CASE.md) or is plain arithmetic on a sourced figure.
@@ -544,7 +577,7 @@ slides.push({
 
 
 // ---------------------------------------------------------------------------------------------
-// Added slides 14 to 20 (they are moved into place by ORDER below). Live pictures: 19 Oct 2026.
+// Added slides 14 to 20 (they are moved into place by ORDER below, as are blocks 3 and 11). Live pictures: 19 Oct 2026.
 // ---------------------------------------------------------------------------------------------
 const LIVE = "studyroute.bot-keep.xyz";
 
@@ -713,7 +746,7 @@ slides.push({
       text(6.05, 3.8, 3.3, 1.0,
         bullets(["Plain HTTP: a listener reads the password and token", "A stolen token reads payments and cancels a draft for 15 minutes"]),
         { size: 10.5, color: "text1", paraAfter: 2 }),
-      text(0.5, 4.95, 9, 0.3, "Raw logs and hashes: submission/evidence/security_2026-10-18/ and the security self-assessment, sections 13 and 14.", { size: 10, color: "text2" }),
+      text(0.5, 4.95, 9, 0.3, "Raw logs and hashes: submission/evidence/security_2026-10-18/ and the security self-assessment, section 7 and Appendix A.", { size: 10, color: "text2" }),
     ],
   });
 }
@@ -740,7 +773,7 @@ slides.push({
       "A stolen token can read payments and cancel a draft, not approve. We fixed account guessing and a telemetry leak. Old document rows stay readable, development tools carry advisories, and no outside penetration test has been done.",
     elements: [
       { type: "table", x: 0.5, y: 1.3, colW: [3.1, 0.95, 4.95], rowH: 0.45, size: 10, rows: [head, ...rows] },
-      text(0.5, 5.0, 9, 0.3, "Source: security self-assessment, sections 13 and 14: every record, the raw-log hashes and what each fix did and did not show.", { size: 10, color: "text2" }),
+      text(0.5, 5.0, 9, 0.3, "Source: security self-assessment, section 7 and Appendix A: every record, the raw-log hashes and what each fix did and did not show.", { size: 10, color: "text2" }),
     ],
   });
 }
@@ -782,7 +815,7 @@ slides.push({
 }
 
 // Final order: the live and chart slides sit beside the slides they support.
-const ORDER = [1, 2, 3, 4, 5, 14, 6, 15, 8, 9, 16, 20, 7, 17, 10, 18, 19, 11, 12, 13];
+const ORDER = [1, 2, 4, 5, 14, 6, 15, 3, 11, 8, 9, 16, 20, 7, 17, 10, 18, 19, 12, 13];
 if (slides.length !== ORDER.length) throw new Error(`Expected ${ORDER.length} slides, found ${slides.length}.`);
 slides.splice(0, slides.length, ...ORDER.map((n) => slides[n - 1]));
 
